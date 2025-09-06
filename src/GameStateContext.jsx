@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
 
 const GameStateContext = createContext();
 
@@ -12,9 +11,6 @@ export const useGameState = () => {
 };
 
 export const GameStateProvider = ({ children }) => {
-
-  const [socket, setSocket] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
   const [gameState, setGameState] = useState({
     fear: { value: 0, visible: false },
     countdowns: [],
@@ -22,97 +18,175 @@ export const GameStateProvider = ({ children }) => {
     environments: []
   });
 
+  // Load state from localStorage on mount
   useEffect(() => {
-    // Initialize Socket.IO connection
-    // Use the current hostname so it works on both localhost and network IP
-    const serverUrl = window.location.hostname === 'localhost' 
-      ? 'http://localhost:3000' 
-      : `http://${window.location.hostname}:3000`;
-    
-    const newSocket = io(serverUrl);
-    setSocket(newSocket);
-
-    // Listen for connection events
-    newSocket.on('connect', () => {
-      setIsConnected(true);
-    });
-
-    newSocket.on('disconnect', () => {
-      setIsConnected(false);
-    });
-
-    // Listen for state updates
-    newSocket.on('stateUpdate', (newState) => {
-      console.log('Received state update from server:', newState);
-      setGameState(newState);
-    });
-
-    // Cleanup on unmount
-    return () => {
-      newSocket.close();
-    };
+    const savedState = localStorage.getItem('daggerheart-game-state');
+    if (savedState) {
+      try {
+        const parsedState = JSON.parse(savedState);
+        setGameState(parsedState);
+      } catch (error) {
+        console.error('Failed to load saved state:', error);
+      }
+    }
   }, []);
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('daggerheart-game-state', JSON.stringify(gameState));
+  }, [gameState]);
 
   // Fear management
   const updateFear = (value) => {
-    if (socket) {
-      socket.emit('updateFear', { value });
-    }
+    setGameState(prev => ({
+      ...prev,
+      fear: { ...prev.fear, value }
+    }));
   };
 
   const toggleFearVisibility = () => {
-    if (socket) {
-      socket.emit('toggleFearVisibility');
-    }
+    setGameState(prev => ({
+      ...prev,
+      fear: { ...prev.fear, visible: !prev.fear.visible }
+    }));
   };
 
   // Countdown management
   const createCountdown = (countdownData) => {
-    if (socket) {
-      socket.emit('createCountdown', countdownData);
-    }
+    const newCountdown = {
+      id: Date.now().toString(),
+      name: countdownData.name || 'Countdown',
+      max: parseInt(countdownData.max) || 1,
+      value: 0,
+      description: countdownData.description || '',
+      visible: true,
+      type: countdownData.type || 'standard',
+      loop: countdownData.loop || 'none'
+    };
+    
+    setGameState(prev => ({
+      ...prev,
+      countdowns: [...prev.countdowns, newCountdown]
+    }));
   };
 
   const updateCountdown = (id, updates) => {
-    if (socket) {
-      socket.emit('updateCountdown', { id, ...updates });
-    }
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(countdown =>
+        countdown.id === id ? { ...countdown, ...updates } : countdown
+      )
+    }));
   };
 
   const deleteCountdown = (id) => {
-    if (socket) {
-      socket.emit('deleteCountdown', { id });
-    }
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.filter(countdown => countdown.id !== id)
+    }));
   };
 
   const advanceCountdown = (id, newValue) => {
-    if (socket) {
-      socket.emit('advanceCountdown', { id, value: newValue });
-    }
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(countdown => {
+        if (countdown.id === id) {
+          let finalValue = newValue;
+          
+          // Handle different loop types
+          if (countdown.loop === 'loop') {
+            if (finalValue > countdown.max) {
+              finalValue = 1;
+            } else if (finalValue < 0) {
+              finalValue = countdown.max;
+            }
+          } else if (countdown.loop === 'increasing') {
+            if (finalValue > countdown.max) {
+              return { ...countdown, max: countdown.max + 1, value: 1 };
+            } else if (finalValue < 0) {
+              return { ...countdown, max: Math.max(1, countdown.max - 1), value: 1 };
+            }
+            finalValue = Math.max(0, finalValue);
+          } else if (countdown.loop === 'decreasing') {
+            if (finalValue > countdown.max) {
+              return { ...countdown, max: Math.max(1, countdown.max - 1), value: 1 };
+            } else if (finalValue < 0) {
+              return { ...countdown, max: countdown.max + 1, value: 1 };
+            }
+            finalValue = Math.min(countdown.max, finalValue);
+          } else {
+            finalValue = Math.max(0, Math.min(finalValue, countdown.max));
+          }
+          
+          return { ...countdown, value: finalValue };
+        }
+        return countdown;
+      })
+    }));
   };
 
   const incrementCountdown = (id) => {
-    console.log('GameStateContext incrementCountdown called with id:', id)
-    if (socket) {
-      console.log('Emitting incrementCountdown socket event')
-      socket.emit('incrementCountdown', { id });
-    } else {
-      console.log('Socket not available')
-    }
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(countdown => {
+        if (countdown.id === id) {
+          let newValue = countdown.value + 1;
+          
+          if (countdown.loop === 'loop') {
+            if (newValue > countdown.max) {
+              newValue = 1;
+            }
+          } else if (countdown.loop === 'increasing') {
+            if (newValue > countdown.max) {
+              return { ...countdown, max: countdown.max + 1, value: 1 };
+            }
+          } else if (countdown.loop === 'decreasing') {
+            if (newValue > countdown.max) {
+              return { ...countdown, max: Math.max(1, countdown.max - 1), value: 1 };
+            }
+          } else {
+            newValue = Math.min(newValue, countdown.max);
+          }
+          
+          return { ...countdown, value: newValue };
+        }
+        return countdown;
+      })
+    }));
   };
 
   const decrementCountdown = (id) => {
-    console.log('GameStateContext decrementCountdown called with id:', id)
-    if (socket) {
-      console.log('Emitting decrementCountdown socket event')
-      socket.emit('decrementCountdown', { id });
-    } else {
-      console.log('Socket not available')
-    }
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(countdown => {
+        if (countdown.id === id) {
+          let newValue = countdown.value - 1;
+          
+          if (countdown.loop === 'loop') {
+            if (newValue < 0) {
+              newValue = countdown.max;
+            }
+          } else if (countdown.loop === 'increasing') {
+            if (newValue < 0) {
+              return { ...countdown, max: Math.max(1, countdown.max - 1), value: countdown.max };
+            }
+            newValue = Math.max(0, newValue);
+          } else if (countdown.loop === 'decreasing') {
+            if (newValue < 0) {
+              return { ...countdown, max: countdown.max + 1, value: 1 };
+            }
+          } else {
+            newValue = Math.max(0, newValue);
+          }
+          
+          return { ...countdown, value: newValue };
+        }
+        return countdown;
+      })
+    }));
   };
 
   const reorderCountdowns = (newOrder) => {
-    // Optimistic update - update local state immediately
     setGameState(prev => {
       const [oldIndex, newIndex] = newOrder;
       const newCountdowns = [...prev.countdowns];
@@ -124,34 +198,48 @@ export const GameStateProvider = ({ children }) => {
         countdowns: newCountdowns
       };
     });
-    
-    // Send to server
-    if (socket) {
-      socket.emit('reorderCountdowns', { order: newOrder });
-    }
   };
 
   // Adversary management
   const createAdversary = (adversaryData) => {
-    if (socket) {
-      socket.emit('createAdversary', adversaryData);
-    }
+    const newAdversary = {
+      id: `adv-${Date.now()}`,
+      name: adversaryData.name || 'Unknown',
+      type: adversaryData.type || 'Unknown',
+      tier: adversaryData.tier || 1,
+      difficulty: adversaryData.difficulty || 'Medium',
+      hp: adversaryData.hpMax || 1,
+      hpMax: adversaryData.hpMax || 1,
+      stress: 0,
+      stressMax: adversaryData.stressMax || 0,
+      description: adversaryData.description || '',
+      isVisible: true,
+      ...adversaryData
+    };
+    
+    setGameState(prev => ({
+      ...prev,
+      adversaries: [...prev.adversaries, newAdversary]
+    }));
   };
 
   const updateAdversary = (id, updates) => {
-    if (socket) {
-      socket.emit('updateAdversary', { id, ...updates });
-    }
+    setGameState(prev => ({
+      ...prev,
+      adversaries: prev.adversaries.map(adversary =>
+        adversary.id === id ? { ...adversary, ...updates } : adversary
+      )
+    }));
   };
 
   const deleteAdversary = (id) => {
-    if (socket) {
-      socket.emit('deleteAdversary', { id });
-    }
+    setGameState(prev => ({
+      ...prev,
+      adversaries: prev.adversaries.filter(adversary => adversary.id !== id)
+    }));
   };
 
   const reorderAdversaries = (newOrder) => {
-    // Optimistic update - update local state immediately
     setGameState(prev => {
       const [oldIndex, newIndex] = newOrder;
       const newAdversaries = [...prev.adversaries];
@@ -163,34 +251,46 @@ export const GameStateProvider = ({ children }) => {
         adversaries: newAdversaries
       };
     });
-    
-    // Send to server
-    if (socket) {
-      socket.emit('reorderAdversaries', { order: newOrder });
-    }
   };
 
   // Environment management
   const createEnvironment = (environmentData) => {
-    if (socket) {
-      socket.emit('createEnvironment', environmentData);
-    }
+    const newEnvironment = {
+      id: `env-${Date.now()}`,
+      name: environmentData.name || 'Unknown',
+      type: environmentData.type || 'Unknown',
+      tier: environmentData.tier || 1,
+      difficulty: environmentData.difficulty || 'Medium',
+      description: environmentData.description || '',
+      impulses: environmentData.impulses || [],
+      features: environmentData.features || [],
+      isVisible: true,
+      ...environmentData
+    };
+    
+    setGameState(prev => ({
+      ...prev,
+      environments: [...prev.environments, newEnvironment]
+    }));
   };
 
   const updateEnvironment = (id, updates) => {
-    if (socket) {
-      socket.emit('updateEnvironment', { id, ...updates });
-    }
+    setGameState(prev => ({
+      ...prev,
+      environments: prev.environments.map(environment =>
+        environment.id === id ? { ...environment, ...updates } : environment
+      )
+    }));
   };
 
   const deleteEnvironment = (id) => {
-    if (socket) {
-      socket.emit('deleteEnvironment', { id });
-    }
+    setGameState(prev => ({
+      ...prev,
+      environments: prev.environments.filter(environment => environment.id !== id)
+    }));
   };
 
   const reorderEnvironments = (newOrder) => {
-    // Optimistic update - update local state immediately
     setGameState(prev => {
       const [oldIndex, newIndex] = newOrder;
       const newEnvironments = [...prev.environments];
@@ -202,16 +302,9 @@ export const GameStateProvider = ({ children }) => {
         environments: newEnvironments
       };
     });
-    
-    // Send to server
-    if (socket) {
-      socket.emit('reorderEnvironments', { order: newOrder });
-    }
   };
 
   const value = {
-    socket,
-    isConnected,
     gameState,
     // Fear actions
     updateFear,

@@ -1,6 +1,6 @@
 # 🎲 Daggerheart GM Dashboard
 
-A local-only web application for Game Masters to manage their Daggerheart RPG sessions with real-time player display synchronization.
+A static web application for Game Masters to manage their Daggerheart RPG sessions with local state management.
 
 ## Quick Start
 
@@ -9,14 +9,18 @@ A local-only web application for Game Masters to manage their Daggerheart RPG se
    npm install
    ```
 
-2. **Start the server:**
+2. **Start development server:**
    ```bash
-   npm start
+   npm run dev
    ```
 
 3. **Access the dashboard:**
-   - **GM Control Panel**: `http://localhost:3000/control`
-   - **Player Display**: `http://localhost:3000/display`
+   - **GM Dashboard**: `http://localhost:5173`
+
+4. **Build for production:**
+   ```bash
+   npm run build
+   ```
 
 ## Features
 
@@ -24,18 +28,25 @@ A local-only web application for Game Masters to manage their Daggerheart RPG se
 - **Countdown Tracks**: Create and manage multiple countdown timers
 - **Adversary HP**: Track enemy health with damage/healing controls
 - **Environment Elements**: Manage location aspects and effects
-- **Live Preview**: GM sees exactly what players see in real-time
-- **Auto-save**: State automatically saves every 3 seconds
-- **WebSocket Sync**: Real-time updates across all connected devices
+- **Damage Thresholds**: Calculate damage based on Daggerheart rules
+- **Auto-save**: State automatically saves to browser localStorage
+- **Mobile Responsive**: Works on all device sizes
+- **Database Browser**: Full adversary and environment database
 
-## Network Access
+## Static Hosting
 
-The server automatically detects and displays:
-- Localhost URL for same-device access
-- LAN IP addresses for same-network devices
+This app can be hosted on any static hosting service:
 
-## Control Token
+- **Vercel**: `vercel --prod`
+- **Netlify**: Drag and drop the `dist` folder
+- **GitHub Pages**: Deploy from the `dist` folder
+- **Firebase Hosting**: `firebase deploy`
 
-Default: `daggerheart2024` (can be changed via `CONTROL_TOKEN` env var)
+## State Management
+
+- **localStorage**: All game state is saved to your browser
+- **Private**: Each user has their own separate game state
+- **Persistent**: State survives browser restarts
+- **No server required**: Completely client-side
 
 Happy gaming! 🎲✨

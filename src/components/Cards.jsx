@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Droplet, Activity } from 'lucide-react'
 import Button from './Buttons'
 import { Badge, DifficultyBadge, TypeBadge } from './Badges'
 import Creator from './Creator'
@@ -44,6 +45,9 @@ const Cards = ({
   dragListeners,
   isEditMode = false
 }) => {
+  const [showDamageInput, setShowDamageInput] = useState(false)
+  const [damageValue, setDamageValue] = useState('')
+
   // Render based on mode
   switch (mode) {
     case 'compact':
@@ -95,12 +99,20 @@ const Cards = ({
             <div className="row-main">
               <h4 className="row-title">{item.name}</h4>
               <div className="row-meta">
-                {item.type && <span className="type-badge">{item.type}</span>}
-                <span className="tier-badge">Tier {item.tier}</span>
                 {item.difficulty && (
-                  <span className={`difficulty-badge difficulty-${String(item.difficulty).toLowerCase()}`}>
-                    {item.difficulty}
-                  </span>
+                  <div 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (item.thresholds && item.thresholds.major && item.thresholds.severe) {
+                        setShowDamageInput(true)
+                        setDamageValue('')
+                      }
+                    }}
+                    style={{ cursor: (item.thresholds && item.thresholds.major && item.thresholds.severe) ? 'pointer' : 'default' }}
+                    title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : ''}
+                  >
+                    <DifficultyBadge difficulty={item.difficulty} />
+                  </div>
                 )}
               </div>
 
@@ -113,37 +125,23 @@ const Cards = ({
                       <span 
                         key={i} 
                         className={`countdown-symbol ${i < (item.hp || 0) ? 'filled' : 'empty'}`}
-                        title={`HP ${i + 1} of ${item.hpMax} (${item.hp || 0} damage taken)`}
+                        title={i < (item.hp || 0) ? 'Click to heal (reduce damage)' : 'Click to take damage'}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          e.preventDefault()
+                          if (i < (item.hp || 0)) {
+                            // Clicking a filled heart heals (reduces damage)
+                            onApplyHealing && onApplyHealing(item.id, 1, item.hp)
+                          } else {
+                            // Clicking an empty heart takes damage
+                            onApplyDamage && onApplyDamage(item.id, 1, item.hp, item.hpMax)
+                          }
+                        }}
+                        style={{ cursor: 'pointer' }}
                       >
-                        {i < (item.hp || 0) ? '●' : '○'}
+                        <Droplet size={16} />
                       </span>
                     ))}
-                  </div>
-                  <div className="hp-controls">
-                    <Button
-                      action="decrement"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        e.preventDefault()
-                        onApplyHealing && onApplyHealing(item.id, 1, item.hp)
-                      }}
-                      title="Heal (reduce damage)"
-                    >
-                      −
-                    </Button>
-                    <Button
-                      action="increment"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        e.preventDefault()
-                        onApplyDamage && onApplyDamage(item.id, 1, item.hp, item.hpMax)
-                      }}
-                      title="Take damage"
-                    >
-                      +
-                    </Button>
                   </div>
                 </div>
                 {item.stressMax > 0 && (
@@ -153,37 +151,23 @@ const Cards = ({
                         <span 
                           key={i} 
                           className={`countdown-symbol ${i < (item.stress || 0) ? 'filled' : 'empty'}`}
-                          title={`Stress ${i + 1} of ${item.stressMax}`}
+                          title={i < (item.stress || 0) ? 'Click to reduce stress' : 'Click to increase stress'}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                            if (i < (item.stress || 0)) {
+                              // Clicking a filled lightning bolt reduces stress
+                              onApplyStressChange && onApplyStressChange(item.id, -1, item.stress, item.stressMax)
+                            } else {
+                              // Clicking an empty lightning bolt increases stress
+                              onApplyStressChange && onApplyStressChange(item.id, 1, item.stress, item.stressMax)
+                            }
+                          }}
+                          style={{ cursor: 'pointer' }}
                         >
-                          {i < (item.stress || 0) ? '●' : '○'}
+                          <Activity size={16} />
                         </span>
                       ))}
-                    </div>
-                    <div className="stress-controls">
-                      <Button
-                        action="decrement"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          e.preventDefault()
-                          onApplyStressChange && onApplyStressChange(item.id, -1, item.stress, item.stressMax)
-                        }}
-                        title="Reduce stress"
-                      >
-                        −
-                      </Button>
-                      <Button
-                        action="increment"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          e.preventDefault()
-                          onApplyStressChange && onApplyStressChange(item.id, 1, item.stress, item.stressMax)
-                        }}
-                        title="Increase stress"
-                      >
-                        +
-                      </Button>
                     </div>
                   </div>
                 )}
@@ -208,6 +192,62 @@ const Cards = ({
               </div>
             </div>
           </div>
+          
+          {/* Damage Input Popup */}
+          {showDamageInput && item.thresholds && item.thresholds.major && item.thresholds.severe && (
+            <div className="damage-input-popup">
+              <div className="damage-input-content">
+                <input
+                  type="number"
+                  placeholder="Damage"
+                  min="0"
+                  value={damageValue}
+                  onChange={(e) => setDamageValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const damage = parseInt(damageValue)
+                      if (damage > 0) {
+                        // Calculate HP damage based on damage thresholds
+                        let hpDamage = 0
+                        if (damage >= item.thresholds.severe) {
+                          hpDamage = 3 // Severe damage
+                        } else if (damage >= item.thresholds.major) {
+                          hpDamage = 2 // Major damage
+                        } else if (damage >= 1) {
+                          hpDamage = 1 // Minor damage
+                        }
+                        onApplyDamage && onApplyDamage(item.id, hpDamage, item.hp, item.hpMax)
+                        setShowDamageInput(false)
+                        setDamageValue('')
+                      }
+                    } else if (e.key === 'Escape') {
+                      setShowDamageInput(false)
+                      setDamageValue('')
+                    }
+                  }}
+                  autoFocus
+                />
+                <div className="damage-indicators">
+                  {[1, 2, 3].map((level) => {
+                    const damage = parseInt(damageValue) || 0
+                    let isActive = false
+                    if (level === 1 && damage >= 1) isActive = true
+                    if (level === 2 && damage >= item.thresholds.major) isActive = true
+                    if (level === 3 && damage >= item.thresholds.severe) isActive = true
+                    
+                    return (
+                      <span 
+                        key={level}
+                        className={`damage-drop ${isActive ? 'active' : ''}`}
+                      >
+                        <Droplet size={16} />
+                      </span>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )
     } else {

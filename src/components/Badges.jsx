@@ -1,4 +1,5 @@
 import React from 'react'
+import { Shield } from 'lucide-react'
 
 // Badge - For tier, type, difficulty, etc.
 export const Badge = ({ 
@@ -28,21 +29,21 @@ export const Badge = ({
   )
 }
 
-// DifficultyBadge - Special badge for difficulty with color coding
+// DifficultyBadge - Special badge for difficulty with shield icon
 export const DifficultyBadge = ({ difficulty, className = '', ...props }) => {
   const getDifficultyColor = (diff) => {
-    if (diff <= 12) return "bg-green-100 text-green-800 border-green-300"
-    if (diff <= 15) return "bg-yellow-100 text-yellow-800 border-yellow-300"
-    if (diff <= 18) return "bg-orange-100 text-orange-800 border-orange-300"
-    return "bg-red-100 text-red-800 border-red-300"
+    if (diff <= 12) return "text-green-600"
+    if (diff <= 15) return "text-yellow-600"
+    if (diff <= 18) return "text-orange-600"
+    return "text-red-600"
   }
 
-  const colorClasses = getDifficultyColor(difficulty)
-  const baseClasses = "px-2 py-1 text-xs rounded-full font-medium border"
+  const colorClass = getDifficultyColor(difficulty)
 
   return (
-    <span className={`${baseClasses} ${colorClasses} ${className}`} {...props}>
-      {difficulty}
+    <span className={`difficulty-shield ${colorClass} ${className}`} {...props}>
+      <Shield size={24} strokeWidth={1.5} />
+      <span className="difficulty-number">{difficulty}</span>
     </span>
   )
 }

@@ -19,7 +19,7 @@
   --border: #404040;
   
   /* Responsive breakpoints */
-  --mobile: 640px;
+  --mobile: 800px;
   --tablet: 768px;
   --desktop: 1024px;
   --wide: 1280px;
@@ -1333,17 +1333,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
-  padding: 1rem;
+  padding: 0.125rem;
   width: 100%;
+  height: 100%;
 }
 
 .fear-controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
+  width: 100%;
+  height: 100%;
 }
 
 .fear-label {
@@ -1355,19 +1355,26 @@ body {
 
 .fear-skulls {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.125rem;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0.125rem;
 }
 
 .fear-skull {
-  font-size: 1.5rem;
+  flex: 1;
+  height: 100%;
   transition: all 0.2s ease;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.3);
+  max-width: calc(8.33% - 0.125rem); /* 12 skulls with gaps */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .fear-skull.empty {
@@ -1377,14 +1384,12 @@ body {
 
 .fear-skull.filled {
   opacity: 1;
-  color: #4f46e5;
-  text-shadow: 0 0 8px rgba(79, 70, 229, 0.8), 0 0 16px rgba(79, 70, 229, 0.4);
-  filter: drop-shadow(0 0 4px rgba(79, 70, 229, 0.6));
+  color: rgba(255, 255, 255, 1);
+  filter: none;
 }
 
 .fear-skull.filled:hover {
   transform: scale(1.02);
-  text-shadow: 0 0 10px rgba(79, 70, 229, 0.9), 0 0 18px rgba(79, 70, 229, 0.5);
 }
 
 /* Ensure fear skull hover effects are isolated from tooltip effects */
@@ -1518,11 +1523,11 @@ body {
 }
 
 /* Mobile responsive layout */
-@media (max-width: 640px) {
+@media (max-width: 800px) {
   .top-bar {
-    padding: 0.5rem;
+    padding: 0.125rem;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.125rem;
   }
   
   .compact-top-bar {
@@ -1535,6 +1540,8 @@ body {
   .countdowns-section {
     width: 100%;
     justify-content: center;
+    padding: 0.0625rem;
+    gap: 0.25rem;
   }
   
   .countdowns-list {
@@ -2459,6 +2466,15 @@ body {
   text-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
 }
 
+/* Overflow icon styling */
+.simple-list-row.compact.adversary .stress-symbols .countdown-symbol.overflow {
+  color: #dc2626;
+  text-shadow: 0 0 4px rgba(220, 38, 38, 0.5);
+  border: 1px solid #dc2626;
+  border-radius: 50%;
+  background: rgba(220, 38, 38, 0.1);
+}
+
 .simple-list-row:hover {
   background: var(--bg-card);
   border-color: var(--primary);
@@ -2503,25 +2519,21 @@ body {
   color: rgba(156, 163, 175, 0.8);
 }
 
-/* Dead badge overlay */
+/* Dead text overlay (no badge container) */
 .simple-list-row.dead::after {
   content: 'DEAD';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgb(75, 85, 99);
   color: rgb(156, 163, 175);
   font-size: 1rem;
   font-weight: 600;
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.375rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   z-index: 10;
   pointer-events: none;
-  text-shadow: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Cross-out lines for dead adversaries */

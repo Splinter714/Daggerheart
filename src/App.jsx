@@ -15,9 +15,7 @@ import Button from './components/Buttons'
 import adversariesData from './data/adversaries.json'
 import environmentsData from './data/environments.json'
 
-// Mobile navigation constants
-const SWIPE_THRESHOLD = 100 // Minimum distance for swipe
-const SWIPE_VELOCITY_THRESHOLD = 0.3 // Minimum velocity for swipe
+// Mobile navigation - simple button-based approach
 
 // Main App Component
 const AppContent = () => {
@@ -43,43 +41,42 @@ const AppContent = () => {
   const [rightColumnMode, setRightColumnMode] = useState(null)
   const [databaseType, setDatabaseType] = useState('unified')
   const [isMobile, setIsMobile] = useState(false)
-  const [slideOffset, setSlideOffset] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
-  
-  // Touch gesture tracking
-  const touchStart = useRef({ x: 0, y: 0, time: 0 })
-  const touchCurrent = useRef({ x: 0, y: 0, time: 0 })
-  const rightPanelRef = useRef(null)
+  const [mobileView, setMobileView] = useState('left') // 'left' or 'right'
   
   // Right column handlers
   const handleItemSelect = (item, type) => {
     setSelectedItem(item)
     setSelectedType(type)
     setRightColumnMode('item')
+    if (isMobile) setMobileView('right')
   }
   
   const handleOpenDatabase = (type = 'unified') => {
     setDatabaseType(type)
     setRightColumnMode('database')
+    if (isMobile) setMobileView('right')
   }
 
   const handleOpenCreator = (type) => {
     setDatabaseType(type)
     setRightColumnMode('creator')
+    if (isMobile) setMobileView('right')
   }
 
   const handleCloseRightColumn = () => {
     setRightColumnMode(null)
     setSelectedItem(null)
     setSelectedType(null)
-    setSlideOffset(0)
+    if (isMobile) setMobileView('left')
   }
 
   // Mobile detection
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
+      // Switch to mobile when width can't accommodate 12 HP icons + stress + other elements
+      // Conservative estimate: 12 HP (240px) + 10 stress (200px) + difficulty + damage input + padding = ~600px
+      setIsMobile(window.innerWidth <= 800)
     }
     
     checkMobile()
@@ -131,56 +128,6 @@ const AppContent = () => {
     }
   }, [countdowns, adversaries, environments, selectedItem, selectedType])
 
-  // Touch gesture handlers
-  const handleTouchStart = (e) => {
-    if (!isMobile || !rightColumnMode) return
-    
-    const touch = e.touches[0]
-    touchStart.current = {
-      x: touch.clientX,
-      y: touch.clientY,
-      time: Date.now()
-    }
-    setIsDragging(true)
-  }
-
-  const handleTouchMove = (e) => {
-    if (!isMobile || !rightColumnMode || !isDragging) return
-    
-    const touch = e.touches[0]
-    touchCurrent.current = {
-      x: touch.clientX,
-      y: touch.clientY,
-      time: Date.now()
-    }
-    
-    const deltaX = touchCurrent.current.x - touchStart.current.x
-    const deltaY = Math.abs(touchCurrent.current.y - touchStart.current.y)
-    
-    // Only allow horizontal swipes with minimal vertical movement
-    if (deltaY < 50 && deltaX > 0) {
-      setSlideOffset(Math.min(deltaX, 300))
-    }
-  }
-
-  const handleTouchEnd = (e) => {
-    if (!isMobile || !rightColumnMode || !isDragging) return
-    
-    const deltaX = touchCurrent.current.x - touchStart.current.x
-    const deltaTime = touchCurrent.current.time - touchStart.current.time
-    const velocity = deltaX / deltaTime
-    
-    // Check if swipe meets threshold for closing
-    if (deltaX > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD) {
-      handleCloseRightColumn()
-    } else {
-      // Reset position if swipe wasn't strong enough
-      setSlideOffset(0)
-    }
-    
-    setIsDragging(false)
-  }
-  
   // Adversary handlers
   const handleAdversaryDamage = (id, damage, currentHp, maxHp) => {
     // In Daggerheart: HP = damage taken, so damage increases HP
@@ -370,32 +317,40 @@ const AppContent = () => {
 
       {/* Main Content Area */}
       <div className="main-content">
-        {/* Left Panel: Adversaries & Environments */}
-        <div className="left-panel">
-          <GameBoard
-            onItemSelect={handleItemSelect}
-            onOpenDatabase={handleOpenDatabase}
-            onOpenCreator={handleOpenCreator}
-            isEditMode={isEditMode}
-            onEditModeChange={setIsEditMode}
-          />
-        </div>
+        {/* Mobile Layout */}
+        {isMobile ? (
+          <>
+            {/* Mobile Left Panel: Game Board */}
+            {mobileView === 'left' && (
+              <div className="mobile-left-panel">
+                <GameBoard
+                  onItemSelect={handleItemSelect}
+                  onOpenDatabase={handleOpenDatabase}
+                  onOpenCreator={handleOpenCreator}
+                  isEditMode={isEditMode}
+                  onEditModeChange={setIsEditMode}
+                />
+              </div>
+            )}
 
-        {/* Right Panel: Details, Database, or Creator */}
-        <div 
-          className={`right-panel ${isMobile && rightColumnMode ? 'mobile-panel' : ''}`}
-          ref={rightPanelRef}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          style={{
-            transform: isMobile && rightColumnMode ? `translateX(${slideOffset}px)` : 'none',
-            transition: isDragging ? 'none' : 'transform 0.3s ease-out'
-          }}
-        >
-          {/* Right Panel Header with Action Buttons */}
-          <div className="right-panel-header">
-            <div className="right-panel-actions">
+            {/* Mobile Right Panel: Details, Database, or Creator */}
+            {mobileView === 'right' && (
+              <div className="mobile-right-panel">
+                {/* Mobile Navigation */}
+                <div className="mobile-nav-buttons">
+                  <Button
+                    action="close"
+                    size="compact"
+                    onClick={handleCloseRightColumn}
+                    title="Back to Game Board"
+                  >
+                    ← Back
+                  </Button>
+                </div>
+                
+                {/* Right Panel Header with Action Buttons */}
+                <div className="right-panel-header">
+                  <div className="right-panel-actions">
               <Button
                 action="edit"
                 size="compact"
@@ -466,20 +421,6 @@ const AppContent = () => {
               )}
             </div>
           </div>
-          {/* Mobile overlay background */}
-          {isMobile && rightColumnMode && (
-            <div 
-              className={`mobile-overlay ${rightColumnMode ? 'visible' : ''}`}
-              onClick={handleCloseRightColumn}
-            />
-          )}
-          
-          {/* Swipe indicator for mobile */}
-          {isMobile && rightColumnMode && (
-            <div className="swipe-indicator">
-              <span>← Swipe right to go back</span>
-            </div>
-          )}
 
           {/* Panel content - only show when there's something to display */}
           {rightColumnMode === 'item' && selectedItem && (
@@ -574,18 +515,217 @@ const AppContent = () => {
             </div>
           )}
 
-          {/* Default state - no content */}
-          {!rightColumnMode && (
-            <div className="no-selection-placeholder">
-              <div className="placeholder-content">
-                <div className="placeholder-title">Select an Item</div>
-                <div className="placeholder-text">
-                  Choose an environment or adversary from the left panel to view its full details and interact with it.
+                {/* Default state - no content */}
+                {!rightColumnMode && (
+                  <div className="no-selection-placeholder">
+                    <div className="placeholder-content">
+                      <div className="placeholder-title">Select an Item</div>
+                      <div className="placeholder-text">
+                        Choose an environment or adversary from the left panel to view its full details and interact with it.
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          /* Desktop Layout */
+          <>
+            {/* Left Panel: Adversaries & Environments */}
+            <div className="left-panel">
+              <GameBoard
+                onItemSelect={handleItemSelect}
+                onOpenDatabase={handleOpenDatabase}
+                onOpenCreator={handleOpenCreator}
+                isEditMode={isEditMode}
+                onEditModeChange={setIsEditMode}
+              />
+            </div>
+
+            {/* Right Panel: Details, Database, or Creator */}
+            <div className="right-panel">
+              {/* Right Panel Header with Action Buttons */}
+              <div className="right-panel-header">
+                <div className="right-panel-actions">
+                  <Button
+                    action="edit"
+                    size="compact"
+                    onClick={() => setIsEditMode(!isEditMode)}
+                    title={isEditMode ? "Exit Edit Mode" : "Enter Edit Mode"}
+                  >
+                    {isEditMode ? "✓" : "✏"}
+                  </Button>
+                  <Button
+                    action="add"
+                    size="compact"
+                    onClick={() => handleOpenDatabase()}
+                    title="Add Game Element"
+                  >
+                    +
+                  </Button>
+                  {isEditMode && (
+                    <>
+                      <Button
+                        action="delete"
+                        size="compact"
+                        onClick={() => {
+                          if (adversaries.length > 0) {
+                            adversaries.forEach(item => deleteAdversary(item.id))
+                          }
+                          if (environments.length > 0) {
+                            environments.forEach(item => deleteEnvironment(item.id))
+                          }
+                          if (countdowns && countdowns.length > 0) {
+                            countdowns.forEach(countdown => deleteCountdown(countdown.id))
+                          }
+                        }}
+                        disabled={adversaries.length === 0 && environments.length === 0 && (!countdowns || countdowns.length === 0)}
+                        title="Clear All Game Elements"
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </Button>
+                      <Button
+                        action="delete"
+                        size="compact"
+                        onClick={() => {
+                          const deadAdversaries = adversaries.filter(a => a.hp >= a.hpMax)
+                          if (deadAdversaries.length > 0) {
+                            deadAdversaries.forEach(item => deleteAdversary(item.id))
+                          }
+                        }}
+                        disabled={adversaries.filter(a => a.hp >= a.hpMax).length === 0}
+                        title="Clear Dead Adversaries"
+                      >
+                        <FontAwesomeIcon icon={faSkull} />
+                      </Button>
+                      <Button
+                        action="delete"
+                        size="compact"
+                        onClick={() => {
+                          if (countdowns && countdowns.length > 0) {
+                            countdowns.forEach(countdown => {
+                              deleteCountdown(countdown.id)
+                            })
+                          }
+                        }}
+                        disabled={!countdowns || countdowns.length === 0}
+                        title="Clear All Countdowns"
+                      >
+                        <FontAwesomeIcon icon={faClock} />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
+
+              {/* Panel content - only show when there's something to display */}
+              {rightColumnMode === 'item' && selectedItem && (
+                <div 
+                  className="item-display"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Cards
+                    item={selectedItem}
+                    type={selectedType}
+                    mode="expanded"
+                    isEditMode={isEditMode}
+                    onDelete={() => handleCloseRightColumn()}
+                    onEdit={() => handleOpenCreator(selectedType)}
+                    onToggleVisibility={() => handleToggleVisibility(selectedItem.id, selectedType, selectedItem.isVisible)}
+                    onReorder={(newOrder) => handleReorder(selectedType, newOrder)}
+                    onApplyDamage={handleAdversaryDamage}
+                    onApplyHealing={handleAdversaryHealing}
+                    onApplyStressChange={handleAdversaryStressChange}
+                    onAdvance={selectedType === 'countdown' ? advanceCountdown : undefined}
+                    onSave={(updatedItem) => {
+                      if (selectedType === 'adversary') {
+                        updateAdversary(updatedItem.id, updatedItem)
+                      } else if (selectedType === 'environment') {
+                        updateEnvironment(updatedItem.id, updatedItem)
+                      }
+                    }}
+                    onExitEditMode={() => setIsEditMode(false)}
+                  />
+                </div>
+              )}
+
+              {rightColumnMode === 'database' && (
+                <div 
+                  className="database-display"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Browser
+                    type={databaseType === 'unified' ? undefined : databaseType}
+                    data={databaseType === 'unified' ? undefined : (databaseType === 'unified' ? adversariesData.adversaries : environmentsData.environments)}
+                    onAddItem={(itemData) => {
+                      console.log('App.jsx onAddItem called with:', itemData)
+                      console.log('Current databaseType:', databaseType)
+                      
+                      if (databaseType === 'adversary') {
+                        console.log('Creating adversary...')
+                        createAdversary(itemData)
+                      } else if (databaseType === 'environment') {
+                        console.log('Creating environment...')
+                        createEnvironment(itemData)
+                      } else if (databaseType === 'unified') {
+                        console.log('Unified case - determining type from category:', itemData.category)
+                        // Handle unified case - determine type from itemData
+                        if (itemData.category === 'Adversary') {
+                          console.log('Creating adversary from unified...')
+                          createAdversary(itemData)
+                        } else if (itemData.category === 'Environment') {
+                          console.log('Creating environment from unified...')
+                          createEnvironment(itemData)
+                        }
+                      }
+                      // Keep browser open so users can add multiple items
+                    }}
+                    onCancel={handleCloseRightColumn}
+                    onCreateCustom={() => handleOpenCreator(databaseType === 'unified' ? 'adversary' : databaseType)}
+                    onCreateCountdown={(countdownData) => {
+                      console.log('Creating countdown from browser:', countdownData)
+                      createCountdown(countdownData)
+                    }}
+                  />
+                </div>
+              )}
+
+              {rightColumnMode === 'creator' && (
+                <div 
+                  className="creator-display"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Creator
+                    type={databaseType}
+                    item={null}
+                    onSave={(itemData) => {
+                      if (databaseType === 'adversary') {
+                        createAdversary(itemData)
+                      } else if (databaseType === 'environment') {
+                        createEnvironment(itemData)
+                      }
+                      handleCloseRightColumn()
+                    }}
+                    onCancel={handleCloseRightColumn}
+                  />
+                </div>
+              )}
+
+              {/* Default state - no content */}
+              {!rightColumnMode && (
+                <div className="no-selection-placeholder">
+                  <div className="placeholder-content">
+                    <div className="placeholder-title">Select an Item</div>
+                    <div className="placeholder-text">
+                      Choose an environment or adversary from the left panel to view its full details and interact with it.
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   )

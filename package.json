@@ -1,11 +1,9 @@
 {
   "name": "daggerheart-gm-dashboard",
   "version": "1.0.0",
-  "description": "Local GM Dashboard for Daggerheart RPG",
-  "main": "src/server.js",
+  "description": "Static GM Dashboard for Daggerheart RPG",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "concurrently \"vite --config config/vite.config.js\" \"node src/server.js\"",
+    "dev": "vite --config config/vite.config.js",
     "build": "vite build --config config/vite.config.js",
     "preview": "vite preview"
   },
@@ -16,15 +14,10 @@
     "@fortawesome/fontawesome-svg-core": "^7.0.0",
     "@fortawesome/free-solid-svg-icons": "^7.0.0",
     "@fortawesome/react-fontawesome": "^3.0.0",
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "lucide-react": "^0.542.0",
-    "socket.io": "^4.7.2",
-    "socket.io-client": "^4.8.1"
+    "lucide-react": "^0.542.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.3",
-    "concurrently": "^9.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "vite": "^4.4.9"
@@ -33,7 +26,8 @@
     "daggerheart",
     "rpg",
     "gm",
-    "dashboard"
+    "dashboard",
+    "static"
   ],
   "author": "",
   "license": "MIT"

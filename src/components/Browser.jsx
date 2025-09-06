@@ -110,27 +110,65 @@ const Browser = ({
       return matchesSearch && matchesCategory && matchesTier && matchesType
     })
 
-    // Sort: First by tier, then type, then name
-    filtered.sort((a, b) => {
-      // Primary sort: Tier (numeric)
-      const aTier = Number(a.tier) || 0
-      const bTier = Number(b.tier) || 0
-      if (aTier !== bTier) {
-        return aTier - bTier
-      }
-      
-      // Secondary sort: Type (string)
-      const aType = (a.displayType || '').toLowerCase()
-      const bType = (b.displayType || '').toLowerCase()
-      if (aType !== bType) {
-        return aType.localeCompare(bType)
-      }
-      
-      // Tertiary sort: Name (string)
-      const aName = (a.name || '').toLowerCase()
-      const bName = (b.name || '').toLowerCase()
-      return aName.localeCompare(bName)
-    })
+    // Apply user-selected sort or default sort
+    if (sortField === 'tier' && sortDirection === 'asc') {
+      // Default sort: tier → type → name
+      filtered.sort((a, b) => {
+        // Primary sort: Tier (numeric)
+        const aTier = Number(a.tier) || 0
+        const bTier = Number(b.tier) || 0
+        if (aTier !== bTier) {
+          return aTier - bTier
+        }
+        
+        // Secondary sort: Type (string)
+        const aType = (a.displayType || '').toLowerCase()
+        const bType = (b.displayType || '').toLowerCase()
+        if (aType !== bType) {
+          return aType.localeCompare(bType)
+        }
+        
+        // Tertiary sort: Name (string)
+        const aName = (a.name || '').toLowerCase()
+        const bName = (b.name || '').toLowerCase()
+        return aName.localeCompare(bName)
+      })
+    } else {
+      // User-selected sort
+      filtered.sort((a, b) => {
+        let aValue, bValue
+        
+        switch (sortField) {
+          case 'name':
+            aValue = (a.name || '').toLowerCase()
+            bValue = (b.name || '').toLowerCase()
+            break
+          case 'type':
+            aValue = (a.displayType || '').toLowerCase()
+            bValue = (b.displayType || '').toLowerCase()
+            break
+          case 'tier':
+            aValue = Number(a.tier) || 0
+            bValue = Number(b.tier) || 0
+            break
+          case 'difficulty':
+            aValue = Number(a.difficulty) || 0
+            bValue = Number(b.difficulty) || 0
+            break
+          default:
+            aValue = a.name || ''
+            bValue = b.name || ''
+        }
+        
+        if (typeof aValue === 'string') {
+          const result = aValue.localeCompare(bValue)
+          return sortDirection === 'asc' ? result : -result
+        } else {
+          const result = aValue - bValue
+          return sortDirection === 'asc' ? result : -result
+        }
+      })
+    }
 
     return filtered
   }, [unifiedData, searchTerm, filterCategory, filterTier, filterType, sortField, sortDirection])
@@ -188,6 +226,7 @@ const Browser = ({
         hpMax: itemData.hpMax,
         stress: 0,
         stressMax: itemData.stressMax || 0,
+        thresholds: itemData.thresholds, // Include damage thresholds
         abilities: itemData.abilities || [],
         traits: itemData.traits || []
       }),
