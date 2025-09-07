@@ -20,6 +20,7 @@
   flex: 1;
   min-height: 0;
   height: calc(100vh - 80px); /* Subtract top bar height with element controls */
+  margin-bottom: 60px; /* Account for bottom bar */
 }
 
 .left-panel {
@@ -66,16 +67,63 @@
   border-color: var(--secondary-dark);
 }
 
-/* Mobile panel styling */
-.mobile-left-panel,
-.mobile-right-panel {
-  flex: 1;
-  min-width: 0;
-  background: var(--bg-dark);
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 80px);
+/* Mobile panel styling - reuse desktop panels with mobile-specific behavior */
+.mobile-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  flex: 0 !important;
+}
+
+/* More specific selector to override panel styles */
+.left-panel.mobile-hidden,
+.right-panel.mobile-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  flex: 0 !important;
+}
+
+/* Even more specific - target the exact combination */
+.main-content .right-panel.mobile-hidden {
+  display: none !important;
+  flex: 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* When right panel is hidden, left panel takes full width and removes border */
+.main-content .left-panel:not(.mobile-hidden) {
+  flex: 1 !important;
+  width: 100% !important;
+  border-right: none !important;
+}
+
+/* More specific rule for mobile view */
+@media (max-width: 800px) {
+  .main-content .left-panel:not(.mobile-hidden) {
+    flex: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 800px) {
+  /* Make panels full width in mobile */
+  .left-panel,
+  .right-panel {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 /* Difficulty Shield Styling */

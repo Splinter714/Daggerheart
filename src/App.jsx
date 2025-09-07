@@ -45,35 +45,23 @@ const AppContent = () => {
   const [isMobile, setIsMobile] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [mobileView, setMobileView] = useState('left') // 'left' or 'right'
-  const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const [addFlyoutOpen, setAddFlyoutOpen] = useState(false)
   const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
+  const [countdownFlyoutOpen, setCountdownFlyoutOpen] = useState(false)
   
-  // Update body class when sidebar expands/collapses
-  useEffect(() => {
-    if (sidebarExpanded) {
-      document.body.classList.add('sidebar-expanded')
-    } else {
-      document.body.classList.remove('sidebar-expanded')
-    }
-  }, [sidebarExpanded])
-
-  // Close flyouts and sidebar when clicking outside
+  // Close flyouts when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.sidebar-nav-item')) {
         setAddFlyoutOpen(false)
         setDeleteFlyoutOpen(false)
-      }
-      // Close expanded sidebar when clicking outside of it
-      if (sidebarExpanded && !event.target.closest('.sidebar')) {
-        setSidebarExpanded(false)
+        setCountdownFlyoutOpen(false)
       }
     }
 
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
-  }, [sidebarExpanded])
+  }, [addFlyoutOpen, deleteFlyoutOpen, countdownFlyoutOpen])
   
   // Right column handlers
   const handleItemSelect = (item, type) => {
@@ -93,6 +81,81 @@ const AppContent = () => {
     setDatabaseType(type)
     setRightColumnMode('creator')
     if (isMobile) setMobileView('right')
+  }
+
+  // Countdown control handlers
+  const handleRollOutcome = (outcome) => {
+    console.log('Bottom bar: Handling roll outcome:', outcome)
+    
+    countdowns.forEach(countdown => {
+      let advancement = 0
+      
+      // Handle the actual countdown types being used
+      if (countdown.type === 'standard' || !countdown.type) {
+        // Standard countdowns always advance by 1
+        advancement = 1
+        console.log(`Standard countdown "${countdown.name}" will advance by ${advancement}`)
+      } else if (countdown.type === 'progress' || countdown.type === 'dynamic-progress') {
+        // Progress countdowns advance based on roll outcome
+        switch (outcome) {
+          case 'success-hope':
+            advancement = 2
+            break
+          case 'success-fear':
+            advancement = 1
+            break
+          case 'critical-success':
+            advancement = 3
+            break
+          default:
+            advancement = 0
+        }
+        if (advancement > 0) {
+          console.log(`Progress countdown "${countdown.name}" will advance by ${advancement}`)
+        }
+      } else if (countdown.type === 'consequence' || countdown.type === 'dynamic-consequence') {
+        // Consequence countdowns advance based on roll outcome
+        switch (outcome) {
+          case 'success-fear':
+            advancement = 1
+            break
+          case 'failure-hope':
+            advancement = 2
+            break
+          case 'failure-fear':
+            advancement = 3
+            break
+          default:
+            advancement = 0
+        }
+        if (advancement > 0) {
+          console.log(`Consequence countdown "${countdown.name}" will advance by ${advancement}`)
+        }
+      }
+      
+      // Apply advancement if any
+      if (advancement > 0) {
+        console.log(`Advancing countdown "${countdown.name}" by ${advancement}`)
+        for (let i = 0; i < advancement; i++) {
+          advanceCountdown(countdown.id)
+        }
+      }
+    })
+  }
+
+  const handleRestTrigger = (restType) => {
+    console.log('Bottom bar: Handling rest trigger:', restType)
+    
+    countdowns.forEach(countdown => {
+      // Long-term countdowns advance on rest
+      if (countdown.type === 'long-term') {
+        const advancement = restType === 'long' ? 2 : 1
+        console.log(`Long-term countdown "${countdown.name}" will advance by ${advancement} on ${restType} rest`)
+        for (let i = 0; i < advancement; i++) {
+          advanceCountdown(countdown.id)
+        }
+      }
+    })
   }
 
   const handleCloseRightColumn = () => {
@@ -365,22 +428,8 @@ const AppContent = () => {
       </div>
 
       {/* Sidebar: Navigation */}
-      <div className={`sidebar ${sidebarExpanded ? 'expanded' : ''} ${(addFlyoutOpen || deleteFlyoutOpen) ? 'flyout-open' : ''}`}>
+      <div className={`sidebar ${(addFlyoutOpen || deleteFlyoutOpen || countdownFlyoutOpen) ? 'flyout-open' : ''}`}>
         <nav className="sidebar-nav">
-          {/* Burger Menu Button */}
-          <button 
-            className="sidebar-nav-item"
-            onClick={() => setSidebarExpanded(!sidebarExpanded)}
-            title={sidebarExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
-          >
-            <div className="sidebar-nav-icon">
-              <Menu size={20} />
-            </div>
-            <span className="sidebar-nav-text">
-              {sidebarExpanded ? "Close" : ""}
-            </span>
-          </button>
-          
           {/* Plus Button with Add Flyout */}
           <button
             className="sidebar-nav-item"
@@ -394,7 +443,6 @@ const AppContent = () => {
             <div className="sidebar-nav-icon">
               <Plus size={20} />
             </div>
-            <span className="sidebar-nav-text">Add</span>
             
             <div className={`flyout-menu ${addFlyoutOpen ? 'show' : ''}`}>
                 <button
@@ -439,6 +487,107 @@ const AppContent = () => {
               </div>
           </button>
           
+          {/* Countdown Control Panel */}
+          <button
+            className={`sidebar-nav-item ${countdownFlyoutOpen ? 'active' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation()
+              setCountdownFlyoutOpen(!countdownFlyoutOpen)
+              setAddFlyoutOpen(false)
+              setDeleteFlyoutOpen(false)
+            }}
+            title="Countdown Controls"
+          >
+            <div className="sidebar-nav-icon">
+              <Clock size={20} />
+            </div>
+            
+            <div className={`flyout-menu ${countdownFlyoutOpen ? 'show' : ''}`}>
+              <div className="countdown-control-panel">
+                <div className="countdown-actions">
+                  <button
+                    className="countdown-action-btn success-fear"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // Success + Fear
+                      const currentFear = fear?.value || 0
+                      if (currentFear < 12) {
+                        updateFear(currentFear + 1)
+                      }
+                      handleRollOutcome('success-fear')
+                    }}
+                  >
+                    Success + Fear
+                  </button>
+                  <button
+                    className="countdown-action-btn fail-fear"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // Fail + Fear
+                      const currentFear = fear?.value || 0
+                      if (currentFear < 12) {
+                        updateFear(currentFear + 1)
+                      }
+                      handleRollOutcome('failure-fear')
+                    }}
+                  >
+                    Fail + Fear
+                  </button>
+                  <button
+                    className="countdown-action-btn success-hope"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // Success + Hope (no fear change)
+                      handleRollOutcome('success-hope')
+                    }}
+                  >
+                    Success + Hope
+                  </button>
+                  <button
+                    className="countdown-action-btn fail-hope"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // Fail + Hope (no fear change)
+                      handleRollOutcome('failure-hope')
+                    }}
+                  >
+                    Fail + Hope
+                  </button>
+                  <button
+                    className="countdown-action-btn crit-success"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // Critical Success (no fear change)
+                      handleRollOutcome('critical-success')
+                    }}
+                  >
+                    Critical Success
+                  </button>
+                  <button
+                    className="countdown-action-btn short-rest"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // Short Rest
+                      handleRestTrigger('short')
+                    }}
+                  >
+                    Short Rest
+                  </button>
+                  <button
+                    className="countdown-action-btn long-rest"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // Long Rest
+                      handleRestTrigger('long')
+                    }}
+                  >
+                    Long Rest
+                  </button>
+                </div>
+              </div>
+            </div>
+          </button>
+
           {/* Edit Mode Toggle */}
           <button
             className={`sidebar-nav-item ${isEditMode ? 'active' : ''}`}
@@ -448,42 +597,45 @@ const AppContent = () => {
             <div className="sidebar-nav-icon">
               <Pencil size={20} />
             </div>
-            <span className="sidebar-nav-text">
-              {isEditMode ? "Exit Edit Mode" : "Edit Mode"}
-            </span>
           </button>
           
           {/* Delete Button with Clear Flyout */}
           <button
-            className={`sidebar-nav-item ${deleteFlyoutOpen ? 'delete-active' : ''}`}
+            className={`sidebar-nav-item ${deleteFlyoutOpen ? 'delete-active' : ''} ${(!adversaries || adversaries.length === 0) && (!environments || environments.length === 0) && (!countdowns || countdowns.length === 0) ? 'disabled' : ''}`}
             onClick={(e) => {
               e.stopPropagation()
-              setDeleteFlyoutOpen(!deleteFlyoutOpen)
-              setAddFlyoutOpen(false) // Close other flyout
+              // Only open flyout if there are items to delete
+              const hasItems = (adversaries && adversaries.length > 0) || 
+                              (environments && environments.length > 0) || 
+                              (countdowns && countdowns.length > 0)
+              if (hasItems) {
+                setDeleteFlyoutOpen(!deleteFlyoutOpen)
+                setAddFlyoutOpen(false) // Close other flyout
+              }
             }}
-            title="Clear Items"
+            title={(!adversaries || adversaries.length === 0) && (!environments || environments.length === 0) && (!countdowns || countdowns.length === 0) ? "Nothing to clear" : "Clear Items"}
+            disabled={(!adversaries || adversaries.length === 0) && (!environments || environments.length === 0) && (!countdowns || countdowns.length === 0)}
           >
             <div className="sidebar-nav-icon">
               <Trash2 size={20} />
             </div>
-            <span className="sidebar-nav-text">Clear</span>
             
             <div className={`flyout-menu ${deleteFlyoutOpen ? 'show' : ''}`}>
-                <button
-                  className="flyout-menu-item delete-flyout-item"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setDeleteFlyoutOpen(false)
-                    if (adversaries.length > 0) {
+                {adversaries && adversaries.length > 0 && (
+                  <button
+                    className="flyout-menu-item delete-flyout-item"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setDeleteFlyoutOpen(false)
                       adversaries.forEach(item => deleteAdversary(item.id))
-                    }
-                  }}
-                >
-                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                    <Trash2 size={14} style={{marginTop: '1px'}} />
-                    <span>All Adversaries</span>
-                  </div>
-                </button>
+                    }}
+                  >
+                    <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                      <Trash2 size={14} style={{marginTop: '1px'}} />
+                      <span>All Adversaries</span>
+                    </div>
+                  </button>
+                )}
                 {adversaries && adversaries.length > 0 && adversaries.some(adv => (adv.hp || 0) >= (adv.hpMax || 1)) && (
                   <button
                     className="flyout-menu-item delete-flyout-item"
@@ -500,73 +652,72 @@ const AppContent = () => {
                     </div>
                   </button>
                 )}
-                <button
-                  className="flyout-menu-item delete-flyout-item"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setDeleteFlyoutOpen(false)
-                    if (environments.length > 0) {
+                {environments && environments.length > 0 && (
+                  <button
+                    className="flyout-menu-item delete-flyout-item"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setDeleteFlyoutOpen(false)
                       environments.forEach(item => deleteEnvironment(item.id))
-                    }
-                  }}
-                >
-                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                    <Trash2 size={14} style={{marginTop: '1px'}} />
-                    <span>All Environments</span>
-                  </div>
-                </button>
-                <button
-                  className="flyout-menu-item delete-flyout-item"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setDeleteFlyoutOpen(false)
-                    if (countdowns && countdowns.length > 0) {
+                    }}
+                  >
+                    <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                      <Trash2 size={14} style={{marginTop: '1px'}} />
+                      <span>All Environments</span>
+                    </div>
+                  </button>
+                )}
+                {countdowns && countdowns.length > 0 && (
+                  <button
+                    className="flyout-menu-item delete-flyout-item"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setDeleteFlyoutOpen(false)
                       countdowns.forEach(countdown => deleteCountdown(countdown.id))
-                    }
-                  }}
-                >
-                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                    <Trash2 size={14} style={{marginTop: '1px'}} />
-                    <span>All Countdowns</span>
-                  </div>
-                </button>
+                    }}
+                  >
+                    <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                      <Trash2 size={14} style={{marginTop: '1px'}} />
+                      <span>All Countdowns</span>
+                    </div>
+                  </button>
+                )}
               </div>
           </button>
         </nav>
       </div>
 
       {/* Main Content Area */}
-      <div className="main-content">
-        {/* Mobile Layout */}
-        {isMobile ? (
-          <>
-            {/* Mobile Left Panel: Game Board */}
-            {mobileView === 'left' && (
-              <div className="mobile-left-panel">
-                <GameBoard
-                  onItemSelect={handleItemSelect}
-                  onOpenDatabase={handleOpenDatabase}
-                  onOpenCreator={handleOpenCreator}
-                  isEditMode={isEditMode}
-                  onEditModeChange={setIsEditMode}
-                />
-              </div>
-            )}
+      <div className="main-content" key={`mobile-${isMobile}`}>
+        {/* Unified Layout - Reuse desktop structure for mobile */}
+        {/* Left Panel: Game Board */}
+        <div className={`left-panel ${isMobile && mobileView === 'right' ? 'mobile-hidden' : ''}`}>
+          {/* Mobile navigation when on left panel but right content exists - removed View Details button */}
+          
+          <GameBoard
+            onItemSelect={handleItemSelect}
+            onOpenDatabase={handleOpenDatabase}
+            onOpenCreator={handleOpenCreator}
+            isEditMode={isEditMode}
+            onEditModeChange={setIsEditMode}
+          />
+        </div>
 
-            {/* Mobile Right Panel: Details, Database, or Creator */}
-            {mobileView === 'right' && (
-              <div className="mobile-right-panel">
-                {/* Mobile Navigation */}
-                <div className="mobile-nav-buttons">
-                  <Button
-                    action="close"
-                    size="compact"
-                    onClick={handleCloseRightColumn}
-                    title="Back to Game Board"
-                  >
-                    ← Back
-                  </Button>
-                </div>
+        {/* Right Panel: Details, Database, or Creator */}
+        <div className={`right-panel ${isMobile && mobileView === 'left' ? 'mobile-hidden' : ''}`}>
+          {/* Mobile navigation when on right panel */}
+          {isMobile && mobileView === 'right' && (
+            <div className="mobile-nav-buttons">
+              <Button
+                action="secondary"
+                size="compact"
+                onClick={() => setMobileView('left')}
+                title="Back to Game Board"
+              >
+                ← Back
+              </Button>
+            </div>
+          )}
 
           {/* Panel content - only show when there's something to display */}
           {rightColumnMode === 'item' && selectedItem && (
@@ -646,107 +797,7 @@ const AppContent = () => {
             </div>
           )}
 
-              </div>
-            )}
-          </>
-        ) : (
-          /* Desktop Layout */
-          <>
-            {/* Left Panel: Adversaries & Environments */}
-            <div className="left-panel">
-              <GameBoard
-                onItemSelect={handleItemSelect}
-                onOpenDatabase={handleOpenDatabase}
-                onOpenCreator={handleOpenCreator}
-                isEditMode={isEditMode}
-                onEditModeChange={setIsEditMode}
-              />
-            </div>
-
-            {/* Right Panel: Details, Database, or Creator */}
-            <div className="right-panel">
-
-              {/* Panel content - only show when there's something to display */}
-              {rightColumnMode === 'item' && selectedItem && (
-                <div 
-                  className="item-display"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Cards
-                    item={selectedItem}
-                    type={selectedType}
-                    mode="expanded"
-                    isEditMode={isEditMode}
-                    onDelete={() => handleCloseRightColumn()}
-                    onEdit={() => handleOpenCreator(selectedType)}
-                    onToggleVisibility={() => handleToggleVisibility(selectedItem.id, selectedType, selectedItem.isVisible)}
-                    onReorder={(newOrder) => handleReorder(selectedType, newOrder)}
-                    onApplyDamage={handleAdversaryDamage}
-                    onApplyHealing={handleAdversaryHealing}
-                    onApplyStressChange={handleAdversaryStressChange}
-                    onAdvance={selectedType === 'countdown' ? advanceCountdown : undefined}
-                    onSave={(updatedItem) => {
-                      if (selectedType === 'adversary') {
-                        updateAdversary(updatedItem.id, updatedItem)
-                      } else if (selectedType === 'environment') {
-                        updateEnvironment(updatedItem.id, updatedItem)
-                      }
-                    }}
-                    onExitEditMode={() => setIsEditMode(false)}
-                  />
-                </div>
-              )}
-
-              {rightColumnMode === 'database' && (
-                <div 
-                  className="database-display"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Browser
-                    type={databaseType}
-                    onAddItem={(itemData) => {
-                      console.log('App.jsx onAddItem called with:', itemData)
-                      console.log('Current databaseType:', databaseType)
-                      
-                      if (databaseType === 'adversary') {
-                        console.log('Creating adversary...')
-                        createAdversary(itemData)
-                      } else if (databaseType === 'environment') {
-                        console.log('Creating environment...')
-                        createEnvironment(itemData)
-                      }
-                      // Keep browser open so users can add multiple items
-                    }}
-                    onCancel={handleCloseRightColumn}
-                    onCreateCustom={() => handleOpenCreator(databaseType)}
-                  />
-                </div>
-              )}
-
-              {rightColumnMode === 'creator' && (
-                <div 
-                  className="creator-display"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Creator
-                    type={databaseType}
-                    item={null}
-                    onSave={(itemData) => {
-                      if (databaseType === 'adversary') {
-                        createAdversary(itemData)
-                      } else if (databaseType === 'environment') {
-                        createEnvironment(itemData)
-                      }
-                      handleCloseRightColumn()
-                    }}
-                    onCancel={handleCloseRightColumn}
-                  />
-                </div>
-              )}
-
-            </div>
-          </>
-        )}
+        </div>
       </div>
     </div>
   )
