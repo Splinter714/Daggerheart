@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import { GameStateProvider } from './GameStateContext'
 import { useGameState } from './useGameState'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faSkull, faClock } from '@fortawesome/free-solid-svg-icons'
+import { faSkull } from '@fortawesome/free-solid-svg-icons'
+import { Swords, TreePine, Pencil, Clock, Timer } from 'lucide-react'
 import './App.css'
 
 // Import all the UI components
@@ -20,7 +21,6 @@ import environmentsData from './data/environments.json'
 // Main App Component
 const AppContent = () => {
   const { 
-    isConnected, 
     adversaries, 
     environments,
     countdowns,
@@ -278,18 +278,6 @@ const AppContent = () => {
     }
   }
 
-  // Show loading state while connecting
-  if (!isConnected) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-primary mb-4">🎲 Daggerheart GM Dashboard</div>
-          <div className="text-gray-400">Connecting to server...</div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div 
       className="app"
@@ -312,6 +300,84 @@ const AppContent = () => {
       >
         <div className="container">
           <Fear />
+          
+          {/* Element Control Buttons */}
+          <div className="element-controls">
+            <Button
+              action={isEditMode ? "delete" : "edit"}
+              immediate={isEditMode}
+              size="compact"
+              onClick={() => {
+                if (isEditMode) {
+                  // Clear all adversaries
+                  if (adversaries.length > 0) {
+                    adversaries.forEach(item => deleteAdversary(item.id))
+                  }
+                } else if (rightColumnMode === 'database' && databaseType === 'adversary') {
+                  // Close adversary database
+                  handleCloseRightColumn()
+                } else {
+                  // Open adversary database
+                  handleOpenDatabase('adversary')
+                }
+              }}
+              title={isEditMode ? "Clear All Adversaries" : (rightColumnMode === 'database' && databaseType === 'adversary') ? "Close Adversary Database" : "Add Adversary"}
+            >
+              {isEditMode ? <Swords size={16} /> : (rightColumnMode === 'database' && databaseType === 'adversary') ? <span style={{fontSize: '24px', fontWeight: '300'}}>×</span> : <Swords size={16} />}
+            </Button>
+            <Button
+              action={isEditMode ? "delete" : "edit"}
+              immediate={isEditMode}
+              size="compact"
+              onClick={() => {
+                if (isEditMode) {
+                  // Clear all environments
+                  if (environments.length > 0) {
+                    environments.forEach(item => deleteEnvironment(item.id))
+                  }
+                } else if (rightColumnMode === 'database' && databaseType === 'environment') {
+                  // Close environment database
+                  handleCloseRightColumn()
+                } else {
+                  // Open environment database
+                  handleOpenDatabase('environment')
+                }
+              }}
+              title={isEditMode ? "Clear All Environments" : (rightColumnMode === 'database' && databaseType === 'environment') ? "Close Environment Database" : "Add Environment"}
+            >
+              {isEditMode ? <TreePine size={16} /> : (rightColumnMode === 'database' && databaseType === 'environment') ? <span style={{fontSize: '24px', fontWeight: '300'}}>×</span> : <TreePine size={16} />}
+            </Button>
+            <Button
+              action={isEditMode ? "delete" : "edit"}
+              immediate={isEditMode}
+              size="compact"
+              onClick={() => {
+                if (isEditMode) {
+                  // Clear all countdowns
+                  if (countdowns && countdowns.length > 0) {
+                    countdowns.forEach(countdown => deleteCountdown(countdown.id))
+                  }
+                } else if (rightColumnMode === 'creator' && databaseType === 'countdown') {
+                  // Close countdown creator
+                  handleCloseRightColumn()
+                } else {
+                  // Open countdown creator
+                  handleOpenCreator('countdown')
+                }
+              }}
+              title={isEditMode ? "Clear All Countdowns" : (rightColumnMode === 'creator' && databaseType === 'countdown') ? "Close Countdown Creator" : "Add Countdown"}
+            >
+              {isEditMode ? <Clock size={16} /> : (rightColumnMode === 'creator' && databaseType === 'countdown') ? <span style={{fontSize: '24px', fontWeight: '300'}}>×</span> : <Clock size={16} />}
+            </Button>
+            <Button
+              action="edit"
+              size="compact"
+              onClick={() => setIsEditMode(!isEditMode)}
+              title={isEditMode ? "Exit Edit Mode" : "Enter Edit Mode"}
+            >
+              <Pencil size={16} />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -347,80 +413,6 @@ const AppContent = () => {
                     ← Back
                   </Button>
                 </div>
-                
-                {/* Right Panel Header with Action Buttons */}
-                <div className="right-panel-header">
-                  <div className="right-panel-actions">
-              <Button
-                action="edit"
-                size="compact"
-                onClick={() => setIsEditMode(!isEditMode)}
-                title={isEditMode ? "Exit Edit Mode" : "Enter Edit Mode"}
-              >
-                {isEditMode ? "✓" : "✏"}
-              </Button>
-              <Button
-                action="add"
-                size="compact"
-                onClick={() => handleOpenDatabase()}
-                title="Add Game Element"
-              >
-                +
-              </Button>
-              {isEditMode && (
-                <>
-                  <Button
-                    action="delete"
-                    size="compact"
-                    onClick={() => {
-                      if (adversaries.length > 0) {
-                        adversaries.forEach(item => deleteAdversary(item.id))
-                      }
-                      if (environments.length > 0) {
-                        environments.forEach(item => deleteEnvironment(item.id))
-                      }
-                      if (countdowns && countdowns.length > 0) {
-                        countdowns.forEach(countdown => deleteCountdown(countdown.id))
-                      }
-                    }}
-                    disabled={adversaries.length === 0 && environments.length === 0 && (!countdowns || countdowns.length === 0)}
-                    title="Clear All Game Elements"
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </Button>
-                  <Button
-                    action="delete"
-                    size="compact"
-                    onClick={() => {
-                      const deadAdversaries = adversaries.filter(a => a.hp >= a.hpMax)
-                      if (deadAdversaries.length > 0) {
-                        deadAdversaries.forEach(item => deleteAdversary(item.id))
-                      }
-                    }}
-                    disabled={adversaries.filter(a => a.hp >= a.hpMax).length === 0}
-                    title="Clear Dead Adversaries"
-                  >
-                    <FontAwesomeIcon icon={faSkull} />
-                  </Button>
-                  <Button
-                    action="delete"
-                    size="compact"
-                    onClick={() => {
-                      if (countdowns && countdowns.length > 0) {
-                        countdowns.forEach(countdown => {
-                          deleteCountdown(countdown.id)
-                        })
-                      }
-                    }}
-                    disabled={!countdowns || countdowns.length === 0}
-                    title="Clear All Countdowns"
-                  >
-                    <FontAwesomeIcon icon={faClock} />
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
 
           {/* Panel content - only show when there's something to display */}
           {rightColumnMode === 'item' && selectedItem && (
@@ -459,8 +451,7 @@ const AppContent = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <Browser
-                type={databaseType === 'unified' ? undefined : databaseType}
-                data={databaseType === 'unified' ? undefined : (databaseType === 'unified' ? adversariesData.adversaries : environmentsData.environments)}
+                type={databaseType}
                 onAddItem={(itemData) => {
                   console.log('App.jsx onAddItem called with:', itemData)
                   console.log('Current databaseType:', databaseType)
@@ -471,25 +462,11 @@ const AppContent = () => {
                   } else if (databaseType === 'environment') {
                     console.log('Creating environment...')
                     createEnvironment(itemData)
-                  } else if (databaseType === 'unified') {
-                    console.log('Unified case - determining type from category:', itemData.category)
-                    // Handle unified case - determine type from itemData
-                    if (itemData.category === 'Adversary') {
-                      console.log('Creating adversary from unified...')
-                      createAdversary(itemData)
-                    } else if (itemData.category === 'Environment') {
-                      console.log('Creating environment from unified...')
-                      createEnvironment(itemData)
-                    }
                   }
                   // Keep browser open so users can add multiple items
                 }}
                 onCancel={handleCloseRightColumn}
-                onCreateCustom={() => handleOpenCreator(databaseType === 'unified' ? 'adversary' : databaseType)}
-                onCreateCountdown={(countdownData) => {
-                  console.log('Creating countdown from browser:', countdownData)
-                  createCountdown(countdownData)
-                }}
+                onCreateCustom={() => handleOpenCreator(databaseType)}
               />
             </div>
           )}
@@ -515,17 +492,6 @@ const AppContent = () => {
             </div>
           )}
 
-                {/* Default state - no content */}
-                {!rightColumnMode && (
-                  <div className="no-selection-placeholder">
-                    <div className="placeholder-content">
-                      <div className="placeholder-title">Select an Item</div>
-                      <div className="placeholder-text">
-                        Choose an environment or adversary from the left panel to view its full details and interact with it.
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </>
@@ -545,79 +511,6 @@ const AppContent = () => {
 
             {/* Right Panel: Details, Database, or Creator */}
             <div className="right-panel">
-              {/* Right Panel Header with Action Buttons */}
-              <div className="right-panel-header">
-                <div className="right-panel-actions">
-                  <Button
-                    action="edit"
-                    size="compact"
-                    onClick={() => setIsEditMode(!isEditMode)}
-                    title={isEditMode ? "Exit Edit Mode" : "Enter Edit Mode"}
-                  >
-                    {isEditMode ? "✓" : "✏"}
-                  </Button>
-                  <Button
-                    action="add"
-                    size="compact"
-                    onClick={() => handleOpenDatabase()}
-                    title="Add Game Element"
-                  >
-                    +
-                  </Button>
-                  {isEditMode && (
-                    <>
-                      <Button
-                        action="delete"
-                        size="compact"
-                        onClick={() => {
-                          if (adversaries.length > 0) {
-                            adversaries.forEach(item => deleteAdversary(item.id))
-                          }
-                          if (environments.length > 0) {
-                            environments.forEach(item => deleteEnvironment(item.id))
-                          }
-                          if (countdowns && countdowns.length > 0) {
-                            countdowns.forEach(countdown => deleteCountdown(countdown.id))
-                          }
-                        }}
-                        disabled={adversaries.length === 0 && environments.length === 0 && (!countdowns || countdowns.length === 0)}
-                        title="Clear All Game Elements"
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </Button>
-                      <Button
-                        action="delete"
-                        size="compact"
-                        onClick={() => {
-                          const deadAdversaries = adversaries.filter(a => a.hp >= a.hpMax)
-                          if (deadAdversaries.length > 0) {
-                            deadAdversaries.forEach(item => deleteAdversary(item.id))
-                          }
-                        }}
-                        disabled={adversaries.filter(a => a.hp >= a.hpMax).length === 0}
-                        title="Clear Dead Adversaries"
-                      >
-                        <FontAwesomeIcon icon={faSkull} />
-                      </Button>
-                      <Button
-                        action="delete"
-                        size="compact"
-                        onClick={() => {
-                          if (countdowns && countdowns.length > 0) {
-                            countdowns.forEach(countdown => {
-                              deleteCountdown(countdown.id)
-                            })
-                          }
-                        }}
-                        disabled={!countdowns || countdowns.length === 0}
-                        title="Clear All Countdowns"
-                      >
-                        <FontAwesomeIcon icon={faClock} />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
 
               {/* Panel content - only show when there's something to display */}
               {rightColumnMode === 'item' && selectedItem && (
@@ -656,8 +549,7 @@ const AppContent = () => {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Browser
-                    type={databaseType === 'unified' ? undefined : databaseType}
-                    data={databaseType === 'unified' ? undefined : (databaseType === 'unified' ? adversariesData.adversaries : environmentsData.environments)}
+                    type={databaseType}
                     onAddItem={(itemData) => {
                       console.log('App.jsx onAddItem called with:', itemData)
                       console.log('Current databaseType:', databaseType)
@@ -668,25 +560,11 @@ const AppContent = () => {
                       } else if (databaseType === 'environment') {
                         console.log('Creating environment...')
                         createEnvironment(itemData)
-                      } else if (databaseType === 'unified') {
-                        console.log('Unified case - determining type from category:', itemData.category)
-                        // Handle unified case - determine type from itemData
-                        if (itemData.category === 'Adversary') {
-                          console.log('Creating adversary from unified...')
-                          createAdversary(itemData)
-                        } else if (itemData.category === 'Environment') {
-                          console.log('Creating environment from unified...')
-                          createEnvironment(itemData)
-                        }
                       }
                       // Keep browser open so users can add multiple items
                     }}
                     onCancel={handleCloseRightColumn}
-                    onCreateCustom={() => handleOpenCreator(databaseType === 'unified' ? 'adversary' : databaseType)}
-                    onCreateCountdown={(countdownData) => {
-                      console.log('Creating countdown from browser:', countdownData)
-                      createCountdown(countdownData)
-                    }}
+                    onCreateCustom={() => handleOpenCreator(databaseType)}
                   />
                 </div>
               )}
@@ -712,17 +590,6 @@ const AppContent = () => {
                 </div>
               )}
 
-              {/* Default state - no content */}
-              {!rightColumnMode && (
-                <div className="no-selection-placeholder">
-                  <div className="placeholder-content">
-                    <div className="placeholder-title">Select an Item</div>
-                    <div className="placeholder-text">
-                      Choose an environment or adversary from the left panel to view its full details and interact with it.
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </>
         )}

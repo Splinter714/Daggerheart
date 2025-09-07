@@ -292,8 +292,7 @@ const GameBoard = ({
   }
 
   return (
-    <div className="game-board-container">
-
+    <>
       {/* Countdowns Section */}
       {countdowns && countdowns.length > 0 && (
         <div className="game-section">
@@ -314,7 +313,7 @@ const GameBoard = ({
                   size="sm"
                   onClick={() => handleRollOutcome('success-hope')}
                   title="Success with Hope: Progress +2, Standard +1"
-                  style={{ backgroundColor: '#eab308', borderColor: '#eab308', color: 'white' }}
+                  style={{ backgroundColor: 'var(--purple)', borderColor: 'var(--purple)', color: 'var(--text-primary)' }}
                 >
                   <CheckCircle size={16} />
                 </Button>
@@ -323,7 +322,7 @@ const GameBoard = ({
                   size="sm"
                   onClick={() => handleRollOutcome('success-fear')}
                   title="Success with Fear: Progress +1, Consequence +1, Standard +1"
-                  style={{ backgroundColor: 'var(--primary)', borderColor: 'var(--primary)', color: 'white' }}
+                  style={{ backgroundColor: 'var(--purple)', borderColor: 'var(--purple)', color: 'var(--text-primary)' }}
                 >
                   <CheckCircle size={16} />
                 </Button>
@@ -332,7 +331,7 @@ const GameBoard = ({
                   size="sm"
                   onClick={() => handleRollOutcome('failure-hope')}
                   title="Failure with Hope: Consequence +2, Standard +1"
-                  style={{ backgroundColor: '#eab308', borderColor: '#eab308', color: 'white' }}
+                  style={{ backgroundColor: 'var(--purple)', borderColor: 'var(--purple)', color: 'var(--text-primary)' }}
                 >
                   <XCircle size={16} />
                 </Button>
@@ -341,7 +340,7 @@ const GameBoard = ({
                   size="sm"
                   onClick={() => handleRollOutcome('failure-fear')}
                   title="Failure with Fear: Consequence +3, Standard +1"
-                  style={{ backgroundColor: 'var(--primary)', borderColor: 'var(--primary)', color: 'white' }}
+                  style={{ backgroundColor: 'var(--purple)', borderColor: 'var(--purple)', color: 'var(--text-primary)' }}
                 >
                   <XCircle size={16} />
                 </Button>
@@ -350,7 +349,7 @@ const GameBoard = ({
                   size="sm"
                   onClick={() => handleRollOutcome('critical-success')}
                   title="Critical Success: Progress +3, Standard +1"
-                  style={{ backgroundColor: '#eab308', borderColor: '#eab308', color: 'white' }}
+                  style={{ backgroundColor: 'var(--purple)', borderColor: 'var(--purple)', color: 'var(--text-primary)' }}
                 >
                   <Zap size={16} />
                   <CheckCircle size={16} />
@@ -516,7 +515,7 @@ const GameBoard = ({
           />
         </div>
       )}
-    </div>
+    </>
   )
 }
 

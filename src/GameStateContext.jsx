@@ -202,19 +202,78 @@ export const GameStateProvider = ({ children }) => {
 
   // Adversary management
   const createAdversary = (adversaryData) => {
+    // Generate unique ID with timestamp and random component
+    const uniqueId = `adv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    
+    // Check for existing adversaries with the same name to add numbering
+    const existingAdversaries = gameState.adversaries || []
+    const sameNameAdversaries = existingAdversaries.filter(adv => {
+      // Extract base name (without existing number suffix)
+      const baseName = adv.name.replace(/\s+\(\d+\)$/, '')
+      return baseName === adversaryData.name
+    })
+    
+    let displayName = adversaryData.name || 'Unknown'
+    
+    if (sameNameAdversaries.length === 0) {
+      // First adversary of this type - no suffix needed
+      displayName = adversaryData.name
+    } else if (sameNameAdversaries.length === 1) {
+      // Second adversary - first one gets (1), new one gets (2)
+      const firstAdversary = sameNameAdversaries[0]
+      const firstAdversaryBaseName = firstAdversary.name.replace(/\s+\(\d+\)$/, '')
+      
+      // Update the first adversary to have (1) suffix
+      const updatedAdversaries = gameState.adversaries.map(adv => 
+        adv.id === firstAdversary.id 
+          ? { ...adv, name: `${firstAdversaryBaseName} (1)` }
+          : adv
+      )
+      
+      // Update the game state with the renamed first adversary
+      setGameState(prev => ({
+        ...prev,
+        adversaries: updatedAdversaries
+      }))
+      
+      // New adversary gets (2)
+      displayName = `${adversaryData.name} (2)`
+    } else {
+      // Find the next available number
+      const usedNumbers = sameNameAdversaries.map(adv => {
+        const match = adv.name.match(/\((\d+)\)$/)
+        return match ? parseInt(match[1]) : null
+      }).filter(num => num !== null)
+      
+      // Find the first unused number starting from 1
+      let nextNumber = 1
+      while (usedNumbers.includes(nextNumber)) {
+        nextNumber++
+      }
+      
+      displayName = `${adversaryData.name} (${nextNumber})`
+    }
+    
     const newAdversary = {
-      id: `adv-${Date.now()}`,
-      name: adversaryData.name || 'Unknown',
+      id: uniqueId,
+      name: displayName,
       type: adversaryData.type || 'Unknown',
       tier: adversaryData.tier || 1,
       difficulty: adversaryData.difficulty || 'Medium',
-      hp: adversaryData.hpMax || 1,
+      hp: 0, // Start with no HP (all icons empty)
       hpMax: adversaryData.hpMax || 1,
-      stress: 0,
+      stress: 0, // Start with no stress
       stressMax: adversaryData.stressMax || 0,
       description: adversaryData.description || '',
       isVisible: true,
-      ...adversaryData
+      // Include other properties from adversaryData but don't let them override our core values
+      ...adversaryData,
+      // Override with our specific values to ensure correct initialization
+      id: uniqueId,
+      name: displayName,
+      hp: 0, // Force HP to be 0 (all icons empty)
+      stress: 0, // Force stress to be 0
+      isVisible: true
     };
     
     setGameState(prev => ({

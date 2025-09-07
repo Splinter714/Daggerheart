@@ -7,7 +7,7 @@
 
 /* Layout Structure */
 .top-bar {
-  background: #000000;
+  background: var(--bg-dark);
   border-bottom: 1px solid var(--border);
   padding: 0.25rem 0;
   position: sticky;
@@ -19,15 +19,16 @@
   display: flex;
   flex: 1;
   min-height: 0;
-  height: calc(100vh - 40px); /* Subtract compact top bar height */
+  height: calc(100vh - 80px); /* Subtract top bar height with element controls */
 }
 
 .left-panel {
   flex: 1;
   min-width: 0;
-  background: var(--bg-card);
+  background: var(--bg-dark);
   overflow-y: auto;
   height: 100%;
+  border-right: 1px solid var(--border);
 }
 
 .right-panel {
@@ -40,19 +41,7 @@
   height: 100%;
 }
 
-.right-panel-header {
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  padding: 0.5rem 0.75rem;
-  flex-shrink: 0;
-}
 
-.right-panel-actions {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  align-items: center;
-}
 
 /* Mobile Navigation */
 .mobile-nav-buttons {
@@ -65,7 +54,7 @@
 
 .mobile-nav-buttons .btn {
   background: var(--secondary);
-  color: white;
+  color: var(--text-primary);
   border: 1px solid var(--secondary);
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
@@ -82,15 +71,11 @@
 .mobile-right-panel {
   flex: 1;
   min-width: 0;
-  background: var(--bg-card);
+  background: var(--bg-dark);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 40px);
-}
-
-.mobile-right-panel {
-  background: var(--bg-dark);
+  height: calc(100vh - 80px);
 }
 
 /* Difficulty Shield Styling */
@@ -111,7 +96,16 @@
   height: 100%;
   z-index: 0;
   opacity: 0.8;
-  color: white; /* White color */
+  color: var(--text-primary); /* White color */
+}
+
+/* Fade shield in dead state */
+.simple-list-row.dead .difficulty-shield svg {
+  opacity: 0.4; /* More faded in dead state */
+}
+
+.simple-list-row.dead .difficulty-shield .difficulty-number {
+  opacity: 0.4; /* Fade the number too */
 }
 
 .difficulty-shield .difficulty-number {
@@ -181,12 +175,12 @@
 }
 
 .damage-drop {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--grey-light);
   transition: color 0.2s ease;
 }
 
 .damage-drop.active {
-  color: #ef4444;
+  color: var(--red);
 }
 
 /* Right Panel Content */
@@ -201,30 +195,6 @@
   height: 0; /* This forces the flex item to respect the container height */
 }
 
-.no-selection-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  padding: 0;
-}
-
-.placeholder-content {
-  text-align: center;
-  color: var(--text-secondary);
-}
-
-.placeholder-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--text-primary);
-}
-
-.placeholder-text {
-  font-size: 1rem;
-  line-height: 1.6;
-}
 
 /* Container */
 .container {
@@ -234,7 +204,7 @@
 }
 
 .header {
-  background: var(--bg-card);
+  background: var(--bg-dark);
   border-bottom: 1px solid var(--border);
   padding: 1rem 0;
   margin-bottom: 0.5rem;
@@ -261,7 +231,7 @@
 
 .mode-display {
   background: var(--secondary);
-  color: white;
+  color: var(--text-primary);
 }
 
 .preview-mode {
@@ -454,7 +424,7 @@
 
 .unified-game-piece .countdown-symbol.filled {
   background: var(--primary);
-  color: white;
+  color: var(--text-primary);
   border-color: var(--primary);
 }
 

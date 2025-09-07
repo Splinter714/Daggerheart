@@ -62,7 +62,7 @@ const Cards = ({
     if (type === 'countdown') {
       return (
         <div 
-          className="simple-list-row compact countdown"
+          className={`simple-list-row compact countdown ${dragAttributes && dragListeners ? 'edit-mode' : ''}`}
           onClick={() => onClick && onClick(item)}
           style={{ cursor: onClick ? 'pointer' : 'default' }}
         >
@@ -90,7 +90,7 @@ const Cards = ({
     } else if (type === 'adversary') {
       return (
         <div 
-          className={`simple-list-row compact adversary ${(item.hp || 0) >= (item.hpMax || 1) ? 'dead' : ''}`}
+          className={`simple-list-row compact adversary ${(item.hp || 0) >= (item.hpMax || 1) ? 'dead' : ''} ${dragAttributes && dragListeners ? 'edit-mode' : ''}`}
           onClick={() => onClick && onClick(item)}
           style={{ cursor: onClick ? 'pointer' : 'default' }}
         >
@@ -253,7 +253,7 @@ const Cards = ({
     } else {
       return (
         <div 
-          className="simple-list-row compact environment"
+          className={`simple-list-row compact environment ${dragAttributes && dragListeners ? 'edit-mode' : ''}`}
           onClick={() => onClick && onClick(item)}
           style={{ cursor: onClick ? 'pointer' : 'default' }}
         >

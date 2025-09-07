@@ -1,22 +1,26 @@
 :root {
-  --primary: #4f46e5;        /* Deep indigo blue */
-  --primary-dark: #3730a3;   /* Darker indigo */
-  --secondary: #6b7280;      /* Muted gray */
-  --secondary-dark: #4b5563; /* Darker muted gray for delete buttons */
-  --danger: #b91c1c;         /* Darker, muted red */
-  --success: #6366f1;         /* Indigo blue - Positive actions */
-  --success-dark: #4f46e5;    /* Darker indigo - Success hover state */
+  /* Minimal Color Palette */
+  --light: #ffffff;          /* Pure white */
+  --dark: #1a1a1a;          /* Almost black */
+  --purple: #4f46e5;        /* Purple accent */
+  --red: #ef4444;           /* Red for danger/delete actions */
+  
+  /* Greyscale System */
+  --grey-light: #a3a3a3;     /* Light grey for secondary text */
+  --grey: #6b7280;          /* Medium grey for borders, empty states */
+  --grey-dark: #404040;      /* Dark grey for backgrounds */
+  
+  /* Derived colors - keep minimal */
+  --bg-dark: var(--dark);
+  --bg-card: #262626;       /* Slightly lighter than dark for contrast */
+  --bg-card-hover: var(--grey-dark); /* Use grey-dark for hover */
+  --text-primary: var(--light);
+  --text-secondary: var(--grey-light);
+  --border: var(--grey);
   
   /* Button system variables */
   --btn-border-radius: 0.25rem;        /* 4px - subtle button rounding */
   --btn-border-radius-compact: 0.125rem; /* 2px - minimal compact button rounding */
-  --warning: #f59e0b;
-  --bg-dark: #1a1a1a;
-  --bg-card: #262626;
-  --bg-card-hover: #404040;
-  --text-primary: #ffffff;
-  --text-secondary: #a3a3a3;
-  --border: #404040;
   
   /* Responsive breakpoints */
   --mobile: 800px;
@@ -65,8 +69,8 @@ body {
 }
 
 .btn-primary {
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
 }
 
 .btn-primary:hover {
@@ -74,30 +78,30 @@ body {
 }
 
 .btn-secondary {
-  background: var(--secondary);
-  color: white;
+  background: var(--grey);
+  color: var(--text-primary);
 }
 
 .btn-secondary:hover {
-  background: #4b5563;  /* Darker muted gray */
+  background: var(--grey-dark);  /* Darker muted gray */
 }
 
 .btn-danger {
-  background: var(--danger);
-  color: white;
+  background: var(--red);
+  color: var(--text-primary);
 }
 
 .btn-danger:hover {
-  background: #991b1b;  /* Even darker red on hover */
+  background: var(--red);  /* Even darker red on hover */
 }
 
 .btn-success {
   background: var(--success);
-  color: white;
+  color: var(--text-primary);
 }
 
 .btn-success:hover {
-  background: #4f46e5;  /* Darker indigo on hover */
+  background: var(--purple);  /* Darker indigo on hover */
 }
 
 .btn-sm {
@@ -159,14 +163,14 @@ body {
 
 /* Confirmation state - only change color, keep everything else the same */
 .confirming {
-  background: var(--danger) !important;
+  background: var(--red) !important;
   color: white !important;
 }
 
 /* Initial delete button state - red to indicate destructive action */
 .btn[data-action="delete"],
 .btn[data-action="remove"] {
-  background: var(--danger) !important;
+  background: var(--red) !important;
   color: white !important;
 }
 
@@ -180,7 +184,7 @@ body {
 
 /* Confirmation state - ONLY change background color, nothing else */
 .btn.confirming {
-  background: var(--danger) !important;
+  background: var(--red) !important;
   color: white !important;
 }
 
@@ -272,7 +276,7 @@ body {
 
 .add-item-button:hover {
   background: var(--bg-card);
-  border-color: var(--primary);
+  border-color: var(--purple);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -421,7 +425,7 @@ body {
   
   .dropdown-trigger:hover {
     background: var(--bg-card-hover);
-    border-color: var(--primary);
+    border-color: var(--purple);
   }
   
   .dropdown-backdrop {
@@ -498,7 +502,7 @@ body {
 
 .expanded-card.edit-mode {
   background: var(--bg-darker);
-  border-color: var(--primary);
+  border-color: var(--purple);
 }
 
 .expanded-header {
@@ -564,7 +568,7 @@ body {
 .stat-block-name {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--purple);
   margin: 0;
   text-align: center;
 }
@@ -579,7 +583,7 @@ body {
 .stat-block-tier {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--secondary);
+  color: var(--grey);
   margin: 0;
   text-align: center;
   padding: 0.5rem;
@@ -626,7 +630,7 @@ body {
 
 .stat-block-difficulty strong,
 .stat-block-thresholds strong {
-  color: var(--primary);
+  color: var(--purple);
   display: block;
   margin-bottom: 0.25rem;
 }
@@ -639,7 +643,7 @@ body {
 }
 
 .resource-tracker strong {
-  color: var(--primary);
+  color: var(--purple);
   font-size: 0.9rem;
 }
 
@@ -671,16 +675,11 @@ body {
 
 .tracker-subtract-button:hover:not(:disabled),
 .tracker-add-button:hover:not(:disabled) {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
+  background: var(--purple);
+  color: var(--text-primary);
+  border-color: var(--purple);
 }
 
-.tracker-subtract-button:disabled,
-.tracker-add-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .input-number-tracker-center-container {
   flex: 1;
@@ -731,15 +730,15 @@ body {
 }
 
 .simple-action-button:hover {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
+  background: var(--purple);
+  color: var(--text-primary);
+  border-color: var(--purple);
 }
 
 .simple-action-button-top-label {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--primary);
+  color: var(--purple);
   margin-bottom: 0.25rem;
 }
 
@@ -753,7 +752,7 @@ body {
 }
 
 .stat-block-feature {
-  color: var(--primary);
+  color: var(--purple);
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
@@ -778,11 +777,11 @@ body {
 }
 
 .single-feature-description strong {
-  color: var(--primary);
+  color: var(--purple);
 }
 
 .single-feature-description em {
-  color: var(--secondary);
+  color: var(--grey);
 }
 
 .interactive-actions-main-holder {
@@ -798,9 +797,9 @@ body {
 }
 
 .resource-cost-action-button {
-  background: var(--danger);
-  color: white;
-  border: 1px solid var(--danger);
+  background: var(--red);
+  color: var(--text-primary);
+  border: 1px solid var(--red);
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
@@ -810,9 +809,9 @@ body {
 }
 
 .dice-action-button {
-  background: var(--secondary);
-  color: white;
-  border: 1px solid var(--secondary);
+  background: var(--grey);
+  color: var(--text-primary);
+  border: 1px solid var(--grey);
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
@@ -830,7 +829,7 @@ body {
 
 .stat-block-experiences strong,
 .stat-block-conditions strong {
-  color: var(--primary);
+  color: var(--purple);
   display: block;
   margin-bottom: 0.5rem;
 }
@@ -856,9 +855,9 @@ body {
 }
 
 .multi-add-buttons--button {
-  background: var(--primary);
-  color: white;
-  border: 1px solid var(--primary);
+  background: var(--purple);
+  color: var(--text-primary);
+  border: 1px solid var(--purple);
   border-radius: 0.5rem;
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
@@ -893,8 +892,8 @@ body {
 }
 
 .hp-dot.filled {
-  background: #ef4444;
-  border-color: #dc2626;
+  background: var(--red);
+  border-color: var(--red);
   box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
 }
 
@@ -904,8 +903,8 @@ body {
 }
 
 .stress-dot.filled {
-  background: #8b5cf6;
-  border-color: #7c3aed;
+  background: var(--purple);
+  border-color: var(--purple);
   box-shadow: 0 0 4px rgba(139, 92, 246, 0.5);
 }
 
@@ -921,206 +920,23 @@ body {
   text-align: center;
 }
 
-/* Death Status */
-.death-status {
-  text-align: center;
-  padding: 0.75rem;
-  background: linear-gradient(135deg, #7f1d1d, #991b1b);
-  border: 2px solid #dc2626;
-  border-radius: 0.5rem;
-  color: #fecaca;
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin: 1rem 0;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-  animation: pulse 2s infinite;
-}
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
-}
 
-/* Parchment-style stat block background */
-.stat-block {
-  background: linear-gradient(135deg, #f7f1e8 0%, #f0e6d2 100%);
-  border: 3px solid #8b7355;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  color: #2d2d2d;
-  position: relative;
-}
 
-.stat-block::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(139, 115, 85, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(139, 115, 85, 0.1) 0%, transparent 50%);
-  border-radius: 9px;
-  pointer-events: none;
-}
 
-.stat-block-header {
-  border-bottom: 2px solid #8b7355;
-  padding-bottom: 1rem;
-  margin-bottom: 1.5rem;
-  position: relative;
-  z-index: 1;
-}
 
-.stat-block-name {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #2d2d2d;
-  margin: 0;
-  text-align: center;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
 
-.stat-block-name:hover {
-  color: #8b7355;
-}
 
-.stat-block-meta {
-  display: grid;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  position: relative;
-  z-index: 1;
-}
 
-.stat-block-tier {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #2d2d2d;
-  margin: 0;
-  text-align: center;
-  padding: 0.5rem;
-  background: rgba(139, 115, 85, 0.1);
-  border-radius: 0.5rem;
-  border: 1px solid #8b7355;
-}
 
-.stat-block-description {
-  font-style: italic;
-  color: #4a4a4a;
-  margin: 0;
-  text-align: center;
-  padding: 0.5rem;
-  line-height: 1.4;
-}
 
-.stat-block-motives {
-  font-size: 0.9rem;
-  color: #4a4a4a;
-  margin: 0;
-  text-align: center;
-  padding: 0.75rem;
-  background: rgba(139, 115, 85, 0.1);
-  border-radius: 0.5rem;
-  border: 1px solid #8b7355;
-  line-height: 1.4;
-}
 
-.stat-block-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: rgba(139, 115, 85, 0.1);
-  border-radius: 0.5rem;
-  border: 1px solid #8b7355;
-  position: relative;
-  z-index: 1;
-}
 
-.stat-block-difficulty,
-.stat-block-thresholds {
-  text-align: center;
-  padding: 0.5rem;
-  color: #2d2d2d;
-}
 
-.stat-block-difficulty strong,
-.stat-block-thresholds strong {
-  color: #8b7355;
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.9rem;
-}
 
-.stat-block-divider {
-  color: #8b7355;
-  font-weight: bold;
-  margin: 0;
-  text-align: center;
-  font-size: 1.2rem;
-}
 
-.resource-tracker {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
 
-.resource-tracker strong {
-  color: #8b7355;
-  font-size: 0.9rem;
-}
 
-.input-number-tracker-container {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.3);
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  border: 1px solid #8b7355;
-}
-
-.tracker-subtract-button,
-.tracker-add-button {
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 50%;
-  border: 1px solid #8b7355;
-  background: #f7f1e8;
-  color: #2d2d2d;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-}
-
-.tracker-subtract-button:hover:not(:disabled),
-.tracker-add-button:hover:not(:disabled) {
-  background: #8b7355;
-  color: white;
-  border-color: #6b5742;
-  transform: scale(1.1);
-}
-
-.tracker-subtract-button:disabled,
-.tracker-add-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .basic-attack-container {
   display: grid;
@@ -1131,7 +947,7 @@ body {
   padding: 1rem;
   background: rgba(139, 115, 85, 0.1);
   border-radius: 0.5rem;
-  border: 1px solid #8b7355;
+  border: 1px solid var(--grey-dark);
   position: relative;
   z-index: 1;
 }
@@ -1149,7 +965,7 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 0.5rem;
-  border: 1px solid #8b7355;
+  border: 1px solid var(--grey-dark);
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1158,21 +974,21 @@ body {
 }
 
 .simple-action-button.attack-dice-action-button {
-  background: #3b82f6;
-  color: white;
-  border-color: #2563eb;
+  background: var(--purple);
+  color: var(--text-primary);
+  border-color: var(--purple);
 }
 
 .simple-action-button.damage-dice-action-button {
-  background: #3b82f6;
-  color: white;
-  border-color: #2563eb;
+  background: var(--purple);
+  color: var(--text-primary);
+  border-color: var(--purple);
 }
 
 .simple-action-button.resource-cost-action-button {
-  background: #1f2937;
-  color: white;
-  border-color: #374151;
+  background: var(--dark);
+  color: var(--text-primary);
+  border-color: var(--grey-dark);
 }
 
 .simple-action-button:hover {
@@ -1199,14 +1015,14 @@ body {
   margin-bottom: 1rem;
   background: rgba(139, 115, 85, 0.1);
   border-radius: 0.5rem;
-  border: 1px solid #8b7355;
+  border: 1px solid var(--grey-dark);
   position: relative;
   z-index: 1;
 }
 
 .stat-block-experiences strong,
 .stat-block-conditions strong {
-  color: #8b7355;
+  color: var(--grey-dark);
   display: block;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
@@ -1221,16 +1037,16 @@ body {
 
 .single-experience {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.3);
-  border: 1px solid #8b7355;
+  background: var(--grey-dark);
+  border: 1px solid var(--grey-dark);
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
-  color: #2d2d2d;
+  color: var(--grey);
 }
 
 .conditions-values {
-  color: #4a4a4a;
+  color: var(--grey-light);
   font-style: italic;
   font-size: 0.9rem;
 }
@@ -1242,7 +1058,7 @@ body {
 }
 
 .stat-block-feature {
-  color: #8b7355;
+  color: var(--grey-dark);
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
@@ -1250,12 +1066,12 @@ body {
   padding: 0.75rem;
   background: rgba(139, 115, 85, 0.1);
   border-radius: 0.5rem;
-  border: 1px solid #8b7355;
+  border: 1px solid var(--grey-dark);
 }
 
 .adversary-feature {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid #8b7355;
+  background: var(--grey-dark);
+  border: 1px solid var(--grey-dark);
   border-radius: 0.5rem;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -1264,11 +1080,11 @@ body {
 .single-feature-description {
   margin: 0 0 1rem 0;
   line-height: 1.6;
-  color: #2d2d2d;
+  color: var(--grey);
 }
 
 .single-feature-description strong {
-  color: #8b7355;
+  color: var(--grey-dark);
 }
 
 .single-feature-description em {
@@ -1287,35 +1103,12 @@ body {
   align-items: center;
 }
 
-.multi-add-buttons-container {
-  text-align: center;
-  margin-top: 1rem;
-}
-
-.multi-add-buttons--button {
-  background: #8b7355;
-  color: white;
-  border: 1px solid #6b5742;
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.multi-add-buttons--button:hover {
-  background: #6b5742;
-  border-color: #5a4936;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
 
 /* New Layout Styles */
 .top-bar {
-  background: var(--bg-card);
+  background: var(--bg-dark);
   border-bottom: 1px solid var(--border);
-  padding: 0.5rem 0;
+  padding: 0.25rem 0;
 }
 
 .compact-top-bar {
@@ -1326,7 +1119,7 @@ body {
   padding: 0.5rem 1rem;
   background: rgba(30, 41, 59, 0.8);
   border-radius: 0.5rem;
-  border: 1px solid #475569;
+  border: 1px solid var(--grey);
 }
 
 .fear-section {
@@ -1335,7 +1128,7 @@ body {
   justify-content: center;
   padding: 0.125rem;
   width: 100%;
-  height: 100%;
+  height: 60%;
 }
 
 .fear-controls {
@@ -1344,6 +1137,7 @@ body {
   justify-content: center;
   width: 100%;
   height: 100%;
+  gap: 1rem;
 }
 
 .fear-label {
@@ -1371,20 +1165,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--grey-dark);
   max-width: calc(8.33% - 0.125rem); /* 12 skulls with gaps */
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
 }
 
 .fear-skull.empty {
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--grey-dark);
   cursor: default;
 }
 
 .fear-skull.filled {
   opacity: 1;
-  color: rgba(255, 255, 255, 1);
+  color: var(--purple);
   filter: none;
 }
 
@@ -1395,7 +1189,54 @@ body {
 /* Ensure fear skull hover effects are isolated from tooltip effects */
 .fear-skulls .fear-skull.filled:hover {
   transform: scale(1.02);
-  text-shadow: 0 0 10px rgba(79, 70, 229, 0.9), 0 0 18px rgba(79, 70, 229, 0.5);
+  /* Removed purple text-shadow */
+}
+
+/* Fear add buttons */
+.fear-add-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Element Control Buttons */
+.element-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0;
+  height: 40%;
+}
+
+.element-controls .btn {
+  min-width: 2.5rem;
+  height: 2rem;
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile responsive element controls */
+@media (max-width: 800px) {
+  .element-controls {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.25rem 0;
+  }
+  
+  .element-controls .btn {
+    min-width: 2rem;
+    height: 1.75rem;
+    font-size: 0.7rem;
+    padding: 0.125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .fear-tooltip {
@@ -1409,7 +1250,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   background: rgba(15, 23, 42, 0.95);
-  border: 1px solid #475569;
+  border: 1px solid var(--grey);
   border-radius: 0.5rem;
   padding: 1rem;
   min-width: 250px;
@@ -1468,7 +1309,7 @@ body {
 
 .countdown-item-compact {
   background: rgba(51, 65, 85, 0.6);
-  border: 1px solid #64748b;
+  border: 1px solid var(--grey-light);
   border-radius: 0.375rem;
   padding: 0.375rem 0.5rem; /* Reduced from 0.5rem 0.75rem */
   min-width: 200px;
@@ -1503,13 +1344,12 @@ body {
 }
 
 .countdown-symbol.filled {
-  color: #3b82f6;
+  color: var(--purple);
   text-shadow: 0 0 4px rgba(59, 130, 246, 0.5);
 }
 
 .countdown-symbol.empty {
-  color: #64748b;
-  opacity: 0.6;
+  color: var(--grey);
 }
 
 .countdown-symbol:hover {
@@ -1618,7 +1458,7 @@ body {
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  background: #475569;
+  background: var(--grey);
   color: #94a3b8;
   display: flex;
   align-items: center;
@@ -1630,13 +1470,13 @@ body {
 }
 
 .countdown-creator-trigger:hover {
-  background: #64748b;
+  background: var(--grey-light);
   color: #e2e8f0;
 }
 
 .countdown-form-compact {
   background: rgba(51, 65, 85, 0.9);
-  border: 1px solid #64748b;
+  border: 1px solid var(--grey-light);
   border-radius: 0.375rem;
   padding: 0.5rem;
 }
@@ -1692,7 +1532,7 @@ body {
 
 .input-compact {
   background: #1e293b;
-  border: 1px solid #475569;
+  border: 1px solid var(--grey);
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
   color: #f1f5f9;
@@ -1701,8 +1541,8 @@ body {
 
 .input-compact:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 1px #3b82f6;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 1px var(--purple);
 }
 
 .btn-compact {
@@ -1721,35 +1561,35 @@ body {
 }
 
 .btn-compact.btn-primary {
-  background: #3b82f6;
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
 }
 
 .btn-compact.btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--purple);
 }
 
 .btn-compact.btn-primary:disabled {
-  background: #64748b;
+  background: var(--grey-light);
   cursor: not-allowed;
 }
 
 .btn-compact.btn-secondary {
-  background: #64748b;
+  background: var(--grey-light);
   color: #e2e8f0;
 }
 
 .btn-compact.btn-secondary:hover {
-  background: #475569;
+  background: var(--grey);
 }
 
 .btn-compact.btn-danger {
-  background: #ef4444;
-  color: white;
+  background: var(--red);
+  color: var(--text-primary);
 }
 
 .btn-compact.btn-danger:hover {
-  background: #991b1b;  /* Even darker red on hover */
+  background: var(--red);  /* Even darker red on hover */
 }
 
 /* Single Row Countdown Form */
@@ -1759,7 +1599,7 @@ body {
   align-items: center;
   flex-wrap: wrap;
   background: rgba(51, 65, 85, 0.9);
-  border: 1px solid #64748b;
+  border: 1px solid var(--grey-light);
   border-radius: 0.375rem;
   padding: 0.5rem;
 }
@@ -1768,7 +1608,7 @@ body {
   flex: 1;
   min-width: 120px;
   padding: 0.5rem;
-  border: 1px solid #475569;
+  border: 1px solid var(--grey);
   border-radius: 0.375rem;
   font-size: 0.875rem;
   background: #1e293b;
@@ -1777,7 +1617,7 @@ body {
 
 .countdown-form-single-row .input-compact:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--purple);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
@@ -1792,7 +1632,7 @@ body {
 /* Horizontal Countdown Creator in Browser */
 .countdown-creator-horizontal {
   background: rgba(51, 65, 85, 0.9);
-  border: 1px solid #64748b;
+  border: 1px solid var(--grey-light);
   border-radius: 0.375rem;
   padding: 0.75rem;
   margin-bottom: 1rem;
@@ -1819,7 +1659,7 @@ body {
   flex: 1;
   min-width: 120px;
   padding: 0.5rem;
-  border: 1px solid #475569;
+  border: 1px solid var(--grey);
   border-radius: 0.375rem;
   font-size: 0.875rem;
   background: #1e293b;
@@ -1828,7 +1668,7 @@ body {
 
 .countdown-form-horizontal .input-compact:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--purple);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
@@ -1858,7 +1698,7 @@ body {
   background: #1e293b;
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
-  border: 1px solid #475569;
+  border: 1px solid var(--grey);
 }
 
 /* Two-row countdown layout */
@@ -1907,7 +1747,7 @@ body {
 }
 
 .error-text {
-  color: #ef4444;
+  color: var(--red);
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -1938,11 +1778,17 @@ body {
 }
 
 .countdown-delete-space {
-  width: 1.5rem; /* Same width as the buttons to reserve space */
+  width: 0; /* No space when not in edit mode */
   height: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: width 0.2s ease; /* Smooth transition */
+}
+
+/* When in edit mode, expand to show delete button */
+.simple-list-row.edit-mode .countdown-delete-space {
+  width: 1.5rem; /* Reserve space for delete button */
 }
 
 .card-actions .btn {
@@ -1970,7 +1816,7 @@ body {
   color: var(--text-secondary);
   font-size: 0.75rem;
   background: var(--bg-secondary);
-  border-right: 1px solid var(--border);
+  /* Removed vertical line border-right */
   transition: all 0.2s ease;
   user-select: none;
   -webkit-user-select: none;
@@ -1982,7 +1828,7 @@ body {
 
 .drag-handle:hover {
   background: var(--bg-hover);
-  border-color: var(--primary);
+  /* Removed purple border-color */
 }
 
 .drag-handle:active {
@@ -2057,7 +1903,7 @@ body {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--primary);
+  border-bottom: 2px solid var(--purple);
   padding-bottom: 0.5rem;
 }
 
@@ -2074,7 +1920,7 @@ body {
 
 .simplified-adversary-card:hover,
 .simplified-environment-card:hover {
-  border-color: var(--primary);
+  border-color: var(--purple);
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
 }
 
@@ -2198,8 +2044,8 @@ body {
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
   font-size: 0.75rem;
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
 }
 
 .feature-description {
@@ -2211,13 +2057,13 @@ body {
   margin-top: 0.75rem;
   padding: 0.75rem;
   background: var(--bg-light);
-  border-left: 3px solid var(--primary);
+  border-left: 3px solid var(--purple);
   border-radius: 0.25rem;
 }
 
 .gm-label {
   font-weight: 600;
-  color: var(--primary);
+  color: var(--purple);
 }
 
 .threshold-item {
@@ -2239,8 +2085,8 @@ body {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background: var(--danger);
-  color: white;
+  background: var(--red);
+  color: var(--text-primary);
   border: none;
   border-radius: 50%;
   width: 2rem;
@@ -2255,35 +2101,10 @@ body {
 }
 
 .close-selection-btn:hover {
-  background: var(--danger-dark);
+  background: var(--red);
   transform: scale(1.1);
 }
 
-.no-selection-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 400px;
-}
-
-.placeholder-content {
-  text-align: center;
-  color: var(--text-secondary);
-}
-
-.placeholder-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--text-primary);
-}
-
-.placeholder-text {
-  font-size: 1rem;
-  line-height: 1.6;
-  max-width: 400px;
-}
 
 /* Simple List Styles */
 .simple-lists-container {
@@ -2292,22 +2113,12 @@ body {
   gap: 1rem;
 }
 
-/* Game Board Layout - consistent spacing */
-.game-board-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem; /* Much tighter spacing between all sections */
-  padding: 1.25rem;
-  background: var(--bg-dark);
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border: 1px solid var(--border);
-}
 
 /* Section Headers */
 .section-header {
   margin-bottom: 0.75rem;
   position: relative;
+  padding-left: 1rem; /* Add space from left border */
 }
 
 .section-header::before {
@@ -2348,7 +2159,7 @@ body {
   display: flex;
   align-items: center;
   padding: 0.5rem; /* Reduced from 0.75rem */
-  padding-left: 2.25rem; /* Reduced from 2.5rem - tighter spacing */
+  padding-left: 1rem; /* More space between left edge and content */
   padding-right: 0.5rem; /* Reduced from 0.75rem */
   background: var(--bg-dark);
   border: 1px solid var(--border);
@@ -2356,6 +2167,11 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
+}
+
+/* When in edit mode, add space for drag handle */
+.simple-list-row.edit-mode {
+  padding-left: 2.25rem; /* Space for drag handle, closer to content */
 }
 
 /* Special height for countdown rows to accommodate two rows */
@@ -2397,7 +2213,7 @@ body {
 }
 
 .simple-list-row.compact.countdown .countdown-symbol.filled {
-  color: var(--primary);
+  color: var(--purple);
   text-shadow: 0 0 4px rgba(59, 130, 246, 0.5);
 }
 
@@ -2457,7 +2273,7 @@ body {
 
 /* HP and Stress symbol colors */
 .simple-list-row.compact.adversary .hp-symbols .countdown-symbol.filled {
-  color: #dc2626;
+  color: var(--red);
   text-shadow: 0 0 4px rgba(220, 38, 38, 0.5);
 }
 
@@ -2468,41 +2284,41 @@ body {
 
 /* Overflow icon styling */
 .simple-list-row.compact.adversary .stress-symbols .countdown-symbol.overflow {
-  color: #dc2626;
+  color: var(--red);
   text-shadow: 0 0 4px rgba(220, 38, 38, 0.5);
-  border: 1px solid #dc2626;
+  border: 1px solid var(--red);
   border-radius: 50%;
   background: rgba(220, 38, 38, 0.1);
 }
 
 .simple-list-row:hover {
   background: var(--bg-card);
-  border-color: var(--primary);
+  /* Removed purple border-color */
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .simple-list-row:hover .drag-handle {
   background: var(--bg-hover);
-  border-color: var(--primary);
+  /* Removed purple border-color */
 }
 
 .simple-list-row.selected {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
+  background: var(--purple);
+  border-color: var(--purple);
+  color: var(--text-primary);
 }
 
 .simple-list-row.selected .row-title,
 .simple-list-row.selected .description-text,
 .simple-list-row.selected .no-description {
-  color: white;
+  color: var(--text-primary);
 }
 
 .simple-list-row.selected .tier-badge,
 .simple-list-row.selected .type-badge {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: var(--grey-dark);
+  color: var(--text-primary);
 }
 
 /* Dead adversary styling */
@@ -2526,7 +2342,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: rgb(156, 163, 175);
+  color: var(--text-primary); /* Full white for better visibility */
   font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -2638,7 +2454,7 @@ body {
   gap: 1rem;
   margin-bottom: 1rem;
   padding: 1rem;
-  background: var(--bg-card);
+  background: var(--bg-dark);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
 }
@@ -2662,7 +2478,7 @@ body {
 
 .search-input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--purple);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
@@ -2691,7 +2507,7 @@ body {
 
 .filter-select:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--purple);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
@@ -2730,29 +2546,29 @@ body {
 
 .export-btn {
   background: var(--success);
-  color: white;
+  color: var(--text-primary);
 }
 
 .export-btn:hover {
-  background: #4f46e5;  /* Darker indigo on hover */
+  background: var(--purple);  /* Darker indigo on hover */
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .import-btn {
-  background: var(--secondary);
-  color: white;
+  background: var(--grey);
+  color: var(--text-primary);
 }
 
 .import-btn:hover {
-  background: #4b5563;  /* Darker muted gray on hover */
+  background: var(--grey-dark);  /* Darker muted gray on hover */
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .undo-btn {
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
 }
 
 .undo-btn:hover:not(.disabled) {
@@ -2768,8 +2584,8 @@ body {
 }
 
 .redo-btn {
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
 }
 
 .redo-btn:hover:not(.disabled) {
@@ -2798,13 +2614,13 @@ body {
   max-width: 600px;
   padding: 2rem;
   background: var(--bg-card);
-  border: 1px solid var(--danger);
+  border: 1px solid var(--red);
   border-radius: 0.75rem;
   text-align: center;
 }
 
 .error-content h2 {
-  color: var(--danger);
+  color: var(--red);
   margin-bottom: 1rem;
   font-size: 1.5rem;
 }
@@ -2856,8 +2672,8 @@ body {
 }
 
 .error-btn.primary {
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
 }
 
 .error-btn.primary:hover {
@@ -2867,7 +2683,7 @@ body {
 
 .error-btn.secondary {
   background: var(--text-secondary);
-  color: white;
+  color: var(--text-primary);
 }
 
 .error-btn.secondary:hover {
@@ -2934,7 +2750,7 @@ body {
 }
 
 .empty-state.clickable:hover {
-  border-color: var(--primary);
+  border-color: var(--purple);
   background: var(--bg-light);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
@@ -2969,7 +2785,7 @@ body {
 }
 
 .empty-state-hint {
-  color: var(--primary);
+  color: var(--purple);
   font-size: 0.875rem;
   font-weight: 500;
   opacity: 0.8;
@@ -2998,8 +2814,8 @@ body {
 }
 
 .empty-state-btn.primary {
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
 }
 
 .empty-state-btn.primary:hover {
@@ -3080,8 +2896,8 @@ body {
 }
 
 .modal-tab-btn.active {
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
 }
 
 .modal-tab-btn.active:hover {
@@ -3163,8 +2979,8 @@ body {
 
 .add-entry-btn:hover {
   background: var(--bg-card);
-  border-color: var(--primary);
-  color: var(--primary);
+  border-color: var(--purple);
+  color: var(--purple);
 }
 
 /* Bulk Clear Controls (now part of action bar) */
@@ -3202,33 +3018,19 @@ body {
   color: var(--text-primary);
 }
 
-.bulk-clear-all-btn {
-  /* Subtle initial state - same as base */
-}
 
-.bulk-clear-all-btn:hover {
-  /* Subtle hover - same as base hover */
-}
-
-.bulk-clear-dead-btn {
-  /* Subtle initial state - same as base */
-}
-
-.bulk-clear-dead-btn:hover {
-  /* Subtle hover - same as base hover */
-}
 
 /* Confirmation state styles - More red after first click */
 .bulk-clear-btn.confirming {
-  background: var(--danger);
-  border-color: var(--danger);
-  color: white;
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--text-primary);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 .bulk-clear-btn.confirming:hover {
-  background: #dc2626;
-  border-color: #dc2626;
+  background: var(--red);
+  border-color: var(--red);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
@@ -3276,7 +3078,7 @@ body {
 }
 
 .dead-label {
-  color: #ef4444;
+  color: var(--red);
   font-size: 0.75rem;
   font-weight: 700;
   background: rgba(239, 68, 68, 0.1);
@@ -3295,7 +3097,7 @@ body {
 
 .dead-clear-btn {
   opacity: 0;
-  color: #ef4444;
+  color: var(--red);
   font-size: 1rem;
   font-weight: bold;
   transition: all 0.2s ease;
@@ -3314,7 +3116,7 @@ body {
 .dead-indicator-left:hover .dead-clear-btn {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
-  color: #dc2626;
+  color: var(--red);
 }
 
 .drag-handle {
@@ -3403,26 +3205,26 @@ body {
 
 .difficulty-easy {
   background: #22c55e;
-  color: white;
+  color: var(--text-primary);
   border-color: #16a34a;
 }
 
 .difficulty-medium {
   background: #eab308;
-  color: white;
+  color: var(--text-primary);
   border-color: #ca8a04;
 }
 
 .difficulty-hard {
   background: #f97316;
-  color: white;
+  color: var(--text-primary);
   border-color: #ea580c;
 }
 
 .difficulty-deadly {
-  background: #ef4444;
-  color: white;
-  border-color: #dc2626;
+  background: var(--red);
+  color: var(--text-primary);
+  border-color: var(--red);
 }
 
 .difficulty-unknown {
@@ -3493,7 +3295,7 @@ body {
 
 .quick-btn:hover {
   background: var(--bg-hover);
-  border-color: var(--primary);
+  border-color: var(--purple);
 }
 
 .quick-btn:active {
@@ -3578,14 +3380,14 @@ body {
 
 .damage-input-field:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--purple);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 .damage-apply-btn {
   padding: 0.5rem 1rem;
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
@@ -3633,7 +3435,7 @@ body {
 
 .damage-input-compact:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--purple);
 }
 
 /* Remove number input arrows */
@@ -3652,8 +3454,8 @@ body {
   height: 1.5rem;
   border: 1px solid var(--border);
   border-radius: 0.25rem;
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
   font-size: 0.75rem;
   font-weight: bold;
   cursor: pointer;
@@ -3685,7 +3487,7 @@ body {
 
 .hp-number.clickable:hover {
   background: var(--bg-hover);
-  color: var(--primary);
+  color: var(--purple);
 }
 
 .stress-number {
@@ -3712,7 +3514,7 @@ body {
   border-color: var(--warning);
   color: var(--warning);
   background: var(--warning);
-  color: white;
+  color: var(--text-primary);
 }
 
 .row-actions {
@@ -3745,7 +3547,7 @@ body {
 
 .visibility-btn.visible {
   background: #22c55e;
-  color: white;
+  color: var(--text-primary);
 }
 
 .visibility-btn.hidden {
@@ -3754,13 +3556,13 @@ body {
 }
 
 .edit-btn {
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
 }
 
 .delete-btn {
-  background: var(--danger);
-  color: white;
+  background: var(--red);
+  color: var(--text-primary);
 }
 
 .visibility-btn:hover,
@@ -3782,7 +3584,7 @@ body {
 
 .input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--purple);
 }
 
 .grid {
@@ -3868,23 +3670,23 @@ body {
 }
 
 .badge-primary {
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
 }
 
 .badge-secondary {
-  background: var(--secondary);
-  color: white;
+  background: var(--grey);
+  color: var(--text-primary);
 }
 
 .badge-danger {
-  background: var(--danger);
-  color: white;
+  background: var(--red);
+  color: var(--text-primary);
 }
 
 .badge-success {
   background: var(--success);
-  color: white;
+  color: var(--text-primary);
 }
 
 .progress-bar {
@@ -3897,12 +3699,12 @@ body {
 
 .progress-fill {
   height: 100%;
-  background: var(--primary);
+  background: var(--purple);
   transition: width 0.3s ease;
 }
 
 .progress-fill.danger {
-  background: var(--danger);
+  background: var(--red);
 }
 
 .progress-fill.warning {
@@ -4033,7 +3835,7 @@ body {
 .unified-button--action-add {
   background: var(--success);
   border-color: var(--success);
-  color: white;
+  color: var(--text-primary);
 }
 
 .unified-button--action-add:hover:not(:disabled) {
@@ -4042,9 +3844,9 @@ body {
 }
 
 .unified-button--action-edit {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: white;
+  background: var(--purple);
+  border-color: var(--purple);
+  color: var(--text-primary);
 }
 
 .unified-button--action-edit:hover:not(:disabled) {
@@ -4053,20 +3855,20 @@ body {
 }
 
 .unified-button--action-delete {
-  background: var(--danger);
-  border-color: var(--danger);
-  color: white;
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--text-primary);
 }
 
 .unified-button--action-delete:hover:not(:disabled) {
-  background: #991b1b;  /* Darker red on hover */
-  border-color: #991b1b;
+  background: var(--red);  /* Darker red on hover */
+  border-color: var(--red);
 }
 
 .unified-button--action-remove {
   background: #ea580c;
   border-color: #ea580c;
-  color: white;
+  color: var(--text-primary);
 }
 
 .unified-button--action-remove:hover:not(:disabled) {
@@ -4077,29 +3879,29 @@ body {
 .unified-button--action-toggle {
   background: #9333ea;
   border-color: #9333ea;
-  color: white;
+  color: var(--text-primary);
 }
 
 .unified-button--action-toggle:hover:not(:disabled) {
-  background: #7c3aed;
-  border-color: #7c3aed;
+  background: var(--purple);
+  border-color: var(--purple);
 }
 
 .unified-button--action-close {
   background: #6b7280;
   border-color: #6b7280;
-  color: white;
+  color: var(--text-primary);
 }
 
 .unified-button--action-close:hover:not(:disabled) {
-  background: #4b5563;
-  border-color: #4b5563;
+  background: var(--grey-dark);
+  border-color: var(--grey-dark);
 }
 
 .unified-button--action-confirm {
   background: var(--success);
   border-color: var(--success);
-  color: white;
+  color: var(--text-primary);
 }
 
 .unified-button--action-confirm:hover:not(:disabled) {
@@ -4110,19 +3912,19 @@ body {
 .unified-button--action-default {
   background: #6b7280;
   border-color: #6b7280;
-  color: white;
+  color: var(--text-primary);
 }
 
 .unified-button--action-default:hover:not(:disabled) {
-  background: #4b5563;
-  border-color: #4b5563;
+  background: var(--grey-dark);
+  border-color: var(--grey-dark);
 }
 
 /* Color variants (override action colors) */
 .unified-button--color-primary {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
+  background: var(--purple);
+  border-color: var(--purple);
+  color: var(--text-primary);
 }
 
 .unified-button--color-primary:hover:not(:disabled) {
@@ -4131,20 +3933,20 @@ body {
 }
 
 .unified-button--color-secondary {
-  background: var(--secondary);
-  border-color: var(--secondary);
-  color: white;
+  background: var(--grey);
+  border-color: var(--grey);
+  color: var(--text-primary);
 }
 
 .unified-button--color-secondary:hover:not(:disabled) {
-  background: #4b5563;  /* Darker muted gray on hover */
-  border-color: #4b5563;
+  background: var(--grey-dark);  /* Darker muted gray on hover */
+  border-color: var(--grey-dark);
 }
 
 .unified-button--color-success {
   background: var(--success);
   border-color: var(--success);
-  color: white;
+  color: var(--text-primary);
 }
 
 .unified-button--color-success:hover:not(:disabled) {
@@ -4153,31 +3955,31 @@ body {
 }
 
 .unified-button--color-danger {
-  background: var(--danger);
-  border-color: var(--danger);
-  color: white;
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--text-primary);
 }
 
 .unified-button--color-danger:hover:not(:disabled) {
-  background: #991b1b;  /* Darker red on hover */
-  border-color: #991b1b;
+  background: var(--red);  /* Darker red on hover */
+  border-color: var(--red);
 }
 
 .unified-button--color-warning {
   background: var(--warning);
   border-color: var(--warning);
-  color: white;
+  color: var(--text-primary);
 }
 
 .unified-button--color-warning:hover:not(:disabled) {
-  background: #4b5563;  /* Darker muted gray on hover */
-  border-color: #4b5563;
+  background: var(--grey-dark);  /* Darker muted gray on hover */
+  border-color: var(--grey-dark);
 }
 
 .unified-button--color-info {
   background: #0891b2;
   border-color: #0891b2;
-  color: white;
+  color: var(--text-primary);
 }
 
 .unified-button--color-info:hover:not(:disabled) {
@@ -4285,7 +4087,7 @@ body {
 
 /* FontAwesome specific styling */
 .item-category .fa-dagger {
-  color: #dc2626 !important;
+  color: var(--red) !important;
 }
 
 .item-category .fa-leaf {
@@ -4387,7 +4189,7 @@ body {
 
 /* FontAwesome specific styling */
 .item-category .fa-skull {
-  color: #dc2626 !important;
+  color: var(--red) !important;
 }
 
 .item-category .fa-leaf {
@@ -4396,7 +4198,7 @@ body {
 
 /* FontAwesome specific styling */
 .item-category .fa-user {
-  color: #dc2626 !important;
+  color: var(--red) !important;
 }
 
 .item-category .fa-leaf {
@@ -4457,8 +4259,8 @@ body {
 
 /* Countdown-specific styling */
 .countdown-badge {
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
   padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
   font-size: 0.75rem;
@@ -4495,7 +4297,7 @@ body {
 }
 
 .countdown-symbol.filled {
-  color: var(--primary);
+  color: var(--purple);
 }
 
 .countdown-symbol.empty {
@@ -4534,8 +4336,8 @@ body {
 
 /* Countdown-specific styling */
 .countdown-badge {
-  background: var(--primary);
-  color: white;
+  background: var(--purple);
+  color: var(--text-primary);
   padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
   font-size: 0.75rem;
@@ -4556,7 +4358,7 @@ body {
 }
 
 .countdown-symbol.filled {
-  color: var(--primary);
+  color: var(--purple);
 }
 
 .countdown-symbol.empty {

@@ -1,6 +1,7 @@
 import React from 'react'
 import { useGameState } from '../useGameState'
-import { Skull } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSkull } from '@fortawesome/free-solid-svg-icons'
 
 const Fear = () => {
   const { fear, updateFear } = useGameState()
@@ -45,7 +46,7 @@ const Fear = () => {
                 opacity: i < (safeFear.value || 0) ? 1 : 0.3
               }}
             >
-              <Skull size={24} />
+              <FontAwesomeIcon icon={faSkull} size="lg" />
             </span>
           ))}
         </div>
