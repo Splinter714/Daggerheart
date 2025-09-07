@@ -4,6 +4,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
@@ -41,7 +42,19 @@ const List = ({
   isEditMode = false
 }) => {
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      // Configure for better mobile touch support
+      activationConstraint: {
+        distance: 8, // Require 8px movement before drag starts
+      },
+    }),
+    useSensor(TouchSensor, {
+      // Better mobile touch support
+      activationConstraint: {
+        delay: 250, // 250ms delay before drag starts
+        tolerance: 5, // 5px tolerance for touch movement
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })

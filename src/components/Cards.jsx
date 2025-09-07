@@ -157,24 +157,24 @@ const Cards = ({
                     </div>
                   </div>
                 )}
-                {item.difficulty && (
-                  <div className="difficulty-section">
-                    <div 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (item.thresholds && item.thresholds.major && item.thresholds.severe) {
-                          setShowDamageInput(true)
-                          setDamageValue('')
-                        }
-                      }}
-                      style={{ cursor: (item.thresholds && item.thresholds.major && item.thresholds.severe) ? 'pointer' : 'default' }}
-                      title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : ''}
-                    >
-                      <DifficultyBadge difficulty={item.difficulty} />
-                    </div>
-                  </div>
-                )}
               </div>
+              {item.difficulty && (
+                <div className="difficulty-section">
+                  <div 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (item.thresholds && item.thresholds.major && item.thresholds.severe) {
+                        setShowDamageInput(true)
+                        setDamageValue('')
+                      }
+                    }}
+                    style={{ cursor: (item.thresholds && item.thresholds.major && item.thresholds.severe) ? 'pointer' : 'default' }}
+                    title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : ''}
+                  >
+                    <DifficultyBadge difficulty={item.difficulty} />
+                  </div>
+                </div>
+              )}
               <div className="countdown-delete-space">
                 {/* Only show delete button in edit mode */}
                 {dragAttributes && dragListeners && (

@@ -1119,6 +1119,44 @@ textarea,
   .top-bar {
     left: 0; /* No sidebar offset in mobile */
   }
+  
+  /* Fix mobile drag handle and scrolling issues */
+  .drag-handle {
+    /* Reduce drag handle width on mobile to minimize interference */
+    width: 1.5rem;
+    font-size: 0.7rem;
+    /* Allow both dragging and scrolling on mobile */
+    touch-action: manipulation;
+    /* Make drag handle more touch-friendly */
+    min-height: 44px; /* iOS recommended touch target size */
+  }
+  
+  /* Ensure content doesn't shift when drag handles appear */
+  .simple-list-row {
+    /* Prevent horizontal shifting */
+    overflow: hidden;
+    /* Ensure consistent layout */
+    min-height: 3rem;
+  }
+  
+  /* Improve touch scrolling for mobile */
+  .left-column,
+  .right-column {
+    /* Better touch scrolling */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent horizontal scrolling */
+    overflow-x: hidden;
+    /* Ensure content stays in place */
+    position: relative;
+  }
+  
+  /* Prevent content from shifting when drag handles appear/disappear */
+  .row-content {
+    /* Ensure consistent left margin */
+    margin-left: 0;
+    /* Prevent shifting */
+    transition: none;
+  }
 }
 
 /* Sidebar Styles */
@@ -2001,6 +2039,30 @@ textarea,
   align-items: center;
 }
 
+/* Compact adversary layout - uses countdown structure for perfect alignment */
+.simple-list-row.compact.adversary .countdown-control-buttons {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important; /* Tighter vertical spacing */
+  align-items: flex-end !important; /* Right-align the trackers */
+}
+
+.simple-list-row.compact.adversary .card-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.5rem !important;
+}
+
+.simple-list-row.compact.adversary .hp-section,
+.simple-list-row.compact.adversary .stress-section,
+.simple-list-row.compact.adversary .difficulty-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .countdown-delete-space {
   width: 0; /* No space when not in edit mode */
   height: 1.5rem;
@@ -2043,7 +2105,9 @@ textarea,
   /* Removed vertical line border-right */
   transition: all 0.2s ease;
   z-index: 10;
-
+  /* Allow both dragging and scrolling */
+  touch-action: manipulation;
+  pointer-events: auto;
 }
 
 .drag-handle:hover {
@@ -2468,29 +2532,6 @@ textarea,
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   border: 1px solid var(--border);
-}
-
-/* Compact adversary layout - HP/stress stacked vertically, difficulty to the right */
-.simple-list-row.compact.adversary .countdown-control-buttons {
-  display: flex;
-  flex-direction: row; /* Horizontal layout for HP/stress stack and difficulty */
-  gap: 0.75rem; /* Horizontal spacing between HP/stress stack and difficulty */
-  align-items: center; /* Center align all sections */
-}
-
-/* Create a vertical stack for HP and stress */
-.simple-list-row.compact.adversary .hp-section,
-.simple-list-row.compact.adversary .stress-section {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25rem; /* Small gap between HP and stress when stacked */
-}
-
-.simple-list-row.compact.adversary .difficulty-section {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
 }
 
 .simple-list-row.compact.adversary .hp-symbols,
