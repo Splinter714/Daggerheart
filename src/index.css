@@ -2473,9 +2473,9 @@ textarea,
 /* Compact adversary layout - uses countdown structure for perfect alignment */
 .simple-list-row.compact.adversary .countdown-control-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem; /* Tighter vertical spacing */
-  align-items: flex-end; /* Right-align the trackers */
+  flex-direction: row; /* Horizontal layout for HP, stress, difficulty */
+  gap: 0.75rem; /* Horizontal spacing between sections */
+  align-items: center; /* Center align all sections */
 }
 
 .simple-list-row.compact.adversary .hp-section,
