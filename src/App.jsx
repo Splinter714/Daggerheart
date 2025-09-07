@@ -3,7 +3,7 @@ import { GameStateProvider } from './GameStateContext'
 import { useGameState } from './useGameState'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSkull } from '@fortawesome/free-solid-svg-icons'
-import { Swords, TreePine, Pencil, Clock, Timer } from 'lucide-react'
+import { Swords, TreePine, Pencil, Clock } from 'lucide-react'
 import './App.css'
 
 // Import all the UI components
