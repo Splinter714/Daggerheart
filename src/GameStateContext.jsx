@@ -255,18 +255,7 @@ export const GameStateProvider = ({ children }) => {
     }
     
     const newAdversary = {
-      id: uniqueId,
-      name: displayName,
-      type: adversaryData.type || 'Unknown',
-      tier: adversaryData.tier || 1,
-      difficulty: adversaryData.difficulty || 'Medium',
-      hp: 0, // Start with no HP (all icons empty)
-      hpMax: adversaryData.hpMax || 1,
-      stress: 0, // Start with no stress
-      stressMax: adversaryData.stressMax || 0,
-      description: adversaryData.description || '',
-      isVisible: true,
-      // Include other properties from adversaryData but don't let them override our core values
+      // Start with all properties from adversaryData
       ...adversaryData,
       // Override with our specific values to ensure correct initialization
       id: uniqueId,
