@@ -47,6 +47,36 @@ const Cards = ({
 }) => {
   const [showDamageInput, setShowDamageInput] = useState(false)
   const [damageValue, setDamageValue] = useState('')
+  
+  // Edit mode state - moved to top level to avoid conditional hook calls
+  function getDefaultData() {
+    if (type === 'countdown') {
+      return { name: '', description: '', max: 5, value: 0 }
+    } else if (type === 'adversary') {
+      return { name: '', description: '', type: '', tier: 1, difficulty: 1, hpMax: 1, stressMax: 0, abilities: [], traits: [] }
+    } else {
+      return { name: '', description: '', type: '', tier: 1, difficulty: 1, effects: [], hazards: [] }
+    }
+  }
+
+  // Ensure all required arrays are initialized
+  function getInitialData() {
+    const defaultData = getDefaultData()
+    if (item) {
+      // When editing, ensure all required arrays exist
+      return {
+        ...defaultData,
+        ...item,
+        abilities: item.abilities || [],
+        traits: item.traits || [],
+        effects: item.effects || [],
+        hazards: item.hazards || []
+      }
+    }
+    return defaultData
+  }
+  
+  const [editData, setEditData] = useState(getInitialData())
 
   // Render based on mode
   switch (mode) {
@@ -593,35 +623,6 @@ const Cards = ({
 
   function renderExpandedEdit() {
     const isCreating = !item
-    
-    function getDefaultData() {
-      if (type === 'countdown') {
-        return { name: '', description: '', max: 5, value: 0 }
-      } else if (type === 'adversary') {
-        return { name: '', description: '', type: '', tier: 1, difficulty: 1, hpMax: 1, stressMax: 0, abilities: [], traits: [] }
-      } else {
-        return { name: '', description: '', type: '', tier: 1, difficulty: 1, effects: [], hazards: [] }
-      }
-    }
-
-    // Ensure all required arrays are initialized
-    function getInitialData() {
-      const defaultData = getDefaultData()
-      if (item) {
-        // When editing, ensure all required arrays exist
-        return {
-          ...defaultData,
-          ...item,
-          abilities: item.abilities || [],
-          traits: item.traits || [],
-          effects: item.effects || [],
-          hazards: item.hazards || []
-        }
-      }
-      return defaultData
-    }
-    
-    const [editData, setEditData] = useState(getInitialData())
 
     function handleInputChange(field, value) {
       setEditData(prev => ({
@@ -780,7 +781,7 @@ const Cards = ({
                   min="1"
                   max="20"
                   value={editData.max}
-                  onChange={(e) => handleInputChange('max', parseInt(e.target.value))}
+                  onChange={(e) => handleInputChange('max', parseInt(e.target.value) || 5)}
                   className="form-input"
                 />
               </div>
@@ -792,7 +793,7 @@ const Cards = ({
                   min="0"
                   max={editData.max}
                   value={editData.value}
-                  onChange={(e) => handleInputChange('value', parseInt(e.target.value))}
+                  onChange={(e) => handleInputChange('value', parseInt(e.target.value) || 0)}
                   className="form-input"
                 />
               </div>
@@ -810,7 +811,7 @@ const Cards = ({
                     type="number"
                     min="1"
                     value={editData.hpMax}
-                    onChange={(e) => handleInputChange('hpMax', parseInt(e.target.value))}
+                    onChange={(e) => handleInputChange('hpMax', parseInt(e.target.value) || 1)}
                     className="form-input"
                   />
                 </div>
@@ -821,7 +822,7 @@ const Cards = ({
                     type="number"
                     min="0"
                     value={editData.stressMax}
-                    onChange={(e) => handleInputChange('stressMax', parseInt(e.target.value))}
+                    onChange={(e) => handleInputChange('stressMax', parseInt(e.target.value) || 0)}
                     className="form-input"
                   />
                 </div>

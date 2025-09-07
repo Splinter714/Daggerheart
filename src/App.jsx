@@ -431,7 +431,7 @@ const AppContent = () => {
       <div className={`sidebar ${(addFlyoutOpen || deleteFlyoutOpen || countdownFlyoutOpen) ? 'flyout-open' : ''}`}>
         <nav className="sidebar-nav">
           {/* Plus Button with Add Flyout */}
-          <button
+          <div
             className="sidebar-nav-item"
             onClick={(e) => {
               e.stopPropagation()
@@ -439,6 +439,7 @@ const AppContent = () => {
               setDeleteFlyoutOpen(false) // Close other flyout
             }}
             title="Add Items"
+            style={{ cursor: 'pointer' }}
           >
             <div className="sidebar-nav-icon">
               <Plus size={20} />
@@ -485,10 +486,10 @@ const AppContent = () => {
                   </div>
                 </button>
               </div>
-          </button>
+          </div>
           
           {/* Countdown Control Panel */}
-          <button
+          <div
             className={`sidebar-nav-item ${countdownFlyoutOpen ? 'active' : ''}`}
             onClick={(e) => {
               e.stopPropagation()
@@ -497,6 +498,7 @@ const AppContent = () => {
               setDeleteFlyoutOpen(false)
             }}
             title="Countdown Controls"
+            style={{ cursor: 'pointer' }}
           >
             <div className="sidebar-nav-icon">
               <Clock size={20} />
@@ -586,7 +588,7 @@ const AppContent = () => {
                 </div>
               </div>
             </div>
-          </button>
+          </div>
 
           {/* Edit Mode Toggle */}
           <button
@@ -600,7 +602,7 @@ const AppContent = () => {
           </button>
           
           {/* Delete Button with Clear Flyout */}
-          <button
+          <div
             className={`sidebar-nav-item ${deleteFlyoutOpen ? 'delete-active' : ''} ${(!adversaries || adversaries.length === 0) && (!environments || environments.length === 0) && (!countdowns || countdowns.length === 0) ? 'disabled' : ''}`}
             onClick={(e) => {
               e.stopPropagation()
@@ -614,7 +616,7 @@ const AppContent = () => {
               }
             }}
             title={(!adversaries || adversaries.length === 0) && (!environments || environments.length === 0) && (!countdowns || countdowns.length === 0) ? "Nothing to clear" : "Clear Items"}
-            disabled={(!adversaries || adversaries.length === 0) && (!environments || environments.length === 0) && (!countdowns || countdowns.length === 0)}
+            style={{ cursor: (!adversaries || adversaries.length === 0) && (!environments || environments.length === 0) && (!countdowns || countdowns.length === 0) ? 'not-allowed' : 'pointer' }}
           >
             <div className="sidebar-nav-icon">
               <Trash2 size={20} />
@@ -683,7 +685,7 @@ const AppContent = () => {
                   </button>
                 )}
               </div>
-          </button>
+          </div>
         </nav>
       </div>
 

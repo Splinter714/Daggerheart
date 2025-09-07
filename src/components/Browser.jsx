@@ -101,9 +101,13 @@ const Browser = ({
       if (sortField === 'tier') {
         aValue = parseInt(aValue) || 0
         bValue = parseInt(bValue) || 0
-      } else if (typeof aValue === 'string') {
+      } else if (typeof aValue === 'string' && typeof bValue === 'string') {
         aValue = aValue.toLowerCase()
         bValue = bValue.toLowerCase()
+      } else {
+        // Handle non-string values by converting to strings
+        aValue = String(aValue || '').toLowerCase()
+        bValue = String(bValue || '').toLowerCase()
       }
       
       if (sortDirection === 'asc') {
