@@ -5,6 +5,7 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   root: path.resolve(__dirname, '../src'),
+  base: '/Daggerheart/', // GitHub Pages subdirectory
   server: {
     host: '0.0.0.0', // Bind to all network interfaces
     port: 5173, // Default Vite port
