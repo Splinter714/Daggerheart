@@ -3,7 +3,7 @@ import { GameStateProvider } from './GameStateContext'
 import { useGameState } from './useGameState'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSkull } from '@fortawesome/free-solid-svg-icons'
-import { Swords, TreePine, Pencil, Clock } from 'lucide-react'
+import { Swords, TreePine, Pencil, Clock, Plus, Trash2, Menu } from 'lucide-react'
 import './App.css'
 
 // Import all the UI components
@@ -43,6 +43,35 @@ const AppContent = () => {
   const [isMobile, setIsMobile] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [mobileView, setMobileView] = useState('left') // 'left' or 'right'
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
+  const [addFlyoutOpen, setAddFlyoutOpen] = useState(false)
+  const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
+  
+  // Update body class when sidebar expands/collapses
+  useEffect(() => {
+    if (sidebarExpanded) {
+      document.body.classList.add('sidebar-expanded')
+    } else {
+      document.body.classList.remove('sidebar-expanded')
+    }
+  }, [sidebarExpanded])
+
+  // Close flyouts and sidebar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.sidebar-nav-item')) {
+        setAddFlyoutOpen(false)
+        setDeleteFlyoutOpen(false)
+      }
+      // Close expanded sidebar when clicking outside of it
+      if (sidebarExpanded && !event.target.closest('.sidebar')) {
+        setSidebarExpanded(false)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [sidebarExpanded])
   
   // Right column handlers
   const handleItemSelect = (item, type) => {
@@ -303,94 +332,175 @@ const AppContent = () => {
         </div>
       </div>
 
-      {/* Navigation Bar: Element Control Buttons */}
-      <div 
-        className="nav-bar"
-        onClick={(e) => {
-          // Clear selection when clicking on nav bar background
-          if (e.target === e.currentTarget) {
-            handleCloseRightColumn()
-          }
-        }}
-      >
-        <div className="container">
-          <div className="element-controls">
-            <Button
-              action={isEditMode ? "delete" : "edit"}
-              immediate={isEditMode}
-              size="compact"
-              onClick={() => {
-                if (isEditMode) {
-                  // Clear all adversaries
-                  if (adversaries.length > 0) {
-                    adversaries.forEach(item => deleteAdversary(item.id))
-                  }
-                } else if (rightColumnMode === 'database' && databaseType === 'adversary') {
-                  // Close adversary database
-                  handleCloseRightColumn()
-                } else {
-                  // Open adversary database
-                  handleOpenDatabase('adversary')
-                }
-              }}
-              title={isEditMode ? "Clear All Adversaries" : (rightColumnMode === 'database' && databaseType === 'adversary') ? "Close Adversary Database" : "Add Adversary"}
-            >
-              {isEditMode ? <Swords size={16} /> : (rightColumnMode === 'database' && databaseType === 'adversary') ? <span style={{fontSize: '24px', fontWeight: '300'}}>×</span> : <Swords size={16} />}
-            </Button>
-            <Button
-              action={isEditMode ? "delete" : "edit"}
-              immediate={isEditMode}
-              size="compact"
-              onClick={() => {
-                if (isEditMode) {
-                  // Clear all environments
-                  if (environments.length > 0) {
-                    environments.forEach(item => deleteEnvironment(item.id))
-                  }
-                } else if (rightColumnMode === 'database' && databaseType === 'environment') {
-                  // Close environment database
-                  handleCloseRightColumn()
-                } else {
-                  // Open environment database
-                  handleOpenDatabase('environment')
-                }
-              }}
-              title={isEditMode ? "Clear All Environments" : (rightColumnMode === 'database' && databaseType === 'environment') ? "Close Environment Database" : "Add Environment"}
-            >
-              {isEditMode ? <TreePine size={16} /> : (rightColumnMode === 'database' && databaseType === 'environment') ? <span style={{fontSize: '24px', fontWeight: '300'}}>×</span> : <TreePine size={16} />}
-            </Button>
-            <Button
-              action={isEditMode ? "delete" : "edit"}
-              immediate={isEditMode}
-              size="compact"
-              onClick={() => {
-                if (isEditMode) {
-                  // Clear all countdowns
-                  if (countdowns && countdowns.length > 0) {
-                    countdowns.forEach(countdown => deleteCountdown(countdown.id))
-                  }
-                } else if (rightColumnMode === 'creator' && databaseType === 'countdown') {
-                  // Close countdown creator
-                  handleCloseRightColumn()
-                } else {
-                  // Open countdown creator
-                  handleOpenCreator('countdown')
-                }
-              }}
-              title={isEditMode ? "Clear All Countdowns" : (rightColumnMode === 'creator' && databaseType === 'countdown') ? "Close Countdown Creator" : "Add Countdown"}
-            >
-              {isEditMode ? <Clock size={16} /> : (rightColumnMode === 'creator' && databaseType === 'countdown') ? <span style={{fontSize: '24px', fontWeight: '300'}}>×</span> : <Clock size={16} />}
-            </Button>
-            <Button
-              action="edit"
-              size="compact"
-              onClick={() => setIsEditMode(!isEditMode)}
-              title={isEditMode ? "Exit Edit Mode" : "Enter Edit Mode"}
-            >
-              <Pencil size={16} />
-            </Button>
-          </div>
-        </div>
+      {/* Sidebar: Navigation */}
+      <div className={`sidebar ${sidebarExpanded ? 'expanded' : ''} ${(addFlyoutOpen || deleteFlyoutOpen) ? 'flyout-open' : ''}`}>
+        <nav className="sidebar-nav">
+          {/* Burger Menu Button */}
+          <button 
+            className="sidebar-nav-item"
+            onClick={() => setSidebarExpanded(!sidebarExpanded)}
+            title={sidebarExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
+          >
+            <div className="sidebar-nav-icon">
+              <Menu size={20} />
+            </div>
+            <span className="sidebar-nav-text">
+              {sidebarExpanded ? "Close" : ""}
+            </span>
+          </button>
+          
+          {/* Plus Button with Add Flyout */}
+          <button
+            className="sidebar-nav-item"
+            onClick={(e) => {
+              e.stopPropagation()
+              setAddFlyoutOpen(!addFlyoutOpen)
+              setDeleteFlyoutOpen(false) // Close other flyout
+            }}
+            title="Add Items"
+          >
+            <div className="sidebar-nav-icon">
+              <Plus size={20} />
+            </div>
+            <span className="sidebar-nav-text">Add</span>
+            
+            <div className={`flyout-menu ${addFlyoutOpen ? 'show' : ''}`}>
+                <button
+                  className="flyout-menu-item"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setAddFlyoutOpen(false)
+                    handleOpenDatabase('adversary')
+                  }}
+                >
+                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                    <Plus size={14} />
+                    <span>Adversary</span>
+                  </div>
+                </button>
+                <button
+                  className="flyout-menu-item"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setAddFlyoutOpen(false)
+                    handleOpenDatabase('environment')
+                  }}
+                >
+                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                    <Plus size={14} />
+                    <span>Environment</span>
+                  </div>
+                </button>
+                <button
+                  className="flyout-menu-item"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setAddFlyoutOpen(false)
+                    handleOpenCreator('countdown')
+                  }}
+                >
+                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                    <Plus size={14} />
+                    <span>Countdown</span>
+                  </div>
+                </button>
+              </div>
+          </button>
+          
+          {/* Edit Mode Toggle */}
+          <button
+            className={`sidebar-nav-item ${isEditMode ? 'active' : ''}`}
+            onClick={() => setIsEditMode(!isEditMode)}
+            title={isEditMode ? "Exit Edit Mode" : "Enter Edit Mode"}
+          >
+            <div className="sidebar-nav-icon">
+              <Pencil size={20} />
+            </div>
+            <span className="sidebar-nav-text">
+              {isEditMode ? "Exit Edit Mode" : "Edit Mode"}
+            </span>
+          </button>
+          
+          {/* Delete Button with Clear Flyout */}
+          <button
+            className={`sidebar-nav-item ${deleteFlyoutOpen ? 'delete-active' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation()
+              setDeleteFlyoutOpen(!deleteFlyoutOpen)
+              setAddFlyoutOpen(false) // Close other flyout
+            }}
+            title="Clear Items"
+          >
+            <div className="sidebar-nav-icon">
+              <Trash2 size={20} />
+            </div>
+            <span className="sidebar-nav-text">Clear</span>
+            
+            <div className={`flyout-menu ${deleteFlyoutOpen ? 'show' : ''}`}>
+                <button
+                  className="flyout-menu-item delete-flyout-item"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setDeleteFlyoutOpen(false)
+                    if (adversaries.length > 0) {
+                      adversaries.forEach(item => deleteAdversary(item.id))
+                    }
+                  }}
+                >
+                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                    <Trash2 size={14} style={{marginTop: '1px'}} />
+                    <span>All Adversaries</span>
+                  </div>
+                </button>
+                {adversaries && adversaries.length > 0 && adversaries.some(adv => (adv.hp || 0) >= (adv.hpMax || 1)) && (
+                  <button
+                    className="flyout-menu-item delete-flyout-item"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setDeleteFlyoutOpen(false)
+                      const deadAdversaries = adversaries.filter(adv => (adv.hp || 0) >= (adv.hpMax || 1))
+                      deadAdversaries.forEach(item => deleteAdversary(item.id))
+                    }}
+                  >
+                    <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                      <Trash2 size={14} style={{marginTop: '1px'}} />
+                      <span>Dead Adversaries</span>
+                    </div>
+                  </button>
+                )}
+                <button
+                  className="flyout-menu-item delete-flyout-item"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setDeleteFlyoutOpen(false)
+                    if (environments.length > 0) {
+                      environments.forEach(item => deleteEnvironment(item.id))
+                    }
+                  }}
+                >
+                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                    <Trash2 size={14} style={{marginTop: '1px'}} />
+                    <span>All Environments</span>
+                  </div>
+                </button>
+                <button
+                  className="flyout-menu-item delete-flyout-item"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setDeleteFlyoutOpen(false)
+                    if (countdowns && countdowns.length > 0) {
+                      countdowns.forEach(countdown => deleteCountdown(countdown.id))
+                    }
+                  }}
+                >
+                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                    <Trash2 size={14} style={{marginTop: '1px'}} />
+                    <span>All Countdowns</span>
+                  </div>
+                </button>
+              </div>
+          </button>
+        </nav>
       </div>
 
       {/* Main Content Area */}
