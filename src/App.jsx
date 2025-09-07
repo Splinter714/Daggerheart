@@ -288,7 +288,7 @@ const AppContent = () => {
         }
       }}
     >
-      {/* Top Bar: Fear & Counters */}
+      {/* Top Bar: Fear Tracker */}
       <div 
         className="top-bar"
         onClick={(e) => {
@@ -300,8 +300,20 @@ const AppContent = () => {
       >
         <div className="container">
           <Fear />
-          
-          {/* Element Control Buttons */}
+        </div>
+      </div>
+
+      {/* Navigation Bar: Element Control Buttons */}
+      <div 
+        className="nav-bar"
+        onClick={(e) => {
+          // Clear selection when clicking on nav bar background
+          if (e.target === e.currentTarget) {
+            handleCloseRightColumn()
+          }
+        }}
+      >
+        <div className="container">
           <div className="element-controls">
             <Button
               action={isEditMode ? "delete" : "edit"}

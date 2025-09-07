@@ -1106,6 +1106,12 @@ textarea,
   padding: 0.25rem 0;
 }
 
+.nav-bar {
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 0;
+}
+
 .compact-top-bar {
   display: flex;
   align-items: center;
@@ -1200,8 +1206,7 @@ textarea,
   gap: 0.5rem;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 0;
-  height: 40%;
+  padding: 0.25rem 0;
 }
 
 .element-controls .btn {
