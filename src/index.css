@@ -1339,7 +1339,6 @@ textarea,
   flex: 1;
   height: 100%;
   transition: all 0.2s ease;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1351,7 +1350,6 @@ textarea,
 
 .fear-skull.empty {
   color: var(--grey-dark);
-  cursor: default;
 }
 
 .fear-skull.filled {

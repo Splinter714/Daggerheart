@@ -24,6 +24,8 @@ const AppContent = () => {
     adversaries, 
     environments,
     countdowns,
+    fear,
+    updateFear,
     createAdversary,
     updateAdversary,
     deleteAdversary,
@@ -320,12 +322,42 @@ const AppContent = () => {
       {/* Top Bar: Fear Tracker */}
       <div 
         className="top-bar"
-        onClick={(e) => {
-          // Clear selection when clicking on top bar background
-          if (e.target === e.currentTarget) {
-            handleCloseRightColumn()
+        onClick={(event) => {
+          // Handle fear clicking on the entire top bar
+          const currentFear = fear?.value || 0
+          
+          // Get the bounds of both the top bar (click area) and the container (skull area)
+          const topBarRect = event.currentTarget.getBoundingClientRect()
+          const containerElement = event.currentTarget.querySelector('.container')
+          const containerRect = containerElement.getBoundingClientRect()
+          
+          const clickX = event.clientX - topBarRect.left
+          
+          // Calculate boundary position relative to the skull container within the top bar
+          const containerStartX = containerRect.left - topBarRect.left
+          const containerWidth = containerRect.width
+          
+          // Add some padding so first/last skulls don't toggle weirdly at edges
+          const skullPadding = containerWidth * 0.05 // 5% padding on each side
+          const effectiveContainerStart = containerStartX + skullPadding
+          const effectiveContainerWidth = containerWidth - (2 * skullPadding)
+          
+          const boundaryRatio = currentFear / 12
+          const boundaryX = effectiveContainerStart + (effectiveContainerWidth * boundaryRatio)
+          
+          if (clickX < boundaryX) {
+            // Clicked left of boundary - decrement fear
+            if (currentFear > 0) {
+              updateFear(Math.max(0, currentFear - 1))
+            }
+          } else {
+            // Clicked right of boundary - increment fear
+            if (currentFear < 12) {
+              updateFear(Math.min(12, currentFear + 1))
+            }
           }
         }}
+        style={{ cursor: 'pointer' }}
       >
         <div className="container">
           <Fear />
