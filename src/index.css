@@ -2470,16 +2470,23 @@ textarea,
   border: 1px solid var(--border);
 }
 
-/* Compact adversary layout - uses countdown structure for perfect alignment */
+/* Compact adversary layout - HP/stress stacked vertically, difficulty to the right */
 .simple-list-row.compact.adversary .countdown-control-buttons {
   display: flex;
-  flex-direction: row; /* Horizontal layout for HP, stress, difficulty */
-  gap: 0.75rem; /* Horizontal spacing between sections */
+  flex-direction: row; /* Horizontal layout for HP/stress stack and difficulty */
+  gap: 0.75rem; /* Horizontal spacing between HP/stress stack and difficulty */
   align-items: center; /* Center align all sections */
 }
 
+/* Create a vertical stack for HP and stress */
 .simple-list-row.compact.adversary .hp-section,
-.simple-list-row.compact.adversary .stress-section,
+.simple-list-row.compact.adversary .stress-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem; /* Small gap between HP and stress when stacked */
+}
+
 .simple-list-row.compact.adversary .difficulty-section {
   display: flex;
   align-items: center;
