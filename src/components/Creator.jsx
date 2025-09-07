@@ -31,7 +31,9 @@ const Creator = ({
     hazards: [],
     // Countdown-specific fields
     max: 5,
-    value: 0
+    value: 0,
+    type: 'standard',
+    loop: 'none'
   })
 
   // Initialize form with item data if editing
@@ -50,7 +52,9 @@ const Creator = ({
         effects: item.effects || [],
         hazards: item.hazards || [],
         max: item.max || 5,
-        value: item.value || 0
+        value: item.value || 0,
+        type: item.type || 'standard',
+        loop: item.loop || 'none'
       })
     }
   }, [item])
@@ -153,90 +157,104 @@ const Creator = ({
   return (
     <div className="creator-container">
       <div className="creator-header">
-        <h2>{isEditing ? 'Edit' : 'Create'} {type === 'adversary' ? 'Adversary' : type === 'environment' ? 'Environment' : 'Countdown'}</h2>
-        <div className="creator-actions">
-          <Button
-            action="cancel"
-            onClick={onCancel}
-            size="sm"
-          >
-            Cancel
-          </Button>
-        </div>
+        {!isCountdown && (
+          <>
+            <h2>{isEditing ? 'Edit' : 'Create'} {type === 'adversary' ? 'Adversary' : 'Environment'}</h2>
+            <div className="creator-actions">
+              <Button
+                action="cancel"
+                onClick={onCancel}
+                size="sm"
+              >
+                Cancel
+              </Button>
+            </div>
+          </>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="creator-form">
         {/* Basic Information */}
-        <div className="form-section">
-          <h3>Basic Information</h3>
-          
-          <div className="form-group">
-            <label htmlFor="name">Name *</label>
-            <input
-              id="name"
-              type="text"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder={`Enter ${type} name`}
-              className="form-input"
-              required
-            />
-          </div>
-
-          <div className="form-row">
+        {/* Basic fields for adversaries and environments only */}
+        {!isCountdown && (
+          <div className="form-section">
+            <h3>Basic Information</h3>
+            
             <div className="form-group">
-              <label htmlFor="tier">Tier</label>
-              <select
-                id="tier"
-                value={formData.tier}
-                onChange={(e) => handleInputChange('tier', parseInt(e.target.value))}
-                className="form-select"
-              >
-                {[1, 2, 3, 4, 5].map(tier => (
-                  <option key={tier} value={tier}>Tier {tier}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="type">Type</label>
+              <label htmlFor="name">Name *</label>
               <input
-                id="type"
+                id="name"
                 type="text"
-                value={formData.type}
-                onChange={(e) => handleInputChange('type', e.target.value)}
-                placeholder="e.g., Beast, Humanoid, Undead"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder={`Enter ${type} name`}
                 className="form-input"
+                required
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="difficulty">Difficulty</label>
-              <select
-                id="difficulty"
-                value={formData.difficulty}
-                onChange={(e) => handleInputChange('difficulty', parseInt(e.target.value))}
-                className="form-select"
-              >
-                {[1, 2, 3, 4, 5].map(diff => (
-                  <option key={diff} value={diff}>Difficulty {diff}</option>
-                ))}
-              </select>
+              <label htmlFor="description">Description</label>
+              <textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder={`Describe this ${type}`}
+                className="form-textarea"
+                rows={3}
+              />
             </div>
           </div>
+        )}
 
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder={`Describe this ${type}`}
-              className="form-textarea"
-              rows={3}
-            />
+        {/* Adversary/Environment specific fields */}
+        {(isAdversary || isEnvironment) && (
+          <div className="form-section">
+            <h3>Details</h3>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="tier">Tier</label>
+                <select
+                  id="tier"
+                  value={formData.tier}
+                  onChange={(e) => handleInputChange('tier', parseInt(e.target.value))}
+                  className="form-select"
+                >
+                  {[1, 2, 3, 4, 5].map(tier => (
+                    <option key={tier} value={tier}>Tier {tier}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="type">Type</label>
+                <input
+                  id="type"
+                  type="text"
+                  value={formData.type}
+                  onChange={(e) => handleInputChange('type', e.target.value)}
+                  placeholder="e.g., Beast, Humanoid, Undead"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="difficulty">Difficulty</label>
+                <select
+                  id="difficulty"
+                  value={formData.difficulty}
+                  onChange={(e) => handleInputChange('difficulty', parseInt(e.target.value))}
+                  className="form-select"
+                >
+                  {[1, 2, 3, 4, 5].map(diff => (
+                    <option key={diff} value={diff}>Difficulty {diff}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Adversary-specific fields */}
         {isAdversary && (
@@ -284,47 +302,79 @@ const Creator = ({
           </div>
         )}
 
-        {/* Countdown-specific fields */}
+        {/* Countdown-specific fields - compact vertical stack */}
         {isCountdown && (
-          <div className="form-section">
-            <h3>Countdown Settings</h3>
-            
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="max">Max Value</label>
+          <div className="form-section countdown-compact">
+            <div className="countdown-stack">
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="Countdown name"
+                className="form-input"
+                required
+              />
+
+              <input
+                type="text"
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder="Description (optional)"
+                className="form-input"
+              />
+
+              <div className="countdown-row">
                 <input
-                  id="max"
                   type="number"
                   min="1"
                   max="20"
                   value={formData.max}
                   onChange={(e) => handleInputChange('max', parseInt(e.target.value))}
+                  placeholder="Max value"
                   className="form-input"
                 />
-              </div>
 
-              <div className="form-group">
-                <label htmlFor="value">Starting Value</label>
-                <input
-                  id="value"
-                  type="number"
-                  min="0"
-                  max={formData.max}
-                  value={formData.value}
-                  onChange={(e) => handleInputChange('value', parseInt(e.target.value))}
+                <select
+                  value={formData.type}
+                  onChange={(e) => handleInputChange('type', e.target.value)}
                   className="form-input"
-                />
+                >
+                  <option value="standard">Standard</option>
+                  <option value="progress">Progress</option>
+                  <option value="dynamic-progress">Dynamic Progress</option>
+                  <option value="consequence">Consequence</option>
+                  <option value="dynamic-consequence">Dynamic Consequence</option>
+                  <option value="long-term">Long-term</option>
+                </select>
+
+                <select
+                  value={formData.loop}
+                  onChange={(e) => handleInputChange('loop', e.target.value)}
+                  className="form-input"
+                >
+                  <option value="none">None</option>
+                  <option value="loop">Loop</option>
+                  <option value="increasing">Increasing</option>
+                  <option value="decreasing">Decreasing</option>
+                </select>
+
+                <Button
+                  action="save"
+                  type="submit"
+                  size="md"
+                >
+                  Create
+                </Button>
               </div>
             </div>
-
-
           </div>
         )}
 
-        {/* Preview */}
-        <div className="form-section">
-          <h3>Preview</h3>
-          <div className="preview-card">
+        {/* Preview - only for adversaries and environments */}
+        {!isCountdown && (
+          <div className="form-section">
+            <h3>Preview</h3>
+            <div className="preview-card">
             <Cards
               item={formData}
               type={type}
@@ -333,17 +383,20 @@ const Creator = ({
             />
           </div>
         </div>
+        )}
 
-        {/* Submit */}
-        <div className="form-actions">
-          <Button
-            action="save"
-            type="submit"
-            size="lg"
-          >
-            {isEditing ? 'Update' : 'Create'} {type === 'adversary' ? 'Adversary' : 'Environment'}
-          </Button>
-        </div>
+        {/* Submit - only for adversaries and environments */}
+        {!isCountdown && (
+          <div className="form-actions">
+            <Button
+              action="save"
+              type="submit"
+              size="lg"
+            >
+              {isEditing ? 'Update' : 'Create'} {type === 'adversary' ? 'Adversary' : 'Environment'}
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   )

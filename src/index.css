@@ -4604,3 +4604,70 @@ textarea,
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+
+/* Compact countdown creator */
+.countdown-compact {
+  padding: 0.5rem;
+}
+
+.countdown-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.countdown-row .form-group {
+  flex: 1;
+  min-width: 120px;
+}
+
+.countdown-row .form-group:last-child {
+  flex: 0 0 auto;
+}
+
+.countdown-row label {
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.countdown-row .form-input {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.5rem;
+}
+
+
+/* Updated compact countdown creator */
+.countdown-compact {
+  padding: 0.5rem;
+}
+
+.countdown-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.countdown-stack .form-input {
+  font-size: 0.875rem;
+  padding: 0.5rem;
+}
+
+.countdown-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.countdown-row .form-input {
+  flex: 1;
+}
+
+.countdown-row .form-input:first-child {
+  flex: 0 0 80px;
+}
+
+.countdown-row button {
+  flex: 0 0 auto;
+}

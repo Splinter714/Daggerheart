@@ -789,6 +789,8 @@ const AppContent = () => {
                     createAdversary(itemData)
                   } else if (databaseType === 'environment') {
                     createEnvironment(itemData)
+                  } else if (databaseType === 'countdown') {
+                    createCountdown(itemData)
                   }
                   handleCloseRightColumn()
                 }}
