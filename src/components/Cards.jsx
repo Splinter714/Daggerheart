@@ -494,22 +494,10 @@ const Cards = ({
                     <div key={type} className="feature-type-group">
                       <h4 className="feature-type-title">{type}</h4>
                       {featuresByType[type].map((feature, i) => {
-                        // Check if this feature involves Fear/Stress mechanics
-                        const description = feature.description ? feature.description.toLowerCase() : '';
-                        const isFearMechanic = 
-                          description.includes('spend') && (description.includes('fear') || description.includes('stress')) ||
-                          description.includes('mark') && (description.includes('fear') || description.includes('stress')) ||
-                          description.includes('gain') && description.includes('fear') ||
-                          description.includes('countdown') ||
-                          description.includes('token');
-                        
                         return (
-                          <div key={i} className={`feature-item ${isFearMechanic ? 'fear-mechanic' : ''}`}>
+                          <div key={i} className="feature-item">
                             <div className="feature-header">
                               <span className="feature-name"><strong>{feature.name}</strong></span>
-                              {isFearMechanic && (
-                                <span className="fear-indicator" title="Fear/Stress Mechanic">⚡</span>
-                              )}
                             </div>
                             <div className="feature-description">
                               {renderInteractiveDescription(feature.description)}
@@ -1198,148 +1186,27 @@ const Cards = ({
     }
   }
 
-  // Helper function to render interactive descriptions
+  // Helper function to render descriptions with highlighted words
   function renderInteractiveDescription(description) {
     if (!description) return null;
     
-    // Patterns to detect and make interactive (only player/GM actions)
-    const patterns = [
-      // Fear spending patterns (player action)
-      { 
-        regex: /spend\s+(\d+)\s+fear/gi, 
-        type: 'spend-fear',
-        handler: (amount) => {
-          console.log(`Spend ${amount} Fear`);
-          // TODO: Implement Fear spending logic
-        }
-      },
-      { 
-        regex: /spend\s+a\s+fear/gi, 
-        type: 'spend-fear',
-        handler: () => {
-          console.log('Spend 1 Fear');
-          // TODO: Implement Fear spending logic
-        }
-      },
-      // Stress marking patterns (only when it's a player choice, not forced)
-      { 
-        regex: /mark\s+(\d+)\s+stress/gi, 
-        type: 'mark-stress',
-        handler: (amount) => {
-          console.log(`Mark ${amount} Stress`);
-          // TODO: Implement Stress marking logic
-        }
-      },
-      { 
-        regex: /mark\s+a\s+stress/gi, 
-        type: 'mark-stress',
-        handler: () => {
-          console.log('Mark 1 Stress');
-          // TODO: Implement Stress marking logic
-        }
-      },
-      // Fear gaining patterns
-      { 
-        regex: /(?:you\s+)?gain\s+(\d+)\s+fear/gi, 
-        type: 'gain-fear',
-        handler: (amount) => {
-          console.log(`Gain ${amount} Fear`);
-          // TODO: Implement Fear gaining logic
-        }
-      },
-      { 
-        regex: /(?:you\s+)?gain\s+a\s+fear/gi, 
-        type: 'gain-fear',
-        handler: () => {
-          console.log('Gain 1 Fear');
-          // TODO: Implement Fear gaining logic
-        }
-      },
-      // Countdown patterns
-      { 
-        regex: /countdown\s*\(([^)]+)\)/gi, 
-        type: 'countdown',
-        handler: (details, featureName) => {
-          const countdownInfo = parseCountdownDetails(details, featureName);
-          console.log(`Create Countdown:`, countdownInfo);
-          // TODO: Implement Countdown creation logic with parsed details
-        }
-      },
-      // Token patterns
-      { 
-        regex: /introduce\s+a\s+(\w+)\s+die/gi, 
-        type: 'token',
-        handler: (dieType) => {
-          console.log(`Introduce ${dieType} Die`);
-          // TODO: Implement Token introduction logic
-        }
-      }
-    ];
+    // Word highlighting with specific colors for core mechanics only
+    const wordColors = {
+      'fear': '#dc267f',      // Pink/magenta for fear
+      'stress': '#f59e0b',    // Amber for stress  
+      'hope': '#22c55e',      // Green for hope
+      'countdown': '#22c55e'  // Green for countdown
+    };
     
     let processedText = description;
-    const interactiveElements = [];
     
-    // Find all matches and replace with interactive elements
-    patterns.forEach((pattern, patternIndex) => {
-      const matches = [...description.matchAll(pattern.regex)];
-      matches.forEach((match, matchIndex) => {
-        const fullMatch = match[0];
-        const captureGroup = match[1];
-        const uniqueKey = `${patternIndex}-${matchIndex}`;
-        
-        // Check if this should be interactive based on context
-        const shouldBeInteractive = checkIfInteractive(fullMatch, description, pattern.type);
-        
-        if (shouldBeInteractive) {
-          // Create interactive element
-          const interactiveElement = (
-            <span 
-              key={uniqueKey}
-              className={`interactive-mechanic ${pattern.type}`}
-              onClick={() => pattern.handler(captureGroup, feature.name)}
-              title={`Click to ${pattern.type.replace('-', ' ')}`}
-            >
-              {fullMatch}
-            </span>
-          );
-          
-          interactiveElements.push({
-            element: interactiveElement,
-            text: fullMatch,
-            index: description.indexOf(fullMatch)
-          });
-        }
-      });
+    Object.keys(wordColors).forEach(word => {
+      const regex = new RegExp(`\\b${word}\\b`, 'gi');
+      const color = wordColors[word];
+      processedText = processedText.replace(regex, `<span class="highlighted-word" style="color: ${color}; background: ${color}20; border: 1px solid ${color}50;">${word}</span>`);
     });
     
-    // Sort by index (reverse order to avoid index shifting)
-    interactiveElements.sort((a, b) => b.index - a.index);
-    
-    // Replace text with interactive elements
-    let result = description;
-    interactiveElements.forEach(({ element, text, index }) => {
-      const before = result.substring(0, index);
-      const after = result.substring(index + text.length);
-      result = before + `__INTERACTIVE_${index}__` + after;
-    });
-    
-    // Split by interactive markers and render
-    const parts = result.split(/__INTERACTIVE_\d+__/);
-    const interactiveIndex = interactiveElements.length - 1;
-    
-    return parts.map((part, index) => {
-      if (index === parts.length - 1) {
-        return part; // Last part, no interactive element after
-      }
-      
-      const interactiveElement = interactiveElements[interactiveIndex - index];
-      return (
-        <React.Fragment key={index}>
-          {part}
-          {interactiveElement.element}
-        </React.Fragment>
-      );
-    });
+    return <span dangerouslySetInnerHTML={{ __html: processedText }} />;
   }
 
   // Helper function to render drag handle

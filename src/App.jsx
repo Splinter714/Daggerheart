@@ -3,7 +3,7 @@ import { GameStateProvider } from './GameStateContext'
 import { useGameState } from './useGameState'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSkull } from '@fortawesome/free-solid-svg-icons'
-import { Swords, TreePine, Pencil, Clock, Plus, Trash2, Menu } from 'lucide-react'
+import { Swords, TreePine, Pencil, Clock, Plus, Trash2, Menu, Wrench } from 'lucide-react'
 import './App.css'
 
 // Import all the UI components
@@ -12,6 +12,7 @@ import GameBoard from './components/GameBoard'
 import Cards from './components/Cards'
 import Browser from './components/Browser'
 import Creator from './components/Creator'
+import AdversaryCreatorMockup from './components/AdversaryCreatorMockup'
 import Button from './components/Buttons'
 import adversariesData from './data/adversaries.json'
 import environmentsData from './data/environments.json'
@@ -48,6 +49,19 @@ const AppContent = () => {
   const [addFlyoutOpen, setAddFlyoutOpen] = useState(false)
   const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
   const [countdownFlyoutOpen, setCountdownFlyoutOpen] = useState(false)
+  const [showMockup, setShowMockup] = useState(false)
+  const [creatorFormData, setCreatorFormData] = useState({
+    name: '',
+    tier: 1,
+    type: '',
+    difficulty: '',
+    hpMax: '',
+    stressMax: '',
+    passiveFeatures: [{ name: '', description: '' }],
+    actionFeatures: [{ name: '', description: '' }],
+    reactionFeatures: [{ name: '', description: '' }],
+    experience: [{ name: '', modifier: 0 }],
+  })
   
   // Close flyouts when clicking outside
   useEffect(() => {
@@ -600,6 +614,24 @@ const AppContent = () => {
               <Pencil size={20} />
             </div>
           </button>
+
+          {/* Creator Mockup Toggle */}
+          <div
+            className={`sidebar-nav-item ${showMockup ? 'active' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowMockup(!showMockup)
+              setAddFlyoutOpen(false)
+              setDeleteFlyoutOpen(false)
+              setCountdownFlyoutOpen(false)
+            }}
+            title="Show Creator Mockup"
+            style={{ cursor: 'pointer' }}
+          >
+            <div className="sidebar-nav-icon">
+              <Wrench size={20} />
+            </div>
+          </div>
           
           {/* Delete Button with Clear Flyout */}
           <div
@@ -692,24 +724,116 @@ const AppContent = () => {
       {/* Main Content Area */}
       <div className="main-content" key={`mobile-${isMobile}`}>
         {/* Unified Layout - Reuse desktop structure for mobile */}
-        {/* Left Panel: Game Board */}
+        {/* Left Panel: Game Board or Creator */}
         <div className={`left-panel ${isMobile && mobileView === 'right' ? 'mobile-hidden' : ''}`}>
-          {/* Mobile navigation when on left panel but right content exists - removed View Details button */}
-          
-          <GameBoard
-            onItemSelect={handleItemSelect}
-            onOpenDatabase={handleOpenDatabase}
-            onOpenCreator={handleOpenCreator}
-            isEditMode={isEditMode}
-            onEditModeChange={setIsEditMode}
-          />
+          {showMockup ? (
+            <div className="creator-left-column">
+              <div className="creator-header">
+                <h3>New Adversary</h3>
+              </div>
+              <AdversaryCreatorMockup 
+                formData={creatorFormData}
+                setFormData={setCreatorFormData}
+              />
+            </div>
+          ) : (
+            <>
+              {/* Mobile navigation when on left panel but right content exists - removed View Details button */}
+              
+              <GameBoard
+                onItemSelect={handleItemSelect}
+                onOpenDatabase={handleOpenDatabase}
+                onOpenCreator={handleOpenCreator}
+                isEditMode={isEditMode}
+                onEditModeChange={setIsEditMode}
+              />
+            </>
+          )}
         </div>
 
-        {/* Right Panel: Details, Database, or Creator */}
+        {/* Right Panel: Details, Database, Creator, or Preview */}
         <div className={`right-panel ${isMobile && mobileView === 'left' ? 'mobile-hidden' : ''}`}>
 
           {/* Panel content - only show when there's something to display */}
-          {rightColumnMode === 'item' && selectedItem && (
+          {showMockup ? (
+            <div className="preview-right-column">
+              <div className="creator-header">
+                <h3>Adversary Preview</h3>
+              </div>
+              <div className="preview-section">
+                <div className="card-preview">
+                  <h4>Compact Card</h4>
+                  <Cards
+                    item={{
+                      ...creatorFormData,
+                      id: 'preview',
+                      hp: 0,
+                      stress: 0,
+                      experience: creatorFormData.experience
+                        .filter(exp => exp.name && exp.name.trim())
+                        .map(exp => `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`),
+                      features: [
+                        ...creatorFormData.passiveFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Passive' })),
+                        ...creatorFormData.actionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Action' })),
+                        ...creatorFormData.reactionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Reaction' }))
+                      ],
+                      traits: []
+                    }}
+                    type="adversary"
+                    mode="compact"
+                    onClick={() => {}} // Mock handler
+                    onDelete={() => {}} // Mock handler
+                    onEdit={() => {}} // Mock handler
+                    onToggleVisibility={() => {}} // Mock handler
+                    onApplyDamage={() => {}} // Mock handler
+                    onApplyHealing={() => {}} // Mock handler
+                    onApplyStressChange={() => {}} // Mock handler
+                    onIncrement={() => {}} // Mock handler
+                    onDecrement={() => {}} // Mock handler
+                    isEditMode={false}
+                    dragAttributes={null}
+                    dragListeners={null}
+                  />
+                </div>
+                <div className="card-preview">
+                  <h4>Expanded Card</h4>
+                  <Cards
+                    item={{
+                      ...creatorFormData,
+                      id: 'preview',
+                      hp: 0,
+                      stress: 0,
+                      experience: creatorFormData.experience
+                        .filter(exp => exp.name && exp.name.trim())
+                        .map(exp => `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`),
+                      features: [
+                        ...creatorFormData.passiveFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Passive' })),
+                        ...creatorFormData.actionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Action' })),
+                        ...creatorFormData.reactionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Reaction' }))
+                      ],
+                      traits: []
+                    }}
+                    type="adversary"
+                    mode="expanded"
+                    onClick={() => {}} // Mock handler
+                    onDelete={() => {}} // Mock handler
+                    onEdit={() => {}} // Mock handler
+                    onToggleVisibility={() => {}} // Mock handler
+                    onApplyDamage={() => {}} // Mock handler
+                    onApplyHealing={() => {}} // Mock handler
+                    onApplyStressChange={() => {}} // Mock handler
+                    onIncrement={() => {}} // Mock handler
+                    onDecrement={() => {}} // Mock handler
+                    isEditMode={false}
+                    dragAttributes={null}
+                    dragListeners={null}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {rightColumnMode === 'item' && selectedItem && (
             <div 
               className="item-display"
               onClick={(e) => e.stopPropagation()}
@@ -765,6 +889,7 @@ const AppContent = () => {
             </div>
           )}
 
+
           {rightColumnMode === 'creator' && (
             <div 
               className="creator-display"
@@ -786,6 +911,8 @@ const AppContent = () => {
                 onCancel={handleCloseRightColumn}
               />
             </div>
+          )}
+            </>
           )}
 
         </div>
