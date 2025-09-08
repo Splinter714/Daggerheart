@@ -27,9 +27,8 @@ jobs:
       run: npm run build
       
     - name: Deploy to GitHub Pages
-      run: |
-        npm install -g gh-pages
-        gh-pages -d dist
+      uses: peaceiris/actions-gh-pages@v3
       if: github.ref == 'refs/heads/main'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        personal_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
