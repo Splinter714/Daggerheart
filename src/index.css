@@ -1819,10 +1819,12 @@ textarea,
   color: var(--purple);
   text-shadow: 0 0 4px rgba(59, 130, 246, 0.5);
   font-weight: 600; /* Make filled symbols bolder to match visual weight */
+  font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 .countdown-symbol.empty {
   color: var(--grey);
+  font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 .countdown-symbol:hover {
@@ -2727,11 +2729,13 @@ textarea,
   color: var(--purple);
   text-shadow: 0 0 4px rgba(59, 130, 246, 0.5);
   font-weight: 600; /* Make filled symbols bolder to match visual weight */
+  font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 .simple-list-row.compact.countdown .countdown-symbol.empty {
   color: var(--text-secondary);
   opacity: 0.6;
+  font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 .simple-list-row.compact.countdown .countdown-symbol:hover {
@@ -2772,11 +2776,13 @@ textarea,
 .simple-list-row.compact.adversary .hp-symbols .countdown-symbol.filled {
   color: var(--red);
   text-shadow: 0 0 4px rgba(220, 38, 38, 0.5);
+  font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 .simple-list-row.compact.adversary .stress-symbols .countdown-symbol.filled {
   color: #f59e0b;
   text-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
+  font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 /* Overflow icon styling */
@@ -3975,6 +3981,33 @@ textarea,
   color: #dc2626;
 }
 
+.damage-drop.minion-additional {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-shadow: none;
+  border: 1px solid var(--border);
+  cursor: default;
+  font-variant-numeric: tabular-nums;
+}
+
+.damage-drop.minion-placeholder {
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-shadow: none;
+  border: 1px solid var(--border);
+  cursor: default;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
 .damage-submit-btn {
   display: flex;
   align-items: center;
@@ -4066,6 +4099,7 @@ textarea,
 .countdown-symbol.filled[data-countdown-type="simple-hope"] {
   color: #f59e0b !important; /* Gold for hope/progress */
   text-shadow: 0 0 4px rgba(245, 158, 11, 0.5) !important;
+  font-size: 0.875rem !important; /* Ensure consistent font size */
 }
 
 .countdown-symbol.filled[data-countdown-type="consequence"],
@@ -4073,12 +4107,14 @@ textarea,
 .countdown-symbol.filled[data-countdown-type="simple-fear"] {
   color: var(--purple) !important; /* Purple for fear/consequence */
   text-shadow: 0 0 4px rgba(59, 130, 246, 0.5) !important;
+  font-size: 0.875rem !important; /* Ensure consistent font size */
 }
 
 .countdown-symbol.filled[data-countdown-type="long-term"],
 .countdown-symbol.filled[data-countdown-type="standard"] {
   color: var(--text-secondary) !important; /* Neutral for simple/long-term */
   text-shadow: 0 0 4px rgba(163, 163, 163, 0.5) !important; /* Subtle grey glow */
+  font-size: 0.875rem !important; /* Ensure consistent font size */
 }
 
 /* Styling for countdowns at max value - color based on type */
@@ -5008,7 +5044,7 @@ textarea,
 }
 
 .countdown-symbol {
-  font-size: 1.25rem;
+  font-size: 0.875rem;
   line-height: 1;
   transition: all 0.2s ease;
 }
@@ -5016,11 +5052,13 @@ textarea,
 .countdown-symbol.filled {
   color: var(--purple);
   font-weight: 600; /* Make filled symbols bolder to match visual weight */
+  font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 .countdown-symbol.empty {
   color: var(--text-secondary);
   opacity: 0.6;
+  font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 .countdown-symbols-section {
@@ -5537,11 +5575,13 @@ textarea,
 
 .countdown-symbol.filled {
   color: var(--purple);
+  font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 .countdown-symbol.empty {
   color: var(--text-secondary);
   opacity: 0.6;
+  font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 .description-badge {

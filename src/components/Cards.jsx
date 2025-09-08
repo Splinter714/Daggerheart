@@ -200,13 +200,13 @@ const Cards = ({
                   <div 
                     onClick={(e) => {
                       e.stopPropagation()
-                      if (item.thresholds && item.thresholds.major && item.thresholds.severe) {
+                      if ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') {
                         setShowDamageInput(true)
-                        setDamageValue('')
+                        setDamageValue(item.type === 'Minion' ? '1' : '')
                       }
                     }}
-                    style={{ cursor: (item.thresholds && item.thresholds.major && item.thresholds.severe) ? 'pointer' : 'default' }}
-                    title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : ''}
+                    style={{ cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default' }}
+                    title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
                   >
                     <DifficultyBadge difficulty={item.difficulty} />
                   </div>
@@ -249,7 +249,7 @@ const Cards = ({
                 <input
                   type="number"
                   placeholder="Damage"
-                  min="0"
+                  min={item.type === 'Minion' ? "1" : "0"}
                   value={damageValue}
                   onChange={(e) => setDamageValue(e.target.value)}
                   onKeyDown={(e) => {
@@ -290,14 +290,27 @@ const Cards = ({
                       const minionThreshold = minionFeature ? parseInt(minionFeature.name.match(/\((\d+)\)/)?.[1] || '1') : 1
                       const additionalMinions = Math.floor(damage / minionThreshold)
                       
-                      return (
-                        <span 
-                          className={`damage-drop ${damage > 0 ? 'active' : ''}`}
-                          title={`${damage} damage can defeat ${additionalMinions + 1} minion${additionalMinions + 1 !== 1 ? 's' : ''} (1 + ${additionalMinions} additional)`}
-                        >
-                          {damage > 0 ? `+${additionalMinions}` : '0'}
-                        </span>
-                      )
+                      // Only show additional minions if we've hit the threshold
+                      if (damage >= minionThreshold && additionalMinions > 0) {
+                        return (
+                          <span 
+                            className="damage-drop minion-additional active"
+                            title={`${damage} damage can defeat ${additionalMinions + 1} minion${additionalMinions + 1 !== 1 ? 's' : ''} (1 + ${additionalMinions} additional)`}
+                          >
+                            +{additionalMinions} additional minion(s)
+                          </span>
+                        )
+                      } else {
+                        // Show placeholder to prevent layout shift
+                        return (
+                          <span 
+                            className="damage-drop minion-placeholder"
+                            title={`${damage} damage defeats this minion only`}
+                          >
+                            +0 additional minion(s)
+                          </span>
+                        )
+                      }
                     })()
                   ) : (
                     // Regular adversary damage indicators
@@ -356,7 +369,7 @@ const Cards = ({
                       }
                     }}
                     title="Apply damage"
-                    disabled={!damageValue || parseInt(damageValue) <= 0}
+                    disabled={!damageValue || parseInt(damageValue) < 1}
                   >
                     <CheckCircle size={16} />
                   </button>
