@@ -137,7 +137,6 @@ const Cards = ({
               <div className="row-meta">
                 {item.type && <TypeBadge type={item.type} />}
               </div>
-
             </div>
             <div className="card-actions countdown-actions">
               <div className="countdown-control-buttons">
@@ -301,8 +300,7 @@ const Cards = ({
             <div className="row-main">
               <h4 className="row-title">{item.name}</h4>
               <div className="row-meta">
-                {item.type && <span className="type-badge">{item.type}</span>}
-                <span className="tier-badge">Tier {item.tier}</span>
+                {item.type && <TypeBadge type={item.type} />}
               </div>
             </div>
             {renderCardActions()}

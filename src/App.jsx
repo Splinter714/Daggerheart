@@ -61,6 +61,7 @@ const AppContent = () => {
     actionFeatures: [{ name: '', description: '' }],
     reactionFeatures: [{ name: '', description: '' }],
     experience: [{ name: '', modifier: 0 }],
+    source: 'campaign' // Default source for countdowns
   })
   
   // Close flyouts when clicking outside
@@ -86,15 +87,27 @@ const AppContent = () => {
   }
   
   const handleOpenDatabase = (type = 'unified') => {
+    // If database is already open for this type, close it
+    if (rightColumnMode === 'database' && databaseType === type) {
+      setRightColumnMode(null)
+      if (isMobile) setMobileView('left')
+      return
+    }
+    
+    // Otherwise, open the database
     setDatabaseType(type)
     setRightColumnMode('database')
     if (isMobile) setMobileView('right')
   }
 
-  const handleOpenCreator = (type) => {
+  const handleOpenCreator = (type, source = 'campaign') => {
     setDatabaseType(type)
     setRightColumnMode('creator')
     if (isMobile) setMobileView('right')
+    // Store the source for countdown creation
+    if (type === 'countdown') {
+      setCreatorFormData(prev => ({ ...prev, source }))
+    }
   }
 
   // Countdown control handlers
@@ -145,14 +158,26 @@ const AppContent = () => {
         if (advancement > 0) {
           console.log(`Consequence countdown "${countdown.name}" will advance by ${advancement}`)
         }
+      } else if (countdown.type === 'simple-fear') {
+        // Simple Fear countdowns advance by 1 whenever rolling with fear
+        if (outcome === 'success-fear' || outcome === 'failure-fear') {
+          advancement = 1
+          console.log(`Simple Fear countdown "${countdown.name}" will advance by ${advancement}`)
+        }
+      } else if (countdown.type === 'simple-hope') {
+        // Simple Hope countdowns advance by 1 whenever rolling with hope
+        if (outcome === 'success-hope' || outcome === 'failure-hope') {
+          advancement = 1
+          console.log(`Simple Hope countdown "${countdown.name}" will advance by ${advancement}`)
+        }
       }
       
       // Apply advancement if any
       if (advancement > 0) {
         console.log(`Advancing countdown "${countdown.name}" by ${advancement}`)
-        for (let i = 0; i < advancement; i++) {
-          advanceCountdown(countdown.id)
-        }
+        const currentValue = countdown.value || 0
+        const rawNewValue = currentValue + advancement
+        advanceCountdown(countdown.id, rawNewValue)
       }
     })
   }
@@ -165,9 +190,9 @@ const AppContent = () => {
       if (countdown.type === 'long-term') {
         const advancement = restType === 'long' ? 2 : 1
         console.log(`Long-term countdown "${countdown.name}" will advance by ${advancement} on ${restType} rest`)
-        for (let i = 0; i < advancement; i++) {
-          advanceCountdown(countdown.id)
-        }
+        const currentValue = countdown.value || 0
+        const rawNewValue = currentValue + advancement
+        advanceCountdown(countdown.id, rawNewValue)
       }
     })
   }
@@ -898,6 +923,7 @@ const AppContent = () => {
               <Creator
                 type={databaseType}
                 item={null}
+                source={databaseType === 'countdown' ? creatorFormData.source : undefined}
                 onSave={(itemData) => {
                   if (databaseType === 'adversary') {
                     createAdversary(itemData)

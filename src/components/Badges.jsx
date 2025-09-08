@@ -50,22 +50,16 @@ export const DifficultyBadge = ({ difficulty, className = '', ...props }) => {
 
 // TypeBadge - Special badge for adversary types with color coding
 export const TypeBadge = ({ type, className = '', ...props }) => {
-  const getTypeColor = (typeName) => {
-    switch (typeName?.toLowerCase()) {
-      case 'solo': return "bg-purple-100 text-purple-800 border-purple-300"
-      case 'bruiser': return "bg-red-100 text-red-800 border-red-300"
-      case 'horde': return "bg-orange-100 text-orange-800 border-orange-300"
-      case 'support': return "bg-blue-100 text-blue-800 border-blue-300"
-      case 'leader': return "bg-yellow-100 text-yellow-800 border-yellow-300"
-      default: return "bg-gray-100 text-gray-800 border-gray-300"
-    }
-  }
-
-  const colorClasses = getTypeColor(type)
-  const baseClasses = "px-2 py-1 text-xs rounded-full font-medium border"
-
   return (
-    <span className={`${baseClasses} ${colorClasses} ${className}`} {...props}>
+    <span 
+      className={`text-xs font-normal ${className}`}
+      style={{ 
+        color: '#6b7280', // gray-500 - muted color
+        fontSize: '0.75rem',
+        fontWeight: '400'
+      }}
+      {...props}
+    >
       {type}
     </span>
   )

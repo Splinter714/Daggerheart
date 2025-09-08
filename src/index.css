@@ -3641,8 +3641,9 @@ textarea,
 
 .row-main {
   display: flex;
-  align-items: center;
-  gap: 0.75rem; /* Reduced from 1rem */
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
 }
 
 .row-title {
@@ -3654,12 +3655,21 @@ textarea,
 
 .row-meta {
   display: flex;
-  gap: 0.375rem; /* Reduced from 0.5rem */
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
-.tier-badge,
 .type-badge {
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+}
+
+.tier-badge {
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   font-size: 0.75rem;
@@ -5734,4 +5744,182 @@ textarea,
     flex-direction: column;
     gap: 0.25rem;
   }
+}
+
+/* Campaign Countdowns - Compact Section */
+.campaign-countdowns {
+  margin-top: 1rem;
+}
+
+.countdowns-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+
+.countdown-symbols {
+  display: flex;
+  gap: 0.25rem;
+}
+
+
+/* Inline Countdown Creator */
+.inline-countdown-creator {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0.75rem 0;
+  margin-bottom: 1rem;
+}
+
+.inline-countdown-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inline-countdown-main-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.inline-input {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.inline-input:focus {
+  outline: none;
+  border-color: var(--purple);
+}
+
+.inline-number {
+  width: 4rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.inline-select {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  min-width: 6rem;
+}
+
+.inline-countdown-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.inline-btn {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.inline-btn:hover:not(:disabled) {
+  background: var(--purple);
+  border-color: var(--purple);
+}
+
+.inline-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.inline-btn.cancel:hover:not(:disabled) {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.inline-btn.save:hover:not(:disabled) {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+/* Section Headers with Multiple Buttons */
+.section-header {
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.section-header-buttons {
+  display: flex; gap: 0.5rem; align-items: center;
+}
+
+/* Section Countdowns - Inline at top of sections */
+.section-countdowns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.countdown-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0.5rem;
+  padding-left: 1rem;
+  padding-right: 0.5rem;
+  width: 100%;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.countdown-inline:hover {
+  border-color: var(--purple);
+  background: var(--bg-dark);
+}
+
+.countdown-symbols {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+
+.countdown-name-display {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: left;
+  flex: 1;
+  margin: 0;
+}
+
+.countdown-label {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  white-space: nowrap;
 }

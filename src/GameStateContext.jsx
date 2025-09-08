@@ -58,10 +58,10 @@ export const GameStateProvider = ({ children }) => {
       name: countdownData.name || 'Countdown',
       max: parseInt(countdownData.max) || 1,
       value: 0,
-      description: countdownData.description || '',
       visible: true,
       type: countdownData.type || 'standard',
-      loop: countdownData.loop || 'none'
+      loop: countdownData.loop || 'none',
+      source: countdownData.source || 'campaign' // 'adversary', 'environment', or 'campaign'
     };
     
     setGameState(prev => ({

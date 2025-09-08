@@ -6,6 +6,7 @@ import { Badge, DifficultyBadge, TypeBadge } from './Badges'
 const Creator = ({ 
   type, // 'adversary', 'environment', or 'countdown'
   item = null, // If provided, we're editing; if null, we're creating
+  source = 'campaign', // Source for countdowns: 'adversary', 'environment', or 'campaign'
   onSave, 
   onCancel 
 }) => {
@@ -20,7 +21,7 @@ const Creator = ({
     tier: 1,
     type: '',
     difficulty: 1,
-    description: '',
+    source: source, // Set source from prop
     // Adversary-specific fields
     hpMax: 1,
     stressMax: 0,
@@ -44,7 +45,7 @@ const Creator = ({
         tier: item.tier || 1,
         type: item.type || '',
         difficulty: item.difficulty || 1,
-        description: item.description || '',
+        source: item.source || source, // Use item source or fallback to prop
         hpMax: item.hpMax || 1,
         stressMax: item.stressMax || 0,
         abilities: item.abilities || [],
@@ -100,7 +101,6 @@ const Creator = ({
     const itemData = {
       ...formData,
       name: formData.name.trim(),
-      description: formData.description.trim(),
       // Add game-specific properties
       ...(isAdversary && {
         hp: 0, // Start with 0 HP (no damage taken)
@@ -193,17 +193,6 @@ const Creator = ({
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder={`Describe this ${type}`}
-                className="form-textarea"
-                rows={3}
-              />
-            </div>
           </div>
         )}
 
@@ -341,10 +330,10 @@ const Creator = ({
                 >
                   <option value="standard">Standard</option>
                   <option value="progress">Progress</option>
-                  <option value="dynamic-progress">Dynamic Progress</option>
                   <option value="consequence">Consequence</option>
-                  <option value="dynamic-consequence">Dynamic Consequence</option>
                   <option value="long-term">Long-term</option>
+                  <option value="simple-fear">Simple Fear</option>
+                  <option value="simple-hope">Simple Hope</option>
                 </select>
 
                 <select

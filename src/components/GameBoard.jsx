@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useGameState } from '../useGameState'
 import Button from './Buttons'
 import List from './List'
+import InlineCountdownCreator from './InlineCountdownCreator'
 import { 
   CheckCircle, 
   XCircle, 
@@ -10,7 +11,11 @@ import {
   Zap,
   Coffee,
   Moon,
-  Dice1
+  Dice1,
+  Plus,
+  Clock,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -180,8 +185,68 @@ const GameBoard = ({
     decrementCountdown
   } = useGameState()
 
+  // State for inline countdown creator
+  const [showInlineCreator, setShowInlineCreator] = useState({
+    adversary: false,
+    environment: false,
+    campaign: false
+  })
+
+  // State for showing/hiding long-term countdowns
+  const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(false)
+
   const handleEditItem = (item, type) => {
     onOpenCreator(type)
+  }
+
+  const handleToggleInlineCreator = (source) => {
+    setShowInlineCreator(prev => ({ ...prev, [source]: !prev[source] }))
+  }
+
+  const handleCreateCountdown = (countdownData) => {
+    createCountdown(countdownData)
+    // Hide the creator for the appropriate source
+    setShowInlineCreator(prev => ({ ...prev, [countdownData.source]: false }))
+  }
+
+  const handleCountdownClick = (event, countdown) => {
+    event.stopPropagation()
+    
+    const currentValue = countdown.value || 0
+    const maxValue = countdown.max
+    
+    // Get the bounds of the pip container (which is now the click target)
+    const pipRect = event.currentTarget.getBoundingClientRect()
+    
+    const clickX = event.clientX - pipRect.left
+    
+    // Calculate boundary as percentage of pip container width
+    const pipWidth = pipRect.width
+    const boundaryRatio = currentValue / maxValue
+    const boundaryX = pipWidth * boundaryRatio
+    
+    console.log('Countdown click debug:', {
+      countdownName: countdown.name,
+      currentValue,
+      maxValue,
+      clickX,
+      pipWidth,
+      boundaryRatio,
+      boundaryX,
+      willDecrement: clickX < boundaryX
+    })
+    
+    if (clickX < boundaryX) {
+      // Clicked left of boundary - decrement
+      if (currentValue > 0) {
+        decrementCountdown(countdown.id)
+      }
+    } else {
+      // Clicked right of boundary - increment
+      if (currentValue < maxValue) {
+        incrementCountdown(countdown.id)
+      }
+    }
   }
 
   const handleDeleteItem = (id, type) => {
@@ -212,7 +277,7 @@ const GameBoard = ({
         // Standard countdowns always advance by 1
         advancement = 1
         console.log(`Standard countdown "${countdown.name}" will advance by ${advancement}`)
-      } else if (countdown.type === 'progress' || countdown.type === 'dynamic-progress') {
+      } else if (countdown.type === 'progress') {
         // Progress countdowns advance based on roll outcome
         switch (outcome) {
           case 'success-hope':
@@ -230,7 +295,7 @@ const GameBoard = ({
         if (advancement > 0) {
           console.log(`Progress countdown "${countdown.name}" will advance by ${advancement}`)
         }
-      } else if (countdown.type === 'consequence' || countdown.type === 'dynamic-consequence') {
+      } else if (countdown.type === 'consequence') {
         // Consequence countdowns advance based on roll outcome
         switch (outcome) {
           case 'success-fear':
@@ -293,136 +358,23 @@ const GameBoard = ({
 
   return (
     <>
-      {/* Countdowns Section */}
-      {countdowns && countdowns.length > 0 && (
-        <div className="game-section">
-          <div className="section-header">
-            <h3 className="section-title">Countdowns</h3>
-          </div>
-          
-          {/* GM Control Panel */}
-          <div className="gm-control-panel">
-            <h4 className="control-panel-title">GM Triggers</h4>
-            
-            {/* Roll Outcome Triggers */}
-            <div className="trigger-group">
-              <h5>Roll Outcomes</h5>
-              <div className="trigger-buttons">
-                <Button
-                  variant="success"
-                  size="sm"
-                  onClick={() => handleRollOutcome('success-hope')}
-                  title="Success with Hope: Progress +2, Standard +1"
-                  style={{ backgroundColor: 'var(--purple)', borderColor: 'var(--purple)', color: 'var(--text-primary)' }}
-                >
-                  <CheckCircle size={16} />
-                </Button>
-                <Button
-                  variant="success"
-                  size="sm"
-                  onClick={() => handleRollOutcome('success-fear')}
-                  title="Success with Fear: Progress +1, Consequence +1, Standard +1"
-                  style={{ backgroundColor: 'var(--purple)', borderColor: 'var(--purple)', color: 'var(--text-primary)' }}
-                >
-                  <CheckCircle size={16} />
-                </Button>
-                <Button
-                  variant="failure"
-                  size="sm"
-                  onClick={() => handleRollOutcome('failure-hope')}
-                  title="Failure with Hope: Consequence +2, Standard +1"
-                  style={{ backgroundColor: 'var(--purple)', borderColor: 'var(--purple)', color: 'var(--text-primary)' }}
-                >
-                  <XCircle size={16} />
-                </Button>
-                <Button
-                  variant="failure"
-                  size="sm"
-                  onClick={() => handleRollOutcome('failure-fear')}
-                  title="Failure with Fear: Consequence +3, Standard +1"
-                  style={{ backgroundColor: 'var(--purple)', borderColor: 'var(--purple)', color: 'var(--text-primary)' }}
-                >
-                  <XCircle size={16} />
-                </Button>
-                <Button
-                  action="critical"
-                  size="sm"
-                  onClick={() => handleRollOutcome('critical-success')}
-                  title="Critical Success: Progress +3, Standard +1"
-                  style={{ backgroundColor: 'var(--purple)', borderColor: 'var(--purple)', color: 'var(--text-primary)' }}
-                >
-                  <Zap size={16} />
-                  <CheckCircle size={16} />
-                </Button>
-              </div>
-            </div>
-            
-            {/* Rest Triggers */}
-            <div className="trigger-group">
-              <h5>Rest Triggers</h5>
-              <div className="trigger-buttons">
-                <Button
-                  action="rest"
-                  size="sm"
-                  onClick={() => handleRestTrigger('short')}
-                  title="Short Rest: Advance long-term countdowns"
-                >
-                  <Coffee size={16} />
-                </Button>
-                <Button
-                  action="rest"
-                  size="sm"
-                  onClick={() => handleRestTrigger('long')}
-                  title="Long Rest: Advance long-term countdowns"
-                >
-                  <Moon size={16} />
-                </Button>
-              </div>
-            </div>
-            
-            {/* General Trigger */}
-            <div className="trigger-group">
-              <h5>General</h5>
-              <div className="trigger-buttons">
-                <Button
-                  action="action"
-                  size="sm"
-                  onClick={() => handleActionRoll()}
-                  title="Action Roll: Advance all standard countdowns by 1"
-                >
-                  <Dice1 size={16} />
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          <List
-            items={countdowns}
-            type="countdown"
-            onDelete={deleteCountdown}
-            onEdit={() => {}} // No edit functionality for countdowns yet
-            onReorder={reorderCountdowns}
-            onItemSelect={onItemSelect}
-            onAdvance={advanceCountdown}
-            onIncrement={(id) => {
-              console.log('GameBoard onIncrement called with id:', id, 'incrementCountdown function:', incrementCountdown)
-              incrementCountdown(id)
-            }}
-            onDecrement={(id) => {
-              console.log('GameBoard onDecrement called with id:', id, 'decrementCountdown function:', decrementCountdown)
-              decrementCountdown(id)
-            }}
-            isEditMode={isEditMode}
-          />
-        </div>
-      )}
-
       {/* Environments Section */}
-      {environments.length > 0 && (
-        <div className="game-section">
-          <div className="section-header">
-            <h3 className="section-title">Environments</h3>
+      <div className="game-section">
+        <div className="section-header">
+          <h3 className="section-title">Environment</h3>
+          <div className="section-header-buttons">
+            <Button
+              action="add"
+              size="sm"
+              onClick={() => onOpenDatabase('environment')}
+              title="Browse Environments"
+            >
+              <Plus size={16} />
+            </Button>
           </div>
+        </div>
+        
+        {environments.length > 0 && (
           <List
             items={environments}
             type="environment"
@@ -442,16 +394,27 @@ const GameBoard = ({
             onAdvance={() => {}} // Not used for environments
             isEditMode={isEditMode}
           />
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Adversaries Section */}
-      {adversaries.length > 0 && (
-        <div className="game-section">
-          <div className="section-header">
-            <h3 className="section-title">Adversaries</h3>
+      <div className="game-section">
+        <div className="section-header">
+          <h3 className="section-title">Adversaries</h3>
+          <div className="section-header-buttons">
+            <Button
+              action="add"
+              size="sm"
+              onClick={() => onOpenDatabase('adversary')}
+              title="Browse Adversaries"
+            >
+              <Plus size={16} />
+            </Button>
           </div>
-          <List
+        </div>
+          
+          {adversaries.length > 0 && (
+            <List
             items={adversaries}
             type="adversary"
             onDelete={(id) => handleDeleteItem(id, 'adversary')}
@@ -513,8 +476,109 @@ const GameBoard = ({
             }}
             isEditMode={isEditMode}
           />
+          )}
+      </div>
+
+      {/* Countdowns Section */}
+      <div className="game-section campaign-countdowns">
+        <div className="section-header">
+          <h3 className="section-title">Countdowns</h3>
+          <div className="section-header-buttons">
+            <Button
+              action="add"
+              size="sm"
+              onClick={() => setShowLongTermCountdowns(!showLongTermCountdowns)}
+              title={showLongTermCountdowns ? "Hide Long-term Countdowns" : "Show Long-term Countdowns"}
+            >
+              {showLongTermCountdowns ? <EyeOff size={16} /> : <Eye size={16} />}
+            </Button>
+            <Button
+              action="add"
+              size="sm"
+              onClick={() => handleToggleInlineCreator('campaign')}
+              title="Add Countdown"
+            >
+              <Plus size={16} />
+            </Button>
+          </div>
         </div>
-      )}
+        
+        {/* Inline Countdown Creator */}
+        {showInlineCreator.campaign && (
+          <InlineCountdownCreator
+            source="campaign"
+            onCreateCountdown={handleCreateCountdown}
+          />
+        )}
+        
+        {/* Non-long-term countdowns - always visible */}
+        {countdowns && countdowns.filter(c => c.type !== 'long-term').length > 0 && (
+          <div className="countdowns-compact">
+            {countdowns.filter(c => c.type !== 'long-term').map((countdown) => (
+              <div 
+                key={countdown.id} 
+                className="countdown-inline"
+              >
+                <div className="row-main">
+                  <h4 className="row-title">{countdown.name}</h4>
+                  <div className="row-meta">
+                    <div 
+                      className="countdown-symbols"
+                      onClick={(event) => handleCountdownClick(event, countdown)}
+                      title={`Click left of filled pips to decrease, right to increase`}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {Array.from({ length: countdown.max }, (_, i) => (
+                        <span 
+                          key={i} 
+                          className={`countdown-symbol ${i < (countdown.value || 0) ? 'filled' : 'empty'}`}
+                          title={`${i + 1} of ${countdown.max}`}
+                        >
+                          {i < (countdown.value || 0) ? '●' : '○'}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {/* Long-term countdowns - only visible when toggle is on */}
+        {showLongTermCountdowns && countdowns && countdowns.filter(c => c.type === 'long-term').length > 0 && (
+          <div className="countdowns-compact">
+            {countdowns.filter(c => c.type === 'long-term').map((countdown) => (
+              <div 
+                key={countdown.id} 
+                className="countdown-inline"
+              >
+                <div className="row-main">
+                  <h4 className="row-title">{countdown.name}</h4>
+                  <div className="row-meta">
+                    <div 
+                      className="countdown-symbols"
+                      onClick={(event) => handleCountdownClick(event, countdown)}
+                      title={`Click left of filled pips to decrease, right to increase`}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {Array.from({ length: countdown.max }, (_, i) => (
+                        <span 
+                          key={i} 
+                          className={`countdown-symbol ${i < (countdown.value || 0) ? 'filled' : 'empty'}`}
+                          title={`${i + 1} of ${countdown.max}`}
+                        >
+                          {i < (countdown.value || 0) ? '●' : '○'}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </>
   )
 }
