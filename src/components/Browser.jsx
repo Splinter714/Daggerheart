@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import Button from './Buttons'
 import Cards from './Cards'
-import { Swords, TreePine } from 'lucide-react'
+import { Swords, TreePine, ArrowLeft, Plus } from 'lucide-react'
 import adversariesData from '../data/adversaries.json'
 import environmentsData from '../data/environments.json'
 
@@ -163,82 +163,64 @@ const Browser = ({
   }
 
   return (
-    <div className="browser-container">
-      {/* Header */}
-      <div className="browser-header">
-        <div className="browser-title">
-          <h2>
-            {type === 'adversary' ? (
-              <>
-                <Swords className="inline-icon" />
-                Adversary Database
-              </>
-            ) : (
-              <>
-                <TreePine className="inline-icon" />
-                Environment Database
-              </>
-            )}
-          </h2>
-        </div>
-        <div className="browser-actions">
-          <Button
-            action="add"
-            onClick={() => onCreateCustom && onCreateCustom(type)}
-            size="sm"
-          >
-            Create Custom
-          </Button>
-          <Button
-            action="secondary"
-            onClick={onCancel}
-            size="sm"
-          >
-            Close
-          </Button>
-        </div>
+    <div className="browser-wrapper">
+      {/* Back Arrow, Search, and Custom Button Row */}
+      <div className="browser-top-row">
+        <Button
+          action="secondary"
+          onClick={onCancel}
+          size="sm"
+          className="browser-back-btn"
+        >
+          <ArrowLeft size={16} />
+        </Button>
+        
+        <input
+          type="text"
+          placeholder={`Search ${type === 'adversary' ? 'adversaries' : 'environments'}...`}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="browser-search-input"
+        />
+        
+        <Button
+          action="add"
+          onClick={() => onCreateCustom && onCreateCustom(type)}
+          size="sm"
+          className="browser-add-btn"
+        >
+          <Plus size={16} />
+        </Button>
       </div>
 
-      {/* Search and Filters */}
-      <div className="browser-controls">
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Search items..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
+      {/* Filter Controls */}
+      <div className="browser-filters">
+        <Button
+          action="filter"
+          onClick={() => handleFilter('category')}
+          size="sm"
+          title={`Filter by Category: ${filterCategory || 'All'}`}
+        >
+          Category {filterCategory || 'All'}
+        </Button>
         
-        <div className="filter-controls">
-          <Button
-            action="filter"
-            onClick={() => handleFilter('category')}
-            size="sm"
-            title={`Filter by Category: ${filterCategory || 'All'}`}
-          >
-            Category {filterCategory || 'All'}
-          </Button>
-          
-          <Button
-            action="filter"
-            onClick={() => handleFilter('tier')}
-            size="sm"
-            title={`Filter by Tier: ${filterTier || 'All'}`}
-          >
-            Tier {filterTier || 'All'}
-          </Button>
-          
-          <Button
-            action="filter"
-            onClick={() => handleFilter('type')}
-            size="sm"
-            title={`Filter by Type: ${filterType || 'All'}`}
-          >
-            Type {filterType || 'All'}
-          </Button>
-        </div>
+        <Button
+          action="filter"
+          onClick={() => handleFilter('tier')}
+          size="sm"
+          title={`Filter by Tier: ${filterTier || 'All'}`}
+        >
+          Tier {filterTier || 'All'}
+        </Button>
+        
+        <Button
+          action="filter"
+          onClick={() => handleFilter('type')}
+          size="sm"
+          title={`Filter by Type: ${filterType || 'All'}`}
+        >
+          Type {filterType || 'All'}
+        </Button>
       </div>
 
       {/* Filter Dropdowns */}
@@ -298,19 +280,31 @@ const Browser = ({
         <table className="browser-table">
           <thead>
             <tr>
-              <th onClick={() => handleSort('name')} className="sortable">
-                Name {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+              <th 
+                onClick={() => handleSort('name')} 
+                className={`sortable ${sortField === 'name' ? 'active' : ''} ${sortField === 'name' ? sortDirection : ''}`}
+              >
+                Name
               </th>
-              <th onClick={() => handleSort('tier')} className="sortable">
-                Tier {sortField === 'tier' && (sortDirection === 'asc' ? '↑' : '↓')}
+              <th 
+                onClick={() => handleSort('tier')} 
+                className={`sortable ${sortField === 'tier' ? 'active' : ''} ${sortField === 'tier' ? sortDirection : ''}`}
+              >
+                Tier
               </th>
-              <th onClick={() => handleSort('displayType')} className="sortable">
-                Type {sortField === 'displayType' && (sortDirection === 'asc' ? '↑' : '↓')}
+              <th 
+                onClick={() => handleSort('displayType')} 
+                className={`sortable ${sortField === 'displayType' ? 'active' : ''} ${sortField === 'displayType' ? sortDirection : ''}`}
+              >
+                Type
               </th>
-              <th onClick={() => handleSort('displayDifficulty')} className="sortable">
-                Difficulty {sortField === 'displayDifficulty' && (sortDirection === 'asc' ? '↑' : '↓')}
+              <th 
+                onClick={() => handleSort('displayDifficulty')} 
+                className={`sortable ${sortField === 'displayDifficulty' ? 'active' : ''} ${sortField === 'displayDifficulty' ? sortDirection : ''}`}
+              >
+                Difficulty
               </th>
-              <th>Action</th>
+              <th>Add</th>
             </tr>
           </thead>
           <tbody>
@@ -320,20 +314,21 @@ const Browser = ({
                   className="browser-row"
                   onClick={() => handleCardClick(item)}
                 >
-                  <td className="column-name">{item.name}</td>
-                  <td className="column-tier">{item.tier}</td>
-                  <td className="column-type">{item.displayType}</td>
-                  <td className="column-description">{item.displayDifficulty}</td>
-                  <td className="column-action">
+                  <td className="column-name" data-label="Name">{item.name}</td>
+                  <td className="column-tier" data-label="Tier">{item.tier}</td>
+                  <td className="column-type" data-label="Type">{item.displayType}</td>
+                  <td className="column-description" data-label="Difficulty">{item.displayDifficulty}</td>
+                  <td className="column-action" data-label="Add">
                     <Button
                       action="add"
                       size="sm"
+                      className="table-add-btn"
                       onClick={(e) => {
                         e.stopPropagation()
                         handleAddFromDatabase(item)
                       }}
                     >
-                      Add
+                      <Plus size={14} />
                     </Button>
                   </td>
                 </tr>

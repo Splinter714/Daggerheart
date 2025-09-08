@@ -707,19 +707,6 @@ const AppContent = () => {
 
         {/* Right Panel: Details, Database, or Creator */}
         <div className={`right-panel ${isMobile && mobileView === 'left' ? 'mobile-hidden' : ''}`}>
-          {/* Mobile navigation when on right panel */}
-          {isMobile && mobileView === 'right' && (
-            <div className="mobile-nav-buttons">
-              <Button
-                action="secondary"
-                size="compact"
-                onClick={() => setMobileView('left')}
-                title="Back to Game Board"
-              >
-                ← Back
-              </Button>
-            </div>
-          )}
 
           {/* Panel content - only show when there's something to display */}
           {rightColumnMode === 'item' && selectedItem && (
