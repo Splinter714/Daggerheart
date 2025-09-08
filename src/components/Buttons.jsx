@@ -87,7 +87,8 @@ const Button = ({
       // Otherwise, map actions to semantic button types
       if (action === 'delete' || action === 'remove' || action === 'bulk-clear') {
         // Delete buttons start neutral, turn red only during confirmation
-        variantClass = isConfirming ? 'btn-danger' : 'btn-secondary'
+        // Exception: immediate delete actions (like filled countdowns) are always red
+        variantClass = (isConfirming || immediate) ? 'btn-danger' : 'btn-secondary'
       } else if (action === 'close') {
         variantClass = 'btn-secondary'     // Close actions (non-destructive)
       } else if (action === 'edit' || action === 'view' || action === 'filter' || action === 'increment' || action === 'decrement') {

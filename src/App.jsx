@@ -302,22 +302,59 @@ const AppContent = () => {
 
   // Adversary handlers
   const handleAdversaryDamage = (id, damage, currentHp, maxHp) => {
-    // In Daggerheart: HP = damage taken, so damage increases HP
-    const newHp = Math.min(currentHp + damage, maxHp) // Can't exceed max damage
-    console.log('Applying damage:', { id, damage, currentHp, maxHp, newHp })
+    const targetAdversary = adversaries.find(adv => adv.id === id)
+    if (!targetAdversary) return
     
-    // Optimistic update - update local state immediately
-    const updatedAdversaries = adversaries.map(adv => 
-      adv.id === id ? { ...adv, hp: newHp } : adv
-    )
+    // Check if this is a minion
+    const isMinion = targetAdversary.type === 'Minion'
+    const minionFeature = targetAdversary.features?.find(f => f.name?.startsWith('Minion ('))
+    const minionThreshold = minionFeature ? parseInt(minionFeature.name.match(/\((\d+)\)/)?.[1] || '1') : 1
     
-    // Update the selected item if it's the one being modified
-    if (selectedItem && selectedItem.id === id) {
-      setSelectedItem(prev => ({ ...prev, hp: newHp }))
+    if (isMinion) {
+      // Minion mechanics: any damage defeats the minion, and excess damage can defeat additional minions
+      console.log('Applying minion damage:', { id, damage, minionThreshold })
+      
+      // First, defeat the target minion
+      deleteAdversary(id)
+      
+      // Calculate how many additional minions can be defeated
+      const additionalMinions = Math.floor(damage / minionThreshold)
+      console.log(`Damage ${damage} with threshold ${minionThreshold} can defeat ${additionalMinions} additional minions`)
+      
+      if (additionalMinions > 0) {
+        // Find other minions of the same type that can be defeated
+        const sameTypeMinions = adversaries.filter(adv => 
+          adv.type === 'Minion' && 
+          adv.id !== id && 
+          adv.name === targetAdversary.name
+        )
+        
+        // Defeat up to the calculated number of additional minions
+        const minionsToDefeat = Math.min(additionalMinions, sameTypeMinions.length)
+        console.log(`Defeating ${minionsToDefeat} additional minions of type ${targetAdversary.name}`)
+        
+        for (let i = 0; i < minionsToDefeat; i++) {
+          deleteAdversary(sameTypeMinions[i].id)
+        }
+      }
+    } else {
+      // Regular adversary damage mechanics
+      const newHp = Math.min(currentHp + damage, maxHp) // Can't exceed max damage
+      console.log('Applying damage:', { id, damage, currentHp, maxHp, newHp })
+      
+      // Optimistic update - update local state immediately
+      const updatedAdversaries = adversaries.map(adv => 
+        adv.id === id ? { ...adv, hp: newHp } : adv
+      )
+      
+      // Update the selected item if it's the one being modified
+      if (selectedItem && selectedItem.id === id) {
+        setSelectedItem(prev => ({ ...prev, hp: newHp }))
+      }
+      
+      // Send update to server
+      updateAdversary(id, { hp: newHp })
     }
-    
-    // Send update to server
-    updateAdversary(id, { hp: newHp })
   }
   
   const handleAdversaryHealing = (id, healing, currentHp) => {
