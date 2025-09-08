@@ -92,7 +92,8 @@ const Cards = ({
     if (type === 'countdown') {
       return (
         <div 
-          className={`simple-list-row compact countdown ${dragAttributes && dragListeners ? 'edit-mode' : ''}`}
+          className={`simple-list-row compact countdown ${item.value >= item.max ? 'at-max' : ''} ${dragAttributes && dragListeners ? 'edit-mode' : ''}`}
+          data-countdown-type={item.type || 'standard'}
           onClick={() => onClick && onClick(item)}
           style={{ cursor: onClick ? 'pointer' : 'default' }}
         >
@@ -105,6 +106,7 @@ const Cards = ({
                     <span 
                       key={i} 
                       className={`countdown-symbol ${i < (item.value || 0) ? 'filled' : 'empty'}`}
+                      data-countdown-type={item.type || 'standard'}
                       title={`${i + 1} of ${item.max}`}
                     >
                       {i < (item.value || 0) ? '●' : '○'}
@@ -412,20 +414,36 @@ const Cards = ({
                     −
                   </Button>
                   <span className="stat-value">{item.value || 0}/{item.max}</span>
-                  <Button
-                    action="increment"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      e.preventDefault()
-                      if (onIncrement) {
-                        onIncrement(item.id)
-                      }
-                    }}
-                    title={item.value >= item.max ? "Loop countdown" : "Increase progress"}
-                  >
-                    {item.value >= item.max ? "⟳" : "+"}
-                  </Button>
+                  {item.value >= item.max && (!item.loop || item.loop === 'none') ? (
+                    <Button
+                      action="delete"
+                      size="sm"
+                      immediate={true}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
+                        onDelete && onDelete(item.id)
+                      }}
+                      title="Delete countdown"
+                    >
+                      ×
+                    </Button>
+                  ) : (
+                    <Button
+                      action="increment"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
+                        if (onIncrement) {
+                          onIncrement(item.id)
+                        }
+                      }}
+                      title={item.value >= item.max ? "Loop countdown" : "Increase progress"}
+                    >
+                      {item.value >= item.max ? "⟳" : "+"}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -437,6 +455,7 @@ const Cards = ({
                   <span 
                     key={i} 
                     className={`countdown-symbol ${i < (item.value || 0) ? 'filled' : 'empty'}`}
+                    data-countdown-type={item.type || 'standard'}
                     title={`${i + 1} of ${item.max}`}
                   >
                     {i < (item.value || 0) ? '●' : '○'}
@@ -1018,24 +1037,40 @@ const Cards = ({
             >
               −
             </Button>
-            <Button
-              action="increment"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation()
-                e.preventDefault()
-                console.log('Increment button clicked, onIncrement function:', onIncrement, 'current countdown value:', item.value, 'max:', item.max)
-                if (onIncrement) {
-                  console.log('Calling onIncrement with id:', item.id)
-                  onIncrement(item.id)
-                } else {
-                  console.log('onIncrement is undefined!')
-                }
-              }}
-              title={item.value >= item.max ? "Loop countdown" : "Increase progress"}
-            >
-              {item.value >= item.max ? "⟳" : "+"}
-            </Button>
+            {item.value >= item.max && (!item.loop || item.loop === 'none') ? (
+              <Button
+                action="delete"
+                size="sm"
+                immediate={true}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  onDelete && onDelete(item.id)
+                }}
+                title="Delete countdown"
+              >
+                ×
+              </Button>
+            ) : (
+              <Button
+                action="increment"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  console.log('Increment button clicked, onIncrement function:', onIncrement, 'current countdown value:', item.value, 'max:', item.max)
+                  if (onIncrement) {
+                    console.log('Calling onIncrement with id:', item.id)
+                    onIncrement(item.id)
+                  } else {
+                    console.log('onIncrement is undefined!')
+                  }
+                }}
+                title={item.value >= item.max ? (item.loop && item.loop !== 'none' ? "Loop countdown" : "Countdown at max") : "Increase progress"}
+              >
+                {item.value >= item.max ? (item.loop && item.loop !== 'none' ? "⟳" : "+") : "+"}
+              </Button>
+            )}
           </div>
           <div className="countdown-delete-space">
             {/* Only show delete button in edit mode */}

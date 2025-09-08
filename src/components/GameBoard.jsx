@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faSkull, faClock } from '@fortawesome/free-solid-svg-icons'
+import { faTrash, faSkull, faClock, faMoon, faDice, faFire } from '@fortawesome/free-solid-svg-icons'
 
 // Add Dropdown Menu Component
 const AddDropdownMenu = ({ onOpenDatabase }) => {
@@ -161,7 +161,13 @@ const GameBoard = ({
   onOpenDatabase,
   onOpenCreator,
   isEditMode,
-  onEditModeChange
+  onEditModeChange,
+  showLongTermCountdowns,
+  fear,
+  updateFear,
+  handleRollOutcome: handleRollOutcomeProp,
+  handleActionRoll: handleActionRollProp,
+  setShowLongTermCountdowns
 }) => {
   
   const { 
@@ -192,8 +198,33 @@ const GameBoard = ({
     campaign: false
   })
 
-  // State for showing/hiding long-term countdowns
-  const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(false)
+  // Determine which triggers are needed based on active countdowns
+  const getNeededTriggers = () => {
+    if (!countdowns || countdowns.length === 0) return { 
+      basicRollTriggers: false, 
+      simpleFearTriggers: false,
+      simpleHopeTriggers: false,
+      complexRollTriggers: false, 
+      restTriggers: false 
+    }
+    
+    const hasDynamicCountdowns = countdowns.some(c => 
+      c.type === 'progress' || c.type === 'consequence' || 
+      c.type === 'dynamic-progress' || c.type === 'dynamic-consequence'
+    )
+    const hasLongTermCountdowns = countdowns.some(c => c.type === 'long-term')
+    const hasSimpleFearCountdowns = countdowns.some(c => c.type === 'simple-fear')
+    const hasSimpleHopeCountdowns = countdowns.some(c => c.type === 'simple-hope')
+    const hasStandardCountdowns = countdowns.some(c => c.type === 'standard' || !c.type)
+    
+    return {
+      basicRollTriggers: hasStandardCountdowns,
+      simpleFearTriggers: hasSimpleFearCountdowns && !hasDynamicCountdowns,
+      simpleHopeTriggers: hasSimpleHopeCountdowns && !hasDynamicCountdowns,
+      complexRollTriggers: hasDynamicCountdowns,
+      restTriggers: hasLongTermCountdowns
+    }
+  }
 
   const handleEditItem = (item, type) => {
     onOpenCreator(type)
@@ -209,45 +240,6 @@ const GameBoard = ({
     setShowInlineCreator(prev => ({ ...prev, [countdownData.source]: false }))
   }
 
-  const handleCountdownClick = (event, countdown) => {
-    event.stopPropagation()
-    
-    const currentValue = countdown.value || 0
-    const maxValue = countdown.max
-    
-    // Get the bounds of the pip container (which is now the click target)
-    const pipRect = event.currentTarget.getBoundingClientRect()
-    
-    const clickX = event.clientX - pipRect.left
-    
-    // Calculate boundary as percentage of pip container width
-    const pipWidth = pipRect.width
-    const boundaryRatio = currentValue / maxValue
-    const boundaryX = pipWidth * boundaryRatio
-    
-    console.log('Countdown click debug:', {
-      countdownName: countdown.name,
-      currentValue,
-      maxValue,
-      clickX,
-      pipWidth,
-      boundaryRatio,
-      boundaryX,
-      willDecrement: clickX < boundaryX
-    })
-    
-    if (clickX < boundaryX) {
-      // Clicked left of boundary - decrement
-      if (currentValue > 0) {
-        decrementCountdown(countdown.id)
-      }
-    } else {
-      // Clicked right of boundary - increment
-      if (currentValue < maxValue) {
-        incrementCountdown(countdown.id)
-      }
-    }
-  }
 
   const handleDeleteItem = (id, type) => {
     if (type === 'environment') {
@@ -313,6 +305,18 @@ const GameBoard = ({
         if (advancement > 0) {
           console.log(`Consequence countdown "${countdown.name}" will advance by ${advancement}`)
         }
+      } else if (countdown.type === 'simple-fear') {
+        // Simple Fear countdowns advance by 1 whenever rolling with fear (simple or complex)
+        if (outcome === 'simple-fear' || outcome === 'success-fear' || outcome === 'failure-fear') {
+          advancement = 1
+          console.log(`Simple Fear countdown "${countdown.name}" will advance by ${advancement}`)
+        }
+      } else if (countdown.type === 'simple-hope') {
+        // Simple Hope countdowns advance by 1 whenever rolling with hope (simple or complex)
+        if (outcome === 'simple-hope' || outcome === 'success-hope' || outcome === 'failure-hope') {
+          advancement = 1
+          console.log(`Simple Hope countdown "${countdown.name}" will advance by ${advancement}`)
+        }
       }
       
       // Apply advancement if any
@@ -358,6 +362,232 @@ const GameBoard = ({
 
   return (
     <>
+      {/* Countdowns Section */}
+      <div className="game-section campaign-countdowns">
+        <div className="section-header">
+          <h3 className="section-title">Countdowns</h3>
+          <div className="section-header-buttons">
+            {/* Countdown Trigger Controls - only show if there are countdowns */}
+            {countdowns && countdowns.length > 0 && (
+              <div className="countdown-trigger-controls">
+                {(() => {
+                  const triggers = getNeededTriggers()
+                  return (
+                    <>
+                      {/* Show/Hide Long-term Countdowns Button */}
+                      {countdowns && countdowns.some(c => c.type === 'long-term') && (
+                        <button
+                          className="trigger-btn toggle-long-term"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setShowLongTermCountdowns(!showLongTermCountdowns)
+                          }}
+                          title={showLongTermCountdowns ? "Hide Long-term Countdowns" : "Show Long-term Countdowns"}
+                        >
+                          <FontAwesomeIcon icon={faMoon} /> {showLongTermCountdowns ? "Hide" : "Show"}
+                        </button>
+                      )}
+                      
+                      {/* Basic Roll Triggers - only show if there are standard countdowns */}
+                      {triggers.basicRollTriggers && (
+                        <button
+                          className="trigger-btn basic-roll"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleActionRollProp()
+                          }}
+                          title="Action Roll"
+                        >
+                          <FontAwesomeIcon icon={faDice} /> Roll
+                        </button>
+                      )}
+                      
+                      {/* Simple Fear/Hope Triggers - only show if there are simple fear/hope countdowns AND no dynamic countdowns */}
+                      {triggers.simpleFearTriggers && (
+                        <button
+                          className="trigger-btn simple-fear"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // Increment fear tracker
+                            const currentFear = fear?.value || 0
+                            if (currentFear < 12) {
+                              updateFear(currentFear + 1)
+                            }
+                            handleRollOutcomeProp('simple-fear')
+                          }}
+                          title="Roll with Fear"
+                        >
+                          <FontAwesomeIcon icon={faSkull} /> Fear
+                        </button>
+                      )}
+                      {triggers.simpleHopeTriggers && (
+                        <button
+                          className="trigger-btn simple-hope"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleRollOutcomeProp('simple-hope')
+                          }}
+                          title="Roll with Hope"
+                        >
+                          <FontAwesomeIcon icon={faFire} /> Hope
+                        </button>
+                      )}
+                      
+                      {/* Complex Roll Outcome Triggers - only show if there are dynamic countdowns */}
+                      {triggers.complexRollTriggers && (
+                        <>
+                          <button
+                            className="trigger-btn fail-fear"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // Increment fear tracker
+                              const currentFear = fear?.value || 0
+                              if (currentFear < 12) {
+                                updateFear(currentFear + 1)
+                              }
+                              handleRollOutcomeProp('failure-fear')
+                            }}
+                            title="Failure + Fear"
+                          >
+                            <FontAwesomeIcon icon={faSkull} /> Failure
+                          </button>
+                          <button
+                            className="trigger-btn fail-hope"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleRollOutcomeProp('failure-hope')
+                            }}
+                            title="Failure + Hope"
+                          >
+                            <FontAwesomeIcon icon={faFire} /> Failure
+                          </button>
+                          <button
+                            className="trigger-btn success-fear"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // Increment fear tracker
+                              const currentFear = fear?.value || 0
+                              if (currentFear < 12) {
+                                updateFear(currentFear + 1)
+                              }
+                              handleRollOutcomeProp('success-fear')
+                            }}
+                            title="Success + Fear"
+                          >
+                            <FontAwesomeIcon icon={faSkull} /> Success
+                          </button>
+                          <button
+                            className="trigger-btn success-hope"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleRollOutcomeProp('success-hope')
+                            }}
+                            title="Success + Hope"
+                          >
+                            <FontAwesomeIcon icon={faFire} /> Success
+                          </button>
+                          <button
+                            className="trigger-btn critical-success"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleRollOutcomeProp('critical-success')
+                            }}
+                            title="Critical Success"
+                          >
+                            <FontAwesomeIcon icon={faFire} /> Crit
+                          </button>
+                        </>
+                      )}
+                    </>
+                  )
+                })()}
+              </div>
+            )}
+            
+            <Button
+              action="add"
+              size="sm"
+              onClick={() => handleToggleInlineCreator('campaign')}
+              title="Add Countdown"
+            >
+              <Plus size={16} />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Inline Countdown Creator */}
+        {showInlineCreator.campaign && (
+          <InlineCountdownCreator
+            source="campaign"
+            onCreateCountdown={handleCreateCountdown}
+          />
+        )}
+        
+        {/* Non-long-term countdowns - always visible */}
+        {countdowns && countdowns.filter(c => c.type !== 'long-term').length > 0 && (
+          <List
+            items={countdowns.filter(c => c.type !== 'long-term')}
+            type="countdown"
+            onDelete={(id) => handleDeleteItem(id, 'countdown')}
+            onEdit={(item) => handleEditItem(item, 'countdown')}
+            onToggleVisibility={(id, isVisible) => handleToggleVisibility(id, 'countdown', isVisible)}
+            onReorder={(newOrder) => handleReorder('countdown', newOrder)}
+            onItemSelect={onItemSelect}
+            selectedItem={selectedItem}
+            selectedType={selectedType}
+            onAdvance={advanceCountdown}
+            onIncrement={incrementCountdown}
+            onDecrement={decrementCountdown}
+            isEditMode={isEditMode}
+          />
+        )}
+        
+        {/* Long-term countdowns - only visible when toggle is on */}
+        {showLongTermCountdowns && countdowns && countdowns.filter(c => c.type === 'long-term').length > 0 && (
+          <>
+            {/* Rest buttons for long-term countdowns */}
+            <div className="long-term-rest-controls">
+              <button
+                className="trigger-btn short-rest"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleRestTrigger('short')
+                }}
+                title="Short Rest"
+              >
+                <FontAwesomeIcon icon={faMoon} /> Short Rest
+              </button>
+              <button
+                className="trigger-btn long-rest"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleRestTrigger('long')
+                }}
+                title="Long Rest"
+              >
+                <FontAwesomeIcon icon={faMoon} /> Long Rest
+              </button>
+            </div>
+            
+            <List
+              items={countdowns.filter(c => c.type === 'long-term')}
+              type="countdown"
+              onDelete={(id) => handleDeleteItem(id, 'countdown')}
+              onEdit={(item) => handleEditItem(item, 'countdown')}
+              onToggleVisibility={(id, isVisible) => handleToggleVisibility(id, 'countdown', isVisible)}
+              onReorder={(newOrder) => handleReorder('countdown', newOrder)}
+              onItemSelect={onItemSelect}
+              selectedItem={selectedItem}
+              selectedType={selectedType}
+              onAdvance={advanceCountdown}
+              onIncrement={incrementCountdown}
+              onDecrement={decrementCountdown}
+              isEditMode={isEditMode}
+            />
+          </>
+        )}
+      </div>
+
       {/* Environments Section */}
       <div className="game-section">
         <div className="section-header">
@@ -477,107 +707,6 @@ const GameBoard = ({
             isEditMode={isEditMode}
           />
           )}
-      </div>
-
-      {/* Countdowns Section */}
-      <div className="game-section campaign-countdowns">
-        <div className="section-header">
-          <h3 className="section-title">Countdowns</h3>
-          <div className="section-header-buttons">
-            <Button
-              action="add"
-              size="sm"
-              onClick={() => setShowLongTermCountdowns(!showLongTermCountdowns)}
-              title={showLongTermCountdowns ? "Hide Long-term Countdowns" : "Show Long-term Countdowns"}
-            >
-              {showLongTermCountdowns ? <EyeOff size={16} /> : <Eye size={16} />}
-            </Button>
-            <Button
-              action="add"
-              size="sm"
-              onClick={() => handleToggleInlineCreator('campaign')}
-              title="Add Countdown"
-            >
-              <Plus size={16} />
-            </Button>
-          </div>
-        </div>
-        
-        {/* Inline Countdown Creator */}
-        {showInlineCreator.campaign && (
-          <InlineCountdownCreator
-            source="campaign"
-            onCreateCountdown={handleCreateCountdown}
-          />
-        )}
-        
-        {/* Non-long-term countdowns - always visible */}
-        {countdowns && countdowns.filter(c => c.type !== 'long-term').length > 0 && (
-          <div className="countdowns-compact">
-            {countdowns.filter(c => c.type !== 'long-term').map((countdown) => (
-              <div 
-                key={countdown.id} 
-                className="countdown-inline"
-              >
-                <div className="row-main">
-                  <h4 className="row-title">{countdown.name}</h4>
-                  <div className="row-meta">
-                    <div 
-                      className="countdown-symbols"
-                      onClick={(event) => handleCountdownClick(event, countdown)}
-                      title={`Click left of filled pips to decrease, right to increase`}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {Array.from({ length: countdown.max }, (_, i) => (
-                        <span 
-                          key={i} 
-                          className={`countdown-symbol ${i < (countdown.value || 0) ? 'filled' : 'empty'}`}
-                          title={`${i + 1} of ${countdown.max}`}
-                        >
-                          {i < (countdown.value || 0) ? '●' : '○'}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        
-        {/* Long-term countdowns - only visible when toggle is on */}
-        {showLongTermCountdowns && countdowns && countdowns.filter(c => c.type === 'long-term').length > 0 && (
-          <div className="countdowns-compact">
-            {countdowns.filter(c => c.type === 'long-term').map((countdown) => (
-              <div 
-                key={countdown.id} 
-                className="countdown-inline"
-              >
-                <div className="row-main">
-                  <h4 className="row-title">{countdown.name}</h4>
-                  <div className="row-meta">
-                    <div 
-                      className="countdown-symbols"
-                      onClick={(event) => handleCountdownClick(event, countdown)}
-                      title={`Click left of filled pips to decrease, right to increase`}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {Array.from({ length: countdown.max }, (_, i) => (
-                        <span 
-                          key={i} 
-                          className={`countdown-symbol ${i < (countdown.value || 0) ? 'filled' : 'empty'}`}
-                          title={`${i + 1} of ${countdown.max}`}
-                        >
-                          {i < (countdown.value || 0) ? '●' : '○'}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </>
   )

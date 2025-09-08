@@ -2247,6 +2247,22 @@ textarea,
   align-items: flex-end !important; /* Right-align the trackers */
 }
 
+/* Compact countdown layout - horizontal buttons */
+.simple-list-row.compact.countdown .countdown-control-buttons {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0.25rem !important;
+  align-items: center !important;
+}
+
+.simple-list-row.compact.countdown .card-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.5rem !important;
+}
+
 .simple-list-row.compact.adversary .card-actions {
   display: flex !important;
   flex-direction: row !important;
@@ -3980,6 +3996,173 @@ textarea,
   background: var(--bg-muted);
   color: var(--text-muted);
   cursor: not-allowed;
+}
+
+/* Countdown Trigger Controls */
+.countdown-trigger-controls {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0.375rem 0.75rem;
+  background: transparent;
+  border: none;
+  margin-bottom: 0.25rem;
+  justify-content: center;
+}
+
+.trigger-btn {
+  padding: 0.25rem 0.375rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: none;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.trigger-btn:hover {
+  background: var(--bg-muted);
+  opacity: 0.8;
+}
+
+/* Color just the fear and hope icons */
+.trigger-btn.simple-fear svg,
+.trigger-btn.success-fear svg,
+.trigger-btn.fail-fear svg {
+  color: var(--purple); /* Standard app purple for fear */
+}
+
+.trigger-btn.simple-hope svg,
+.trigger-btn.success-hope svg,
+.trigger-btn.fail-hope svg,
+.trigger-btn.critical-success svg {
+  color: #f59e0b; /* Same gold as stress pips */
+}
+
+.trigger-btn.toggle-long-term {
+  /* Remove specific styling to match other buttons */
+}
+
+/* Long-term rest controls */
+.long-term-rest-controls {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-muted);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.5rem;
+}
+
+/* Countdown pip colors based on type */
+.countdown-symbol.filled[data-countdown-type="progress"],
+.countdown-symbol.filled[data-countdown-type="dynamic-progress"],
+.countdown-symbol.filled[data-countdown-type="simple-hope"] {
+  color: #f59e0b !important; /* Gold for hope/progress */
+  text-shadow: 0 0 4px rgba(245, 158, 11, 0.5) !important;
+}
+
+.countdown-symbol.filled[data-countdown-type="consequence"],
+.countdown-symbol.filled[data-countdown-type="dynamic-consequence"],
+.countdown-symbol.filled[data-countdown-type="simple-fear"] {
+  color: var(--purple) !important; /* Purple for fear/consequence */
+  text-shadow: 0 0 4px rgba(59, 130, 246, 0.5) !important;
+}
+
+.countdown-symbol.filled[data-countdown-type="long-term"],
+.countdown-symbol.filled[data-countdown-type="standard"] {
+  color: var(--text-secondary) !important; /* Neutral for simple/long-term */
+  text-shadow: 0 0 4px rgba(163, 163, 163, 0.5) !important; /* Subtle grey glow */
+}
+
+/* Styling for countdowns at max value - color based on type */
+.simple-list-row.compact.countdown.at-max {
+  background: var(--bg-card);
+  border-radius: 0 0.25rem 0.25rem 0; /* Only round right corners */
+}
+
+/* Fear/Consequence countdowns at max - purple highlighting */
+.simple-list-row.compact.countdown.at-max[data-countdown-type="consequence"],
+.simple-list-row.compact.countdown.at-max[data-countdown-type="dynamic-consequence"],
+.simple-list-row.compact.countdown.at-max[data-countdown-type="simple-fear"] {
+  position: relative;
+}
+
+.simple-list-row.compact.countdown.at-max[data-countdown-type="consequence"]::before,
+.simple-list-row.compact.countdown.at-max[data-countdown-type="dynamic-consequence"]::before,
+.simple-list-row.compact.countdown.at-max[data-countdown-type="simple-fear"]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--purple);
+  border-radius: 0 2px 2px 0;
+}
+
+.simple-list-row.compact.countdown.at-max[data-countdown-type="consequence"] .row-title,
+.simple-list-row.compact.countdown.at-max[data-countdown-type="dynamic-consequence"] .row-title,
+.simple-list-row.compact.countdown.at-max[data-countdown-type="simple-fear"] .row-title {
+  font-weight: 600;
+}
+
+/* Hope/Progress countdowns at max - gold highlighting */
+.simple-list-row.compact.countdown.at-max[data-countdown-type="progress"],
+.simple-list-row.compact.countdown.at-max[data-countdown-type="dynamic-progress"],
+.simple-list-row.compact.countdown.at-max[data-countdown-type="simple-hope"] {
+  position: relative;
+}
+
+.simple-list-row.compact.countdown.at-max[data-countdown-type="progress"]::before,
+.simple-list-row.compact.countdown.at-max[data-countdown-type="dynamic-progress"]::before,
+.simple-list-row.compact.countdown.at-max[data-countdown-type="simple-hope"]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #f59e0b;
+  border-radius: 0 2px 2px 0;
+}
+
+.simple-list-row.compact.countdown.at-max[data-countdown-type="progress"] .row-title,
+.simple-list-row.compact.countdown.at-max[data-countdown-type="dynamic-progress"] .row-title,
+.simple-list-row.compact.countdown.at-max[data-countdown-type="simple-hope"] .row-title {
+  font-weight: 600;
+}
+
+/* Neutral countdowns at max - grey highlighting */
+.simple-list-row.compact.countdown.at-max[data-countdown-type="long-term"],
+.simple-list-row.compact.countdown.at-max[data-countdown-type="standard"] {
+  position: relative;
+}
+
+.simple-list-row.compact.countdown.at-max[data-countdown-type="long-term"]::before,
+.simple-list-row.compact.countdown.at-max[data-countdown-type="standard"]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--text-secondary);
+  border-radius: 0 2px 2px 0;
+}
+
+.simple-list-row.compact.countdown.at-max[data-countdown-type="long-term"] .row-title,
+.simple-list-row.compact.countdown.at-max[data-countdown-type="standard"] .row-title {
+  font-weight: 600;
+}
+
+.simple-list-row.compact.countdown.at-max {
+  background: var(--bg-card);
+  border-radius: 0.25rem;
 }
 
 .damage-apply-btn-compact {

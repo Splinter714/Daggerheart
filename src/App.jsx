@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { GameStateProvider } from './GameStateContext'
 import { useGameState } from './useGameState'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSkull } from '@fortawesome/free-solid-svg-icons'
+import { faSkull, faFire, faMoon, faStar, faDice } from '@fortawesome/free-solid-svg-icons'
 import { Swords, TreePine, Pencil, Clock, Plus, Trash2, Menu, Wrench } from 'lucide-react'
 import './App.css'
 
@@ -46,9 +46,8 @@ const AppContent = () => {
   const [isMobile, setIsMobile] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [mobileView, setMobileView] = useState('left') // 'left' or 'right'
-  const [addFlyoutOpen, setAddFlyoutOpen] = useState(false)
   const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
-  const [countdownFlyoutOpen, setCountdownFlyoutOpen] = useState(false)
+  const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
   const [showMockup, setShowMockup] = useState(false)
   const [creatorFormData, setCreatorFormData] = useState({
     name: '',
@@ -68,15 +67,13 @@ const AppContent = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.sidebar-nav-item')) {
-        setAddFlyoutOpen(false)
         setDeleteFlyoutOpen(false)
-        setCountdownFlyoutOpen(false)
       }
     }
 
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
-  }, [addFlyoutOpen, deleteFlyoutOpen, countdownFlyoutOpen])
+  }, [deleteFlyoutOpen])
   
   // Right column handlers
   const handleItemSelect = (item, type) => {
@@ -159,14 +156,14 @@ const AppContent = () => {
           console.log(`Consequence countdown "${countdown.name}" will advance by ${advancement}`)
         }
       } else if (countdown.type === 'simple-fear') {
-        // Simple Fear countdowns advance by 1 whenever rolling with fear
-        if (outcome === 'success-fear' || outcome === 'failure-fear') {
+        // Simple Fear countdowns advance by 1 whenever rolling with fear (simple or complex)
+        if (outcome === 'simple-fear' || outcome === 'success-fear' || outcome === 'failure-fear') {
           advancement = 1
           console.log(`Simple Fear countdown "${countdown.name}" will advance by ${advancement}`)
         }
       } else if (countdown.type === 'simple-hope') {
-        // Simple Hope countdowns advance by 1 whenever rolling with hope
-        if (outcome === 'success-hope' || outcome === 'failure-hope') {
+        // Simple Hope countdowns advance by 1 whenever rolling with hope (simple or complex)
+        if (outcome === 'simple-hope' || outcome === 'success-hope' || outcome === 'failure-hope') {
           advancement = 1
           console.log(`Simple Hope countdown "${countdown.name}" will advance by ${advancement}`)
         }
@@ -197,6 +194,20 @@ const AppContent = () => {
     })
   }
 
+  const handleActionRoll = () => {
+    console.log('Bottom bar: Handling action roll')
+    
+    countdowns.forEach(countdown => {
+      // Standard countdowns advance by 1 on action roll
+      if (countdown.type === 'standard' || !countdown.type) {
+        console.log(`Standard countdown "${countdown.name}" will advance on action roll`)
+        const currentValue = countdown.value || 0
+        const rawNewValue = currentValue + 1
+        advanceCountdown(countdown.id, rawNewValue)
+      }
+    })
+  }
+
   const handleCloseRightColumn = () => {
     setRightColumnMode(null)
     setSelectedItem(null)
@@ -216,6 +227,34 @@ const AppContent = () => {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Determine which triggers are needed based on active countdowns
+  const getNeededTriggers = () => {
+    if (!countdowns || countdowns.length === 0) return { 
+      basicRollTriggers: false, 
+      simpleFearTriggers: false,
+      simpleHopeTriggers: false,
+      complexRollTriggers: false, 
+      restTriggers: false 
+    }
+    
+    const hasDynamicCountdowns = countdowns.some(c => 
+      c.type === 'progress' || c.type === 'consequence' || 
+      c.type === 'dynamic-progress' || c.type === 'dynamic-consequence'
+    )
+    const hasLongTermCountdowns = countdowns.some(c => c.type === 'long-term')
+    const hasSimpleFearCountdowns = countdowns.some(c => c.type === 'simple-fear')
+    const hasSimpleHopeCountdowns = countdowns.some(c => c.type === 'simple-hope')
+    const hasStandardCountdowns = countdowns.some(c => c.type === 'standard' || !c.type)
+    
+    return {
+      basicRollTriggers: hasStandardCountdowns,
+      simpleFearTriggers: hasSimpleFearCountdowns && !hasDynamicCountdowns,
+      simpleHopeTriggers: hasSimpleHopeCountdowns && !hasDynamicCountdowns,
+      complexRollTriggers: hasDynamicCountdowns,
+      restTriggers: hasLongTermCountdowns
+    }
+  }
 
   // Sync selectedItem with updated data
   useEffect(() => {
@@ -467,167 +506,9 @@ const AppContent = () => {
       </div>
 
       {/* Sidebar: Navigation */}
-      <div className={`sidebar ${(addFlyoutOpen || deleteFlyoutOpen || countdownFlyoutOpen) ? 'flyout-open' : ''}`}>
+      <div className={`sidebar ${deleteFlyoutOpen ? 'flyout-open' : ''}`}>
         <nav className="sidebar-nav">
-          {/* Plus Button with Add Flyout */}
-          <div
-            className="sidebar-nav-item"
-            onClick={(e) => {
-              e.stopPropagation()
-              setAddFlyoutOpen(!addFlyoutOpen)
-              setDeleteFlyoutOpen(false) // Close other flyout
-            }}
-            title="Add Items"
-            style={{ cursor: 'pointer' }}
-          >
-            <div className="sidebar-nav-icon">
-              <Plus size={20} />
-            </div>
-            
-            <div className={`flyout-menu ${addFlyoutOpen ? 'show' : ''}`}>
-                <button
-                  className="flyout-menu-item"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setAddFlyoutOpen(false)
-                    handleOpenDatabase('adversary')
-                  }}
-                >
-                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                    <Plus size={14} />
-                    <span>Adversary</span>
-                  </div>
-                </button>
-                <button
-                  className="flyout-menu-item"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setAddFlyoutOpen(false)
-                    handleOpenDatabase('environment')
-                  }}
-                >
-                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                    <Plus size={14} />
-                    <span>Environment</span>
-                  </div>
-                </button>
-                <button
-                  className="flyout-menu-item"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setAddFlyoutOpen(false)
-                    handleOpenCreator('countdown')
-                  }}
-                >
-                  <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                    <Plus size={14} />
-                    <span>Countdown</span>
-                  </div>
-                </button>
-              </div>
-          </div>
           
-          {/* Countdown Control Panel */}
-          <div
-            className={`sidebar-nav-item ${countdownFlyoutOpen ? 'active' : ''}`}
-            onClick={(e) => {
-              e.stopPropagation()
-              setCountdownFlyoutOpen(!countdownFlyoutOpen)
-              setAddFlyoutOpen(false)
-              setDeleteFlyoutOpen(false)
-            }}
-            title="Countdown Controls"
-            style={{ cursor: 'pointer' }}
-          >
-            <div className="sidebar-nav-icon">
-              <Clock size={20} />
-            </div>
-            
-            <div className={`flyout-menu ${countdownFlyoutOpen ? 'show' : ''}`}>
-              <div className="countdown-control-panel">
-                <div className="countdown-actions">
-                  <button
-                    className="countdown-action-btn success-fear"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      // Success + Fear
-                      const currentFear = fear?.value || 0
-                      if (currentFear < 12) {
-                        updateFear(currentFear + 1)
-                      }
-                      handleRollOutcome('success-fear')
-                    }}
-                  >
-                    Success + Fear
-                  </button>
-                  <button
-                    className="countdown-action-btn fail-fear"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      // Fail + Fear
-                      const currentFear = fear?.value || 0
-                      if (currentFear < 12) {
-                        updateFear(currentFear + 1)
-                      }
-                      handleRollOutcome('failure-fear')
-                    }}
-                  >
-                    Fail + Fear
-                  </button>
-                  <button
-                    className="countdown-action-btn success-hope"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      // Success + Hope (no fear change)
-                      handleRollOutcome('success-hope')
-                    }}
-                  >
-                    Success + Hope
-                  </button>
-                  <button
-                    className="countdown-action-btn fail-hope"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      // Fail + Hope (no fear change)
-                      handleRollOutcome('failure-hope')
-                    }}
-                  >
-                    Fail + Hope
-                  </button>
-                  <button
-                    className="countdown-action-btn crit-success"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      // Critical Success (no fear change)
-                      handleRollOutcome('critical-success')
-                    }}
-                  >
-                    Critical Success
-                  </button>
-                  <button
-                    className="countdown-action-btn short-rest"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      // Short Rest
-                      handleRestTrigger('short')
-                    }}
-                  >
-                    Short Rest
-                  </button>
-                  <button
-                    className="countdown-action-btn long-rest"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      // Long Rest
-                      handleRestTrigger('long')
-                    }}
-                  >
-                    Long Rest
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Edit Mode Toggle */}
           <button
@@ -765,12 +646,19 @@ const AppContent = () => {
             <>
               {/* Mobile navigation when on left panel but right content exists - removed View Details button */}
               
+
               <GameBoard
                 onItemSelect={handleItemSelect}
                 onOpenDatabase={handleOpenDatabase}
                 onOpenCreator={handleOpenCreator}
                 isEditMode={isEditMode}
                 onEditModeChange={setIsEditMode}
+                showLongTermCountdowns={showLongTermCountdowns}
+                fear={fear}
+                updateFear={updateFear}
+                handleRollOutcome={handleRollOutcome}
+                handleActionRoll={handleActionRoll}
+                setShowLongTermCountdowns={setShowLongTermCountdowns}
               />
             </>
           )}
