@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Droplet, Activity } from 'lucide-react'
+import { Droplet, Activity, CheckCircle } from 'lucide-react'
 import Button from './Buttons'
 import { Badge, DifficultyBadge, TypeBadge } from './Badges'
 import Creator from './Creator'
@@ -233,7 +233,16 @@ const Cards = ({
           
           {/* Damage Input Popup */}
           {showDamageInput && item.thresholds && item.thresholds.major && item.thresholds.severe && (
-            <div className="damage-input-popup">
+            <div 
+              className="damage-input-popup"
+              onClick={(e) => {
+                // Close if clicking outside the input content
+                if (e.target === e.currentTarget) {
+                  setShowDamageInput(false)
+                  setDamageValue('')
+                }
+              }}
+            >
               <div className="damage-input-content">
                 <input
                   type="number"
@@ -277,11 +286,48 @@ const Cards = ({
                       <span 
                         key={level}
                         className={`damage-drop ${isActive ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          // Set the input value to the threshold amount for this level
+                          if (level === 1) {
+                            setDamageValue('1')
+                          } else if (level === 2) {
+                            setDamageValue(item.thresholds.major.toString())
+                          } else if (level === 3) {
+                            setDamageValue(item.thresholds.severe.toString())
+                          }
+                        }}
+                        title={`Click to set damage to ${level === 1 ? '1' : level === 2 ? item.thresholds.major : item.thresholds.severe}`}
                       >
                         <Droplet size={16} />
                       </span>
                     )
                   })}
+                  <button
+                    className="damage-submit-btn"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      const damage = parseInt(damageValue)
+                      if (damage > 0) {
+                        // Calculate HP damage based on damage thresholds
+                        let hpDamage = 0
+                        if (damage >= item.thresholds.severe) {
+                          hpDamage = 3 // Severe damage
+                        } else if (damage >= item.thresholds.major) {
+                          hpDamage = 2 // Major damage
+                        } else if (damage >= 1) {
+                          hpDamage = 1 // Minor damage
+                        }
+                        onApplyDamage && onApplyDamage(item.id, hpDamage, item.hp, item.hpMax)
+                        setShowDamageInput(false)
+                        setDamageValue('')
+                      }
+                    }}
+                    title="Apply damage"
+                    disabled={!damageValue || parseInt(damageValue) <= 0}
+                  >
+                    <CheckCircle size={16} />
+                  </button>
                 </div>
               </div>
             </div>

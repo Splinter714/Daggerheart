@@ -3934,6 +3934,54 @@ textarea,
   appearance: textfield;
 }
 
+.damage-indicators {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.damage-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.damage-drop:hover {
+  color: var(--text-primary);
+}
+
+.damage-drop.active {
+  color: #dc2626;
+}
+
+.damage-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: var(--bg-muted);
+  border: none;
+  border-radius: 0.25rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.damage-submit-btn:hover:not(:disabled) {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.damage-submit-btn:disabled {
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
 .damage-apply-btn-compact {
   width: 1.5rem;
   height: 1.5rem;
