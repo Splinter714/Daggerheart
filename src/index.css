@@ -1818,6 +1818,7 @@ textarea,
 .countdown-symbol.filled {
   color: var(--purple);
   text-shadow: 0 0 4px rgba(59, 130, 246, 0.5);
+  font-weight: 600; /* Make filled symbols bolder to match visual weight */
 }
 
 .countdown-symbol.empty {
@@ -2725,6 +2726,7 @@ textarea,
 .simple-list-row.compact.countdown .countdown-symbol.filled {
   color: var(--purple);
   text-shadow: 0 0 4px rgba(59, 130, 246, 0.5);
+  font-weight: 600; /* Make filled symbols bolder to match visual weight */
 }
 
 .simple-list-row.compact.countdown .countdown-symbol.empty {
@@ -5013,6 +5015,7 @@ textarea,
 
 .countdown-symbol.filled {
   color: var(--purple);
+  font-weight: 600; /* Make filled symbols bolder to match visual weight */
 }
 
 .countdown-symbol.empty {

@@ -234,7 +234,7 @@ const Cards = ({
           </div>
           
           {/* Damage Input Popup */}
-          {showDamageInput && item.thresholds && item.thresholds.major && item.thresholds.severe && (
+          {showDamageInput && ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') && (
             <div 
               className="damage-input-popup"
               onClick={(e) => {
@@ -256,16 +256,21 @@ const Cards = ({
                     if (e.key === 'Enter') {
                       const damage = parseInt(damageValue)
                       if (damage > 0) {
-                        // Calculate HP damage based on damage thresholds
-                        let hpDamage = 0
-                        if (damage >= item.thresholds.severe) {
-                          hpDamage = 3 // Severe damage
-                        } else if (damage >= item.thresholds.major) {
-                          hpDamage = 2 // Major damage
-                        } else if (damage >= 1) {
-                          hpDamage = 1 // Minor damage
+                        if (item.type === 'Minion') {
+                          // For minions, apply the raw damage amount (minion mechanics handle the rest)
+                          onApplyDamage && onApplyDamage(item.id, damage, item.hp, item.hpMax)
+                        } else {
+                          // Calculate HP damage based on damage thresholds for regular adversaries
+                          let hpDamage = 0
+                          if (damage >= item.thresholds.severe) {
+                            hpDamage = 3 // Severe damage
+                          } else if (damage >= item.thresholds.major) {
+                            hpDamage = 2 // Major damage
+                          } else if (damage >= 1) {
+                            hpDamage = 1 // Minor damage
+                          }
+                          onApplyDamage && onApplyDamage(item.id, hpDamage, item.hp, item.hpMax)
                         }
-                        onApplyDamage && onApplyDamage(item.id, hpDamage, item.hp, item.hpMax)
                         setShowDamageInput(false)
                         setDamageValue('')
                       }
@@ -277,50 +282,75 @@ const Cards = ({
                   autoFocus
                 />
                 <div className="damage-indicators">
-                  {[1, 2, 3].map((level) => {
-                    const damage = parseInt(damageValue) || 0
-                    let isActive = false
-                    if (level === 1 && damage >= 1) isActive = true
-                    if (level === 2 && damage >= item.thresholds.major) isActive = true
-                    if (level === 3 && damage >= item.thresholds.severe) isActive = true
-                    
-                    return (
-                      <span 
-                        key={level}
-                        className={`damage-drop ${isActive ? 'active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          // Set the input value to the threshold amount for this level
-                          if (level === 1) {
-                            setDamageValue('1')
-                          } else if (level === 2) {
-                            setDamageValue(item.thresholds.major.toString())
-                          } else if (level === 3) {
-                            setDamageValue(item.thresholds.severe.toString())
-                          }
-                        }}
-                        title={`Click to set damage to ${level === 1 ? '1' : level === 2 ? item.thresholds.major : item.thresholds.severe}`}
-                      >
-                        <Droplet size={16} />
-                      </span>
-                    )
-                  })}
+                  {item.type === 'Minion' ? (
+                    // Minion damage indicator - show how many additional minions can be defeated
+                    (() => {
+                      const damage = parseInt(damageValue) || 0
+                      const minionFeature = item.features?.find(f => f.name?.startsWith('Minion ('))
+                      const minionThreshold = minionFeature ? parseInt(minionFeature.name.match(/\((\d+)\)/)?.[1] || '1') : 1
+                      const additionalMinions = Math.floor(damage / minionThreshold)
+                      
+                      return (
+                        <span 
+                          className={`damage-drop ${damage > 0 ? 'active' : ''}`}
+                          title={`${damage} damage can defeat ${additionalMinions + 1} minion${additionalMinions + 1 !== 1 ? 's' : ''} (1 + ${additionalMinions} additional)`}
+                        >
+                          {damage > 0 ? `+${additionalMinions}` : '0'}
+                        </span>
+                      )
+                    })()
+                  ) : (
+                    // Regular adversary damage indicators
+                    [1, 2, 3].map((level) => {
+                      const damage = parseInt(damageValue) || 0
+                      let isActive = false
+                      if (level === 1 && damage >= 1) isActive = true
+                      if (level === 2 && damage >= item.thresholds.major) isActive = true
+                      if (level === 3 && damage >= item.thresholds.severe) isActive = true
+                      
+                      return (
+                        <span 
+                          key={level}
+                          className={`damage-drop ${isActive ? 'active' : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // Set the input value to the threshold amount for this level
+                            if (level === 1) {
+                              setDamageValue('1')
+                            } else if (level === 2) {
+                              setDamageValue(item.thresholds.major.toString())
+                            } else if (level === 3) {
+                              setDamageValue(item.thresholds.severe.toString())
+                            }
+                          }}
+                          title={`Click to set damage to ${level === 1 ? '1' : level === 2 ? item.thresholds.major : item.thresholds.severe}`}
+                        >
+                          <Droplet size={16} />
+                        </span>
+                      )
+                    })
+                  )}
                   <button
                     className="damage-submit-btn"
                     onClick={(e) => {
                       e.stopPropagation()
                       const damage = parseInt(damageValue)
                       if (damage > 0) {
-                        // Calculate HP damage based on damage thresholds
-                        let hpDamage = 0
-                        if (damage >= item.thresholds.severe) {
-                          hpDamage = 3 // Severe damage
-                        } else if (damage >= item.thresholds.major) {
-                          hpDamage = 2 // Major damage
-                        } else if (damage >= 1) {
-                          hpDamage = 1 // Minor damage
+                        if (item.type === 'Minion') {
+                          // For minions, apply the raw damage amount (minion mechanics handle the rest)
+                          onApplyDamage && onApplyDamage(item.id, damage, item.hp, item.hpMax)
+                        } else {
+                          // Calculate HP damage based on damage thresholds for regular adversaries
+                          let hpDamage = 0
+                          if (damage >= item.thresholds.severe) {
+                            hpDamage = 3 // Severe damage
+                          } else if (damage >= item.thresholds.major) {
+                            hpDamage = 2 // Major damage
+                          } else if (damage >= 1) {
+                            hpDamage = 1 // Minor damage
+                          }
+                          onApplyDamage && onApplyDamage(item.id, hpDamage, item.hp, item.hpMax)
                         }
-                        onApplyDamage && onApplyDamage(item.id, hpDamage, item.hp, item.hpMax)
                         setShowDamageInput(false)
                         setDamageValue('')
                       }

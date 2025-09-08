@@ -474,6 +474,7 @@
   background: var(--primary);
   color: var(--text-primary);
   border-color: var(--primary);
+  font-weight: 600; /* Make filled symbols bolder to match visual weight */
 }
 
 .unified-game-piece .countdown-symbol.empty {
