@@ -111,6 +111,12 @@ const Cards = ({
                     </span>
                   ))}
                 </div>
+                {/* Trigger Badge for conditional countdowns */}
+                {item.triggerCondition && (
+                  <div className="countdown-trigger-badge compact">
+                    <span className="trigger-condition">{formatTriggerCondition(item.triggerCondition)}</span>
+                  </div>
+                )}
               </div>
 
             {renderCardActions()}
@@ -393,6 +399,13 @@ const Cards = ({
                   </span>
                 ))}
               </div>
+              {/* Trigger Badge for conditional countdowns */}
+              {item.triggerCondition && (
+                <div className="countdown-trigger-badge">
+                  <span className="trigger-label">Triggers:</span>
+                  <span className="trigger-condition">{formatTriggerCondition(item.triggerCondition)}</span>
+                </div>
+              )}
             </div>
             
             {item.description && (
@@ -406,142 +419,133 @@ const Cards = ({
       )
     } else if (type === 'adversary') {
       return (
-        <div className="expanded-card adversary">
-          <div className="expanded-header">
-            <h2>{item.name}</h2>
-            <div className="header-actions">
-              <Button
-                action="edit"
-                size="sm"
-                onClick={() => onEdit && onEdit(item)}
-                title="Edit adversary"
-              >
-                ✏️
-              </Button>
-              {onDelete && (
-                <Button
-                  action="delete"
-                  size="sm"
-                  onClick={() => onDelete(item.id)}
-                  title="Delete adversary"
-                >
-                  ×
-                </Button>
+        <div className="adversary-details">
+          {/* Motives & Tactics */}
+          {item.motives && (
+            <div className="motives-section">
+              <h3>Motives & Tactics</h3>
+              <p><em>{item.motives}</em></p>
+            </div>
+          )}
+
+          {/* Core Stats */}
+          <div className="core-stats-section">
+            <h3>Core Stats</h3>
+            <div className="stats-grid">
+              <div className="stat-item">
+                <span className="stat-label">Difficulty:</span>
+                <span className="stat-value">{item.difficulty}</span>
+              </div>
+              {item.thresholds && (
+                <div className="stat-item">
+                  <span className="stat-label">Thresholds:</span>
+                  <span className="stat-value">{item.thresholds.major}/{item.thresholds.severe}</span>
+                </div>
+              )}
+              <div className="stat-item">
+                <span className="stat-label">ATK:</span>
+                <span className="stat-value">+{item.atk}</span>
+              </div>
+              {item.weapon && (
+                <div className="stat-item">
+                  <span className="stat-label">Weapon:</span>
+                  <span className="stat-value">{item.weapon}: {item.range} | {item.damage}</span>
+                </div>
               )}
             </div>
           </div>
+
+          {/* Experience */}
+          {item.experience && item.experience.length > 0 && (
+            <div className="experience-section">
+              <h3>Experience</h3>
+              <p>{item.experience.join(', ')}</p>
+            </div>
+          )}
+
+          {/* Description */}
+          {item.description && (
+            <div className="description-section">
+              <h3>Description</h3>
+              <p><em>{item.description}</em></p>
+            </div>
+          )}
           
-          <div className="expanded-content">
-            <div className="stats-section">
-              <div className="stat-row">
-                <span className="stat-label">HP (Damage):</span>
-                <div className="stat-controls">
-                  <Button
-                    action="decrement"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      e.preventDefault()
-                      onApplyHealing && onApplyHealing(item.id, 1, item.hp)
-                    }}
-                    title="Heal (reduce damage)"
-                  >
-                    −
-                  </Button>
-                  <span className="stat-value">{item.hp}/{item.hpMax}</span>
-                  <Button
-                    action="increment"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      e.preventDefault()
-                      onApplyDamage && onApplyDamage(item.id, 1, item.hp, item.hpMax)
-                    }}
-                    title="Take damage"
-                  >
-                    +
-                  </Button>
-                </div>
-              </div>
-              
-              {item.stressMax > 0 && (
-                <div className="stat-row">
-                  <span className="stat-label">Stress:</span>
-                  <div className="stat-controls">
-                    <Button
-                      action="decrement"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        e.preventDefault()
-                        onApplyStressChange && onApplyStressChange(item.id, -1, item.stress, item.stressMax)
-                      }}
-                      title="Reduce stress"
-                    >
-                      −
-                    </Button>
-                    <span className="stat-value">{item.stress}/{item.stressMax}</span>
-                    <Button
-                      action="increment"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        e.preventDefault()
-                        onApplyStressChange && onApplyStressChange(item.id, 1, item.stress, item.stressMax)
-                      }}
-                      title="Increase stress"
-                    >
-                      +
-                    </Button>
-                  </div>
-                </div>
-              )}
+          {/* Features */}
+          {item.features && item.features.length > 0 && (
+            <div className="features-section">
+              <h3>Features</h3>
+              {(() => {
+                // Group features by type
+                const featuresByType = item.features.reduce((acc, feature) => {
+                  const type = feature.type || 'Other';
+                  if (!acc[type]) acc[type] = [];
+                  acc[type].push(feature);
+                  return acc;
+                }, {});
+
+                // Define order for types
+                const typeOrder = ['Passive', 'Action', 'Reaction', 'Other'];
+                
+                return typeOrder.map(type => {
+                  if (!featuresByType[type]) return null;
+                  
+                  return (
+                    <div key={type} className="feature-type-group">
+                      <h4 className="feature-type-title">{type}</h4>
+                      {featuresByType[type].map((feature, i) => {
+                        // Check if this feature involves Fear/Stress mechanics
+                        const description = feature.description ? feature.description.toLowerCase() : '';
+                        const isFearMechanic = 
+                          description.includes('spend') && (description.includes('fear') || description.includes('stress')) ||
+                          description.includes('mark') && (description.includes('fear') || description.includes('stress')) ||
+                          description.includes('gain') && description.includes('fear') ||
+                          description.includes('countdown') ||
+                          description.includes('token');
+                        
+                        return (
+                          <div key={i} className={`feature-item ${isFearMechanic ? 'fear-mechanic' : ''}`}>
+                            <div className="feature-header">
+                              <span className="feature-name"><strong>{feature.name}</strong></span>
+                              {isFearMechanic && (
+                                <span className="fear-indicator" title="Fear/Stress Mechanic">⚡</span>
+                              )}
+                            </div>
+                            <div className="feature-description">
+                              {renderInteractiveDescription(feature.description)}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                }).filter(Boolean);
+              })()}
             </div>
-            
-            <div className="meta-section">
-              <div className="meta-row">
-                <span className="meta-label">Type:</span>
-                <TypeBadge type={item.type} />
-              </div>
-              <div className="meta-row">
-                <span className="meta-label">Tier:</span>
-                <Badge variant="tier">Tier {item.tier}</Badge>
-              </div>
-              <div className="meta-row">
-                <span className="meta-label">Difficulty:</span>
-                <DifficultyBadge difficulty={item.difficulty} />
-              </div>
+          )}
+
+          {/* Legacy abilities/traits for backwards compatibility */}
+          {item.abilities && item.abilities.length > 0 && (
+            <div className="abilities-section">
+              <h3>Abilities</h3>
+              <ul>
+                {item.abilities.map((ability, i) => (
+                  <li key={i}>{ability}</li>
+                ))}
+              </ul>
             </div>
-            
-            {item.description && (
-              <div className="description-section">
-                <h3>Description</h3>
-                <p>{item.description}</p>
-              </div>
-            )}
-            
-            {item.abilities && item.abilities.length > 0 && (
-              <div className="abilities-section">
-                <h3>Abilities</h3>
-                <ul>
-                  {item.abilities.map((ability, i) => (
-                    <li key={i}>{ability}</li>
-                  ))}
-                </ul>
-                  </div>
-            )}
-            
-            {item.traits && item.traits.length > 0 && (
-              <div className="traits-section">
-                <h3>Traits</h3>
-                <ul>
-                  {item.traits.map((trait, i) => (
-                    <li key={i}>{trait}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+          )}
+          
+          {item.traits && item.traits.length > 0 && (
+            <div className="traits-section">
+              <h3>Traits</h3>
+              <ul>
+                {item.traits.map((trait, i) => (
+                  <li key={i}>{trait}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )
     } else {
@@ -1041,6 +1045,301 @@ const Cards = ({
         </div>
       )
     }
+  }
+
+  // Helper function to roll dice
+  function rollDice(numDice, dieSize) {
+    let total = 0;
+    for (let i = 0; i < numDice; i++) {
+      total += Math.floor(Math.random() * dieSize) + 1;
+    }
+    return total;
+  }
+
+  // Helper function to format trigger conditions for display
+  function formatTriggerCondition(triggerCondition) {
+    const conditionMap = {
+      'pc-rolls-with-fear': 'PC rolls with Fear',
+      'pc-makes-attack-roll': 'PC makes attack roll',
+      'gorgon-is-attacked': 'Gorgon is attacked',
+      'pc-takes-violent-action': 'PC takes violent action'
+    };
+    
+    return conditionMap[triggerCondition] || triggerCondition;
+  }
+
+  // Helper function to parse countdown details from context
+  function parseCountdownDetails(details, featureName) {
+    const detailsLower = details.toLowerCase();
+    
+    // Parse countdown type
+    let type = 'standard';
+    if (detailsLower.includes('loop')) {
+      type = 'loop';
+    } else if (detailsLower.includes('increasing')) {
+      type = 'increasing';
+    } else if (detailsLower.includes('decreasing')) {
+      type = 'decreasing';
+    } else if (detailsLower.includes('progress')) {
+      type = 'progress';
+    } else if (detailsLower.includes('consequence')) {
+      type = 'consequence';
+    }
+    
+    // Parse special trigger conditions from the full description
+    let triggerCondition = null;
+    const fullDescription = featureName ? `${featureName}: ${details}` : details;
+    
+    // Check for specific trigger patterns
+    if (fullDescription.toLowerCase().includes('ticks down when a pc rolls with fear')) {
+      triggerCondition = 'pc-rolls-with-fear';
+    } else if (fullDescription.toLowerCase().includes('ticks down when a pc makes an attack roll')) {
+      triggerCondition = 'pc-makes-attack-roll';
+    } else if (fullDescription.toLowerCase().includes('ticks down when the gorgon is attacked')) {
+      triggerCondition = 'gorgon-is-attacked';
+    } else if (fullDescription.toLowerCase().includes('ticks down when a pc takes a violent action')) {
+      triggerCondition = 'pc-takes-violent-action';
+    } else if (fullDescription.toLowerCase().includes('ticks down when')) {
+      // Extract the condition after "ticks down when"
+      const whenMatch = fullDescription.match(/ticks down when (.+?)(?:\.|$)/i);
+      if (whenMatch) {
+        triggerCondition = whenMatch[1].toLowerCase().trim();
+      }
+    }
+    
+    // Name should always be the feature name that starts it
+    const name = featureName || 'Countdown';
+    
+    // Parse max value based on type
+    let max = 5; // default
+    
+    if (type === 'loop') {
+      // For loop countdowns, max is based on dice notation
+      const diceMatch = details.match(/(\d+)d(\d+)/i);
+      if (diceMatch) {
+        const numDice = parseInt(diceMatch[1]);
+        const dieSize = parseInt(diceMatch[2]);
+        max = rollDice(numDice, dieSize); // Roll 2d6, 1d4, etc.
+      }
+    } else {
+      // For other types, max is the number in parentheses
+      const maxMatch = details.match(/(\d+)/);
+      if (maxMatch) {
+        max = parseInt(maxMatch[1]);
+      }
+    }
+    
+    // Parse dice notation (e.g., "2d6", "1d4")
+    let diceNotation = null;
+    const diceMatch = details.match(/(\d+d\d+)/i);
+    if (diceMatch) {
+      diceNotation = diceMatch[1];
+    }
+    
+    return {
+      name,
+      type,
+      max,
+      diceNotation,
+      description: details,
+      value: 0,
+      triggerCondition
+    };
+  }
+
+  // Helper function to check if a mechanic should be interactive based on context
+  function checkIfInteractive(match, description, type) {
+    const matchIndex = description.indexOf(match);
+    const contextBefore = description.substring(Math.max(0, matchIndex - 50), matchIndex).toLowerCase();
+    const contextAfter = description.substring(matchIndex + match.length, Math.min(description.length, matchIndex + match.length + 50)).toLowerCase();
+    
+    // Non-interactive patterns (automatic effects)
+    const nonInteractivePatterns = [
+      'they mark', 'them mark', 'target marks', 'pc marks', 'player marks',
+      'each pc', 'all pcs', 'every pc', 'the party',
+      'automatically', 'must mark', 'forced to', 'compelled to'
+    ];
+    
+    // Check if context suggests this is automatic, not player choice
+    for (const pattern of nonInteractivePatterns) {
+      if (contextBefore.includes(pattern) || contextAfter.includes(pattern)) {
+        return false;
+      }
+    }
+    
+    // Interactive patterns (player/GM choices)
+    const interactivePatterns = [
+      'you may', 'you can', 'you spend', 'you gain',
+      'gm may', 'gm can', 'gm gains',
+      'instead of', 'to activate', 'to make', 'to spotlight'
+    ];
+    
+    // Check if context suggests this is a choice
+    for (const pattern of interactivePatterns) {
+      if (contextBefore.includes(pattern) || contextAfter.includes(pattern)) {
+        return true;
+      }
+    }
+    
+    // Default behavior based on type
+    switch (type) {
+      case 'spend-fear':
+        return true; // Fear spending is usually player choice
+      case 'mark-stress':
+        return false; // Stress marking is usually automatic unless explicitly "you may"
+      case 'gain-fear':
+        return true; // Fear gaining is usually GM choice
+      case 'countdown':
+        return true; // Countdown creation is usually GM choice
+      case 'token':
+        return true; // Token introduction is usually GM choice
+      default:
+        return false;
+    }
+  }
+
+  // Helper function to render interactive descriptions
+  function renderInteractiveDescription(description) {
+    if (!description) return null;
+    
+    // Patterns to detect and make interactive (only player/GM actions)
+    const patterns = [
+      // Fear spending patterns (player action)
+      { 
+        regex: /spend\s+(\d+)\s+fear/gi, 
+        type: 'spend-fear',
+        handler: (amount) => {
+          console.log(`Spend ${amount} Fear`);
+          // TODO: Implement Fear spending logic
+        }
+      },
+      { 
+        regex: /spend\s+a\s+fear/gi, 
+        type: 'spend-fear',
+        handler: () => {
+          console.log('Spend 1 Fear');
+          // TODO: Implement Fear spending logic
+        }
+      },
+      // Stress marking patterns (only when it's a player choice, not forced)
+      { 
+        regex: /mark\s+(\d+)\s+stress/gi, 
+        type: 'mark-stress',
+        handler: (amount) => {
+          console.log(`Mark ${amount} Stress`);
+          // TODO: Implement Stress marking logic
+        }
+      },
+      { 
+        regex: /mark\s+a\s+stress/gi, 
+        type: 'mark-stress',
+        handler: () => {
+          console.log('Mark 1 Stress');
+          // TODO: Implement Stress marking logic
+        }
+      },
+      // Fear gaining patterns
+      { 
+        regex: /(?:you\s+)?gain\s+(\d+)\s+fear/gi, 
+        type: 'gain-fear',
+        handler: (amount) => {
+          console.log(`Gain ${amount} Fear`);
+          // TODO: Implement Fear gaining logic
+        }
+      },
+      { 
+        regex: /(?:you\s+)?gain\s+a\s+fear/gi, 
+        type: 'gain-fear',
+        handler: () => {
+          console.log('Gain 1 Fear');
+          // TODO: Implement Fear gaining logic
+        }
+      },
+      // Countdown patterns
+      { 
+        regex: /countdown\s*\(([^)]+)\)/gi, 
+        type: 'countdown',
+        handler: (details, featureName) => {
+          const countdownInfo = parseCountdownDetails(details, featureName);
+          console.log(`Create Countdown:`, countdownInfo);
+          // TODO: Implement Countdown creation logic with parsed details
+        }
+      },
+      // Token patterns
+      { 
+        regex: /introduce\s+a\s+(\w+)\s+die/gi, 
+        type: 'token',
+        handler: (dieType) => {
+          console.log(`Introduce ${dieType} Die`);
+          // TODO: Implement Token introduction logic
+        }
+      }
+    ];
+    
+    let processedText = description;
+    const interactiveElements = [];
+    
+    // Find all matches and replace with interactive elements
+    patterns.forEach((pattern, patternIndex) => {
+      const matches = [...description.matchAll(pattern.regex)];
+      matches.forEach((match, matchIndex) => {
+        const fullMatch = match[0];
+        const captureGroup = match[1];
+        const uniqueKey = `${patternIndex}-${matchIndex}`;
+        
+        // Check if this should be interactive based on context
+        const shouldBeInteractive = checkIfInteractive(fullMatch, description, pattern.type);
+        
+        if (shouldBeInteractive) {
+          // Create interactive element
+          const interactiveElement = (
+            <span 
+              key={uniqueKey}
+              className={`interactive-mechanic ${pattern.type}`}
+              onClick={() => pattern.handler(captureGroup, feature.name)}
+              title={`Click to ${pattern.type.replace('-', ' ')}`}
+            >
+              {fullMatch}
+            </span>
+          );
+          
+          interactiveElements.push({
+            element: interactiveElement,
+            text: fullMatch,
+            index: description.indexOf(fullMatch)
+          });
+        }
+      });
+    });
+    
+    // Sort by index (reverse order to avoid index shifting)
+    interactiveElements.sort((a, b) => b.index - a.index);
+    
+    // Replace text with interactive elements
+    let result = description;
+    interactiveElements.forEach(({ element, text, index }) => {
+      const before = result.substring(0, index);
+      const after = result.substring(index + text.length);
+      result = before + `__INTERACTIVE_${index}__` + after;
+    });
+    
+    // Split by interactive markers and render
+    const parts = result.split(/__INTERACTIVE_\d+__/);
+    const interactiveIndex = interactiveElements.length - 1;
+    
+    return parts.map((part, index) => {
+      if (index === parts.length - 1) {
+        return part; // Last part, no interactive element after
+      }
+      
+      const interactiveElement = interactiveElements[interactiveIndex - index];
+      return (
+        <React.Fragment key={index}>
+          {part}
+          {interactiveElement.element}
+        </React.Fragment>
+      );
+    });
   }
 
   // Helper function to render drag handle
