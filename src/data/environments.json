@@ -102,7 +102,7 @@
       "type": "Event",
       "description": "An ambush is set to catch an unsuspecting party off-guard.",
       "impulses": ["Overwhelm", "scatter", "surround"],
-      "difficulty": "Special (see Relative Strength)",
+      "difficulty": "~",
       "potentialAdversaries": ["Any"],
       "features": [
         {
@@ -132,7 +132,7 @@
       "type": "Event",
       "description": "An ambush is set by the PCs to catch unsuspecting adversaries off-guard.",
       "impulses": ["Escape", "group up", "protect the most vulnerable"],
-      "difficulty": "Special (see Relative Strength)",
+      "difficulty": "~",
       "potentialAdversaries": ["Any"],
       "features": [
         {

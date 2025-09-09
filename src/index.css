@@ -4852,16 +4852,16 @@ textarea,
 
 /* Database Browser Compact Rows */
 .browser-table tbody tr {
-  height: 2.5rem;
+  height: 35px; /* Match button height exactly */
 }
 
 .browser-table td {
-  padding: 0.375rem 0.5rem;
+  padding: 0.25rem 0.25rem; /* Match our desktop styling */
   vertical-align: middle;
 }
 
 .browser-table th {
-  padding: 0.5rem;
+  padding: 0.25rem 0.25rem; /* Match our desktop styling */
   vertical-align: middle;
 }
 
@@ -5767,9 +5767,11 @@ textarea,
 }
 
 .browser-add-btn {
-  min-width: 40px !important;
-  width: 40px !important;
-  padding: 0.5rem !important;
+  min-width: 35px !important;
+  width: 35px !important;
+  height: 35px !important;
+  padding: 0 !important;
+  margin: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -5784,9 +5786,13 @@ textarea,
 }
 
 .table-add-btn {
-  min-width: 32px !important;
-  width: 32px !important;
-  padding: 0.375rem !important;
+  min-width: 35px !important;
+  width: 35px !important;
+  height: 35px !important; /* Keep button square */
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -5812,7 +5818,7 @@ textarea,
 
 .browser-table-container {
   flex: 1;
-  overflow: visible;
+  overflow: hidden; /* Prevent horizontal overflow */
   background: var(--bg-card);
   border-radius: 0.5rem;
   border: 1px solid var(--border);
@@ -5822,120 +5828,210 @@ textarea,
 .browser-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed; /* Fixed layout for precise control */
 }
 
 .browser-table th,
 .browser-table td {
-  padding: 0.75rem 0.5rem;
+  padding: 0.25rem 0.25rem; /* Much tighter padding */
   vertical-align: middle;
   color: var(--text-primary);
   white-space: nowrap;
 }
 
+/* Fixed column widths based on actual content, not headers */
 .browser-table th:first-child,
 .browser-table td:first-child {
-  min-width: 150px;
+  width: auto; /* Name column gets remaining space */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .browser-table th:nth-child(2),
 .browser-table td:nth-child(2) {
-  min-width: 60px;
+  width: 40px; /* Tier column - narrow for single digits */
+  min-width: 40px;
   text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .browser-table th:nth-child(3),
 .browser-table td:nth-child(3) {
+  width: 100px; /* Type column - wider to avoid ellipsis */
   min-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .browser-table th:nth-child(4),
 .browser-table td:nth-child(4) {
-  min-width: 100px;
+  width: 30px; /* Difficulty column - very narrow for single tilde */
+  min-width: 30px;
   text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .browser-table th:last-child,
-.browser-table td:last-child {
-  min-width: 80px;
+.browser-table td:last-child,
+.browser-table td.column-action {
+  width: 35px; /* Add button column - smaller for compact button */
+  min-width: 35px;
   text-align: center;
+  padding: 0 !important; /* Remove cell padding */
+  margin: 0 !important; /* Remove cell margins */
+  border: none !important; /* Remove cell borders */
 }
 
-/* Mobile table - clean card layout with !important to override desktop styles */
+/* Mobile table - use same layout as desktop */
 @media (max-width: 800px) {
   .browser-table-container {
-    overflow: visible !important;
+    overflow: auto !important; /* Allow horizontal scroll if needed */
   }
   
   .browser-table {
-    display: block !important;
     width: 100% !important;
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
   }
   
   .browser-table thead {
-    display: none !important;
+    display: table-header-group !important;
   }
   
   .browser-table tbody {
-    display: block !important;
+    display: table-row-group !important;
   }
   
   .browser-table tbody tr {
-    display: block !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 0.5rem !important;
-    margin-bottom: 0.75rem !important;
-    padding: 0.75rem !important;
-    background: var(--bg-dark) !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    height: auto !important;
-    border-bottom: none !important;
+    display: table-row !important;
+    height: 35px !important;
+    border-bottom: 1px solid var(--border) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transition: background-color 0.2s ease !important;
   }
   
   .browser-table tbody tr:hover {
     background: var(--bg-hover) !important;
   }
   
+  .browser-table tbody tr:last-child {
+    border-bottom: none !important;
+  }
+  
   .browser-table td {
-    display: block !important;
+    display: table-cell !important;
     border: none !important;
-    position: relative !important;
-    padding: 0.5rem 0.75rem 0.5rem 40% !important;
-    white-space: normal !important;
+    position: static !important;
+    padding: 0.25rem 0.25rem !important;
+    white-space: nowrap !important;
     text-align: left !important;
-    width: 100% !important;
+    width: auto !important;
     box-sizing: border-box !important;
     min-width: auto !important;
   }
   
   .browser-table td:before {
-    content: attr(data-label) ": " !important;
-    position: absolute !important;
-    left: 0.75rem !important;
-    width: 35% !important;
-    padding-right: 0.5rem !important;
-    white-space: nowrap !important;
-    font-weight: 600 !important;
-    color: var(--text-secondary) !important;
+    display: none !important;
+  }
+  
+  .browser-table td:nth-child(2) {
+    text-align: center !important; /* Center tier column */
+  }
+  
+  .browser-table td:nth-child(4) {
+    text-align: center !important; /* Center difficulty column */
   }
   
   .browser-table td:last-child {
     text-align: center !important;
-    padding-left: 0.75rem !important;
+    padding: 0 !important;
   }
   
   .browser-table td:last-child:before {
     display: none !important;
   }
+
+  /* Mobile expanded card styling */
+  .expanded-card-row {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 0.5rem !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+    display: table-row !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .expanded-card-cell {
+    padding: 0 !important;
+    border: none !important;
+    display: table-cell !important;
+  }
+
+  .expanded-card-container {
+    padding: 1rem !important;
+    border-top: 1px solid var(--border) !important;
+  }
+
+  /* Make expanded cards more mobile-friendly */
+  .expanded-card {
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .expanded-card .expanded-header {
+    padding: 0.75rem !important;
+    background: var(--bg-dark) !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+  }
+
+  .expanded-card .expanded-header h2 {
+    font-size: 1.1rem !important;
+    margin: 0 !important;
+  }
+
+  .expanded-card .expanded-content {
+    padding: 0.75rem !important;
+  }
+
+  /* Mobile-friendly stat rows */
+  .expanded-card .stat-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+    padding: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .expanded-card .stat-label {
+    min-width: auto !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+  }
+
+  .expanded-card .stat-controls {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
 }
 
 .browser-table th {
+  height: 35px; /* Match row height */
   background: var(--bg-dark);
   color: var(--text-primary);
   font-weight: 600;
-  padding: 0.75rem 0.5rem;
+  padding: 0.25rem 0.25rem; /* Match cell padding */
   text-align: left;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
@@ -5978,6 +6074,7 @@ textarea,
 }
 
 .browser-table tbody tr {
+  height: 35px; /* Match button height exactly */
   border-bottom: 1px solid var(--border);
   transition: background-color 0.2s ease;
 }
@@ -5992,7 +6089,7 @@ textarea,
 
 .browser-table th,
 .browser-table td {
-  padding: 0.75rem 0.5rem;
+  padding: 0.25rem 0.25rem; /* Match our desktop styling */
   vertical-align: middle;
   color: var(--text-primary);
   white-space: nowrap;
@@ -6000,42 +6097,6 @@ textarea,
   text-overflow: ellipsis; /* Show ellipsis for truncated content */
 }
 
-.browser-table th:first-child,
-.browser-table td:first-child {
-  width: 100%;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.browser-table th:nth-child(2),
-.browser-table td:nth-child(2) {
-  width: 1%;
-  min-width: 0;
-  max-width: 8ch; /* Keep Type compact */
-  text-align: center;
-}
-
-.browser-table th:nth-child(3),
-.browser-table td:nth-child(3) {
-  width: 1%;
-  min-width: 0;
-}
-
-.browser-table th:nth-child(4),
-.browser-table td:nth-child(4) {
-  width: 1%;
-  min-width: 0;
-  max-width: 7ch; /* Keep Difficulty compact */
-  text-align: center;
-}
-
-.browser-table th:last-child,
-.browser-table td:last-child {
-  width: 1%;
-  min-width: 0;
-  text-align: center;
-}
 
 .browser-row {
   cursor: pointer;
