@@ -4,6 +4,7 @@ import { useGameState } from './useGameState'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSkull, faFire, faMoon, faStar, faDice } from '@fortawesome/free-solid-svg-icons'
 import { Swords, TreePine, Pencil, Clock, Plus, Trash2, Menu, Wrench } from 'lucide-react'
+import Version from './components/Version'
 import './App.css'
 
 // Import all the UI components
@@ -644,6 +645,9 @@ const AppContent = () => {
         }
       }}
     >
+      {/* Version Display */}
+      <Version />
+      
       {/* Top Bar: Fear Tracker */}
       <div 
         className="top-bar"
