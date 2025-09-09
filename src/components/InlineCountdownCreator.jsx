@@ -71,8 +71,8 @@ const InlineCountdownCreator = ({
             <option value="progress">Progress</option>
             <option value="consequence">Consequence</option>
             <option value="long-term">Long-term</option>
-            <option value="simple-fear">Simple Fear</option>
-            <option value="simple-hope">Simple Hope</option>
+            <option value="simple-fear">Fear</option>
+            <option value="simple-hope">Hope</option>
           </select>
           
           <select

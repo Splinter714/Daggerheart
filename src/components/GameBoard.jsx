@@ -365,145 +365,8 @@ const GameBoard = ({
       {/* Countdowns Section */}
       <div className="game-section campaign-countdowns">
         <div className="section-header">
-          <h3 className="section-title">Countdowns</h3>
-          <div className="section-header-buttons">
-            {/* Countdown Trigger Controls - only show if there are countdowns */}
-            {countdowns && countdowns.length > 0 && (
-              <div className="countdown-trigger-controls">
-                {(() => {
-                  const triggers = getNeededTriggers()
-                  return (
-                    <>
-                      {/* Show/Hide Long-term Countdowns Button */}
-                      {countdowns && countdowns.some(c => c.type === 'long-term') && (
-                        <button
-                          className="trigger-btn toggle-long-term"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setShowLongTermCountdowns(!showLongTermCountdowns)
-                          }}
-                          title={showLongTermCountdowns ? "Hide Long-term Countdowns" : "Show Long-term Countdowns"}
-                        >
-                          <FontAwesomeIcon icon={faMoon} /> {showLongTermCountdowns ? "Hide" : "Show"}
-                        </button>
-                      )}
-                      
-                      {/* Basic Roll Triggers - only show if there are standard countdowns */}
-                      {triggers.basicRollTriggers && (
-                        <button
-                          className="trigger-btn basic-roll"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleActionRollProp()
-                          }}
-                          title="Action Roll"
-                        >
-                          <FontAwesomeIcon icon={faDice} /> Roll
-                        </button>
-                      )}
-                      
-                      {/* Simple Fear/Hope Triggers - only show if there are simple fear/hope countdowns AND no dynamic countdowns */}
-                      {triggers.simpleFearTriggers && (
-                        <button
-                          className="trigger-btn simple-fear"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            // Increment fear tracker
-                            const currentFear = fear?.value || 0
-                            if (currentFear < 12) {
-                              updateFear(currentFear + 1)
-                            }
-                            handleRollOutcomeProp('simple-fear')
-                          }}
-                          title="Roll with Fear"
-                        >
-                          <FontAwesomeIcon icon={faSkull} /> Fear
-                        </button>
-                      )}
-                      {triggers.simpleHopeTriggers && (
-                        <button
-                          className="trigger-btn simple-hope"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleRollOutcomeProp('simple-hope')
-                          }}
-                          title="Roll with Hope"
-                        >
-                          <FontAwesomeIcon icon={faFire} /> Hope
-                        </button>
-                      )}
-                      
-                      {/* Complex Roll Outcome Triggers - only show if there are dynamic countdowns */}
-                      {triggers.complexRollTriggers && (
-                        <>
-                          <button
-                            className="trigger-btn fail-fear"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              // Increment fear tracker
-                              const currentFear = fear?.value || 0
-                              if (currentFear < 12) {
-                                updateFear(currentFear + 1)
-                              }
-                              handleRollOutcomeProp('failure-fear')
-                            }}
-                            title="Failure + Fear"
-                          >
-                            <FontAwesomeIcon icon={faSkull} /> Failure
-                          </button>
-                          <button
-                            className="trigger-btn fail-hope"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleRollOutcomeProp('failure-hope')
-                            }}
-                            title="Failure + Hope"
-                          >
-                            <FontAwesomeIcon icon={faFire} /> Failure
-                          </button>
-                          <button
-                            className="trigger-btn success-fear"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              // Increment fear tracker
-                              const currentFear = fear?.value || 0
-                              if (currentFear < 12) {
-                                updateFear(currentFear + 1)
-                              }
-                              handleRollOutcomeProp('success-fear')
-                            }}
-                            title="Success + Fear"
-                          >
-                            <FontAwesomeIcon icon={faSkull} /> Success
-                          </button>
-                          <button
-                            className="trigger-btn success-hope"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleRollOutcomeProp('success-hope')
-                            }}
-                            title="Success + Hope"
-                          >
-                            <FontAwesomeIcon icon={faFire} /> Success
-                          </button>
-                          <button
-                            className="trigger-btn critical-success"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleRollOutcomeProp('critical-success')
-                            }}
-                            title="Critical Success"
-                          >
-                            <FontAwesomeIcon icon={faFire} /> Crit
-                          </button>
-                        </>
-                      )}
-                    </>
-                  )
-                })()}
-              </div>
-            )}
-            
+          <div className="section-title-row">
+            <h3 className="section-title">Countdowns</h3>
             <Button
               action="add"
               size="sm"
@@ -512,16 +375,152 @@ const GameBoard = ({
             >
               <Plus size={16} />
             </Button>
+            {/* Inline Countdown Creator */}
+            {showInlineCreator.campaign && (
+              <InlineCountdownCreator
+                source="campaign"
+                onCreateCountdown={handleCreateCountdown}
+              />
+            )}
           </div>
+          
+          {/* Countdown Trigger Controls - only show if there are countdowns */}
+          {countdowns && countdowns.length > 0 && (
+            <div className="countdown-trigger-controls">
+              {(() => {
+                const triggers = getNeededTriggers()
+                return (
+                  <>
+                    {/* Basic Roll Triggers - only show if there are standard countdowns */}
+                    {triggers.basicRollTriggers && (
+                      <button
+                        className="trigger-btn basic-roll"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleActionRollProp()
+                        }}
+                        title="Action Roll"
+                      >
+                        <FontAwesomeIcon icon={faDice} /> Roll
+                      </button>
+                    )}
+                    
+                    {/* Simple Fear/Hope Triggers - only show if there are simple fear/hope countdowns AND no dynamic countdowns */}
+                    {triggers.simpleFearTriggers && (
+                      <button
+                        className="trigger-btn simple-fear"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          // Increment fear tracker
+                          const currentFear = fear?.value || 0
+                          if (currentFear < 12) {
+                            updateFear(currentFear + 1)
+                          }
+                          handleRollOutcomeProp('simple-fear')
+                        }}
+                        title="Roll with Fear"
+                      >
+                        <FontAwesomeIcon icon={faSkull} /> Fear
+                      </button>
+                    )}
+                    {triggers.simpleHopeTriggers && (
+                      <button
+                        className="trigger-btn simple-hope"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleRollOutcomeProp('simple-hope')
+                        }}
+                        title="Roll with Hope"
+                      >
+                        <FontAwesomeIcon icon={faFire} /> Hope
+                      </button>
+                    )}
+                    
+                    {/* Complex Roll Outcome Triggers - only show if there are dynamic countdowns */}
+                    {triggers.complexRollTriggers && (
+                      <>
+                        <button
+                          className="trigger-btn fail-fear"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // Increment fear tracker
+                            const currentFear = fear?.value || 0
+                            if (currentFear < 12) {
+                              updateFear(currentFear + 1)
+                            }
+                            handleRollOutcomeProp('failure-fear')
+                          }}
+                          title="Failure + Fear"
+                        >
+                          <FontAwesomeIcon icon={faSkull} /> Failure
+                        </button>
+                        <button
+                          className="trigger-btn fail-hope"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleRollOutcomeProp('failure-hope')
+                          }}
+                          title="Failure + Hope"
+                        >
+                          <FontAwesomeIcon icon={faFire} /> Failure
+                        </button>
+                        <button
+                          className="trigger-btn success-fear"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // Increment fear tracker
+                            const currentFear = fear?.value || 0
+                            if (currentFear < 12) {
+                              updateFear(currentFear + 1)
+                            }
+                            handleRollOutcomeProp('success-fear')
+                          }}
+                          title="Success + Fear"
+                        >
+                          <FontAwesomeIcon icon={faSkull} /> Success
+                        </button>
+                        <button
+                          className="trigger-btn success-hope"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleRollOutcomeProp('success-hope')
+                          }}
+                          title="Success + Hope"
+                        >
+                          <FontAwesomeIcon icon={faFire} /> Success
+                        </button>
+                        <button
+                          className="trigger-btn critical-success"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleRollOutcomeProp('critical-success')
+                          }}
+                          title="Critical Success"
+                        >
+                          <FontAwesomeIcon icon={faFire} /> Crit
+                        </button>
+                      </>
+                    )}
+                    
+                    {/* Show/Hide Long-term Countdowns Button - moved to end */}
+                    {countdowns && countdowns.some(c => c.type === 'long-term') && (
+                      <button
+                        className="trigger-btn toggle-long-term"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setShowLongTermCountdowns(!showLongTermCountdowns)
+                        }}
+                        title={showLongTermCountdowns ? "Hide Long-term Countdowns" : "Show Long-term Countdowns"}
+                      >
+                        <FontAwesomeIcon icon={faMoon} /> {showLongTermCountdowns ? "Hide" : "Show"}
+                      </button>
+                    )}
+                  </>
+                )
+              })()}
+            </div>
+          )}
         </div>
-        
-        {/* Inline Countdown Creator */}
-        {showInlineCreator.campaign && (
-          <InlineCountdownCreator
-            source="campaign"
-            onCreateCountdown={handleCreateCountdown}
-          />
-        )}
         
         {/* Non-long-term countdowns - always visible */}
         {countdowns && countdowns.filter(c => c.type !== 'long-term').length > 0 && (
@@ -591,8 +590,8 @@ const GameBoard = ({
       {/* Environments Section */}
       <div className="game-section">
         <div className="section-header">
-          <h3 className="section-title">Environment</h3>
-          <div className="section-header-buttons">
+          <div className="section-title-row">
+            <h3 className="section-title">Environment</h3>
             <Button
               action="add"
               size="sm"
@@ -630,8 +629,8 @@ const GameBoard = ({
       {/* Adversaries Section */}
       <div className="game-section">
         <div className="section-header">
-          <h3 className="section-title">Adversaries</h3>
-          <div className="section-header-buttons">
+          <div className="section-title-row">
+            <h3 className="section-title">Adversaries</h3>
             <Button
               action="add"
               size="sm"
