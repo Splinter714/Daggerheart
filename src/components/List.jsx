@@ -154,11 +154,9 @@ const List = ({
     
     const distance = touchCurrent - touchStart
     
-    // Only prevent default if this was a significant downward swipe
-    if (distance > 30) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
+    // Always prevent default to avoid any scroll behavior
+    e.preventDefault()
+    e.stopPropagation()
     
     // If swipe was far enough, smoothly animate downward to close
     if (distance > 100) {
@@ -173,14 +171,19 @@ const List = ({
     // If swipe was significant but not enough to close, snap back smoothly
     else if (distance > 30) {
       setDrawerOffset(0)
+      // Clear touch state to prevent any scroll behavior
+      setTimeout(() => {
+        setTouchStart(null)
+        setTouchCurrent(null)
+      }, 50)
     }
     // If swipe was small, just reset
     else if (distance <= 30) {
       setDrawerOffset(0)
+      // Clear touch state immediately for small swipes
+      setTouchStart(null)
+      setTouchCurrent(null)
     }
-    
-    setTouchStart(null)
-    setTouchCurrent(null)
   }
   const sensors = useSensors(
     useSensor(PointerSensor, {

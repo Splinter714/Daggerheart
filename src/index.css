@@ -1448,7 +1448,7 @@ textarea,
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: manipulation !important; /* Allow scrolling but prevent zoom and pull-to-refresh */
+    touch-action: none !important; /* Prevent all touch gestures to stop pull-to-refresh */
   }
   
   .mobile-drawer.open .drawer-content {
@@ -1491,7 +1491,7 @@ textarea,
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: manipulation !important; /* Allow scrolling but prevent zoom and pull-to-refresh */
+    touch-action: none !important; /* Prevent all touch gestures to stop pull-to-refresh */
   }
 
   /* Mobile drawer browser specific styles */
@@ -1509,6 +1509,23 @@ textarea,
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
     touch-action: pan-y !important; /* Allow vertical scrolling only */
+  }
+  
+  /* Allow scrolling in expanded card content areas */
+  .drawer-body .expanded-card {
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: none !important; /* Prevent all touch gestures on card container */
+  }
+  
+  .drawer-body .expanded-content {
+    overflow-y: auto !important; /* Allow vertical scrolling */
+    -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS Safari */
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: pan-y !important; /* Allow vertical scrolling only */
+    height: calc(100vh - 200px) !important; /* Force a specific height to enable scrolling */
+    max-height: calc(100vh - 200px) !important; /* Don't exceed this height */
   }
   
 
