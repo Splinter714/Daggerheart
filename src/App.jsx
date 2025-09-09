@@ -49,6 +49,33 @@ const AppContent = () => {
   const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
   const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
   const [showMockup, setShowMockup] = useState(false)
+  const [lastAddedItemType, setLastAddedItemType] = useState(null)
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+  
+  // Touch gesture handling for mobile drawer
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
+  
+  const handleTouchStart = (e) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientY)
+  }
+  
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientY)
+  }
+  
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    
+    const distance = touchStart - touchEnd
+    const isDownSwipe = distance < -50
+    
+    if (isDownSwipe && mobileDrawerOpen) {
+      handleCloseRightColumn()
+    }
+  }
+  
   const [creatorFormData, setCreatorFormData] = useState({
     name: '',
     tier: 1,
@@ -87,20 +114,27 @@ const AppContent = () => {
     // If database is already open for this type, close it
     if (rightColumnMode === 'database' && databaseType === type) {
       setRightColumnMode(null)
-      if (isMobile) setMobileView('left')
+      if (isMobile) {
+        setMobileView('left')
+        setMobileDrawerOpen(false)
+      }
       return
     }
     
     // Otherwise, open the database
     setDatabaseType(type)
     setRightColumnMode('database')
-    if (isMobile) setMobileView('right')
+    if (isMobile) {
+      setMobileDrawerOpen(true)
+    }
   }
 
   const handleOpenCreator = (type, source = 'campaign') => {
     setDatabaseType(type)
     setRightColumnMode('creator')
-    if (isMobile) setMobileView('right')
+    if (isMobile) {
+      setMobileDrawerOpen(true)
+    }
     // Store the source for countdown creation
     if (type === 'countdown') {
       setCreatorFormData(prev => ({ ...prev, source }))
@@ -212,7 +246,10 @@ const AppContent = () => {
     setRightColumnMode(null)
     setSelectedItem(null)
     setSelectedType(null)
-    if (isMobile) setMobileView('left')
+    if (isMobile) {
+      setMobileView('left')
+      setMobileDrawerOpen(false)
+    }
   }
 
   // Mobile detection
@@ -248,6 +285,20 @@ const AppContent = () => {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [isMobile, rightColumnMode])
+
+  // Prevent background scrolling when mobile drawer is open
+  useEffect(() => {
+    if (isMobile && mobileDrawerOpen) {
+      document.body.classList.add('mobile-drawer-open')
+    } else {
+      document.body.classList.remove('mobile-drawer-open')
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('mobile-drawer-open')
+    }
+  }, [isMobile, mobileDrawerOpen])
 
   // Determine which triggers are needed based on active countdowns
   const getNeededTriggers = () => {
@@ -717,6 +768,7 @@ const AppContent = () => {
                 handleRollOutcome={handleRollOutcome}
                 handleActionRoll={handleActionRoll}
                 setShowLongTermCountdowns={setShowLongTermCountdowns}
+                lastAddedItemType={lastAddedItemType}
               />
             </>
           )}
@@ -841,17 +893,20 @@ const AppContent = () => {
             >
               <Browser
                 type={databaseType}
-                onAddItem={(itemData) => {
-                  console.log('App.jsx onAddItem called with:', itemData)
+                onAddItem={(itemData, itemType) => {
+                  console.log('App.jsx onAddItem called with:', itemData, 'type:', itemType)
                   console.log('Current databaseType:', databaseType)
                   
                   if (databaseType === 'adversary') {
                     console.log('Creating adversary...')
                     createAdversary(itemData)
+                    setLastAddedItemType('adversary')
                   } else if (databaseType === 'environment') {
                     console.log('Creating environment...')
                     createEnvironment(itemData)
+                    setLastAddedItemType('environment')
                   }
+                  
                   // Keep browser open so users can add multiple items
                 }}
                 onCancel={handleCloseRightColumn}
@@ -884,11 +939,80 @@ const AppContent = () => {
               />
             </div>
           )}
-            </>
-          )}
+          </>
+        )}
 
         </div>
       </div>
+
+      {/* Mobile Drawer for Browser and Creator */}
+      {isMobile && (
+        <div className={`mobile-drawer ${mobileDrawerOpen ? 'open' : ''}`}>
+          <div className="drawer-backdrop" onClick={handleCloseRightColumn} />
+          <div 
+            className="drawer-content"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="drawer-header">
+              <div className="drawer-handle" />
+              <button className="drawer-close" onClick={handleCloseRightColumn}>
+                ×
+              </button>
+            </div>
+            <div className="drawer-body">
+              {/* Database Browser */}
+              {rightColumnMode === 'database' && (
+                <Browser
+                  type={databaseType}
+                  onAddItem={(itemData, itemType) => {
+                    console.log('App.jsx onAddItem called with:', itemData, 'type:', itemType)
+                    console.log('Current databaseType:', databaseType)
+                    
+                    if (databaseType === 'adversary') {
+                      console.log('Creating adversary...')
+                      createAdversary(itemData)
+                      setLastAddedItemType('adversary')
+                    } else if (databaseType === 'environment') {
+                      console.log('Creating environment...')
+                      createEnvironment(itemData)
+                      setLastAddedItemType('environment')
+                    }
+                    
+                    // Keep browser open so users can add multiple items
+                  }}
+                  onCancel={handleCloseRightColumn}
+                  onCreateCustom={() => handleOpenCreator(databaseType)}
+                />
+              )}
+
+              {/* Creator */}
+              {rightColumnMode === 'creator' && (
+                <Creator
+                  type={databaseType}
+                  item={null}
+                  source={databaseType === 'countdown' ? creatorFormData.source : undefined}
+                  onSave={(itemData) => {
+                    if (databaseType === 'adversary') {
+                      createAdversary(itemData)
+                      setLastAddedItemType('adversary')
+                    } else if (databaseType === 'environment') {
+                      createEnvironment(itemData)
+                      setLastAddedItemType('environment')
+                    } else if (databaseType === 'countdown') {
+                      createCountdown(itemData)
+                      setLastAddedItemType('countdown')
+                    }
+                    handleCloseRightColumn()
+                  }}
+                  onCancel={handleCloseRightColumn}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

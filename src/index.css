@@ -1357,7 +1357,179 @@ textarea,
     /* Prevent shifting */
     transition: none;
   }
+  
+  /* Mobile in-line expansion styles - removed extra spacing */
+  
+  /* Mobile expansion animation */
+  .sortable-item .card {
+    transition: all 0.3s ease;
+  }
+  
+  /* Visual feedback for expandable cards on mobile */
+  .sortable-item .card.compact {
+    cursor: pointer;
+  }
+  
+  .sortable-item .card.compact:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Mobile drawer styles */
+  .mobile-drawer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    pointer-events: none;
+  }
+  
+  .mobile-drawer.open {
+    pointer-events: auto;
+  }
+  
+  .drawer-backdrop {
+    position: fixed;
+    top: 49px; /* Start below the fear header including its border */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .mobile-drawer.open .drawer-backdrop {
+    opacity: 1;
+  }
+  
+  .drawer-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-dark);
+    border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    max-height: calc(100vh - 49px); /* Account for fear header height + border */
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+  }
+  
+  .mobile-drawer.open .drawer-content {
+    transform: translateY(0);
+  }
+  
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  
+  .drawer-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  
+  .drawer-close {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    line-height: 1;
+  }
+  
+  .drawer-body {
+    padding: 1rem;
+    height: calc(100vh - 49px - 80px); /* Account for fear header + border and drawer header */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* No scrolling on drawer body */
+  }
+
+  /* Mobile drawer browser specific styles */
+  .drawer-body .browser-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .drawer-body .browser-table-container {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent background scrolling when mobile drawer is open */
+  body.mobile-drawer-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+  }
 }
+
+/* Browser condensed card styles for both desktop and mobile */
+.condensed-card-row {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+
+.condensed-card-cell {
+  padding: 0;
+  border: none;
+}
+
+.condensed-card-container {
+  padding: 0.5rem;
+  background: var(--bg-card);
+}
+
+.condensed-card-container .card {
+  margin: 0;
+  box-shadow: none;
+  border: 1px solid var(--border);
+}
+
+/* Collapsible section styles */
+.section-title-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  transition: color 0.2s ease;
+}
+
+.section-title-button:hover {
+  color: var(--text-secondary);
+}
+
+.section-title-button .section-title {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
 
 /* Sidebar Styles */
 .sidebar {

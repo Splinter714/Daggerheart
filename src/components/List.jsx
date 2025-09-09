@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -41,6 +41,73 @@ const List = ({
   onDecrement, // For countdowns
   isEditMode = false
 }) => {
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false)
+  
+  // Mobile drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerItem, setDrawerItem] = useState(null)
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 800)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
+  // Handle mobile card tap - open drawer
+  const handleMobileCardClick = (item) => {
+    if (isMobile) {
+      setDrawerItem(item)
+      setDrawerOpen(true)
+      
+      // Focus the tapped card in the main view
+      const cardElement = document.querySelector(`[data-item-id="${item.id}"]`)
+      if (cardElement) {
+        cardElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        })
+      }
+    } else {
+      // On desktop, use normal item selection
+      onItemSelect(item, type)
+    }
+  }
+  
+  // Close drawer
+  const closeDrawer = () => {
+    setDrawerOpen(false)
+    setDrawerItem(null)
+  }
+  
+  // Touch gesture handling for drawer
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
+  
+  const handleTouchStart = (e) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientY)
+  }
+  
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientY)
+  }
+  
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    
+    const distance = touchStart - touchEnd
+    const isUpSwipe = distance > 50
+    const isDownSwipe = distance < -50
+    
+    if (isDownSwipe && drawerOpen) {
+      closeDrawer()
+    }
+  }
   const sensors = useSensors(
     useSensor(PointerSensor, {
       // Configure for better mobile touch support
@@ -108,11 +175,53 @@ const List = ({
                 onIncrement={onIncrement}
                 onDecrement={onDecrement}
                 isEditMode={isEditMode}
+                isMobile={isMobile}
+                onMobileCardClick={handleMobileCardClick}
               />
             ))}
           </div>
         </SortableContext>
       </DndContext>
+      
+      {/* Mobile Bottom Drawer */}
+      {isMobile && (
+        <div className={`mobile-drawer ${drawerOpen ? 'open' : ''}`}>
+          <div className="drawer-backdrop" onClick={closeDrawer} />
+          <div 
+            className="drawer-content"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="drawer-header">
+              <div className="drawer-handle" />
+              <button className="drawer-close" onClick={closeDrawer}>
+                ×
+              </button>
+            </div>
+            <div className="drawer-body">
+              {drawerItem && (
+                <Cards
+                  item={drawerItem}
+                  type={type}
+                  mode="expanded"
+                  onDelete={onDelete}
+                  onEdit={onEdit}
+                  onToggleVisibility={onToggleVisibility}
+                  onApplyDamage={onApplyDamage}
+                  onApplyHealing={onApplyHealing}
+                  onApplyStressChange={onApplyStressChange}
+                  onIncrement={onIncrement}
+                  onDecrement={onDecrement}
+                  isEditMode={isEditMode}
+                  dragAttributes={null}
+                  dragListeners={null}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -131,7 +240,9 @@ const SortableItem = ({
   onApplyStressChange,
   onIncrement,
   onDecrement,
-  isEditMode
+  isEditMode,
+  isMobile,
+  onMobileCardClick
 }) => {
   const {
     attributes,
@@ -153,12 +264,14 @@ const SortableItem = ({
       ref={setNodeRef}
       style={style}
       className={`sortable-item ${isSelected ? 'selected' : ''}`}
+      data-item-id={item.id}
     >
+      {/* Always show compact card */}
       <Cards
         item={item}
         type={type}
         mode="compact"
-        onClick={onItemClick}
+        onClick={() => onMobileCardClick(item)}
         onDelete={onDelete}
         onEdit={onEdit}
         onToggleVisibility={onToggleVisibility}
