@@ -4850,21 +4850,6 @@ textarea,
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Database Browser Compact Rows */
-.browser-table tbody tr {
-  height: 35px; /* Match button height exactly */
-}
-
-.browser-table td {
-  padding: 0.25rem 0.25rem; /* Match our desktop styling */
-  vertical-align: middle;
-}
-
-.browser-table th {
-  padding: 0.25rem 0.25rem; /* Match our desktop styling */
-  vertical-align: middle;
-}
-
 /* Database Browser Category Icons */
 .item-category {
   text-align: center;
@@ -5047,12 +5032,31 @@ textarea,
   display: none !important;
 }
 
-/* Center tier and difficulty columns */
-.browser-table th:nth-child(4),
-.browser-table td:nth-child(4),
-.browser-table th:nth-child(5),
-.browser-table td:nth-child(5) {
+/* Center only tier and difficulty column headers */
+.browser-table th:nth-child(2),
+.browser-table th:nth-child(4) {
   text-align: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Left-align name and type headers to match their content */
+.browser-table th:nth-child(1) {
+  text-align: left !important;
+  padding: 0.25rem 0.25rem 0.25rem 0.5rem !important; /* Match content left padding */
+}
+
+.browser-table th:nth-child(3) {
+  text-align: center !important; /* Center the type header */
+  padding: 0.25rem 0.25rem !important;
+}
+
+/* Center tier and difficulty column content */
+.browser-table td:nth-child(2),
+.browser-table td:nth-child(4) {
+  text-align: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 /* Countdowns Section - Top of GameBoard */
@@ -5721,7 +5725,7 @@ textarea,
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 1rem;
+  padding: 0; /* Remove padding */
   background: var(--bg-primary);
   border-radius: 0.5rem;
   height: 100%;
@@ -5831,6 +5835,32 @@ textarea,
   table-layout: fixed; /* Fixed layout for precise control */
 }
 
+.browser-table thead {
+  background: #1a1a1a; /* Solid dark background for header */
+  border-bottom: 1px solid var(--border); /* Match regular row borders */
+  position: sticky; /* Make header sticky */
+  top: 0; /* Stick to top of container */
+  z-index: 10; /* Ensure header stays above content */
+  box-shadow: 0 1px 0 var(--border); /* Match regular row border thickness */
+}
+
+.browser-table th {
+  background: #1a1a1a; /* Solid dark background for header cells */
+  font-weight: 700; /* Bolder font weight for headers */
+  border-bottom: 1px solid var(--border); /* Match regular row borders */
+  cursor: pointer;
+  user-select: none;
+  position: sticky; /* Make header cells sticky */
+  top: 0; /* Stick to top of container */
+  z-index: 10; /* Ensure header stays above content */
+  min-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* Subtle text shadow for depth */
+  box-shadow: 0 1px 0 var(--border); /* Match regular row border thickness */
+}
+
 .browser-table th,
 .browser-table td {
   padding: 0.25rem 0.25rem; /* Much tighter padding */
@@ -5846,32 +5876,54 @@ textarea,
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding-left: 0.5rem; /* Increase left padding for name column */
 }
 
 .browser-table th:nth-child(2),
 .browser-table td:nth-child(2) {
-  width: 40px; /* Tier column - narrow for single digits */
-  min-width: 40px;
+  width: 50px; /* Tier column - wider for icon */
   text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible; /* Don't hide icon */
+  text-overflow: unset; /* No ellipsis for icons */
+}
+
+.browser-table th:nth-child(2) {
+  width: 50px !important; /* Restore fixed width */
+  text-align: center !important;
+}
+
+.browser-table th:nth-child(1).sortable,
+.browser-table th:nth-child(3).sortable {
+  padding-right: 0.5rem !important; /* Match the symmetrical padding */
 }
 
 .browser-table th:nth-child(3),
 .browser-table td:nth-child(3) {
-  width: 100px; /* Type column - wider to avoid ellipsis */
-  min-width: 100px;
+  width: 100px; /* Type column - wider to fit "Exploration" */
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.browser-table td:nth-child(3) {
+  text-align: center !important; /* Center the type content */
+}
+
 .browser-table th:nth-child(4),
 .browser-table td:nth-child(4) {
-  width: 30px; /* Difficulty column - very narrow for single tilde */
-  min-width: 30px;
+  width: 50px; /* Difficulty column - wider for icon */
   text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible; /* Don't hide icon */
+  text-overflow: unset; /* No ellipsis for icons */
+}
+
+.browser-table th:nth-child(4) {
+  width: 50px !important; /* Restore fixed width */
+  text-align: center !important;
+}
+
+.browser-table th:nth-child(2).sortable,
+.browser-table th:nth-child(4).sortable {
+  padding-right: 0 !important; /* No extra padding for narrow icon columns */
 }
 
 .browser-table th:last-child,
@@ -5883,194 +5935,33 @@ textarea,
   padding: 0 !important; /* Remove cell padding */
   margin: 0 !important; /* Remove cell margins */
   border: none !important; /* Remove cell borders */
+  margin-right: 0 !important; /* Remove right margin */
 }
 
 /* Mobile table - use same layout as desktop */
-@media (max-width: 800px) {
-  .browser-table-container {
-    overflow: auto !important; /* Allow horizontal scroll if needed */
-  }
-  
-  .browser-table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    table-layout: fixed !important;
-  }
-  
-  .browser-table thead {
-    display: table-header-group !important;
-  }
-  
-  .browser-table tbody {
-    display: table-row-group !important;
-  }
-  
-  .browser-table tbody tr {
-    display: table-row !important;
-    height: 35px !important;
-    border-bottom: 1px solid var(--border) !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: transparent !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    transition: background-color 0.2s ease !important;
-  }
-  
-  .browser-table tbody tr:hover {
-    background: var(--bg-hover) !important;
-  }
-  
-  .browser-table tbody tr:last-child {
-    border-bottom: none !important;
-  }
-  
-  .browser-table td {
-    display: table-cell !important;
-    border: none !important;
-    position: static !important;
-    padding: 0.25rem 0.25rem !important;
-    white-space: nowrap !important;
-    text-align: left !important;
-    width: auto !important;
-    box-sizing: border-box !important;
-    min-width: auto !important;
-  }
-  
-  .browser-table td:before {
-    display: none !important;
-  }
-  
-  .browser-table td:nth-child(2) {
-    text-align: center !important; /* Center tier column */
-  }
-  
-  .browser-table td:nth-child(4) {
-    text-align: center !important; /* Center difficulty column */
-  }
-  
-  .browser-table td:last-child {
-    text-align: center !important;
-    padding: 0 !important;
-  }
-  
-  .browser-table td:last-child:before {
-    display: none !important;
-  }
-
-  /* Mobile expanded card styling */
-  .expanded-card-row {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 0.5rem !important;
-    margin-top: 0.5rem !important;
-    margin-bottom: 0.5rem !important;
-    display: table-row !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .expanded-card-cell {
-    padding: 0 !important;
-    border: none !important;
-    display: table-cell !important;
-  }
-
-  .expanded-card-container {
-    padding: 1rem !important;
-    border-top: 1px solid var(--border) !important;
-  }
-
-  /* Make expanded cards more mobile-friendly */
-  .expanded-card {
-    border: none !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-  }
-
-  .expanded-card .expanded-header {
-    padding: 0.75rem !important;
-    background: var(--bg-dark) !important;
-    border-bottom: 1px solid var(--border) !important;
-    border-radius: 0 !important;
-  }
-
-  .expanded-card .expanded-header h2 {
-    font-size: 1.1rem !important;
-    margin: 0 !important;
-  }
-
-  .expanded-card .expanded-content {
-    padding: 0.75rem !important;
-  }
-
-  /* Mobile-friendly stat rows */
-  .expanded-card .stat-row {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 0.5rem !important;
-    padding: 0.75rem !important;
-    margin-bottom: 0.75rem !important;
-  }
-
-  .expanded-card .stat-label {
-    min-width: auto !important;
-    font-weight: 600 !important;
-    color: var(--text-primary) !important;
-  }
-
-  .expanded-card .stat-controls {
-    width: 100% !important;
-    justify-content: space-between !important;
-  }
-}
-
-.browser-table th {
-  height: 35px; /* Match row height */
-  background: var(--bg-dark);
-  color: var(--text-primary);
-  font-weight: 600;
-  padding: 0.25rem 0.25rem; /* Match cell padding */
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  user-select: none;
-  position: relative;
-  min-width: 100px;
-}
 
 .browser-table th:hover {
   background: var(--bg-hover);
 }
 
 .browser-table th.sortable {
-  padding-right: 2rem;
+  padding-right: 0.5rem; /* Remove extra padding for sort arrows */
 }
 
 .browser-table th.sortable::after {
-  content: '↕';
-  position: absolute;
-  right: 0.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.5;
-  font-size: 0.875rem;
-  width: 1rem;
-  text-align: center;
+  display: none; /* Remove sort arrows */
 }
 
 .browser-table th.sortable.active::after {
-  opacity: 1;
-  color: var(--text-primary);
+  display: none; /* Remove sort arrows */
 }
 
 .browser-table th.sortable.active.asc::after {
-  content: '↑';
+  display: none; /* Remove sort arrows */
 }
 
 .browser-table th.sortable.active.desc::after {
-  content: '↓';
+  display: none; /* Remove sort arrows */
 }
 
 .browser-table tbody tr {
@@ -6115,6 +6006,11 @@ textarea,
   padding: 1rem;
 }
 
+.browser-filters {
+  position: relative; /* Enable absolute positioning for dropdowns */
+  margin-bottom: 1rem; /* Add space between filters and table */
+}
+
 .filter-dropdown {
   position: absolute;
   top: 100%;
@@ -6125,6 +6021,7 @@ textarea,
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   min-width: 150px;
+  margin-top: 0.25rem; /* Add small gap from filter buttons */
 }
 
 .filter-option {
@@ -6149,9 +6046,11 @@ textarea,
 /* Mobile responsiveness for browser */
 @media (max-width: 800px) {
   .browser-wrapper {
-    padding: 0.5rem;
-    gap: 0.75rem;
-    overflow: hidden;
+    overflow: visible !important; /* Ensure browser is visible on mobile */
+  }
+  
+  .browser-table-container {
+    overflow: auto !important; /* Allow scrolling if needed */
   }
   
   .browser-top-row {

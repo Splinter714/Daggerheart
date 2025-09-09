@@ -218,15 +218,36 @@ const AppContent = () => {
   // Mobile detection
   useEffect(() => {
     const checkMobile = () => {
-      // Switch to mobile when width can't accommodate 12 HP icons + stress + other elements
-      // Conservative estimate: 12 HP (240px) + 10 stress (200px) + difficulty + damage input + padding = ~600px
-      setIsMobile(window.innerWidth <= 800)
+      const wasMobile = isMobile
+      const nowMobile = window.innerWidth <= 800
+      
+      setIsMobile(nowMobile)
+      
+      // When transitioning from desktop to mobile, preserve current panel focus
+      if (!wasMobile && nowMobile) {
+        // If browser is open, keep it visible in mobile
+        if (rightColumnMode === 'database') {
+          setMobileView('right')
+        }
+        // If item is selected, keep it visible in mobile
+        else if (rightColumnMode === 'item') {
+          setMobileView('right')
+        }
+        // If creator is open, keep it visible in mobile
+        else if (rightColumnMode === 'creator') {
+          setMobileView('right')
+        }
+        // Otherwise default to left panel
+        else {
+          setMobileView('left')
+        }
+      }
     }
     
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+  }, [isMobile, rightColumnMode])
 
   // Determine which triggers are needed based on active countdowns
   const getNeededTriggers = () => {

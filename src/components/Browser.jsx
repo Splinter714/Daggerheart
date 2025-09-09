@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import Button from './Buttons'
 import Cards from './Cards'
-import { Swords, TreePine, ArrowLeft, Plus } from 'lucide-react'
+import { Swords, TreePine, ArrowLeft, Plus, Star, Skull } from 'lucide-react'
 import adversariesData from '../data/adversaries.json'
 import environmentsData from '../data/environments.json'
 
@@ -15,17 +15,68 @@ const Browser = ({
   console.log('Browser component is being used, not List component')
   
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterCategory, setFilterCategory] = useState('')
   const [filterTier, setFilterTier] = useState('')
   const [filterType, setFilterType] = useState('')
-  const [sortField, setSortField] = useState('tier')
-  const [sortDirection, setSortDirection] = useState('asc')
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
+  // Load initial sort state synchronously to prevent jitter
+  const getInitialSortState = () => {
+    const savedSort = localStorage.getItem(`browser-sort-${type}`)
+    if (savedSort) {
+      try {
+        return JSON.parse(savedSort)
+      } catch (e) {
+        console.warn('Failed to parse saved sort state:', e)
+      }
+    }
+    // Default sort: tier, type, difficulty
+    return [
+      { field: 'tier', direction: 'asc' },
+      { field: 'displayType', direction: 'asc' },
+      { field: 'displayDifficulty', direction: 'asc' }
+    ]
+  }
+
+  const [sortFields, setSortFields] = useState(getInitialSortState)
   const [showTierDropdown, setShowTierDropdown] = useState(false)
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
   
   // Track which card is expanded
   const [expandedCard, setExpandedCard] = useState(null)
+  
+  // Track the current type to detect changes
+  const currentTypeRef = useRef(type)
+  
+  // Handle type changes without useEffect to prevent jitter
+  if (currentTypeRef.current !== type) {
+    currentTypeRef.current = type
+    
+    const savedSort = localStorage.getItem(`browser-sort-${type}`)
+    if (savedSort) {
+      try {
+        const parsed = JSON.parse(savedSort)
+        setSortFields(parsed)
+      } catch (e) {
+        console.warn('Failed to parse saved sort state:', e)
+        // Reset to default if parsing fails
+        setSortFields([
+          { field: 'tier', direction: 'asc' },
+          { field: 'displayType', direction: 'asc' },
+          { field: 'displayDifficulty', direction: 'asc' }
+        ])
+      }
+    } else {
+      // No saved state, use default
+      setSortFields([
+        { field: 'tier', direction: 'asc' },
+        { field: 'displayType', direction: 'asc' },
+        { field: 'displayDifficulty', direction: 'asc' }
+      ])
+    }
+  }
+
+  // Save sort state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(`browser-sort-${type}`, JSON.stringify(sortFields))
+  }, [sortFields, type])
 
   // Use imported data directly - only the relevant type
   const adversaryData = adversariesData.adversaries || []
@@ -63,11 +114,6 @@ const Browser = ({
     return items
   }, [currentData, dataType])
 
-  // Get unique categories for filter
-  const categories = useMemo(() => {
-    return [dataType === 'adversary' ? 'Adversary' : 'Environment']
-  }, [dataType])
-
   // Get unique types for filter
   const itemTypes = useMemo(() => {
     const types = [...new Set(unifiedData.map(item => item.displayType).filter(Boolean))]
@@ -87,61 +133,66 @@ const Browser = ({
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
       
-      const matchesCategory = filterCategory === '' || item.category === filterCategory
       const matchesTier = filterTier === '' || item.tier.toString() === filterTier
       const matchesType = filterType === '' || item.displayType === filterType
       
-      return matchesSearch && matchesCategory && matchesTier && matchesType
+      return matchesSearch && matchesTier && matchesType
     })
 
-    // Sort items
+    // Apply multi-level sorting
     filtered.sort((a, b) => {
-      let aValue = a[sortField]
-      let bValue = b[sortField]
-      
-      if (sortField === 'tier') {
-        aValue = parseInt(aValue) || 0
-        bValue = parseInt(bValue) || 0
-      } else if (typeof aValue === 'string' && typeof bValue === 'string') {
-        aValue = aValue.toLowerCase()
-        bValue = bValue.toLowerCase()
-      } else {
-        // Handle non-string values by converting to strings
-        aValue = String(aValue || '').toLowerCase()
-        bValue = String(bValue || '').toLowerCase()
+      for (const sort of sortFields) {
+        const { field, direction } = sort
+        let aValue = a[field]
+        let bValue = b[field]
+        
+        if (field === 'tier') {
+          aValue = parseInt(aValue) || 0
+          bValue = parseInt(bValue) || 0
+        } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+          aValue = aValue.toLowerCase()
+          bValue = bValue.toLowerCase()
+        } else {
+          // Handle non-string values by converting to strings
+          aValue = String(aValue || '').toLowerCase()
+          bValue = String(bValue || '').toLowerCase()
+        }
+        
+        if (direction === 'asc') {
+          if (aValue > bValue) return 1
+          if (aValue < bValue) return -1
+        } else {
+          if (aValue < bValue) return 1
+          if (aValue > bValue) return -1
+        }
+        // If equal, continue to next sort level
       }
-      
-      if (sortDirection === 'asc') {
-        return aValue > bValue ? 1 : -1
-      } else {
-        return aValue < bValue ? 1 : -1
-      }
+      return 0
     })
 
     return filtered
-  }, [unifiedData, searchTerm, filterCategory, filterTier, filterType, sortField, sortDirection])
+  }, [unifiedData, searchTerm, filterTier, filterType, sortFields])
 
   const handleSort = (field) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortDirection('asc')
-    }
+    setSortFields(prevSortFields => {
+      // Check if this field is already the primary sort
+      if (prevSortFields[0]?.field === field) {
+        // Toggle direction of primary sort
+        return [{ field, direction: prevSortFields[0].direction === 'asc' ? 'desc' : 'asc' }, ...prevSortFields.slice(1)]
+      } else {
+        // Remove this field from existing sorts and add as new primary
+        const filteredSorts = prevSortFields.filter(sort => sort.field !== field)
+        return [{ field, direction: 'asc' }, ...filteredSorts]
+      }
+    })
   }
 
   const handleFilter = (filterType) => {
-    if (filterType === 'category') {
-      setShowCategoryDropdown(!showCategoryDropdown)
-      setShowTierDropdown(false)
-      setShowTypeDropdown(false)
-    } else if (filterType === 'tier') {
+    if (filterType === 'tier') {
       setShowTierDropdown(!showTierDropdown)
-      setShowCategoryDropdown(false)
       setShowTypeDropdown(false)
     } else if (filterType === 'type') {
       setShowTypeDropdown(!showTypeDropdown)
-      setShowCategoryDropdown(false)
       setShowTierDropdown(false)
     }
   }
@@ -206,15 +257,6 @@ const Browser = ({
       <div className="browser-filters">
         <Button
           action="filter"
-          onClick={() => handleFilter('category')}
-          size="sm"
-          title={`Filter by Category: ${filterCategory || 'All'}`}
-        >
-          Category {filterCategory || 'All'}
-        </Button>
-        
-        <Button
-          action="filter"
           onClick={() => handleFilter('tier')}
           size="sm"
           title={`Filter by Tier: ${filterTier || 'All'}`}
@@ -230,59 +272,42 @@ const Browser = ({
         >
           Type {filterType || 'All'}
         </Button>
+
+        {/* Filter Dropdowns */}
+        {showTierDropdown && (
+          <div className="filter-dropdown">
+            <div className="filter-option" onClick={() => { setFilterTier(''); setShowTierDropdown(false) }}>
+              All Tiers
+            </div>
+            {itemTiers.map(tier => (
+              <div 
+                key={tier} 
+                className="filter-option" 
+                onClick={() => { setFilterTier(tier.toString()); setShowTierDropdown(false) }}
+              >
+                Tier {tier}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {showTypeDropdown && (
+          <div className="filter-dropdown">
+            <div className="filter-option" onClick={() => { setFilterType(''); setShowTypeDropdown(false) }}>
+              All Types
+            </div>
+            {itemTypes.map(type => (
+              <div 
+                key={type} 
+                className="filter-option" 
+                onClick={() => { setFilterType(type); setShowTypeDropdown(false) }}
+              >
+                {type}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* Filter Dropdowns */}
-      {showCategoryDropdown && (
-        <div className="filter-dropdown">
-          <div className="filter-option" onClick={() => { setFilterCategory(''); setShowCategoryDropdown(false) }}>
-            All Categories
-          </div>
-          {categories.map(category => (
-            <div 
-              key={category} 
-              className="filter-option" 
-              onClick={() => { setFilterCategory(category); setShowCategoryDropdown(false) }}
-            >
-              {category}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {showTierDropdown && (
-        <div className="filter-dropdown">
-          <div className="filter-option" onClick={() => { setFilterTier(''); setShowTierDropdown(false) }}>
-            All Tiers
-          </div>
-          {itemTiers.map(tier => (
-            <div 
-              key={tier} 
-              className="filter-option" 
-              onClick={() => { setFilterTier(tier.toString()); setShowTierDropdown(false) }}
-            >
-              Tier {tier}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {showTypeDropdown && (
-        <div className="filter-dropdown">
-          <div className="filter-option" onClick={() => { setFilterType(''); setShowTypeDropdown(false) }}>
-            All Types
-          </div>
-          {itemTypes.map(type => (
-            <div 
-              key={type} 
-              className="filter-option" 
-              onClick={() => { setFilterType(type); setShowTypeDropdown(false) }}
-            >
-              {type}
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Items Table */}
       <div className="browser-table-container">
@@ -291,27 +316,27 @@ const Browser = ({
             <tr>
               <th 
                 onClick={() => handleSort('name')} 
-                className={`sortable ${sortField === 'name' ? 'active' : ''} ${sortField === 'name' ? sortDirection : ''}`}
+                className={`sortable ${sortFields[0]?.field === 'name' ? 'active' : ''} ${sortFields[0]?.field === 'name' ? sortFields[0].direction : ''}`}
               >
                 Name
               </th>
               <th 
                 onClick={() => handleSort('tier')} 
-                className={`sortable ${sortField === 'tier' ? 'active' : ''} ${sortField === 'tier' ? sortDirection : ''}`}
+                className={`sortable ${sortFields[0]?.field === 'tier' ? 'active' : ''} ${sortFields[0]?.field === 'tier' ? sortFields[0].direction : ''}`}
               >
-                #
+                <Star size={16} />
               </th>
               <th 
                 onClick={() => handleSort('displayType')} 
-                className={`sortable ${sortField === 'displayType' ? 'active' : ''} ${sortField === 'displayType' ? sortDirection : ''}`}
+                className={`sortable ${sortFields[0]?.field === 'displayType' ? 'active' : ''} ${sortFields[0]?.field === 'displayType' ? sortFields[0].direction : ''}`}
               >
                 Type
               </th>
               <th 
                 onClick={() => handleSort('displayDifficulty')} 
-                className={`sortable ${sortField === 'displayDifficulty' ? 'active' : ''} ${sortField === 'displayDifficulty' ? sortDirection : ''}`}
+                className={`sortable ${sortFields[0]?.field === 'displayDifficulty' ? 'active' : ''} ${sortFields[0]?.field === 'displayDifficulty' ? sortFields[0].direction : ''}`}
               >
-                ⚔
+                <Skull size={16} />
               </th>
               <th></th>
             </tr>
