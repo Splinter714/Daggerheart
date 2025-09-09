@@ -72,11 +72,13 @@ const AppContent = () => {
       
       if (!isTableAtTop) {
         // Don't handle swipe-to-dismiss for table touches when not at top
+        // Allow normal scrolling
         return
       }
     }
     
-    e.preventDefault() // Prevent default scroll behavior
+    // For swipe-to-dismiss gestures, prevent default to avoid pull-to-refresh
+    e.preventDefault()
     setTouchStart(e.targetTouches[0].clientY)
     setTouchCurrent(e.targetTouches[0].clientY)
     setDrawerOffset(0)
@@ -85,36 +87,32 @@ const AppContent = () => {
   const handleTouchMove = (e) => {
     if (!touchStart) return
     
-    // Check if touch is on the browser table
-    const isTableTouch = e.target.closest('.browser-table-container') || 
-                        e.target.closest('.browser-table') ||
-                        e.target.closest('table')
-    
-    if (isTableTouch) {
-      // Don't handle swipe-to-dismiss for table touches
-      return
-    }
-    
-    e.preventDefault() // Prevent default scroll behavior
-    
     const currentY = e.targetTouches[0].clientY
     const deltaY = currentY - touchStart
     
-    // Only allow downward swipes (positive deltaY)
+    // Only prevent default if this is a downward swipe-to-dismiss gesture
     if (deltaY > 0) {
+      e.preventDefault()
       setTouchCurrent(currentY)
       setDrawerOffset(deltaY)
-      
-      // Don't close immediately - let user complete the gesture
+    } else if (deltaY < -10) {
+      // If swiping up more than 10px, reset the swipe state
+      setTouchStart(null)
+      setTouchCurrent(null)
+      setDrawerOffset(0)
     }
+    // For upward swipes less than 10px, allow normal scrolling
   }
   
   const handleTouchEnd = (e) => {
     if (!touchStart || !touchCurrent) return
     
-    e.preventDefault() // Prevent default scroll behavior
-    
     const distance = touchCurrent - touchStart
+    
+    // Only prevent default if this was a significant downward swipe
+    if (distance > 30) {
+      e.preventDefault()
+    }
     
     // If swipe was far enough, smoothly animate downward to close
     if (distance > 100) {
@@ -129,14 +127,19 @@ const AppContent = () => {
     // If swipe was significant but not enough to close, snap back smoothly
     else if (distance > 30) {
       setDrawerOffset(0)
+      // Clear touch state to prevent any scroll behavior
+      setTimeout(() => {
+        setTouchStart(null)
+        setTouchCurrent(null)
+      }, 50)
     }
     // If swipe was small, just reset
     else if (distance <= 30) {
       setDrawerOffset(0)
+      // Clear touch state immediately for small swipes
+      setTouchStart(null)
+      setTouchCurrent(null)
     }
-    
-    setTouchStart(null)
-    setTouchCurrent(null)
   }
   
   const [creatorFormData, setCreatorFormData] = useState({
