@@ -6520,3 +6520,30 @@ textarea,
   font-size: 0.85rem;
   white-space: nowrap;
 }
+
+/* Version Display */
+.version-display {
+  position: fixed;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--text-light);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  z-index: 1000;
+  pointer-events: none;
+  user-select: none;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 800px) {
+  .version-display {
+    top: 0.25rem;
+    right: 0.25rem;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
