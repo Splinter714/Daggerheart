@@ -11,7 +11,8 @@ const Browser = ({
   onCancel, 
   onCreateCustom
 }) => {
-  console.log('Browser component received props:', { type, onAddItem, onCancel, onCreateCustom })
+  console.log('Browser component rendered with props:', { type, onAddItem, onCancel, onCreateCustom })
+  console.log('Browser component is being used, not List component')
   
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
@@ -155,15 +156,23 @@ const Browser = ({
   }
 
   const handleCardClick = (item) => {
+    console.log('Browser handleCardClick called:', item.name)
     if (expandedCard?.id === item.id) {
       setExpandedCard(null)
+      console.log('Collapsing card')
     } else {
       setExpandedCard(item)
+      console.log('Expanding card:', item.name, 'expandedCard state:', expandedCard)
     }
   }
 
   return (
-    <div className="browser-wrapper">
+    <div 
+      className="browser-wrapper"
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
+    >
       {/* Back Arrow, Search, and Custom Button Row */}
       <div className="browser-top-row">
         <Button
@@ -290,7 +299,7 @@ const Browser = ({
                 onClick={() => handleSort('tier')} 
                 className={`sortable ${sortField === 'tier' ? 'active' : ''} ${sortField === 'tier' ? sortDirection : ''}`}
               >
-                Tier
+                #
               </th>
               <th 
                 onClick={() => handleSort('displayType')} 
@@ -302,9 +311,9 @@ const Browser = ({
                 onClick={() => handleSort('displayDifficulty')} 
                 className={`sortable ${sortField === 'displayDifficulty' ? 'active' : ''} ${sortField === 'displayDifficulty' ? sortDirection : ''}`}
               >
-                Difficulty
+                ⚔
               </th>
-              <th>Add</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -312,7 +321,11 @@ const Browser = ({
               <React.Fragment key={item.id}>
                 <tr 
                   className="browser-row"
-                  onClick={() => handleCardClick(item)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleCardClick(item)
+                  }}
                 >
                   <td className="column-name" data-label="Name">{item.name}</td>
                   <td className="column-tier" data-label="Tier">{item.tier}</td>
@@ -333,7 +346,7 @@ const Browser = ({
                   </td>
                 </tr>
                 
-                {/* Inline Expanded Card View */}
+                {/* Inline Expanded Card View - Both Desktop and Mobile */}
                 {expandedCard?.id === item.id && (
                   <tr className="expanded-card-row">
                     <td colSpan={5} className="expanded-card-cell">
@@ -342,7 +355,6 @@ const Browser = ({
                           item={expandedCard}
                           type={expandedCard.category.toLowerCase()}
                           mode="expanded"
-                          onItemClick={() => handleAddFromDatabase(expandedCard)}
                         />
                       </div>
                     </td>
@@ -353,6 +365,7 @@ const Browser = ({
           </tbody>
         </table>
       </div>
+
     </div>
   )
 }
