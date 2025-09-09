@@ -60,24 +60,27 @@ const AppContent = () => {
   const [drawerOffset, setDrawerOffset] = useState(0)
   
   const handleTouchStart = (e) => {
-    // Check if touch is on the browser table (which should scroll normally)
+    // BROWSER/CREATOR DRAWER STRATEGY: Handle table scrolling intelligently
+    
+    // Check if touch is on the browser table
     const isTableTouch = e.target.closest('.browser-table-container') || 
                         e.target.closest('.browser-table') ||
                         e.target.closest('table')
     
     if (isTableTouch) {
-      // Check if table is scrolled to the top
+      // For table touches, check scroll position
       const tableContainer = e.target.closest('.browser-table-container')
       const isTableAtTop = tableContainer && tableContainer.scrollTop <= 10
       
       if (!isTableAtTop) {
-        // Don't handle swipe-to-dismiss for table touches when not at top
-        // Allow normal scrolling
+        // Table is scrolled down - allow normal table scrolling
+        // Don't prevent default - let browser handle table scrolling
         return
       }
+      // Table is at top - allow swipe-to-dismiss
     }
     
-    // For swipe-to-dismiss gestures, prevent default to avoid pull-to-refresh
+    // For non-table touches OR table touches at top, handle swipe-to-dismiss
     e.preventDefault()
     setTouchStart(e.targetTouches[0].clientY)
     setTouchCurrent(e.targetTouches[0].clientY)
@@ -87,56 +90,51 @@ const AppContent = () => {
   const handleTouchMove = (e) => {
     if (!touchStart) return
     
+    // BROWSER/CREATOR DRAWER STRATEGY: Handle swipe gestures with table awareness
     const currentY = e.targetTouches[0].clientY
     const deltaY = currentY - touchStart
     
-    // Only prevent default if this is a downward swipe-to-dismiss gesture
+    // Only handle downward swipes for swipe-to-dismiss
     if (deltaY > 0) {
       e.preventDefault()
       setTouchCurrent(currentY)
       setDrawerOffset(deltaY)
-    } else if (deltaY < -10) {
-      // If swiping up more than 10px, reset the swipe state
+    }
+    // For upward swipes, reset state to allow normal scrolling
+    else if (deltaY < 0) {
       setTouchStart(null)
       setTouchCurrent(null)
       setDrawerOffset(0)
     }
-    // For upward swipes less than 10px, allow normal scrolling
   }
   
   const handleTouchEnd = (e) => {
     if (!touchStart || !touchCurrent) return
     
+    // BROWSER/CREATOR DRAWER STRATEGY: Handle swipe gestures consistently
     const distance = touchCurrent - touchStart
     
-    // Only prevent default if this was a significant downward swipe
-    if (distance > 30) {
-      e.preventDefault()
-    }
+    // Always prevent default for swipe gestures
+    e.preventDefault()
     
     // If swipe was far enough, smoothly animate downward to close
     if (distance > 100) {
-      // Animate drawer offset to full height (smooth downward close)
       setDrawerOffset(window.innerHeight)
-      
-      // Then close the drawer after the transition completes
       setTimeout(() => {
         handleCloseRightColumn()
-      }, 300) // Match the CSS transition duration
+      }, 300)
     }
     // If swipe was significant but not enough to close, snap back smoothly
     else if (distance > 30) {
       setDrawerOffset(0)
-      // Clear touch state to prevent any scroll behavior
       setTimeout(() => {
         setTouchStart(null)
         setTouchCurrent(null)
       }, 50)
     }
     // If swipe was small, just reset
-    else if (distance <= 30) {
+    else {
       setDrawerOffset(0)
-      // Clear touch state immediately for small swipes
       setTouchStart(null)
       setTouchCurrent(null)
     }

@@ -101,24 +101,18 @@ const List = ({
   const [drawerOffset, setDrawerOffset] = useState(0)
   
   const handleTouchStart = (e) => {
-    // Check if touch is on header OR on content when scrolled to top
+    // EXPANDED CARD DRAWER STRATEGY: Prioritize scrolling, only handle swipe-to-dismiss on header
+    
+    // Only handle swipe-to-dismiss for header touches
     const isHeaderTouch = e.target.closest('.drawer-header')
-    const drawerBody = e.target.closest('.drawer-body')
     
-    // If touching content, check if we're scrolled to the top
-    let isContentAtTop = false
-    if (drawerBody) {
-      isContentAtTop = drawerBody.scrollTop <= 10 // Allow small tolerance
-    }
-    
-    // Only handle swipe-to-dismiss for header touches OR content touches when at top
-    if (!isHeaderTouch && !isContentAtTop) {
-      // Don't handle swipe-to-dismiss for content touches when not at top
-      // Allow normal scrolling
+    if (!isHeaderTouch) {
+      // For all non-header touches, allow normal scrolling
+      // Don't prevent default - let the browser handle scrolling
       return
     }
     
-    // For swipe-to-dismiss gestures, prevent default to avoid pull-to-refresh
+    // Only for header touches, handle swipe-to-dismiss
     e.preventDefault()
     e.stopPropagation()
     
@@ -131,58 +125,53 @@ const List = ({
   const handleTouchMove = (e) => {
     if (!touchStart) return
     
+    // EXPANDED CARD DRAWER STRATEGY: Only handle header swipe gestures
     const currentY = e.targetTouches[0].clientY
     const deltaY = currentY - touchStart
     
-    // Only prevent default if this is a downward swipe-to-dismiss gesture
+    // Only handle downward swipes for swipe-to-dismiss
     if (deltaY > 0) {
       e.preventDefault()
       e.stopPropagation()
       setTouchCurrent(currentY)
       setDrawerOffset(deltaY)
-    } else if (deltaY < -10) {
-      // If swiping up more than 10px, reset the swipe state to prevent scroll
+    }
+    // For upward swipes, reset state to allow normal scrolling
+    else if (deltaY < 0) {
       setTouchStart(null)
       setTouchCurrent(null)
       setDrawerOffset(0)
     }
-    // For upward swipes less than 10px, allow normal scrolling
   }
   
   const handleTouchEnd = (e) => {
     if (!touchStart || !touchCurrent) return
     
+    // EXPANDED CARD DRAWER STRATEGY: Handle header swipe gestures only
     const distance = touchCurrent - touchStart
     
-    // Only prevent default if this was a significant downward swipe
-    if (distance > 30) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
+    // Always prevent default for header swipe gestures
+    e.preventDefault()
+    e.stopPropagation()
     
     // If swipe was far enough, smoothly animate downward to close
     if (distance > 100) {
-      // Animate drawer offset to full height (smooth downward close)
       setDrawerOffset(window.innerHeight)
-      
-      // Then close the drawer after the transition completes
       setTimeout(() => {
         closeDrawer()
-      }, 300) // Match the CSS transition duration
+      }, 300)
     }
     // If swipe was significant but not enough to close, snap back smoothly
     else if (distance > 30) {
       setDrawerOffset(0)
-      // Clear touch state to prevent any scroll behavior
       setTimeout(() => {
         setTouchStart(null)
         setTouchCurrent(null)
       }, 50)
     }
     // If swipe was small, just reset
-    else if (distance <= 30) {
+    else {
       setDrawerOffset(0)
-      // Clear touch state immediately for small swipes
       setTouchStart(null)
       setTouchCurrent(null)
     }
