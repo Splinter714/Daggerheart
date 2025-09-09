@@ -101,18 +101,26 @@ const List = ({
   const [drawerOffset, setDrawerOffset] = useState(0)
   
   const handleTouchStart = (e) => {
-    // EXPANDED CARD DRAWER STRATEGY: Prioritize scrolling, only handle swipe-to-dismiss on header
+    // EXPANDED CARD DRAWER STRATEGY: Handle swipe-to-dismiss on header OR content when at top
     
-    // Only handle swipe-to-dismiss for header touches
+    // Check if touch is on header
     const isHeaderTouch = e.target.closest('.drawer-header')
     
-    if (!isHeaderTouch) {
-      // For all non-header touches, allow normal scrolling
+    // Check if touch is on scrollable content
+    const drawerBody = e.target.closest('.drawer-body')
+    let isContentAtTop = false
+    if (drawerBody) {
+      isContentAtTop = drawerBody.scrollTop <= 10 // Allow small tolerance
+    }
+    
+    // Only handle swipe-to-dismiss for header touches OR content touches when at top
+    if (!isHeaderTouch && !isContentAtTop) {
+      // For content touches when scrolled down, allow normal scrolling
       // Don't prevent default - let the browser handle scrolling
       return
     }
     
-    // Only for header touches, handle swipe-to-dismiss
+    // For header touches OR content touches at top, handle swipe-to-dismiss
     e.preventDefault()
     e.stopPropagation()
     
@@ -125,7 +133,7 @@ const List = ({
   const handleTouchMove = (e) => {
     if (!touchStart) return
     
-    // EXPANDED CARD DRAWER STRATEGY: Only handle header swipe gestures
+    // EXPANDED CARD DRAWER STRATEGY: Handle swipe gestures from header or content at top
     const currentY = e.targetTouches[0].clientY
     const deltaY = currentY - touchStart
     
@@ -147,10 +155,10 @@ const List = ({
   const handleTouchEnd = (e) => {
     if (!touchStart || !touchCurrent) return
     
-    // EXPANDED CARD DRAWER STRATEGY: Handle header swipe gestures only
+    // EXPANDED CARD DRAWER STRATEGY: Handle swipe gestures from header or content at top
     const distance = touchCurrent - touchStart
     
-    // Always prevent default for header swipe gestures
+    // Always prevent default for swipe gestures
     e.preventDefault()
     e.stopPropagation()
     
