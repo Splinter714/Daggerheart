@@ -51,29 +51,91 @@ const AppContent = () => {
   const [showMockup, setShowMockup] = useState(false)
   const [lastAddedItemType, setLastAddedItemType] = useState(null)
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+  const [drawerRefreshKey, setDrawerRefreshKey] = useState(0)
   
   // Touch gesture handling for mobile drawer
   const [touchStart, setTouchStart] = useState(null)
-  const [touchEnd, setTouchEnd] = useState(null)
+  const [touchCurrent, setTouchCurrent] = useState(null)
+  const [drawerOffset, setDrawerOffset] = useState(0)
   
   const handleTouchStart = (e) => {
-    setTouchEnd(null)
+    // Check if touch is on the browser table (which should scroll normally)
+    const isTableTouch = e.target.closest('.browser-table-container') || 
+                        e.target.closest('.browser-table') ||
+                        e.target.closest('table')
+    
+    if (isTableTouch) {
+      // Check if table is scrolled to the top
+      const tableContainer = e.target.closest('.browser-table-container')
+      const isTableAtTop = tableContainer && tableContainer.scrollTop <= 10
+      
+      if (!isTableAtTop) {
+        // Don't handle swipe-to-dismiss for table touches when not at top
+        return
+      }
+    }
+    
+    e.preventDefault() // Prevent default scroll behavior
     setTouchStart(e.targetTouches[0].clientY)
+    setTouchCurrent(e.targetTouches[0].clientY)
+    setDrawerOffset(0)
   }
   
   const handleTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientY)
+    if (!touchStart) return
+    
+    // Check if touch is on the browser table
+    const isTableTouch = e.target.closest('.browser-table-container') || 
+                        e.target.closest('.browser-table') ||
+                        e.target.closest('table')
+    
+    if (isTableTouch) {
+      // Don't handle swipe-to-dismiss for table touches
+      return
+    }
+    
+    e.preventDefault() // Prevent default scroll behavior
+    
+    const currentY = e.targetTouches[0].clientY
+    const deltaY = currentY - touchStart
+    
+    // Only allow downward swipes (positive deltaY)
+    if (deltaY > 0) {
+      setTouchCurrent(currentY)
+      setDrawerOffset(deltaY)
+      
+      // Don't close immediately - let user complete the gesture
+    }
   }
   
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
+  const handleTouchEnd = (e) => {
+    if (!touchStart || !touchCurrent) return
     
-    const distance = touchStart - touchEnd
-    const isDownSwipe = distance < -50
+    e.preventDefault() // Prevent default scroll behavior
     
-    if (isDownSwipe && mobileDrawerOpen) {
-      handleCloseRightColumn()
+    const distance = touchCurrent - touchStart
+    
+    // If swipe was far enough, smoothly animate downward to close
+    if (distance > 100) {
+      // Animate drawer offset to full height (smooth downward close)
+      setDrawerOffset(window.innerHeight)
+      
+      // Then close the drawer after the transition completes
+      setTimeout(() => {
+        handleCloseRightColumn()
+      }, 300) // Match the CSS transition duration
     }
+    // If swipe was significant but not enough to close, snap back smoothly
+    else if (distance > 30) {
+      setDrawerOffset(0)
+    }
+    // If swipe was small, just reset
+    else if (distance <= 30) {
+      setDrawerOffset(0)
+    }
+    
+    setTouchStart(null)
+    setTouchCurrent(null)
   }
   
   const [creatorFormData, setCreatorFormData] = useState({
@@ -249,6 +311,10 @@ const AppContent = () => {
     if (isMobile) {
       setMobileView('left')
       setMobileDrawerOpen(false)
+      // Reset all drawer state when closing
+      setDrawerOffset(0)
+      setTouchStart(null)
+      setTouchCurrent(null)
     }
   }
 
@@ -286,9 +352,11 @@ const AppContent = () => {
     return () => window.removeEventListener('resize', checkMobile)
   }, [isMobile, rightColumnMode])
 
-  // Prevent background scrolling when mobile drawer is open
+  // Prevent background scrolling when any drawer is open
   useEffect(() => {
-    if (isMobile && mobileDrawerOpen) {
+    const hasAnyDrawerOpen = mobileDrawerOpen || (isMobile && selectedItem)
+    
+    if (hasAnyDrawerOpen) {
       document.body.classList.add('mobile-drawer-open')
     } else {
       document.body.classList.remove('mobile-drawer-open')
@@ -298,7 +366,14 @@ const AppContent = () => {
     return () => {
       document.body.classList.remove('mobile-drawer-open')
     }
-  }, [isMobile, mobileDrawerOpen])
+  }, [isMobile, mobileDrawerOpen, selectedItem])
+
+  // Reset drawer offset when drawer opens
+  useEffect(() => {
+    if (mobileDrawerOpen) {
+      setDrawerOffset(0)
+    }
+  }, [mobileDrawerOpen])
 
   // Determine which triggers are needed based on active countdowns
   const getNeededTriggers = () => {
@@ -947,19 +1022,31 @@ const AppContent = () => {
 
       {/* Mobile Drawer for Browser and Creator */}
       {isMobile && (
-        <div className={`mobile-drawer ${mobileDrawerOpen ? 'open' : ''}`}>
+        <div 
+          className={`mobile-drawer ${mobileDrawerOpen ? 'open' : ''}`}
+          key={`drawer-${drawerRefreshKey}`}
+        >
           <div className="drawer-backdrop" onClick={handleCloseRightColumn} />
           <div 
             className="drawer-content"
+            style={{
+              transform: mobileDrawerOpen 
+                ? `translateY(${drawerOffset}px)` 
+                : 'translateY(100%)',
+              transition: touchStart ? 'none' : 'transform 0.3s ease'
+            }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <div className="drawer-header">
+            <div className="drawer-header" onClick={() => {
+              // Use same smooth closing animation as swipe-to-close
+              setDrawerOffset(window.innerHeight)
+              setTimeout(() => {
+                handleCloseRightColumn()
+              }, 300)
+            }}>
               <div className="drawer-handle" />
-              <button className="drawer-close" onClick={handleCloseRightColumn}>
-                ×
-              </button>
             </div>
             <div className="drawer-body">
               {/* Database Browser */}
@@ -979,6 +1066,13 @@ const AppContent = () => {
                       createEnvironment(itemData)
                       setLastAddedItemType('environment')
                     }
+                    
+                    // Reset drawer state after adding item to prevent artifacts
+                    console.log('Resetting drawer state after item creation')
+                    setDrawerOffset(0)
+                    setTouchStart(null)
+                    setTouchCurrent(null)
+                    setDrawerRefreshKey(prev => prev + 1) // Force drawer re-render
                     
                     // Keep browser open so users can add multiple items
                   }}

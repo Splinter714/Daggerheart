@@ -82,31 +82,105 @@ const List = ({
   const closeDrawer = () => {
     setDrawerOpen(false)
     setDrawerItem(null)
+    // Reset drawer state when closing
+    setDrawerOffset(0)
+    setTouchStart(null)
+    setTouchCurrent(null)
   }
+
+  // Reset drawer offset when drawer opens
+  useEffect(() => {
+    if (drawerOpen) {
+      setDrawerOffset(0)
+    }
+  }, [drawerOpen])
   
   // Touch gesture handling for drawer
   const [touchStart, setTouchStart] = useState(null)
-  const [touchEnd, setTouchEnd] = useState(null)
+  const [touchCurrent, setTouchCurrent] = useState(null)
+  const [drawerOffset, setDrawerOffset] = useState(0)
   
   const handleTouchStart = (e) => {
-    setTouchEnd(null)
-    setTouchStart(e.targetTouches[0].clientY)
+    // Always prevent default to avoid pull-to-refresh
+    e.preventDefault()
+    e.stopPropagation()
+    
+    // Check if touch is on header OR on content when scrolled to top
+    const isHeaderTouch = e.target.closest('.drawer-header')
+    const drawerBody = e.target.closest('.drawer-body')
+    
+    // If touching content, check if we're scrolled to the top
+    let isContentAtTop = false
+    if (drawerBody) {
+      isContentAtTop = drawerBody.scrollTop <= 10 // Allow small tolerance
+    }
+    
+    // Only handle swipe-to-dismiss for header touches OR content touches when at top
+    if (!isHeaderTouch && !isContentAtTop) {
+      // Don't handle swipe-to-dismiss for content touches when not at top
+      return
+    }
+    
+    const touchY = e.targetTouches[0].clientY
+    setTouchStart(touchY)
+    setTouchCurrent(touchY)
+    setDrawerOffset(0)
   }
   
   const handleTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientY)
+    // Always prevent default to avoid pull-to-refresh
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!touchStart) return
+    
+    const currentY = e.targetTouches[0].clientY
+    const deltaY = currentY - touchStart
+    
+    // Only handle swipe-to-dismiss for downward swipes (positive deltaY)
+    if (deltaY > 0) {
+      setTouchCurrent(currentY)
+      setDrawerOffset(deltaY)
+    } else if (deltaY < -10) {
+      // If swiping up more than 10px, reset the swipe state to prevent scroll
+      setTouchStart(null)
+      setTouchCurrent(null)
+      setDrawerOffset(0)
+    }
   }
   
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
+  const handleTouchEnd = (e) => {
+    if (!touchStart || !touchCurrent) return
     
-    const distance = touchStart - touchEnd
-    const isUpSwipe = distance > 50
-    const isDownSwipe = distance < -50
+    const distance = touchCurrent - touchStart
     
-    if (isDownSwipe && drawerOpen) {
-      closeDrawer()
+    // Only prevent default if this was a significant downward swipe
+    if (distance > 30) {
+      e.preventDefault()
+      e.stopPropagation()
     }
+    
+    // If swipe was far enough, smoothly animate downward to close
+    if (distance > 100) {
+      // Animate drawer offset to full height (smooth downward close)
+      setDrawerOffset(window.innerHeight)
+      
+      // Then close the drawer after the transition completes
+      setTimeout(() => {
+        closeDrawer()
+      }, 300) // Match the CSS transition duration
+    }
+    // If swipe was significant but not enough to close, snap back smoothly
+    else if (distance > 30) {
+      setDrawerOffset(0)
+    }
+    // If swipe was small, just reset
+    else if (distance <= 30) {
+      setDrawerOffset(0)
+    }
+    
+    setTouchStart(null)
+    setTouchCurrent(null)
   }
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -189,15 +263,24 @@ const List = ({
           <div className="drawer-backdrop" onClick={closeDrawer} />
           <div 
             className="drawer-content"
+            style={{
+              transform: drawerOpen 
+                ? `translateY(${drawerOffset}px)` 
+                : 'translateY(100%)',
+              transition: touchStart ? 'none' : 'transform 0.3s ease'
+            }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <div className="drawer-header">
+            <div className="drawer-header" onClick={() => {
+              // Use same smooth closing animation as swipe-to-close
+              setDrawerOffset(window.innerHeight)
+              setTimeout(() => {
+                closeDrawer()
+              }, 300)
+            }}>
               <div className="drawer-handle" />
-              <button className="drawer-close" onClick={closeDrawer}>
-                ×
-              </button>
             </div>
             <div className="drawer-body">
               {drawerItem && (

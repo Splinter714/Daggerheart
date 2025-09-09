@@ -55,6 +55,8 @@ const InlineCountdownCreator = ({
           
           <input
             type="number"
+            inputMode="numeric"
+            enterKeyHint="done"
             min="1"
             max="20"
             value={formData.max}

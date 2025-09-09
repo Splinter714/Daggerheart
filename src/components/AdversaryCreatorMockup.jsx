@@ -155,6 +155,8 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
           <div className="form-group">
             <input
               type="number"
+              inputMode="numeric"
+              enterKeyHint="done"
               placeholder="Difficulty"
               min="1"
               max="21"
@@ -165,6 +167,8 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
           <div className="form-group">
             <input
               type="number"
+              inputMode="numeric"
+              enterKeyHint="done"
               placeholder="Max HP"
               min="1"
               max="12"
@@ -175,6 +179,8 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
           <div className="form-group">
             <input
               type="number"
+              inputMode="numeric"
+              enterKeyHint="done"
               placeholder="Max Stress"
               min="1"
               max="10"
@@ -202,6 +208,8 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
               <div className="form-group">
                 <input
                   type="number"
+                  inputMode="numeric"
+                  enterKeyHint="done"
                   placeholder="Modifier"
                   value={exp.modifier || ''}
                   onChange={(e) => handleExperienceChange(index, 'modifier', e.target.value === '' ? 0 : parseInt(e.target.value))}

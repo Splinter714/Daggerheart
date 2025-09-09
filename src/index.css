@@ -37,6 +37,19 @@
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100%;
+  height: 100dvh; /* Use dynamic viewport height for better mobile support */
+  overflow: auto; /* Allow scrolling when content exceeds viewport */
+}
+
+/* Safari mobile viewport fixes */
+@supports (height: 100dvh) {
+  html, body {
+    height: 100dvh;
+  }
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: var(--bg-dark);
@@ -1378,6 +1391,7 @@ textarea,
   /* Mobile drawer styles */
   .mobile-drawer {
     position: fixed;
+    top: 49px; /* Start below fear header */
     bottom: 0;
     left: 0;
     right: 0;
@@ -1390,18 +1404,22 @@ textarea,
   }
   
   .drawer-backdrop {
-    position: fixed;
-    top: 49px; /* Start below the fear header including its border */
+    position: absolute;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none; /* Prevent backdrop from receiving events when hidden */
+    visibility: hidden; /* Ensure backdrop is completely hidden when not open */
   }
   
   .mobile-drawer.open .drawer-backdrop {
     opacity: 1;
+    pointer-events: auto; /* Allow backdrop events only when drawer is open */
+    visibility: visible; /* Make backdrop visible when drawer is open */
   }
   
   .drawer-content {
@@ -1412,14 +1430,30 @@ textarea,
     background: var(--bg-dark);
     border-top: 1px solid var(--border);
     border-radius: 16px 16px 0 0;
-    max-height: calc(100vh - 49px); /* Account for fear header height + border */
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
+    height: 100%; /* Use full height of container */
     overflow: hidden;
+    pointer-events: none; /* Prevent content from receiving events when hidden */
+    visibility: hidden; /* Ensure content is completely hidden when not open */
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: none !important; /* Prevent all touch gestures to stop pull-to-refresh */
+  }
+  
+  .drawer-body {
+    padding: 1rem;
+    height: calc(100% - 80px); /* Use 100% instead of viewport units for consistency */
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Allow scrolling on drawer body */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: manipulation !important; /* Allow scrolling but prevent zoom and pull-to-refresh */
   }
   
   .mobile-drawer.open .drawer-content {
-    transform: translateY(0);
+    pointer-events: auto; /* Allow content events only when drawer is open */
+    visibility: visible; /* Make content visible when drawer is open */
   }
   
   .drawer-header {
@@ -1429,6 +1463,10 @@ textarea,
     padding: 1rem;
     border-bottom: 1px solid var(--border);
     position: relative;
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: none !important; /* Prevent all touch gestures to stop pull-to-refresh */
+    cursor: pointer; /* Make it clear the header is clickable */
   }
   
   .drawer-handle {
@@ -1437,28 +1475,23 @@ textarea,
     background: var(--border);
     border-radius: 2px;
     cursor: pointer;
+    overscroll-behavior: none; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none; /* Prevent vertical pull-to-refresh */
+    touch-action: none; /* Prevent all touch actions except our custom handling */
   }
   
-  .drawer-close {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--text-primary);
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    line-height: 1;
-  }
+  /* Removed drawer-close styles since header is now clickable */
   
   .drawer-body {
     padding: 1rem;
-    height: calc(100vh - 49px - 80px); /* Account for fear header + border and drawer header */
+    height: calc(100% - 80px); /* Use 100% instead of viewport units for consistency */
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* No scrolling on drawer body */
+    overflow-y: auto; /* Allow scrolling on drawer body */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: manipulation !important; /* Allow scrolling but prevent zoom and pull-to-refresh */
   }
 
   /* Mobile drawer browser specific styles */
@@ -1473,14 +1506,55 @@ textarea,
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: pan-y !important; /* Allow vertical scrolling only */
   }
+  
 
-  /* Prevent background scrolling when mobile drawer is open */
+  /* Prevent background scrolling when any mobile drawer is open */
   body.mobile-drawer-open {
     overflow: hidden;
     position: fixed;
     width: 100%;
+    height: 100%;
+    touch-action: none; /* Prevent touch scrolling */
+    overscroll-behavior: none; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none; /* Prevent vertical pull-to-refresh */
   }
+  
+  /* Additional aggressive pull-to-refresh prevention for mobile drawers */
+  .mobile-drawer {
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    touch-action: none !important;
+  }
+  
+  .mobile-drawer .drawer-content {
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    touch-action: none !important;
+  }
+  
+  .mobile-drawer .drawer-header {
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    touch-action: none !important;
+  }
+  
+  .mobile-drawer .drawer-handle {
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    touch-action: none !important;
+  }
+  
+  /* Allow scrolling in expanded card content areas */
+  .drawer-body .expanded-card {
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: none !important; /* Prevent all touch gestures on card container */
+  }
+  
 }
 
 /* Browser condensed card styles for both desktop and mobile */
@@ -1533,10 +1607,10 @@ textarea,
 
 /* Sidebar Styles */
 .sidebar {
-  position: fixed;
-  bottom: 0; /* Bottom bar for both desktop and mobile */
-  left: 0;
-  right: 0;
+  position: relative; /* Changed from fixed to relative */
+  bottom: auto; /* Remove fixed positioning */
+  left: auto;
+  right: auto;
   width: 100%; /* Full width */
   height: 60px; /* Fixed height */
   background: var(--bg-dark);
@@ -1776,6 +1850,8 @@ textarea,
   padding: 0.125rem;
   width: 100%;
   height: 60%;
+  touch-action: manipulation; /* Prevent zooming */
+  user-select: none; /* Prevent text selection */
 }
 
 .fear-controls {
@@ -2802,7 +2878,7 @@ textarea,
   gap: 0.25rem;
   margin-bottom: 0.25rem;
   position: relative;
-  padding-left: 1rem; /* Add space from left border */
+  padding-left: 0.25rem; /* Reduced from 1rem to 0.25rem */
   padding-top: 0.75rem; /* Add top padding to section headers */
 }
 
@@ -5453,6 +5529,11 @@ textarea,
   gap: 0.25rem;
 }
 
+/* Damage input popup - prevent mobile auto-zoom */
+.damage-input-popup input {
+  font-size: 1rem; /* 16px to prevent mobile auto-zoom */
+}
+
 /* Experience form specific sizing */
 .experience-form .form-row .form-group:first-child {
   flex: 3;
@@ -5477,7 +5558,7 @@ textarea,
   border-radius: 0.25rem;
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: 1rem; /* 16px to prevent mobile auto-zoom */
 }
 
 .form-group input:focus,
@@ -5852,7 +5933,7 @@ textarea,
 }
 
 .countdown-row .form-input {
-  font-size: 0.875rem;
+  font-size: 1rem; /* 16px to prevent mobile auto-zoom */
   padding: 0.375rem 0.5rem;
 }
 
@@ -5870,7 +5951,7 @@ textarea,
 }
 
 .countdown-stack .form-input {
-  font-size: 0.875rem;
+  font-size: 1rem; /* 16px to prevent mobile auto-zoom */
   padding: 0.5rem;
 }
 
@@ -6296,7 +6377,7 @@ textarea,
   border-radius: 0.25rem;
   background: var(--bg-dark);
   color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: 1rem; /* 16px to prevent mobile auto-zoom */
   min-width: 8rem;
 }
 
