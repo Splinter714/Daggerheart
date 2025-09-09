@@ -37,6 +37,7 @@
   min-width: 0;
   background: var(--bg-dark);
   overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal spill outside column */
   display: flex;
   flex-direction: column;
   height: 100%;

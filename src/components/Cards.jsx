@@ -1080,7 +1080,25 @@ const Cards = ({
             >
               −
             </Button>
-            {item.value >= item.max && (!item.loop || item.loop === 'none') ? (
+            <Button
+              action="increment"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                console.log('Increment button clicked, onIncrement function:', onIncrement, 'current countdown value:', item.value, 'max:', item.max)
+                if (onIncrement) {
+                  console.log('Calling onIncrement with id:', item.id)
+                  onIncrement(item.id)
+                } else {
+                  console.log('onIncrement is undefined!')
+                }
+              }}
+              title={item.value >= item.max ? (item.loop && item.loop !== 'none' ? "Loop countdown" : "Countdown at max") : "Increase progress"}
+            >
+              {item.value >= item.max ? (item.loop && item.loop !== 'none' ? "⟳" : "+") : "+"}
+            </Button>
+            {item.value >= item.max && (!item.loop || item.loop === 'none') && (
               <Button
                 action="delete"
                 size="sm"
@@ -1093,25 +1111,6 @@ const Cards = ({
                 title="Delete countdown"
               >
                 ×
-              </Button>
-            ) : (
-              <Button
-                action="increment"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  e.preventDefault()
-                  console.log('Increment button clicked, onIncrement function:', onIncrement, 'current countdown value:', item.value, 'max:', item.max)
-                  if (onIncrement) {
-                    console.log('Calling onIncrement with id:', item.id)
-                    onIncrement(item.id)
-                  } else {
-                    console.log('onIncrement is undefined!')
-                  }
-                }}
-                title={item.value >= item.max ? (item.loop && item.loop !== 'none' ? "Loop countdown" : "Countdown at max") : "Increase progress"}
-              >
-                {item.value >= item.max ? (item.loop && item.loop !== 'none' ? "⟳" : "+") : "+"}
               </Button>
             )}
           </div>
