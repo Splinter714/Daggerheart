@@ -15,8 +15,21 @@ const Browser = ({
   console.log('Browser component is being used, not List component')
   
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterTier, setFilterTier] = useState('')
-  const [filterType, setFilterType] = useState('')
+  // Load filter state from localStorage
+  const getInitialFilterState = () => {
+    const savedFilters = localStorage.getItem(`browser-filters-${type}`)
+    if (savedFilters) {
+      try {
+        return JSON.parse(savedFilters)
+      } catch (e) {
+        console.warn('Failed to parse saved filter state:', e)
+      }
+    }
+    return { tier: '', type: '' }
+  }
+  
+  const [filterTier, setFilterTier] = useState(getInitialFilterState().tier)
+  const [filterType, setFilterType] = useState(getInitialFilterState().type)
   // Load initial sort state synchronously to prevent jitter
   const getInitialSortState = () => {
     const savedSort = localStorage.getItem(`browser-sort-${type}`)
@@ -39,8 +52,37 @@ const Browser = ({
   const [showTierDropdown, setShowTierDropdown] = useState(false)
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
   
+  // Load expanded card state from localStorage
+  const getInitialExpandedCard = () => {
+    const savedExpanded = localStorage.getItem(`browser-expanded-${type}`)
+    if (savedExpanded) {
+      try {
+        const parsed = JSON.parse(savedExpanded)
+        // Find the card in current data
+        const currentData = type === 'adversary' ? adversariesData.adversaries : environmentsData.environments
+        return currentData.find(item => item.id === parsed.id) || null
+      } catch (e) {
+        console.warn('Failed to parse saved expanded card state:', e)
+      }
+    }
+    return null
+  }
+  
   // Track which card is expanded
-  const [expandedCard, setExpandedCard] = useState(null)
+  const [expandedCard, setExpandedCard] = useState(getInitialExpandedCard)
+  
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 800)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   
   // Track the current type to detect changes
   const currentTypeRef = useRef(type)
@@ -77,6 +119,23 @@ const Browser = ({
   useEffect(() => {
     localStorage.setItem(`browser-sort-${type}`, JSON.stringify(sortFields))
   }, [sortFields, type])
+  
+  // Save expanded card state to localStorage whenever it changes
+  useEffect(() => {
+    if (expandedCard) {
+      localStorage.setItem(`browser-expanded-${type}`, JSON.stringify({ id: expandedCard.id }))
+    } else {
+      localStorage.removeItem(`browser-expanded-${type}`)
+    }
+  }, [expandedCard, type])
+  
+  // Save filter state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(`browser-filters-${type}`, JSON.stringify({ 
+      tier: filterTier, 
+      type: filterType 
+    }))
+  }, [filterTier, filterType, type])
 
   // Use imported data directly - only the relevant type
   const adversaryData = adversariesData.adversaries || []
@@ -149,6 +208,28 @@ const Browser = ({
         if (field === 'tier') {
           aValue = parseInt(aValue) || 0
           bValue = parseInt(bValue) || 0
+        } else if (field === 'displayDifficulty') {
+          // Handle difficulty sorting - numeric difficulties first, then special cases
+          const aNum = parseInt(aValue)
+          const bNum = parseInt(bValue)
+          
+          if (!isNaN(aNum) && !isNaN(bNum)) {
+            // Both are numeric
+            aValue = aNum
+            bValue = bNum
+          } else if (!isNaN(aNum) && isNaN(bNum)) {
+            // a is numeric, b is not - numeric comes first
+            aValue = aNum
+            bValue = 999 // High number to sort after numeric difficulties
+          } else if (isNaN(aNum) && !isNaN(bNum)) {
+            // b is numeric, a is not - numeric comes first
+            aValue = 999 // High number to sort after numeric difficulties
+            bValue = bNum
+          } else {
+            // Both are non-numeric, sort alphabetically
+            aValue = String(aValue || '').toLowerCase()
+            bValue = String(bValue || '').toLowerCase()
+          }
         } else if (typeof aValue === 'string' && typeof bValue === 'string') {
           aValue = aValue.toLowerCase()
           bValue = bValue.toLowerCase()
@@ -202,7 +283,7 @@ const Browser = ({
     
     // Add the item to the game state
     if (onAddItem) {
-      onAddItem(itemData)
+      onAddItem(itemData, type)
     }
   }
 
@@ -371,13 +452,36 @@ const Browser = ({
                   </td>
                 </tr>
                 
+                {/* Condensed Card View - Both Desktop and Mobile */}
+                {expandedCard?.id === item.id && (
+                  <tr className="condensed-card-row">
+                    <td colSpan={5} className="condensed-card-cell">
+                      <div className="condensed-card-container">
+                        <Cards
+                          item={{
+                            ...expandedCard,
+                            hp: 0, // Show as healthy (0 HP) in browser preview
+                            stress: 0 // Show as no stress in browser preview
+                          }}
+                          type={expandedCard.category.toLowerCase()}
+                          mode="compact"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                
                 {/* Inline Expanded Card View - Both Desktop and Mobile */}
                 {expandedCard?.id === item.id && (
                   <tr className="expanded-card-row">
                     <td colSpan={5} className="expanded-card-cell">
                       <div className="expanded-card-container">
                         <Cards
-                          item={expandedCard}
+                          item={{
+                            ...expandedCard,
+                            hp: 0, // Show as healthy (0 HP) in browser preview
+                            stress: 0 // Show as no stress in browser preview
+                          }}
                           type={expandedCard.category.toLowerCase()}
                           mode="expanded"
                         />

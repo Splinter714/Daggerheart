@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useGameState } from '../useGameState'
 import Button from './Buttons'
 import List from './List'
@@ -15,7 +15,9 @@ import {
   Plus,
   Clock,
   Eye,
-  EyeOff
+  EyeOff,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -167,7 +169,8 @@ const GameBoard = ({
   updateFear,
   handleRollOutcome: handleRollOutcomeProp,
   handleActionRoll: handleActionRollProp,
-  setShowLongTermCountdowns
+  setShowLongTermCountdowns,
+  lastAddedItemType
 }) => {
   
   const { 
@@ -197,6 +200,53 @@ const GameBoard = ({
     environment: false,
     campaign: false
   })
+
+  // State for collapsible sections - initialize from localStorage
+  const [sectionVisibility, setSectionVisibility] = useState(() => {
+    const savedVisibility = localStorage.getItem('sectionVisibility')
+    if (savedVisibility) {
+      try {
+        const parsed = JSON.parse(savedVisibility)
+        return {
+          countdowns: false,
+          environments: false,
+          adversaries: false,
+          ...parsed
+        }
+      } catch (error) {
+        console.error('Error parsing saved section visibility:', error)
+      }
+    }
+    return {
+      countdowns: false,
+      environments: false,
+      adversaries: false
+    }
+  })
+
+  // Save section visibility to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('sectionVisibility', JSON.stringify(sectionVisibility))
+  }, [sectionVisibility])
+
+  // Auto-expand section when items are added from browser
+  useEffect(() => {
+    if (lastAddedItemType) {
+      if (lastAddedItemType === 'environment') {
+        setSectionVisibility(prev => ({ ...prev, environments: true }))
+      } else if (lastAddedItemType === 'adversary') {
+        setSectionVisibility(prev => ({ ...prev, adversaries: true }))
+      }
+    }
+  }, [lastAddedItemType])
+
+  // Toggle section visibility
+  const toggleSection = (section) => {
+    setSectionVisibility(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }))
+  }
 
   // Determine which triggers are needed based on active countdowns
   const getNeededTriggers = () => {
@@ -238,7 +288,15 @@ const GameBoard = ({
     createCountdown(countdownData)
     // Hide the creator for the appropriate source
     setShowInlineCreator(prev => ({ ...prev, [countdownData.source]: false }))
+    // Auto-expand countdowns section when adding a countdown
+    setSectionVisibility(prev => ({ ...prev, countdowns: true }))
   }
+
+  // Wrapper function for opening database (no auto-expand)
+  const handleOpenDatabase = (type) => {
+    onOpenDatabase(type)
+  }
+
 
 
   const handleDeleteItem = (id, type) => {
@@ -366,7 +424,18 @@ const GameBoard = ({
       <div className="game-section campaign-countdowns">
         <div className="section-header">
           <div className="section-title-row">
-            <h3 className="section-title">Countdowns</h3>
+            <button 
+              className="section-title-button"
+              onClick={() => toggleSection('countdowns')}
+              title={sectionVisibility.countdowns ? "Collapse section" : "Expand section"}
+            >
+              {countdowns && countdowns.length > 0 ? (
+                sectionVisibility.countdowns ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+              ) : (
+                <div style={{ width: '16px', height: '16px' }} />
+              )}
+              <h3 className="section-title">Countdowns</h3>
+            </button>
             <Button
               action="add"
               size="sm"
@@ -385,7 +454,7 @@ const GameBoard = ({
           </div>
           
           {/* Countdown Trigger Controls - only show if there are countdowns */}
-          {countdowns && countdowns.length > 0 && (
+          {sectionVisibility.countdowns && countdowns && countdowns.length > 0 && (
             <div className="countdown-trigger-controls">
               {(() => {
                 const triggers = getNeededTriggers()
@@ -523,7 +592,7 @@ const GameBoard = ({
         </div>
         
         {/* Non-long-term countdowns - always visible */}
-        {countdowns && countdowns.filter(c => c.type !== 'long-term').length > 0 && (
+        {sectionVisibility.countdowns && countdowns && countdowns.filter(c => c.type !== 'long-term').length > 0 && (
           <List
             items={countdowns.filter(c => c.type !== 'long-term')}
             type="countdown"
@@ -542,7 +611,7 @@ const GameBoard = ({
         )}
         
         {/* Long-term countdowns - only visible when toggle is on */}
-        {showLongTermCountdowns && countdowns && countdowns.filter(c => c.type === 'long-term').length > 0 && (
+        {sectionVisibility.countdowns && showLongTermCountdowns && countdowns && countdowns.filter(c => c.type === 'long-term').length > 0 && (
           <>
             {/* Rest buttons for long-term countdowns */}
             <div className="long-term-rest-controls">
@@ -591,11 +660,22 @@ const GameBoard = ({
       <div className="game-section">
         <div className="section-header">
           <div className="section-title-row">
-            <h3 className="section-title">Environment</h3>
+            <button 
+              className="section-title-button"
+              onClick={() => toggleSection('environments')}
+              title={sectionVisibility.environments ? "Collapse section" : "Expand section"}
+            >
+              {environments && environments.length > 0 ? (
+                sectionVisibility.environments ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+              ) : (
+                <div style={{ width: '16px', height: '16px' }} />
+              )}
+              <h3 className="section-title">Environments</h3>
+            </button>
             <Button
               action="add"
               size="sm"
-              onClick={() => onOpenDatabase('environment')}
+              onClick={() => handleOpenDatabase('environment')}
               title="Browse Environments"
             >
               <Plus size={16} />
@@ -603,7 +683,7 @@ const GameBoard = ({
           </div>
         </div>
         
-        {environments.length > 0 && (
+        {sectionVisibility.environments && environments.length > 0 && (
           <List
             items={environments}
             type="environment"
@@ -619,7 +699,7 @@ const GameBoard = ({
             onItemSelect={onItemSelect}
             selectedItem={selectedItem}
             selectedType={selectedType}
-            onOpenDatabase={onOpenDatabase}
+            onOpenDatabase={handleOpenDatabase}
             onAdvance={() => {}} // Not used for environments
             isEditMode={isEditMode}
           />
@@ -630,11 +710,22 @@ const GameBoard = ({
       <div className="game-section">
         <div className="section-header">
           <div className="section-title-row">
-            <h3 className="section-title">Adversaries</h3>
+            <button 
+              className="section-title-button"
+              onClick={() => toggleSection('adversaries')}
+              title={sectionVisibility.adversaries ? "Collapse section" : "Expand section"}
+            >
+              {adversaries && adversaries.length > 0 ? (
+                sectionVisibility.adversaries ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+              ) : (
+                <div style={{ width: '16px', height: '16px' }} />
+              )}
+              <h3 className="section-title">Adversaries</h3>
+            </button>
             <Button
               action="add"
               size="sm"
-              onClick={() => onOpenDatabase('adversary')}
+              onClick={() => handleOpenDatabase('adversary')}
               title="Browse Adversaries"
             >
               <Plus size={16} />
@@ -642,8 +733,8 @@ const GameBoard = ({
           </div>
         </div>
           
-          {adversaries.length > 0 && (
-            <List
+        {sectionVisibility.adversaries && adversaries.length > 0 && (
+          <List
             items={adversaries}
             type="adversary"
             onDelete={(id) => handleDeleteItem(id, 'adversary')}
@@ -658,7 +749,7 @@ const GameBoard = ({
             onItemSelect={onItemSelect}
             selectedItem={selectedItem}
             selectedType={selectedType}
-            onOpenDatabase={onOpenDatabase}
+            onOpenDatabase={handleOpenDatabase}
             onAdvance={() => {}} // Not used for adversaries
             onApplyDamage={(id, amount, currentHp, maxHp) => {
               console.log('HP damage:', { id, amount, currentHp, maxHp })
@@ -705,7 +796,7 @@ const GameBoard = ({
             }}
             isEditMode={isEditMode}
           />
-          )}
+        )}
       </div>
     </>
   )
