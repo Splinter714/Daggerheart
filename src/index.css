@@ -1502,20 +1502,21 @@ textarea,
     overflow: hidden;
   }
 
+  /* BROWSER/CREATOR DRAWER: Handle table scrolling intelligently */
   .drawer-body .browser-table-container {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: auto !important; /* Let JavaScript handle touch events */
+    touch-action: pan-y !important; /* Allow vertical scrolling, JavaScript handles swipe-to-dismiss */
   }
   
-  /* Allow scrolling in expanded card content areas */
+  /* EXPANDED CARD DRAWER: Prioritize scrolling, only prevent pull-to-refresh */
   .drawer-body .expanded-card {
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: auto !important; /* Let JavaScript handle touch events */
+    touch-action: pan-y !important; /* Allow vertical scrolling, JavaScript handles swipe-to-dismiss */
   }
   
   .drawer-body .expanded-content {
@@ -1523,7 +1524,7 @@ textarea,
     -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS Safari */
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: auto !important; /* Let JavaScript handle touch events */
+    touch-action: pan-y !important; /* Allow vertical scrolling */
     height: calc(100vh - 200px) !important; /* Force a specific height to enable scrolling */
     max-height: calc(100vh - 200px) !important; /* Don't exceed this height */
   }
