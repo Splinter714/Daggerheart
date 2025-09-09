@@ -101,10 +101,6 @@ const List = ({
   const [drawerOffset, setDrawerOffset] = useState(0)
   
   const handleTouchStart = (e) => {
-    // Always prevent default to avoid pull-to-refresh
-    e.preventDefault()
-    e.stopPropagation()
-    
     // Check if touch is on header OR on content when scrolled to top
     const isHeaderTouch = e.target.closest('.drawer-header')
     const drawerBody = e.target.closest('.drawer-body')
@@ -118,8 +114,13 @@ const List = ({
     // Only handle swipe-to-dismiss for header touches OR content touches when at top
     if (!isHeaderTouch && !isContentAtTop) {
       // Don't handle swipe-to-dismiss for content touches when not at top
+      // Allow normal scrolling
       return
     }
+    
+    // For swipe-to-dismiss gestures, prevent default to avoid pull-to-refresh
+    e.preventDefault()
+    e.stopPropagation()
     
     const touchY = e.targetTouches[0].clientY
     setTouchStart(touchY)
@@ -128,17 +129,15 @@ const List = ({
   }
   
   const handleTouchMove = (e) => {
-    // Always prevent default to avoid pull-to-refresh
-    e.preventDefault()
-    e.stopPropagation()
-    
     if (!touchStart) return
     
     const currentY = e.targetTouches[0].clientY
     const deltaY = currentY - touchStart
     
-    // Only handle swipe-to-dismiss for downward swipes (positive deltaY)
+    // Only prevent default if this is a downward swipe-to-dismiss gesture
     if (deltaY > 0) {
+      e.preventDefault()
+      e.stopPropagation()
       setTouchCurrent(currentY)
       setDrawerOffset(deltaY)
     } else if (deltaY < -10) {
@@ -147,6 +146,7 @@ const List = ({
       setTouchCurrent(null)
       setDrawerOffset(0)
     }
+    // For upward swipes less than 10px, allow normal scrolling
   }
   
   const handleTouchEnd = (e) => {
@@ -154,9 +154,11 @@ const List = ({
     
     const distance = touchCurrent - touchStart
     
-    // Always prevent default to avoid any scroll behavior
-    e.preventDefault()
-    e.stopPropagation()
+    // Only prevent default if this was a significant downward swipe
+    if (distance > 30) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
     
     // If swipe was far enough, smoothly animate downward to close
     if (distance > 100) {

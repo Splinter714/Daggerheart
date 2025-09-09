@@ -1448,7 +1448,7 @@ textarea,
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: none !important; /* Prevent all touch gestures to stop pull-to-refresh */
+    touch-action: auto !important; /* Let JavaScript handle touch events */
   }
   
   .mobile-drawer.open .drawer-content {
@@ -1491,7 +1491,7 @@ textarea,
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: none !important; /* Prevent all touch gestures to stop pull-to-refresh */
+    touch-action: auto !important; /* Let JavaScript handle touch events */
   }
 
   /* Mobile drawer browser specific styles */
@@ -1508,14 +1508,14 @@ textarea,
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: pan-y !important; /* Allow vertical scrolling only */
+    touch-action: auto !important; /* Let JavaScript handle touch events */
   }
   
   /* Allow scrolling in expanded card content areas */
   .drawer-body .expanded-card {
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: none !important; /* Prevent all touch gestures on card container */
+    touch-action: auto !important; /* Let JavaScript handle touch events */
   }
   
   .drawer-body .expanded-content {
@@ -1523,7 +1523,7 @@ textarea,
     -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS Safari */
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: pan-y !important; /* Allow vertical scrolling only */
+    touch-action: auto !important; /* Let JavaScript handle touch events */
     height: calc(100vh - 200px) !important; /* Force a specific height to enable scrolling */
     max-height: calc(100vh - 200px) !important; /* Don't exceed this height */
   }
