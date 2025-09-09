@@ -238,6 +238,9 @@ const Cards = ({
             <div 
               className="damage-input-popup"
               onClick={(e) => {
+                // Prevent event propagation to underlying card
+                e.stopPropagation()
+                
                 // Close if clicking outside the input content
                 if (e.target === e.currentTarget) {
                   setShowDamageInput(false)
@@ -245,9 +248,14 @@ const Cards = ({
                 }
               }}
             >
-              <div className="damage-input-content">
+              <div 
+                className="damage-input-content"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <input
                   type="number"
+                  inputMode="numeric"
+                  enterKeyHint="done"
                   placeholder="Damage"
                   min={item.type === 'Minion' ? "1" : "0"}
                   value={damageValue}
@@ -876,6 +884,8 @@ const Cards = ({
                 <span className="stat-label">Max Value:</span>
                 <input
                   type="number"
+                  inputMode="numeric"
+                  enterKeyHint="done"
                   min="1"
                   max="20"
                   value={editData.max}
@@ -888,6 +898,8 @@ const Cards = ({
                 <span className="stat-label">Starting Value:</span>
                 <input
                   type="number"
+                  inputMode="numeric"
+                  enterKeyHint="done"
                   min="0"
                   max={editData.max}
                   value={editData.value}
@@ -907,6 +919,8 @@ const Cards = ({
                   <span className="stat-label">Max HP:</span>
                   <input
                     type="number"
+                    inputMode="numeric"
+                    enterKeyHint="done"
                     min="1"
                     value={editData.hpMax}
                     onChange={(e) => handleInputChange('hpMax', parseInt(e.target.value) || 1)}
@@ -918,6 +932,8 @@ const Cards = ({
                   <span className="stat-label">Max Stress:</span>
                   <input
                     type="number"
+                    inputMode="numeric"
+                    enterKeyHint="done"
                     min="0"
                     value={editData.stressMax}
                     onChange={(e) => handleInputChange('stressMax', parseInt(e.target.value) || 0)}

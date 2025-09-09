@@ -1,11 +1,20 @@
 /* Essential App Styles - Only classes actually used in components */
 
 .app {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh; /* Use dynamic viewport height for better mobile support */
   background: var(--bg-dark);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent jittering and scrolling */
+  position: fixed; /* Prevent Safari from scrolling the entire app */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
-/* Layout Structure */
+/* Top bar - fixed at top */
 .top-bar {
   background: var(--bg-dark);
   border-bottom: 1px solid var(--border);
@@ -13,14 +22,39 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  order: 1; /* Ensure top bar appears first */
+  flex-shrink: 0; /* Don't shrink */
+  touch-action: manipulation; /* Prevent zooming */
+  user-select: none; /* Prevent text selection */
 }
 
+/* Main content area - takes up remaining space */
 .main-content {
   display: flex;
   flex: 1;
   min-height: 0;
-  height: calc(100vh - 80px); /* Subtract top bar height with element controls */
-  margin-bottom: 60px; /* Account for bottom bar */
+  height: calc(100vh - 48px - 60px); /* Subtract fear header (48px) and bottom bar (60px) */
+  height: calc(100dvh - 48px - 60px); /* Use dynamic viewport height */
+  order: 2; /* Ensure main content appears after top bar */
+}
+
+/* Sidebar at bottom */
+.sidebar {
+  order: 3; /* Ensure sidebar appears after main content */
+  flex-shrink: 0; /* Don't shrink */
+  position: sticky; /* Use sticky instead of fixed to prevent Safari issues */
+  bottom: 0;
+  z-index: 100;
+  touch-action: manipulation; /* Prevent zooming */
+  user-select: none; /* Prevent text selection */
+}
+
+/* Prevent jittering on resize */
+@media (max-width: 800px) {
+  .sidebar {
+    /* Ensure toolbar is above Safari's bottom UI */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 .left-panel {

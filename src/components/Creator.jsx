@@ -256,6 +256,8 @@ const Creator = ({
                 <input
                   id="hpMax"
                   type="number"
+                  inputMode="numeric"
+                  enterKeyHint="done"
                   min="1"
                   value={formData.hpMax}
                   onChange={(e) => handleInputChange('hpMax', parseInt(e.target.value))}
@@ -268,6 +270,8 @@ const Creator = ({
                 <input
                   id="stressMax"
                   type="number"
+                  inputMode="numeric"
+                  enterKeyHint="done"
                   min="0"
                   value={formData.stressMax}
                   onChange={(e) => handleInputChange('stressMax', parseInt(e.target.value))}
@@ -315,6 +319,8 @@ const Creator = ({
               <div className="countdown-row">
                 <input
                   type="number"
+                  inputMode="numeric"
+                  enterKeyHint="done"
                   min="1"
                   max="20"
                   value={formData.max}
