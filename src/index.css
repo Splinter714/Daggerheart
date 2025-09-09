@@ -10,13 +10,30 @@
   --grey: #6b7280;          /* Medium grey for borders, empty states */
   --grey-dark: #404040;      /* Dark grey for backgrounds */
   
-  /* Derived colors - keep minimal */
+  /* Additional Color System */
+  --success: #10b981;        /* Green for success states */
+  --success-dark: #059669;   /* Darker green for hover */
+  --warning: #f59e0b;        /* Amber for warnings */
+  --warning-shadow: rgba(245, 158, 11, 0.5); /* Warning glow effect */
+  --red-shadow: rgba(220, 38, 38, 0.5); /* Red glow effect */
+  --primary-dark: #3730a3;    /* Darker purple for hover states */
+  
+  /* Background System */
   --bg-dark: var(--dark);
   --bg-card: #262626;       /* Slightly lighter than dark for contrast */
   --bg-card-hover: var(--grey-dark); /* Use grey-dark for hover */
+  --bg-primary: var(--bg-card);      /* Primary background */
+  --bg-secondary: var(--grey-dark);  /* Secondary background */
+  --bg-muted: rgba(107, 114, 128, 0.1); /* Muted background */
+  
+  /* Text System */
   --text-primary: var(--light);
   --text-secondary: var(--grey-light);
+  --text-muted: var(--grey);
+  
+  /* Border System */
   --border: var(--grey);
+  --border-color: var(--grey);
   
   /* Button system variables */
   --btn-border-radius: 0.25rem;        /* 4px - subtle button rounding */
@@ -27,8 +44,6 @@
   --tablet: 768px;
   --desktop: 1024px;
   --wide: 1280px;
-  
-
 }
 
 * {
@@ -690,7 +705,7 @@ textarea,
 
 .interactive-mechanic.mark-stress {
   background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  color: var(--warning);
   border-color: rgba(245, 158, 11, 0.3);
 }
 
@@ -1559,13 +1574,13 @@ textarea,
 }
 
 .countdown-action-btn.success-hope {
-  border-color: #f59e0b;
-  color: #f59e0b;
+  border-color: var(--warning);
+  color: var(--warning);
 }
 
 .countdown-action-btn.fail-hope {
-  border-color: #f59e0b;
-  color: #f59e0b;
+  border-color: var(--warning);
+  color: var(--warning);
 }
 
 .countdown-action-btn.crit-success {
@@ -1617,7 +1632,7 @@ textarea,
 
 .fear-label {
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-primary);
   font-size: 1.125rem;
   letter-spacing: 0.05em;
 }
@@ -1741,7 +1756,7 @@ textarea,
 
 .fear-tooltip-title {
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-secondary);
   margin-bottom: 0.75rem;
   font-size: 0.875rem;
 }
@@ -1754,7 +1769,7 @@ textarea,
 }
 
 .fear-tooltip-option strong {
-  color: #e2e8f0;
+  color: var(--text-secondary);
 }
 
 .cursor-help {
@@ -1797,7 +1812,7 @@ textarea,
 .countdown-name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text-secondary);
   min-width: 60px;
 }
 
@@ -1937,7 +1952,7 @@ textarea,
   height: 2rem;
   border-radius: 50%;
   background: var(--grey);
-  color: #94a3b8;
+  color: var(--text-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1949,7 +1964,7 @@ textarea,
 
 .countdown-creator-trigger:hover {
   background: var(--grey-light);
-  color: #e2e8f0;
+  color: var(--text-secondary);
 }
 
 .countdown-form-compact {
@@ -2013,7 +2028,7 @@ textarea,
   border: 1px solid var(--grey);
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
-  color: #f1f5f9;
+  color: var(--text-primary);
   font-size: 0.875rem;
 }
 
@@ -2049,7 +2064,7 @@ textarea,
 
 .btn-compact.btn-secondary {
   background: var(--grey-light);
-  color: #e2e8f0;
+  color: var(--text-secondary);
 }
 
 .btn-compact.btn-secondary:hover {
@@ -2085,7 +2100,7 @@ textarea,
   border-radius: 0.375rem;
   font-size: 0.875rem;
   background: #1e293b;
-  color: #f1f5f9;
+  color: var(--text-primary);
 }
 
 .countdown-form-single-row .input-compact:focus {
@@ -2117,7 +2132,7 @@ textarea,
 
 .countdown-creator-label {
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -2136,7 +2151,7 @@ textarea,
   border-radius: 0.375rem;
   font-size: 0.875rem;
   background: #1e293b;
-  color: #f1f5f9;
+  color: var(--text-primary);
 }
 
 .countdown-form-horizontal .input-compact:focus {
@@ -2167,7 +2182,7 @@ textarea,
   top: -0.75rem;
   right: 0.5rem;
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   background: #1e293b;
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
@@ -2246,8 +2261,8 @@ textarea,
 .simple-list-row.compact.adversary .countdown-control-buttons {
   display: flex !important;
   flex-direction: column !important;
-  gap: 0.5rem !important; /* Tighter vertical spacing */
-  align-items: flex-end !important; /* Right-align the trackers */
+  gap: 0.75rem !important;
+  align-items: flex-end !important;
 }
 
 /* Compact countdown layout - horizontal buttons */
@@ -2271,7 +2286,7 @@ textarea,
   flex-direction: row !important;
   align-items: center !important;
   justify-content: flex-end !important;
-  gap: 0.5rem !important;
+  gap: 0.75rem !important;
 }
 
 .simple-list-row.compact.adversary .hp-section,
@@ -2279,7 +2294,7 @@ textarea,
 .simple-list-row.compact.adversary .difficulty-section {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .countdown-delete-space {
@@ -2340,7 +2355,7 @@ textarea,
 
 .drag-handle-compact {
   cursor: grab;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.875rem;
   padding: 0.125rem;
   position: absolute;
@@ -2671,15 +2686,14 @@ textarea,
 .simple-list-row {
   display: flex;
   align-items: center;
-  padding: 0.5rem; /* Reduced from 0.75rem */
-  padding-left: 1rem; /* More space between left edge and content */
-  padding-right: 0.5rem; /* Reduced from 0.75rem */
+  padding: 0.75rem 1rem;
   background: var(--bg-dark);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  position: relative;
+  min-height: 3.5rem;
+  gap: 0.75rem;
 }
 
 /* When in edit mode, add space for drag handle */
@@ -2706,16 +2720,16 @@ textarea,
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.0625rem; /* Much tighter spacing between name and pips */
+  gap: 0.375rem;
   align-items: flex-start;
 }
 
 .simple-list-row.compact.countdown .countdown-symbols {
   display: flex;
-  gap: 0.125rem;
+  gap: 0.25rem;
   flex-wrap: wrap;
   align-content: flex-start;
-  row-gap: 0.125rem;
+  row-gap: 0.25rem;
 }
 
 .simple-list-row.compact.countdown .countdown-symbol {
@@ -2759,10 +2773,10 @@ textarea,
 .simple-list-row.compact.adversary .hp-symbols,
 .simple-list-row.compact.adversary .stress-symbols {
   display: flex;
-  gap: 0.125rem;
+  gap: 0.25rem;
   flex-wrap: wrap;
   align-content: flex-start;
-  row-gap: 0.125rem;
+  row-gap: 0.25rem;
 }
 
 .simple-list-row.compact.adversary .hp-controls,
@@ -2775,20 +2789,20 @@ textarea,
 /* HP and Stress symbol colors */
 .simple-list-row.compact.adversary .hp-symbols .countdown-symbol.filled {
   color: var(--red);
-  text-shadow: 0 0 4px rgba(220, 38, 38, 0.5);
+  text-shadow: 0 0 4px var(--red-shadow);
   font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 .simple-list-row.compact.adversary .stress-symbols .countdown-symbol.filled {
-  color: #f59e0b;
-  text-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
+  color: var(--warning);
+  text-shadow: 0 0 4px var(--warning-shadow);
   font-size: 0.875rem; /* Ensure consistent font size */
 }
 
 /* Overflow icon styling */
 .simple-list-row.compact.adversary .stress-symbols .countdown-symbol.overflow {
   color: var(--red);
-  text-shadow: 0 0 4px rgba(220, 38, 38, 0.5);
+  text-shadow: 0 0 4px var(--red-shadow);
   border: 1px solid var(--red);
   border-radius: 50%;
   background: rgba(220, 38, 38, 0.1);
@@ -3641,7 +3655,8 @@ textarea,
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.375rem; /* Reduced from 0.5rem */
+  gap: 0.75rem;
+  min-width: 0;
 }
 
 .row-header {
@@ -3667,14 +3682,18 @@ textarea,
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.25rem;
+  gap: 0.375rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .row-title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
+  line-height: 1.2;
+  word-break: break-word;
 }
 
 .row-meta {
@@ -4036,33 +4055,42 @@ textarea,
 /* Countdown Trigger Controls */
 .countdown-trigger-controls {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.375rem;
   align-items: center;
   flex-wrap: wrap;
-  padding: 0.375rem 0.75rem;
-  background: transparent;
-  border: none;
-  margin-bottom: 0.25rem;
-  justify-content: center;
+  padding: 0.5rem;
+  background: var(--bg-muted);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  justify-content: flex-start;
+  min-width: 0;
+  flex-shrink: 0;
 }
 
 .trigger-btn {
-  padding: 0.25rem 0.375rem;
-  border: none;
-  border-radius: 0.25rem;
-  background: transparent;
-  color: var(--text-color);
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  transition: none;
+  transition: all 0.2s ease;
   text-align: center;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 1.75rem;
 }
 
 .trigger-btn:hover {
-  background: var(--bg-muted);
-  opacity: 0.8;
+  background: var(--bg-card-hover);
+  border-color: var(--purple);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Color just the fear and hope icons */
@@ -4076,7 +4104,7 @@ textarea,
 .trigger-btn.success-hope svg,
 .trigger-btn.fail-hope svg,
 .trigger-btn.critical-success svg {
-  color: #f59e0b; /* Same gold as stress pips */
+  color: var(--warning); /* Same gold as stress pips */
 }
 
 .trigger-btn.toggle-long-term {
@@ -6140,7 +6168,18 @@ textarea,
 }
 
 .section-header-buttons {
-  display: flex; gap: 0.5rem; align-items: center;
+  display: flex; 
+  gap: 0.5rem; 
+  align-items: flex-start;
+  flex-direction: column;
+  width: 100%;
+}
+
+.add-button-row {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 0.25rem;
 }
 
 /* Section Countdowns - Inline at top of sections */

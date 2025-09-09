@@ -109,8 +109,6 @@ const AppContent = () => {
 
   // Countdown control handlers
   const handleRollOutcome = (outcome) => {
-    console.log('Bottom bar: Handling roll outcome:', outcome)
-    
     countdowns.forEach(countdown => {
       let advancement = 0
       
@@ -118,7 +116,6 @@ const AppContent = () => {
       if (countdown.type === 'standard' || !countdown.type) {
         // Standard countdowns always advance by 1
         advancement = 1
-        console.log(`Standard countdown "${countdown.name}" will advance by ${advancement}`)
       } else if (countdown.type === 'progress' || countdown.type === 'dynamic-progress') {
         // Progress countdowns advance based on roll outcome
         switch (outcome) {
@@ -135,7 +132,7 @@ const AppContent = () => {
             advancement = 0
         }
         if (advancement > 0) {
-          console.log(`Progress countdown "${countdown.name}" will advance by ${advancement}`)
+          // Progress countdown advanced
         }
       } else if (countdown.type === 'consequence' || countdown.type === 'dynamic-consequence') {
         // Consequence countdowns advance based on roll outcome
@@ -153,25 +150,22 @@ const AppContent = () => {
             advancement = 0
         }
         if (advancement > 0) {
-          console.log(`Consequence countdown "${countdown.name}" will advance by ${advancement}`)
+          // Consequence countdown advanced
         }
       } else if (countdown.type === 'simple-fear') {
         // Simple Fear countdowns advance by 1 whenever rolling with fear (simple or complex)
         if (outcome === 'simple-fear' || outcome === 'success-fear' || outcome === 'failure-fear') {
           advancement = 1
-          console.log(`Simple Fear countdown "${countdown.name}" will advance by ${advancement}`)
         }
       } else if (countdown.type === 'simple-hope') {
         // Simple Hope countdowns advance by 1 whenever rolling with hope (simple or complex)
         if (outcome === 'simple-hope' || outcome === 'success-hope' || outcome === 'failure-hope') {
           advancement = 1
-          console.log(`Simple Hope countdown "${countdown.name}" will advance by ${advancement}`)
         }
       }
       
       // Apply advancement if any
       if (advancement > 0) {
-        console.log(`Advancing countdown "${countdown.name}" by ${advancement}`)
         const currentValue = countdown.value || 0
         const rawNewValue = currentValue + advancement
         advanceCountdown(countdown.id, rawNewValue)
@@ -180,13 +174,10 @@ const AppContent = () => {
   }
 
   const handleRestTrigger = (restType) => {
-    console.log('Bottom bar: Handling rest trigger:', restType)
-    
     countdowns.forEach(countdown => {
       // Long-term countdowns advance on rest
       if (countdown.type === 'long-term') {
         const advancement = restType === 'long' ? 2 : 1
-        console.log(`Long-term countdown "${countdown.name}" will advance by ${advancement} on ${restType} rest`)
         const currentValue = countdown.value || 0
         const rawNewValue = currentValue + advancement
         advanceCountdown(countdown.id, rawNewValue)
@@ -195,12 +186,9 @@ const AppContent = () => {
   }
 
   const handleActionRoll = () => {
-    console.log('Bottom bar: Handling action roll')
-    
     countdowns.forEach(countdown => {
       // Standard countdowns advance by 1 on action roll
       if (countdown.type === 'standard' || !countdown.type) {
-        console.log(`Standard countdown "${countdown.name}" will advance on action roll`)
         const currentValue = countdown.value || 0
         const rawNewValue = currentValue + 1
         advanceCountdown(countdown.id, rawNewValue)
@@ -312,14 +300,12 @@ const AppContent = () => {
     
     if (isMinion) {
       // Minion mechanics: any damage defeats the minion, and excess damage can defeat additional minions
-      console.log('Applying minion damage:', { id, damage, minionThreshold })
       
       // First, defeat the target minion
       deleteAdversary(id)
       
       // Calculate how many additional minions can be defeated
       const additionalMinions = Math.floor(damage / minionThreshold)
-      console.log(`Damage ${damage} with threshold ${minionThreshold} can defeat ${additionalMinions} additional minions`)
       
       if (additionalMinions > 0) {
         // Find other minions of the same type that can be defeated
@@ -331,7 +317,6 @@ const AppContent = () => {
         
         // Defeat up to the calculated number of additional minions
         const minionsToDefeat = Math.min(additionalMinions, sameTypeMinions.length)
-        console.log(`Defeating ${minionsToDefeat} additional minions of type ${targetAdversary.name}`)
         
         for (let i = 0; i < minionsToDefeat; i++) {
           deleteAdversary(sameTypeMinions[i].id)
@@ -340,7 +325,6 @@ const AppContent = () => {
     } else {
       // Regular adversary damage mechanics
       const newHp = Math.min(currentHp + damage, maxHp) // Can't exceed max damage
-      console.log('Applying damage:', { id, damage, currentHp, maxHp, newHp })
       
       // Optimistic update - update local state immediately
       const updatedAdversaries = adversaries.map(adv => 
@@ -360,7 +344,6 @@ const AppContent = () => {
   const handleAdversaryHealing = (id, healing, currentHp) => {
     // In Daggerheart: HP = damage taken, so healing decreases HP
     const newHp = Math.max(0, currentHp - healing) // Can't go below 0 damage
-    console.log('Applying healing:', { id, healing, currentHp, newHp })
     
     // Optimistic update - update local state immediately
     const updatedAdversaries = adversaries.map(adv => 
@@ -392,16 +375,6 @@ const AppContent = () => {
     // Ensure stress doesn't go below 0
     newStress = Math.max(0, newStress)
     
-    console.log('Applying stress change:', { 
-      id, 
-      stressDelta, 
-      currentStress, 
-      maxStress, 
-      newStress, 
-      newHp, 
-      hpChanged,
-      overflow: hpChanged ? newStress - currentStress : 0
-    })
     
     // Optimistic update - update local state immediately
     const updatedAdversaries = adversaries.map(adv => 
@@ -821,14 +794,9 @@ const AppContent = () => {
               <Browser
                 type={databaseType}
                 onAddItem={(itemData) => {
-                  console.log('App.jsx onAddItem called with:', itemData)
-                  console.log('Current databaseType:', databaseType)
-                  
                   if (databaseType === 'adversary') {
-                    console.log('Creating adversary...')
                     createAdversary(itemData)
                   } else if (databaseType === 'environment') {
-                    console.log('Creating environment...')
                     createEnvironment(itemData)
                   }
                   // Keep browser open so users can add multiple items

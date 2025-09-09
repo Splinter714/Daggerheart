@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 
 const GameStateContext = createContext();
 
@@ -31,28 +31,32 @@ export const GameStateProvider = ({ children }) => {
     }
   }, []);
 
-  // Save state to localStorage whenever it changes
+  // Save state to localStorage whenever it changes (debounced)
   useEffect(() => {
-    localStorage.setItem('daggerheart-game-state', JSON.stringify(gameState));
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem('daggerheart-game-state', JSON.stringify(gameState));
+    }, 100); // Debounce saves by 100ms
+
+    return () => clearTimeout(timeoutId);
   }, [gameState]);
 
   // Fear management
-  const updateFear = (value) => {
+  const updateFear = useCallback((value) => {
     setGameState(prev => ({
       ...prev,
       fear: { ...prev.fear, value }
     }));
-  };
+  }, []);
 
-  const toggleFearVisibility = () => {
+  const toggleFearVisibility = useCallback(() => {
     setGameState(prev => ({
       ...prev,
       fear: { ...prev.fear, visible: !prev.fear.visible }
     }));
-  };
+  }, []);
 
   // Countdown management
-  const createCountdown = (countdownData) => {
+  const createCountdown = useCallback((countdownData) => {
     const newCountdown = {
       id: Date.now().toString(),
       name: countdownData.name || 'Countdown',
@@ -68,25 +72,25 @@ export const GameStateProvider = ({ children }) => {
       ...prev,
       countdowns: [...prev.countdowns, newCountdown]
     }));
-  };
+  }, []);
 
-  const updateCountdown = (id, updates) => {
+  const updateCountdown = useCallback((id, updates) => {
     setGameState(prev => ({
       ...prev,
       countdowns: prev.countdowns.map(countdown =>
         countdown.id === id ? { ...countdown, ...updates } : countdown
       )
     }));
-  };
+  }, []);
 
-  const deleteCountdown = (id) => {
+  const deleteCountdown = useCallback((id) => {
     setGameState(prev => ({
       ...prev,
       countdowns: prev.countdowns.filter(countdown => countdown.id !== id)
     }));
-  };
+  }, []);
 
-  const advanceCountdown = (id, newValue) => {
+  const advanceCountdown = useCallback((id, newValue) => {
     setGameState(prev => ({
       ...prev,
       countdowns: prev.countdowns.map(countdown => {
@@ -123,9 +127,9 @@ export const GameStateProvider = ({ children }) => {
         return countdown;
       })
     }));
-  };
+  }, []);
 
-  const incrementCountdown = (id) => {
+  const incrementCountdown = useCallback((id) => {
     setGameState(prev => ({
       ...prev,
       countdowns: prev.countdowns.map(countdown => {
@@ -153,9 +157,9 @@ export const GameStateProvider = ({ children }) => {
         return countdown;
       })
     }));
-  };
+  }, []);
 
-  const decrementCountdown = (id) => {
+  const decrementCountdown = useCallback((id) => {
     setGameState(prev => ({
       ...prev,
       countdowns: prev.countdowns.map(countdown => {
@@ -184,9 +188,9 @@ export const GameStateProvider = ({ children }) => {
         return countdown;
       })
     }));
-  };
+  }, []);
 
-  const reorderCountdowns = (newOrder) => {
+  const reorderCountdowns = useCallback((newOrder) => {
     setGameState(prev => {
       const [oldIndex, newIndex] = newOrder;
       const newCountdowns = [...prev.countdowns];
@@ -198,7 +202,7 @@ export const GameStateProvider = ({ children }) => {
         countdowns: newCountdowns
       };
     });
-  };
+  }, []);
 
   // Adversary management
   const createAdversary = (adversaryData) => {
