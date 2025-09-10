@@ -1380,14 +1380,14 @@ textarea,
   
   /* Visual feedback for expandable cards on mobile */
   .sortable-item .card.compact {
-    cursor: pointer;
-  }
-  
+  cursor: pointer;
+}
+
   .sortable-item .card.compact:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
   /* Mobile drawer styles */
   .mobile-drawer {
     position: fixed;
@@ -1502,8 +1502,8 @@ textarea,
     overflow: hidden;
   }
 
-  /* BROWSER/CREATOR DRAWER: Handle table scrolling via CSS */
-  .drawer-body .browser-table-container {
+  /* BROWSER/CREATOR DRAWER: Let entire browser content scroll */
+  .drawer-body .browser-content {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -1512,10 +1512,8 @@ textarea,
     touch-action: pan-y !important; /* Allow vertical scrolling only */
   }
   
-  /* BROWSER/CREATOR DRAWER: Prevent pull-to-refresh in non-table areas */
-  .drawer-body .browser-wrapper,
-  .drawer-body .browser-top-row,
-  .drawer-body .browser-filters {
+  /* BROWSER/CREATOR DRAWER: Prevent pull-to-refresh in header */
+  .drawer-body .browser-header {
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
     touch-action: manipulation !important; /* Prevent pull-to-refresh, allow tap */
@@ -2199,7 +2197,7 @@ textarea,
   .bulk-clear-btn {
     width: 100%;
     justify-content: center;
-  }
+}
 
 
 .countdown-creator-compact {
@@ -6004,8 +6002,6 @@ textarea,
 .browser-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 0; /* Remove padding */
   background: var(--bg-primary);
   border-radius: 0.5rem;
   height: 100%;
@@ -6014,10 +6010,20 @@ textarea,
   overflow: hidden;
 }
 
-.browser-top-row {
+.browser-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.browser-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: visible; /* Allow dropdowns to extend horizontally */
   padding: 0.75rem;
 }
 
@@ -6029,12 +6035,91 @@ textarea,
   border-radius: 0.5rem;
   color: var(--text-primary);
   font-size: 1rem;
+  height: 2.5rem; /* Match button height */
+  box-sizing: border-box;
+}
+
+.browser-create-btn {
+  flex-shrink: 0;
+  background: var(--purple) !important;
+  color: white !important;
+  border: 1px solid var(--purple) !important;
+}
+
+.browser-create-btn:hover {
+  background: var(--purple-dark) !important;
+  border-color: var(--purple-dark) !important;
+}
+
+.header-with-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the content */
+  gap: 0.25rem; /* Reduced from 0.5rem */
+  position: relative; /* Enable absolute positioning for dropdowns */
+}
+
+.header-filter-icon {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative; /* Enable absolute positioning for dropdowns */
+}
+
+.header-filter-icon:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Sort arrows */
+.sort-arrow {
+  color: var(--purple);
+  font-size: 0.875rem;
+  margin-left: 0.25rem;
+  font-weight: bold;
+}
+
+/* Ensure table headers have enough space */
+.browser-content th {
+  min-width: 80px;
+  padding: 0.75rem 0.5rem;
+  white-space: nowrap;
+  position: relative; /* Enable absolute positioning for dropdowns */
+}
+
+/* Specific column widths */
+.browser-content th:nth-child(1) { min-width: 150px; } /* Name */
+.browser-content th:nth-child(2) { min-width: 80px; }  /* Tier */
+.browser-content th:nth-child(3) { min-width: 100px; } /* Type */
+.browser-content th:nth-child(4) { min-width: 90px; }  /* Difficulty */
+.browser-content th:nth-child(5) { min-width: 60px; }  /* Action */
+
+.browser-content th.sortable.asc::after {
+  content: '↑';
+  color: var(--purple);
+  opacity: 1;
+}
+
+.browser-content th.sortable.desc::after {
+  content: '↓';
+  color: var(--purple);
+  opacity: 1;
+}
+
+.browser-content th.sortable:hover::after {
+  opacity: 0.8;
 }
 
 .browser-search-input:focus {
   outline: none;
-  border-color: var(--purple);
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+  border-color: var(--border);
 }
 
 .browser-top-row .btn {
@@ -6102,7 +6187,7 @@ textarea,
 
 .browser-table-container {
   flex: 1;
-  overflow: hidden; /* Prevent horizontal overflow */
+  overflow: visible; /* Allow dropdowns to show */
   background: var(--bg-card);
   border-radius: 0.5rem;
   border: 1px solid var(--border);
@@ -6161,14 +6246,14 @@ textarea,
 
 .browser-table th:nth-child(2),
 .browser-table td:nth-child(2) {
-  width: 50px; /* Tier column - wider for icon */
+  width: 50px; /* Tier column - minimal width for numbers */
   text-align: center;
-  overflow: visible; /* Don't hide icon */
-  text-overflow: unset; /* No ellipsis for icons */
+  overflow: visible; /* Don't hide text */
+  text-overflow: unset; /* No ellipsis for text */
 }
 
 .browser-table th:nth-child(2) {
-  width: 50px !important; /* Restore fixed width */
+  width: 50px !important; /* Minimal width for "Tier" header */
   text-align: center !important;
 }
 
@@ -6179,25 +6264,28 @@ textarea,
 
 .browser-table th:nth-child(3),
 .browser-table td:nth-child(3) {
-  width: 100px; /* Type column - wider to fit "Exploration" */
+  width: 100px; /* Type column - fit "Type" header */
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center; /* Center the type content */
 }
 
-.browser-table td:nth-child(3) {
-  text-align: center !important; /* Center the type content */
+.browser-table th:nth-child(3) {
+  text-align: center !important; /* Center the type header */
+  padding-left: 0.5rem !important; /* Add left padding to balance the filter button */
+  padding-right: 0.5rem !important; /* Add right padding to balance the filter button */
 }
 
 .browser-table th:nth-child(4),
 .browser-table td:nth-child(4) {
-  width: 50px; /* Difficulty column - wider for icon */
+  width: 40px; /* Diff column - minimal width for "Diff" header */
   text-align: center;
-  overflow: visible; /* Don't hide icon */
-  text-overflow: unset; /* No ellipsis for icons */
+  overflow: visible; /* Don't hide text */
+  text-overflow: unset; /* No ellipsis for text */
 }
 
 .browser-table th:nth-child(4) {
-  width: 50px !important; /* Restore fixed width */
+  width: 40px !important; /* Minimal width for "Diff" header */
   text-align: center !important;
 }
 
@@ -6292,28 +6380,55 @@ textarea,
 }
 
 .filter-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
+  position: fixed;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  min-width: 150px;
-  margin-top: 0.25rem; /* Add small gap from filter buttons */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 99999;
+  margin-top: 0.25rem;
+  overflow: hidden;
+  width: max-content;
+  max-width: 60vw;
 }
+
 
 .filter-option {
-  padding: 0.75rem 1rem;
+  padding: 0.25rem 0.5rem; /* Match table row padding */
   cursor: pointer;
   color: var(--text-primary);
+  font-size: 1rem; /* Explicitly match default font size */
+  height: 35px; /* Match table row height */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   transition: background-color 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.filter-option:hover {
-  background: var(--bg-hover);
+.filter-option:last-child {
+  border-bottom: none;
 }
+
+.filter-option:hover { background: var(--bg-hover); }
+
+.filter-option.selected .check-icon { color: var(--text-primary); }
+.filter-option.selected .filter-label { color: var(--text-primary); }
+
+.check-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.filter-label { flex: 1; }
 
 .filter-option:first-child {
   border-radius: 0.5rem 0.5rem 0 0;
