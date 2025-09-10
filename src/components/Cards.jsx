@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Droplet, Activity, CheckCircle, Pencil } from 'lucide-react'
 import Button from './Buttons'
 import { Badge, DifficultyBadge, TypeBadge } from './Badges'
-import Creator from './Creator'
+// import Creator from './Creator'
 import CountdownCard from './cards/CountdownCard'
 
 // Add Item Button Component
@@ -25,23 +25,17 @@ const Cards = ({
   item, 
   type, // 'countdown', 'adversary', or 'environment'
   mode = 'compact', // 'compact' or 'expanded'
-  index = 0,
+  _index = 0,
   onDelete,
   onEdit,
-  onToggleVisibility,
-  onReorder,
   onApplyDamage,
   onApplyHealing,
-  onStressChange,
   onApplyStressChange,
   onIncrement,
   onDecrement,
   onSave,
   onExitEditMode,
-  showDragHandle = false,
-  isSelected = false,
   onClick,
-  preview = false,
   dragAttributes,
   dragListeners,
   isEditMode = false
@@ -1050,155 +1044,16 @@ const Cards = ({
   }
 
   // Helper function to roll dice
-  function rollDice(numDice, dieSize) {
-    let total = 0;
-    for (let i = 0; i < numDice; i++) {
-      total += Math.floor(Math.random() * dieSize) + 1;
-    }
-    return total;
-  }
+  // (helper rollDice removed; not used)
 
   // Helper function to format trigger conditions for display
-  function formatTriggerCondition(triggerCondition) {
-    const conditionMap = {
-      'pc-rolls-with-fear': 'PC rolls with Fear',
-      'pc-makes-attack-roll': 'PC makes attack roll',
-      'gorgon-is-attacked': 'Gorgon is attacked',
-      'pc-takes-violent-action': 'PC takes violent action'
-    };
-    
-    return conditionMap[triggerCondition] || triggerCondition;
-  }
+  // (formatTriggerCondition removed; not used)
 
   // Helper function to parse countdown details from context
-  function parseCountdownDetails(details, featureName) {
-    const detailsLower = details.toLowerCase();
-    
-    // Parse countdown type
-    let type = 'standard';
-    if (detailsLower.includes('loop')) {
-      type = 'loop';
-    } else if (detailsLower.includes('increasing')) {
-      type = 'increasing';
-    } else if (detailsLower.includes('decreasing')) {
-      type = 'decreasing';
-    } else if (detailsLower.includes('progress')) {
-      type = 'progress';
-    } else if (detailsLower.includes('consequence')) {
-      type = 'consequence';
-    }
-    
-    // Parse special trigger conditions from the full description
-    let triggerCondition = null;
-    const fullDescription = featureName ? `${featureName}: ${details}` : details;
-    
-    // Check for specific trigger patterns
-    if (fullDescription.toLowerCase().includes('ticks down when a pc rolls with fear')) {
-      triggerCondition = 'pc-rolls-with-fear';
-    } else if (fullDescription.toLowerCase().includes('ticks down when a pc makes an attack roll')) {
-      triggerCondition = 'pc-makes-attack-roll';
-    } else if (fullDescription.toLowerCase().includes('ticks down when the gorgon is attacked')) {
-      triggerCondition = 'gorgon-is-attacked';
-    } else if (fullDescription.toLowerCase().includes('ticks down when a pc takes a violent action')) {
-      triggerCondition = 'pc-takes-violent-action';
-    } else if (fullDescription.toLowerCase().includes('ticks down when')) {
-      // Extract the condition after "ticks down when"
-      const whenMatch = fullDescription.match(/ticks down when (.+?)(?:\.|$)/i);
-      if (whenMatch) {
-        triggerCondition = whenMatch[1].toLowerCase().trim();
-      }
-    }
-    
-    // Name should always be the feature name that starts it
-    const name = featureName || 'Countdown';
-    
-    // Parse max value based on type
-    let max = 5; // default
-    
-    if (type === 'loop') {
-      // For loop countdowns, max is based on dice notation
-      const diceMatch = details.match(/(\d+)d(\d+)/i);
-      if (diceMatch) {
-        const numDice = parseInt(diceMatch[1]);
-        const dieSize = parseInt(diceMatch[2]);
-        max = rollDice(numDice, dieSize); // Roll 2d6, 1d4, etc.
-      }
-    } else {
-      // For other types, max is the number in parentheses
-      const maxMatch = details.match(/(\d+)/);
-      if (maxMatch) {
-        max = parseInt(maxMatch[1]);
-      }
-    }
-    
-    // Parse dice notation (e.g., "2d6", "1d4")
-    let diceNotation = null;
-    const diceMatch = details.match(/(\d+d\d+)/i);
-    if (diceMatch) {
-      diceNotation = diceMatch[1];
-    }
-    
-    return {
-      name,
-      type,
-      max,
-      diceNotation,
-      description: details,
-      value: 0,
-      triggerCondition
-    };
-  }
+  // (parseCountdownDetails removed; not used)
 
   // Helper function to check if a mechanic should be interactive based on context
-  function checkIfInteractive(match, description, type) {
-    const matchIndex = description.indexOf(match);
-    const contextBefore = description.substring(Math.max(0, matchIndex - 50), matchIndex).toLowerCase();
-    const contextAfter = description.substring(matchIndex + match.length, Math.min(description.length, matchIndex + match.length + 50)).toLowerCase();
-    
-    // Non-interactive patterns (automatic effects)
-    const nonInteractivePatterns = [
-      'they mark', 'them mark', 'target marks', 'pc marks', 'player marks',
-      'each pc', 'all pcs', 'every pc', 'the party',
-      'automatically', 'must mark', 'forced to', 'compelled to'
-    ];
-    
-    // Check if context suggests this is automatic, not player choice
-    for (const pattern of nonInteractivePatterns) {
-      if (contextBefore.includes(pattern) || contextAfter.includes(pattern)) {
-        return false;
-      }
-    }
-    
-    // Interactive patterns (player/GM choices)
-    const interactivePatterns = [
-      'you may', 'you can', 'you spend', 'you gain',
-      'gm may', 'gm can', 'gm gains',
-      'instead of', 'to activate', 'to make', 'to spotlight'
-    ];
-    
-    // Check if context suggests this is a choice
-    for (const pattern of interactivePatterns) {
-      if (contextBefore.includes(pattern) || contextAfter.includes(pattern)) {
-        return true;
-      }
-    }
-    
-    // Default behavior based on type
-    switch (type) {
-      case 'spend-fear':
-        return true; // Fear spending is usually player choice
-      case 'mark-stress':
-        return false; // Stress marking is usually automatic unless explicitly "you may"
-      case 'gain-fear':
-        return true; // Fear gaining is usually GM choice
-      case 'countdown':
-        return true; // Countdown creation is usually GM choice
-      case 'token':
-        return true; // Token introduction is usually GM choice
-      default:
-        return false;
-    }
-  }
+  // (checkIfInteractive removed; not used)
 
   // Helper function to render descriptions with highlighted words
   function renderInteractiveDescription(description) {

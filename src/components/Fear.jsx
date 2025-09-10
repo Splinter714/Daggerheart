@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSkull } from '@fortawesome/free-solid-svg-icons'
 
 const Fear = () => {
-  const { fear, updateFear } = useGameState()
+  const { fear } = useGameState()
   const safeFear = fear || { value: 0, visible: false }
 
   // Return just the visual elements, we'll handle clicks in the parent

@@ -152,8 +152,8 @@ const Button = ({
  * BulkClearButton - Specialized button for bulk operations with confirmation
  */
 export const BulkClearButton = ({ 
-  type, 
-  count, 
+  type: _type, 
+  count: _count, 
   onConfirm, 
   title, 
   label,

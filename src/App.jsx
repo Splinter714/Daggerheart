@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useRef, Suspense } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { GameStateProvider } from './GameStateContext'
 import { useGameState } from './useGameState'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSkull, faFire, faMoon, faStar, faDice } from '@fortawesome/free-solid-svg-icons'
-import { Swords, TreePine, Pencil, Clock, Plus, Trash2, Menu, Wrench } from 'lucide-react'
+import { Wrench } from 'lucide-react'
 import Version from './components/Version'
 import useSwipeDrawer from './hooks/useSwipeDrawer'
 import './App.css'
@@ -13,15 +11,12 @@ import Fear from './components/Fear'
 import GameBoard from './components/GameBoard'
 import Cards from './components/Cards'
 import AdversaryCreatorMockup from './components/AdversaryCreatorMockup'
-import Button from './components/Buttons'
 // Lazy-load heavy right-panel components
 const Browser = React.lazy(() => import('./components/Browser'))
 const Creator = React.lazy(() => import('./components/Creator'))
 import { 
-  getNeededTriggers as getNeededTriggersEngine,
   getAdvancementForOutcome,
-  getAdvancementForActionRoll,
-  getAdvancementForRest
+  getAdvancementForActionRoll
 } from './utils/countdownEngine'
 
 // Mobile navigation - simple button-based approach
@@ -52,7 +47,7 @@ const AppContent = () => {
   const [databaseType, setDatabaseType] = useState('unified')
   const [isMobile, setIsMobile] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
-  const [mobileView, setMobileView] = useState('left') // 'left' or 'right'
+  const [mobileView] = useState('left') // 'left' or 'right'
   const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
   const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
   const [showMockup, setShowMockup] = useState(false)
@@ -149,15 +144,7 @@ const AppContent = () => {
     })
   }
 
-  const handleRestTrigger = (restType) => {
-    countdowns.forEach((countdown) => {
-      const advancement = getAdvancementForRest(countdown, restType)
-      if (advancement > 0) {
-        const currentValue = countdown.value || 0
-        advanceCountdown(countdown.id, currentValue + advancement)
-      }
-    })
-  }
+  // Rest triggers handled in GameBoard
 
   const handleActionRoll = () => {
     countdowns.forEach((countdown) => {
@@ -232,7 +219,7 @@ const AppContent = () => {
   }, [mobileDrawerOpen])
 
   // Determine which triggers are needed based on active countdowns
-  const getNeededTriggers = () => getNeededTriggersEngine(countdowns || [])
+  // const getNeededTriggers = () => getNeededTriggersEngine(countdowns || [])
 
   // Sync selectedItem with updated data
   useEffect(() => {
@@ -320,11 +307,6 @@ const AppContent = () => {
       const newHp = Math.min(currentHp + damage, maxHp) // Can't exceed max damage
       console.log('Applying damage:', { id, damage, currentHp, maxHp, newHp })
       
-      // Optimistic update - update local state immediately
-      const updatedAdversaries = adversaries.map(adv => 
-        adv.id === id ? { ...adv, hp: newHp } : adv
-      )
-      
       // Update the selected item if it's the one being modified
       if (selectedItem && selectedItem.id === id) {
         setSelectedItem(prev => ({ ...prev, hp: newHp }))
@@ -339,11 +321,6 @@ const AppContent = () => {
     // In Daggerheart: HP = damage taken, so healing decreases HP
     const newHp = Math.max(0, currentHp - healing) // Can't go below 0 damage
     console.log('Applying healing:', { id, healing, currentHp, newHp })
-    
-    // Optimistic update - update local state immediately
-    const updatedAdversaries = adversaries.map(adv => 
-      adv.id === id ? { ...adv, hp: newHp } : adv
-    )
     
     // Update the selected item if it's the one being modified
     if (selectedItem && selectedItem.id === id) {
@@ -381,15 +358,6 @@ const AppContent = () => {
       overflow: hpChanged ? newStress - currentStress : 0
     })
     
-    // Optimistic update - update local state immediately
-    const updatedAdversaries = adversaries.map(adv => 
-      adv.id === id ? { 
-        ...adv, 
-        stress: newStress,
-        ...(hpChanged && { hp: newHp })
-      } : adv
-    )
-    
     // Update the selected item if it's the one being modified
     if (selectedItem && selectedItem.id === id) {
       setSelectedItem(prev => ({ 
@@ -406,46 +374,7 @@ const AppContent = () => {
     })
   }
   
-  const handleAddAdversaryFromDatabase = (adversary) => {
-    createAdversary({
-      ...adversary,
-      id: `adv-${Date.now()}`,
-      hp: adversary.hpMax,
-      stress: 0,
-      isVisible: true
-    })
-    handleCloseRightColumn()
-  }
-  
-  const handleCreateAdversary = (adversary) => {
-    createAdversary({
-      ...adversary,
-      id: `adv-${Date.now()}`,
-      hp: adversary.hpMax,
-      stress: 0,
-      isVisible: true
-    })
-    handleCloseRightColumn()
-  }
-  
-  // Environment handlers
-  const handleAddEnvironmentFromDatabase = (environment) => {
-    createEnvironment({
-      ...environment,
-      id: `env-${Date.now()}`,
-      isVisible: true
-    })
-    handleCloseRightColumn()
-  }
-  
-  const handleCreateEnvironment = (environment) => {
-    createEnvironment({
-      ...environment,
-      id: `env-${Date.now()}`,
-      isVisible: true
-    })
-    handleCloseRightColumn()
-  }
+  // (database create handlers consolidated elsewhere)
   
   // Toggle visibility handlers
   const handleToggleVisibility = (id, type, currentVisibility) => {
@@ -457,13 +386,7 @@ const AppContent = () => {
   }
   
   // Reorder handlers
-  const handleReorder = (type, newOrder) => {
-    if (type === 'adversary') {
-      reorderAdversaries(newOrder)
-    } else if (type === 'environment') {
-      reorderEnvironments(newOrder)
-    }
-  }
+  const handleReorder = () => {}
 
   return (
     <div 
@@ -535,7 +458,7 @@ const AppContent = () => {
             title={isEditMode ? "Exit Edit Mode" : "Enter Edit Mode"}
           >
             <div className="sidebar-nav-icon">
-              <Pencil size={20} />
+              <Wrench size={20} />
             </div>
           </button>
 
@@ -545,9 +468,7 @@ const AppContent = () => {
             onClick={(e) => {
               e.stopPropagation()
               setShowMockup(!showMockup)
-              setAddFlyoutOpen(false)
               setDeleteFlyoutOpen(false)
-              setCountdownFlyoutOpen(false)
             }}
             title="Show Creator Mockup"
             style={{ cursor: 'pointer' }}
@@ -568,15 +489,13 @@ const AppContent = () => {
                               (countdowns && countdowns.length > 0)
               if (hasItems) {
                 setDeleteFlyoutOpen(!deleteFlyoutOpen)
-                setAddFlyoutOpen(false) // Close other flyout
+                // Close other flyout (deprecated)
               }
             }}
             title={(!adversaries || adversaries.length === 0) && (!environments || environments.length === 0) && (!countdowns || countdowns.length === 0) ? "Nothing to clear" : "Clear Items"}
             style={{ cursor: (!adversaries || adversaries.length === 0) && (!environments || environments.length === 0) && (!countdowns || countdowns.length === 0) ? 'not-allowed' : 'pointer' }}
           >
-            <div className="sidebar-nav-icon">
-              <Trash2 size={20} />
-            </div>
+            <div className="sidebar-nav-icon" aria-hidden="true">×</div>
             
             <div className={`flyout-menu ${deleteFlyoutOpen ? 'show' : ''}`}>
                 {adversaries && adversaries.length > 0 && (
@@ -589,7 +508,7 @@ const AppContent = () => {
                     }}
                   >
                     <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                      <Trash2 size={14} style={{marginTop: '1px'}} />
+                      <span aria-hidden="true">×</span>
                       <span>All Adversaries</span>
                     </div>
                   </button>
@@ -605,7 +524,7 @@ const AppContent = () => {
                     }}
                   >
                     <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                      <Trash2 size={14} style={{marginTop: '1px'}} />
+                      <span aria-hidden="true">×</span>
                       <span>Dead Adversaries</span>
                     </div>
                   </button>
@@ -620,7 +539,7 @@ const AppContent = () => {
                     }}
                   >
                     <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                      <Trash2 size={14} style={{marginTop: '1px'}} />
+                      <span aria-hidden="true">×</span>
                       <span>All Environments</span>
                     </div>
                   </button>
@@ -635,7 +554,7 @@ const AppContent = () => {
                     }}
                   >
                     <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                      <Trash2 size={14} style={{marginTop: '1px'}} />
+                      <span aria-hidden="true">×</span>
                       <span>All Countdowns</span>
                     </div>
                   </button>
@@ -871,7 +790,7 @@ const AppContent = () => {
               transform: mobileDrawerOpen 
                 ? `translateY(${drawerOffset}px)` 
                 : 'translateY(100%)',
-              transition: touchStart ? 'none' : 'transform 0.3s ease'
+              transition: drawerOffset ? 'none' : 'transform 0.3s ease'
             }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -908,8 +827,7 @@ const AppContent = () => {
                     // Reset drawer state after adding item to prevent artifacts
                     console.log('Resetting drawer state after item creation')
                     setDrawerOffset(0)
-                    setTouchStart(null)
-                    setTouchCurrent(null)
+                    resetSwipeState()
                     setDrawerRefreshKey(prev => prev + 1) // Force drawer re-render
                     
                     // Keep browser open so users can add multiple items

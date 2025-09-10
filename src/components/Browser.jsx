@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react'
 import usePersistentState from '../hooks/usePersistentState'
 import Button from './Buttons'
 import Cards from './Cards'
-import { Swords, TreePine, Plus, Star, Skull, Filter, Square, CheckSquare } from 'lucide-react'
+import { Plus, Filter, Square, CheckSquare } from 'lucide-react'
 // Dynamically import JSON data to keep initial bundle smaller
 let adversariesData = { adversaries: [] }
 let environmentsData = { environments: [] }
@@ -94,18 +94,7 @@ const Browser = ({
   // Track which card is expanded
   const [expandedCard, setExpandedCard] = useState(getInitialExpandedCard)
   
-  // Mobile detection
-  const [isMobile, setIsMobile] = useState(false)
-  
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 800)
-    }
-    
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+  // (mobile detection removed)
   
   // Track the current type to detect changes
   const currentTypeRef = useRef(type)
@@ -167,7 +156,7 @@ const Browser = ({
       setSelectedTiers([])
       setSelectedTypes([])
     }
-  }, [type])
+  }, [type, setSelectedTiers, setSelectedTypes])
 
   // (moved below itemTypes/itemTiers)
 
@@ -238,7 +227,7 @@ const Browser = ({
         setSelectedTiers(nextTiers.length > 0 ? nextTiers : [])
       }
     }
-  }, [itemTypes, itemTiers])
+  }, [itemTypes, itemTiers, selectedTypes, selectedTiers, setSelectedTypes, setSelectedTiers])
 
   // Sort and filter items
   const filteredAndSortedItems = useMemo(() => {
