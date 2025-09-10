@@ -60,39 +60,9 @@ const AppContent = () => {
   const [drawerOffset, setDrawerOffset] = useState(0)
   
   const handleTouchStart = (e) => {
-    // BROWSER/CREATOR DRAWER STRATEGY: Handle table scrolling intelligently
+    // BROWSER/CREATOR DRAWER STRATEGY: Prevent pull-to-refresh everywhere, handle table scrolling via CSS
     
-    // Check if touch is on the browser table
-    const isTableTouch = e.target.closest('.browser-table-container') || 
-                        e.target.closest('.browser-table') ||
-                        e.target.closest('table')
-    
-    // Check if touch is on drawer handle
-    const isHandleTouch = e.target.closest('.drawer-handle')
-    
-    if (isTableTouch) {
-      // For table touches, check scroll position
-      const tableContainer = e.target.closest('.browser-table-container')
-      const isTableAtTop = tableContainer && tableContainer.scrollTop <= 10
-      
-      if (!isTableAtTop) {
-        // Table is scrolled down - allow normal table scrolling
-        // Don't prevent default - let browser handle table scrolling
-        return
-      }
-      // Table is at top - allow swipe-to-dismiss
-    } else if (isHandleTouch) {
-      // For handle touches, always handle swipe-to-dismiss
-      // Prevent default to avoid pull-to-refresh
-      e.preventDefault()
-      setTouchStart(e.targetTouches[0].clientY)
-      setTouchCurrent(e.targetTouches[0].clientY)
-      setDrawerOffset(0)
-      return
-    }
-    
-    // For all other touches (non-table, non-handle), prevent pull-to-refresh
-    // and handle swipe-to-dismiss
+    // Always prevent pull-to-refresh and handle swipe-to-dismiss
     e.preventDefault()
     setTouchStart(e.targetTouches[0].clientY)
     setTouchCurrent(e.targetTouches[0].clientY)
