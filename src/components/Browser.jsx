@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import Button from './Buttons'
 import Cards from './Cards'
-import { Swords, TreePine, ArrowLeft, Plus, Star, Skull } from 'lucide-react'
+import { Swords, TreePine, Plus, Star, Skull, Filter, Square, CheckSquare } from 'lucide-react'
 import adversariesData from '../data/adversaries.json'
 import environmentsData from '../data/environments.json'
 
@@ -15,21 +15,26 @@ const Browser = ({
   console.log('Browser component is being used, not List component')
   
   const [searchTerm, setSearchTerm] = useState('')
-  // Load filter state from localStorage
-  const getInitialFilterState = () => {
-    const savedFilters = localStorage.getItem(`browser-filters-${type}`)
-    if (savedFilters) {
+  // Load selected filter arrays from localStorage per type
+  const getInitialSelectedFilters = () => {
+    const saved = localStorage.getItem(`browser-filters-${type}`)
+    if (saved) {
       try {
-        return JSON.parse(savedFilters)
+        const parsed = JSON.parse(saved)
+        return {
+          tiers: Array.isArray(parsed.tiers) ? parsed.tiers : [],
+          types: Array.isArray(parsed.types) ? parsed.types : []
+        }
       } catch (e) {
-        console.warn('Failed to parse saved filter state:', e)
+        console.warn('Failed to parse saved selected filters:', e)
       }
     }
-    return { tier: '', type: '' }
+    return { tiers: [], types: [] }
   }
   
-  const [filterTier, setFilterTier] = useState(getInitialFilterState().tier)
-  const [filterType, setFilterType] = useState(getInitialFilterState().type)
+  // Multi-select filter states
+  const [selectedTiers, setSelectedTiers] = useState(getInitialSelectedFilters().tiers)
+  const [selectedTypes, setSelectedTypes] = useState(getInitialSelectedFilters().types)
   // Load initial sort state synchronously to prevent jitter
   const getInitialSortState = () => {
     const savedSort = localStorage.getItem(`browser-sort-${type}`)
@@ -51,6 +56,10 @@ const Browser = ({
   const [sortFields, setSortFields] = useState(getInitialSortState)
   const [showTierDropdown, setShowTierDropdown] = useState(false)
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
+  
+  // Refs for filter buttons
+  const tierFilterRef = useRef(null)
+  const typeFilterRef = useRef(null)
   
   // Load expanded card state from localStorage
   const getInitialExpandedCard = () => {
@@ -129,13 +138,33 @@ const Browser = ({
     }
   }, [expandedCard, type])
   
-  // Save filter state to localStorage whenever it changes
+  // Persist selected filters per type (avoid writing on type change until values load)
   useEffect(() => {
     localStorage.setItem(`browser-filters-${type}`, JSON.stringify({ 
-      tier: filterTier, 
-      type: filterType 
+      tiers: selectedTiers, 
+      types: selectedTypes 
     }))
-  }, [filterTier, filterType, type])
+  }, [selectedTiers, selectedTypes])
+
+  // When switching data type, load its saved filters
+  useEffect(() => {
+    const saved = localStorage.getItem(`browser-filters-${type}`)
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        setSelectedTiers(Array.isArray(parsed.tiers) ? parsed.tiers : [])
+        setSelectedTypes(Array.isArray(parsed.types) ? parsed.types : [])
+      } catch (e) {
+        setSelectedTiers([])
+        setSelectedTypes([])
+      }
+    } else {
+      setSelectedTiers([])
+      setSelectedTypes([])
+    }
+  }, [type])
+
+  // (moved below itemTypes/itemTiers)
 
   // Use imported data directly - only the relevant type
   const adversaryData = adversariesData.adversaries || []
@@ -145,11 +174,12 @@ const Browser = ({
   const currentData = type === 'adversary' ? adversaryData : environmentData
   const dataType = type === 'adversary' ? 'adversary' : 'environment'
 
-  // Close dropdowns when clicking outside
+  // Close dropdowns when clicking anywhere outside the dropdown or filter buttons
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest('th')) {
-        setShowCategoryDropdown(false)
+      const clickedInsideDropdown = event.target.closest('.filter-dropdown')
+      const clickedFilterButton = event.target.closest('.header-filter-icon')
+      if (!clickedInsideDropdown && !clickedFilterButton) {
         setShowTierDropdown(false)
         setShowTypeDropdown(false)
       }
@@ -185,6 +215,26 @@ const Browser = ({
     return tiers.sort((a, b) => a - b)
   }, [unifiedData])
 
+  // Reconcile saved filters with available data to avoid empty results
+  useEffect(() => {
+    // Types
+    if (selectedTypes.length > 0) {
+      const validTypes = new Set(itemTypes)
+      const nextTypes = selectedTypes.filter(t => validTypes.has(t))
+      if (nextTypes.length !== selectedTypes.length) {
+        setSelectedTypes(nextTypes.length > 0 ? nextTypes : [])
+      }
+    }
+    // Tiers (compare as strings)
+    if (selectedTiers.length > 0) {
+      const validTiers = new Set(itemTiers.map(t => String(t)))
+      const nextTiers = selectedTiers.filter(t => validTiers.has(String(t)))
+      if (nextTiers.length !== selectedTiers.length) {
+        setSelectedTiers(nextTiers.length > 0 ? nextTiers : [])
+      }
+    }
+  }, [itemTypes, itemTiers])
+
   // Sort and filter items
   const filteredAndSortedItems = useMemo(() => {
     let filtered = unifiedData.filter(item => {
@@ -192,8 +242,8 @@ const Browser = ({
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
       
-      const matchesTier = filterTier === '' || item.tier.toString() === filterTier
-      const matchesType = filterType === '' || item.displayType === filterType
+      const matchesTier = selectedTiers.length === 0 || selectedTiers.includes(item.tier.toString())
+      const matchesType = selectedTypes.length === 0 || selectedTypes.includes(item.displayType)
       
       return matchesSearch && matchesTier && matchesType
     })
@@ -252,7 +302,7 @@ const Browser = ({
     })
 
     return filtered
-  }, [unifiedData, searchTerm, filterTier, filterType, sortFields])
+  }, [unifiedData, searchTerm, selectedTiers, selectedTypes, sortFields])
 
   const handleSort = (field) => {
     setSortFields(prevSortFields => {
@@ -275,6 +325,47 @@ const Browser = ({
     } else if (filterType === 'type') {
       setShowTypeDropdown(!showTypeDropdown)
       setShowTierDropdown(false)
+    }
+  }
+
+  // Tooltip helpers for filter buttons
+  const tierTooltip = selectedTiers.length === 0 ? 'All' : `${selectedTiers.length} selected`
+  const typeTooltip = selectedTypes.length === 0 ? 'All' : `${selectedTypes.length} selected`
+
+  // Multi-select handlers
+  const handleTierSelect = (tier) => {
+    setSelectedTiers(prev => {
+      if (prev.includes(tier)) {
+        return prev.filter(t => t !== tier)
+      } else {
+        return [...prev, tier]
+      }
+    })
+  }
+
+  const handleTypeSelect = (type) => {
+    setSelectedTypes(prev => {
+      if (prev.includes(type)) {
+        return prev.filter(t => t !== type)
+      } else {
+        return [...prev, type]
+      }
+    })
+  }
+
+  // Calculate dropdown position based on the header cell (th); let CSS size it to content
+  const getDropdownStyle = (buttonRef) => {
+    if (!buttonRef?.current) return {}
+    const thEl = buttonRef.current.closest('th')
+    if (!thEl) return {}
+    const thRect = thEl.getBoundingClientRect()
+    const gutter = 8
+    const left = Math.max(gutter, thRect.left)
+    return {
+      position: 'fixed',
+      top: thRect.bottom + 4,
+      left,
+      zIndex: 99999
     }
   }
 
@@ -305,20 +396,11 @@ const Browser = ({
       onMouseDown={(e) => e.stopPropagation()}
       onMouseUp={(e) => e.stopPropagation()}
     >
-      {/* Back Arrow, Search, and Custom Button Row */}
-      <div className="browser-top-row">
-        <Button
-          action="secondary"
-          onClick={onCancel}
-          size="sm"
-          className="browser-back-btn"
-        >
-          <ArrowLeft size={16} />
-        </Button>
-        
+      {/* Fixed Header Row */}
+      <div className="browser-header">
         <input
           type="text"
-          placeholder={`Search ${type === 'adversary' ? 'adversaries' : 'environments'}...`}
+          placeholder="Search"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="browser-search-input"
@@ -328,70 +410,15 @@ const Browser = ({
           action="add"
           onClick={() => onCreateCustom && onCreateCustom(type)}
           size="sm"
-          className="browser-add-btn"
+          className="browser-create-btn"
         >
-          <Plus size={16} />
+          Create
         </Button>
       </div>
 
-      {/* Filter Controls */}
-      <div className="browser-filters">
-        <Button
-          action="filter"
-          onClick={() => handleFilter('tier')}
-          size="sm"
-          title={`Filter by Tier: ${filterTier || 'All'}`}
-        >
-          Tier {filterTier || 'All'}
-        </Button>
-        
-        <Button
-          action="filter"
-          onClick={() => handleFilter('type')}
-          size="sm"
-          title={`Filter by Type: ${filterType || 'All'}`}
-        >
-          Type {filterType || 'All'}
-        </Button>
+      {/* Scrollable Content */}
+      <div className="browser-content">
 
-        {/* Filter Dropdowns */}
-        {showTierDropdown && (
-          <div className="filter-dropdown">
-            <div className="filter-option" onClick={() => { setFilterTier(''); setShowTierDropdown(false) }}>
-              All Tiers
-            </div>
-            {itemTiers.map(tier => (
-              <div 
-                key={tier} 
-                className="filter-option" 
-                onClick={() => { setFilterTier(tier.toString()); setShowTierDropdown(false) }}
-              >
-                Tier {tier}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {showTypeDropdown && (
-          <div className="filter-dropdown">
-            <div className="filter-option" onClick={() => { setFilterType(''); setShowTypeDropdown(false) }}>
-              All Types
-            </div>
-            {itemTypes.map(type => (
-              <div 
-                key={type} 
-                className="filter-option" 
-                onClick={() => { setFilterType(type); setShowTypeDropdown(false) }}
-              >
-                {type}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Items Table */}
-      <div className="browser-table-container">
         <table className="browser-table">
           <thead>
             <tr>
@@ -405,19 +432,105 @@ const Browser = ({
                 onClick={() => handleSort('tier')} 
                 className={`sortable ${sortFields[0]?.field === 'tier' ? 'active' : ''} ${sortFields[0]?.field === 'tier' ? sortFields[0].direction : ''}`}
               >
-                <Star size={16} />
+                <div className="header-with-filter">
+                  Tier
+                  <button
+                    ref={tierFilterRef}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleFilter('tier')
+                    }}
+                    className="header-filter-icon"
+                    title={`Filter by Tier: ${tierTooltip}`}
+                  >
+                    <Filter size={14} />
+                  </button>
+                  {showTierDropdown && (
+                    <div 
+                      className="filter-dropdown" 
+                      style={getDropdownStyle(tierFilterRef)}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div 
+                        className={`filter-option ${selectedTiers.length === 0 ? 'selected' : ''}`} 
+                        onClick={() => setSelectedTiers([])}
+                      >
+                        <span className="check-icon">{selectedTiers.length === 0 ? <CheckSquare size={16}/> : <Square size={16}/>}</span>
+                        <span className="filter-label">All</span>
+                      </div>
+                      {itemTiers.map(tier => {
+                        const isSelected = selectedTiers.includes(tier.toString())
+                        return (
+                          <div 
+                            key={tier} 
+                            className={`filter-option ${isSelected ? 'selected' : ''}`}
+                            onClick={() => handleTierSelect(tier.toString())}
+                          >
+                            <span className="check-icon">{isSelected ? <CheckSquare size={16}/> : <Square size={16}/>}</span>
+                            <span className="filter-label">{tier}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
               </th>
               <th 
                 onClick={() => handleSort('displayType')} 
                 className={`sortable ${sortFields[0]?.field === 'displayType' ? 'active' : ''} ${sortFields[0]?.field === 'displayType' ? sortFields[0].direction : ''}`}
               >
-                Type
+                <div className="header-with-filter">
+                  Type
+                  <button
+                    ref={typeFilterRef}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleFilter('type')
+                    }}
+                    className="header-filter-icon"
+                    title={`Filter by Type: ${typeTooltip}`}
+                  >
+                    <Filter size={14} />
+                  </button>
+                  {showTypeDropdown && (
+                    <div 
+                      className="filter-dropdown" 
+                      style={getDropdownStyle(typeFilterRef)}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div 
+                        className={`filter-option ${selectedTypes.length === 0 ? 'selected' : ''}`} 
+                        onClick={() => setSelectedTypes([])}
+                      >
+                        <span className="check-icon">{selectedTypes.length === 0 ? <CheckSquare size={16}/> : <Square size={16}/>}</span>
+                        <span className="filter-label">All</span>
+                      </div>
+                      {itemTypes.map(type => {
+                        const isSelected = selectedTypes.includes(type)
+                        return (
+                          <div 
+                            key={type} 
+                            className={`filter-option ${isSelected ? 'selected' : ''}`}
+                            onClick={() => handleTypeSelect(type)}
+                          >
+                            <span className="check-icon">{isSelected ? <CheckSquare size={16}/> : <Square size={16}/>}</span>
+                            <span className="filter-label">{type}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
               </th>
               <th 
                 onClick={() => handleSort('displayDifficulty')} 
                 className={`sortable ${sortFields[0]?.field === 'displayDifficulty' ? 'active' : ''} ${sortFields[0]?.field === 'displayDifficulty' ? sortFields[0].direction : ''}`}
               >
-                <Skull size={16} />
+                <div className="header-with-filter">
+                  Diff
+                </div>
               </th>
               <th></th>
             </tr>
