@@ -1512,6 +1512,15 @@ textarea,
     touch-action: pan-y !important; /* Allow vertical scrolling, JavaScript handles swipe-to-dismiss */
   }
   
+  /* BROWSER/CREATOR DRAWER: Prevent pull-to-refresh in non-table areas */
+  .drawer-body .browser-wrapper,
+  .drawer-body .browser-top-row,
+  .drawer-body .browser-filters {
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: manipulation !important; /* Prevent pull-to-refresh, allow tap */
+  }
+  
   /* EXPANDED CARD DRAWER: Prioritize scrolling, only prevent pull-to-refresh */
   .drawer-body .expanded-card {
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */

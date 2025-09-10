@@ -67,6 +67,9 @@ const AppContent = () => {
                         e.target.closest('.browser-table') ||
                         e.target.closest('table')
     
+    // Check if touch is on drawer handle
+    const isHandleTouch = e.target.closest('.drawer-handle')
+    
     if (isTableTouch) {
       // For table touches, check scroll position
       const tableContainer = e.target.closest('.browser-table-container')
@@ -78,9 +81,18 @@ const AppContent = () => {
         return
       }
       // Table is at top - allow swipe-to-dismiss
+    } else if (isHandleTouch) {
+      // For handle touches, always handle swipe-to-dismiss
+      // Prevent default to avoid pull-to-refresh
+      e.preventDefault()
+      setTouchStart(e.targetTouches[0].clientY)
+      setTouchCurrent(e.targetTouches[0].clientY)
+      setDrawerOffset(0)
+      return
     }
     
-    // For non-table touches OR table touches at top, handle swipe-to-dismiss
+    // For all other touches (non-table, non-handle), prevent pull-to-refresh
+    // and handle swipe-to-dismiss
     e.preventDefault()
     setTouchStart(e.targetTouches[0].clientY)
     setTouchCurrent(e.targetTouches[0].clientY)
