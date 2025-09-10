@@ -2,8 +2,19 @@ import React, { useState, useMemo, useEffect, useRef } from 'react'
 import Button from './Buttons'
 import Cards from './Cards'
 import { Swords, TreePine, Plus, Star, Skull, Filter, Square, CheckSquare } from 'lucide-react'
-import adversariesData from '../data/adversaries.json'
-import environmentsData from '../data/environments.json'
+// Dynamically import JSON data to keep initial bundle smaller
+let adversariesData = { adversaries: [] }
+let environmentsData = { environments: [] }
+try {
+  adversariesData = await import(/* @vite-ignore */ '../data/adversaries.json')
+} catch (e) {
+  console.warn('Failed to load adversaries.json dynamically:', e)
+}
+try {
+  environmentsData = await import(/* @vite-ignore */ '../data/environments.json')
+} catch (e) {
+  console.warn('Failed to load environments.json dynamically:', e)
+}
 
 const Browser = ({ 
   type, // 'adversary' or 'environment'

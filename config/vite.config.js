@@ -25,6 +25,15 @@ export default defineConfig({
   },
   build: {
     outDir: path.resolve(__dirname, '../dist'),
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          dndkit: ['@dnd-kit/core','@dnd-kit/sortable','@dnd-kit/utilities'],
+          fa: ['@fortawesome/fontawesome-svg-core','@fortawesome/free-solid-svg-icons','@fortawesome/react-fontawesome'],
+          lucide: ['lucide-react'],
+        }
+      }
+    }
   }
 })

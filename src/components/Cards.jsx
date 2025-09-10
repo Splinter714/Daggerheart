@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Droplet, Activity, CheckCircle } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, Pencil } from 'lucide-react'
 import Button from './Buttons'
 import { Badge, DifficultyBadge, TypeBadge } from './Badges'
 import Creator from './Creator'
@@ -429,8 +429,9 @@ const Cards = ({
                   size="sm"
                 onClick={() => onEdit && onEdit(item)}
                 title="Edit countdown"
+                aria-label="Edit countdown"
               >
-                ✏️
+                <Pencil size={16} />
               </Button>
               {onDelete && (
                 <Button
@@ -661,8 +662,9 @@ const Cards = ({
                 size="sm"
                 onClick={() => onEdit && onEdit(item)}
                 title="Edit environment"
+                aria-label="Edit environment"
               >
-                ✏️
+                <Pencil size={16} />
               </Button>
               {onDelete && (
                 <Button
