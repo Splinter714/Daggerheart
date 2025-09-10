@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, Suspense } from 'react'
 import { GameStateProvider } from './GameStateContext'
 import { useGameState } from './useGameState'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSkull, faFire, faMoon, faStar, faDice } from '@fortawesome/free-solid-svg-icons'
 import { Swords, TreePine, Pencil, Clock, Plus, Trash2, Menu, Wrench } from 'lucide-react'
 import Version from './components/Version'
+import useSwipeDrawer from './hooks/useSwipeDrawer'
 import './App.css'
 
 // Import all the UI components
 import Fear from './components/Fear'
 import GameBoard from './components/GameBoard'
 import Cards from './components/Cards'
-import Browser from './components/Browser'
-import Creator from './components/Creator'
 import AdversaryCreatorMockup from './components/AdversaryCreatorMockup'
 import Button from './components/Buttons'
-import adversariesData from './data/adversaries.json'
-import environmentsData from './data/environments.json'
+// Lazy-load heavy right-panel components
+const Browser = React.lazy(() => import('./components/Browser'))
+const Creator = React.lazy(() => import('./components/Creator'))
 import { 
   getNeededTriggers as getNeededTriggersEngine,
   getAdvancementForOutcome,
@@ -60,92 +60,19 @@ const AppContent = () => {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0)
   
-  // Touch gesture handling for mobile drawer
-  const [touchStart, setTouchStart] = useState(null)
-  const [touchCurrent, setTouchCurrent] = useState(null)
-  const [drawerOffset, setDrawerOffset] = useState(0)
-  
-  const handleTouchStart = (e) => {
-    // BROWSER/CREATOR DRAWER STRATEGY: Handle header vs content differently
-    
-    // Check if touch is on the browser header (search/create row)
-    const isHeaderTouch = e.target.closest('.browser-header')
-    
-    // Check if touch is on the browser content (scrollable area)
-    const isContentTouch = e.target.closest('.browser-content')
-    
-    if (isContentTouch) {
-      // For content touches, check scroll position
-      const contentContainer = e.target.closest('.browser-content')
-      const isContentAtTop = contentContainer && contentContainer.scrollTop <= 10
-      
-      if (!isContentAtTop) {
-        // Content is scrolled down - allow normal scrolling
-        // Don't prevent default - let browser handle scrolling
-        return
-      }
-      // Content is at top - handle swipe-to-dismiss
-    }
-    
-    // For header touches OR content touches at top, prevent pull-to-refresh and handle swipe-to-dismiss
-    e.preventDefault()
-    setTouchStart(e.targetTouches[0].clientY)
-    setTouchCurrent(e.targetTouches[0].clientY)
-    setDrawerOffset(0)
-  }
-  
-  const handleTouchMove = (e) => {
-    if (!touchStart) return
-    
-    // BROWSER/CREATOR DRAWER STRATEGY: Handle swipe gestures with table awareness
-    const currentY = e.targetTouches[0].clientY
-    const deltaY = currentY - touchStart
-    
-    // Only handle downward swipes for swipe-to-dismiss
-    if (deltaY > 0) {
-      e.preventDefault()
-      setTouchCurrent(currentY)
-      setDrawerOffset(deltaY)
-    }
-    // For upward swipes, reset state to allow normal scrolling
-    else if (deltaY < 0) {
-      setTouchStart(null)
-      setTouchCurrent(null)
-      setDrawerOffset(0)
-    }
-  }
-  
-  const handleTouchEnd = (e) => {
-    if (!touchStart || !touchCurrent) return
-    
-    // BROWSER/CREATOR DRAWER STRATEGY: Handle swipe gestures consistently
-    const distance = touchCurrent - touchStart
-    
-    // Always prevent default for swipe gestures
-    e.preventDefault()
-    
-    // If swipe was far enough, smoothly animate downward to close
-    if (distance > 100) {
-      setDrawerOffset(window.innerHeight)
-      setTimeout(() => {
-        handleCloseRightColumn()
-      }, 300)
-    }
-    // If swipe was significant but not enough to close, snap back smoothly
-    else if (distance > 30) {
-      setDrawerOffset(0)
-      setTimeout(() => {
-        setTouchStart(null)
-        setTouchCurrent(null)
-      }, 50)
-    }
-    // If swipe was small, just reset
-    else {
-      setDrawerOffset(0)
-      setTouchStart(null)
-      setTouchCurrent(null)
-    }
-  }
+  // Touch gesture handling for mobile drawer via reusable hook
+  const {
+    drawerOffset,
+    setDrawerOffset,
+    touchHandlers: { onTouchStart: handleTouchStart, onTouchMove: handleTouchMove, onTouchEnd: handleTouchEnd },
+    resetSwipeState,
+  } = useSwipeDrawer({
+    headerSelector: '.drawer-header, .browser-header',
+    bodySelector: '.drawer-body, .browser-content',
+    closeThreshold: 100,
+    snapThreshold: 30,
+    onClose: () => handleCloseRightColumn(),
+  })
   
   const [creatorFormData, setCreatorFormData] = useState({
     name: '',
@@ -250,8 +177,7 @@ const AppContent = () => {
       setMobileDrawerOpen(false)
       // Reset all drawer state when closing
       setDrawerOffset(0)
-      setTouchStart(null)
-      setTouchCurrent(null)
+      resetSwipeState()
     }
   }
 

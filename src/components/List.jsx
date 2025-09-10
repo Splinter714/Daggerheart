@@ -21,6 +21,7 @@ import { BulkClearButton } from './Buttons'
 import Button from './Buttons'
 import Cards from './Cards'
 import { AddItemButton } from './Cards'
+import useSwipeDrawer from '../hooks/useSwipeDrawer'
 
 const List = ({ 
   items, 
@@ -82,10 +83,7 @@ const List = ({
   const closeDrawer = () => {
     setDrawerOpen(false)
     setDrawerItem(null)
-    // Reset drawer state when closing
-    setDrawerOffset(0)
-    setTouchStart(null)
-    setTouchCurrent(null)
+    resetSwipeState()
   }
 
   // Reset drawer offset when drawer opens
@@ -95,95 +93,19 @@ const List = ({
     }
   }, [drawerOpen])
   
-  // Touch gesture handling for drawer
-  const [touchStart, setTouchStart] = useState(null)
-  const [touchCurrent, setTouchCurrent] = useState(null)
-  const [drawerOffset, setDrawerOffset] = useState(0)
-  
-  const handleTouchStart = (e) => {
-    // EXPANDED CARD DRAWER STRATEGY: Handle swipe-to-dismiss on header OR content when at top
-    
-    // Check if touch is on header
-    const isHeaderTouch = e.target.closest('.drawer-header')
-    
-    // Check if touch is on scrollable content
-    const drawerBody = e.target.closest('.drawer-body')
-    let isContentAtTop = false
-    if (drawerBody) {
-      isContentAtTop = drawerBody.scrollTop <= 10 // Allow small tolerance
-    }
-    
-    // Only handle swipe-to-dismiss for header touches OR content touches when at top
-    if (!isHeaderTouch && !isContentAtTop) {
-      // For content touches when scrolled down, allow normal scrolling
-      // Don't prevent default - let the browser handle scrolling
-      return
-    }
-    
-    // For header touches OR content touches at top, handle swipe-to-dismiss
-    e.preventDefault()
-    e.stopPropagation()
-    
-    const touchY = e.targetTouches[0].clientY
-    setTouchStart(touchY)
-    setTouchCurrent(touchY)
-    setDrawerOffset(0)
-  }
-  
-  const handleTouchMove = (e) => {
-    if (!touchStart) return
-    
-    // EXPANDED CARD DRAWER STRATEGY: Handle swipe gestures from header or content at top
-    const currentY = e.targetTouches[0].clientY
-    const deltaY = currentY - touchStart
-    
-    // Only handle downward swipes for swipe-to-dismiss
-    if (deltaY > 0) {
-      e.preventDefault()
-      e.stopPropagation()
-      setTouchCurrent(currentY)
-      setDrawerOffset(deltaY)
-    }
-    // For upward swipes, reset state to allow normal scrolling
-    else if (deltaY < 0) {
-      setTouchStart(null)
-      setTouchCurrent(null)
-      setDrawerOffset(0)
-    }
-  }
-  
-  const handleTouchEnd = (e) => {
-    if (!touchStart || !touchCurrent) return
-    
-    // EXPANDED CARD DRAWER STRATEGY: Handle swipe gestures from header or content at top
-    const distance = touchCurrent - touchStart
-    
-    // Always prevent default for swipe gestures
-    e.preventDefault()
-    e.stopPropagation()
-    
-    // If swipe was far enough, smoothly animate downward to close
-    if (distance > 100) {
-      setDrawerOffset(window.innerHeight)
-      setTimeout(() => {
-        closeDrawer()
-      }, 300)
-    }
-    // If swipe was significant but not enough to close, snap back smoothly
-    else if (distance > 30) {
-      setDrawerOffset(0)
-      setTimeout(() => {
-        setTouchStart(null)
-        setTouchCurrent(null)
-      }, 50)
-    }
-    // If swipe was small, just reset
-    else {
-      setDrawerOffset(0)
-      setTouchStart(null)
-      setTouchCurrent(null)
-    }
-  }
+  const {
+    drawerOffset,
+    setDrawerOffset,
+    touchHandlers: { onTouchStart: handleTouchStart, onTouchMove: handleTouchMove, onTouchEnd: handleTouchEnd },
+    resetSwipeState,
+  } = useSwipeDrawer({
+    headerSelector: '.drawer-header',
+    bodySelector: '.drawer-body',
+    closeThreshold: 100,
+    snapThreshold: 30,
+    onClose: () => closeDrawer(),
+  })
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       // Configure for better mobile touch support

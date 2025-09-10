@@ -4,6 +4,12 @@
   --dark: #1a1a1a;          /* Almost black */
   --purple: #4f46e5;        /* Purple accent */
   --red: #ef4444;           /* Red for danger/delete actions */
+  --primary: var(--purple);
+  --primary-dark: #4338ca;
+  --secondary: var(--grey);
+  --secondary-dark: var(--grey-dark);
+  --success: #10b981;       /* Green success */
+  --gold: #d4af37;          /* Gold for hope */
   
   /* Greyscale System */
   --grey-light: #a3a3a3;     /* Light grey for secondary text */
