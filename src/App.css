@@ -268,14 +268,25 @@
 
 /* Right Panel Content */
 .item-display,
-.database-display,
 .creator-display {
   padding: 0;
   position: relative;
   z-index: 1;
   flex: 1;
   overflow-y: auto;
-  height: 0; /* This forces the flex item to respect the container height */
+  min-height: 0; /* This allows the flex item to shrink but still be visible */
+}
+
+/* In database (browser) view, let the inner browser-content manage scrolling */
+.database-display {
+  padding: 0;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  overflow: hidden; /* prevent parent from scrolling so header stays fixed */
+  height: 0; /* respect container height */
+  display: flex;
+  flex-direction: column;
 }
 
 

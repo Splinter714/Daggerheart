@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -12,8 +12,9 @@ import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrate
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-import Cards from './Cards'
-import useSwipeDrawer from '../hooks/useSwipeDrawer'
+import Cards from '../cards/Cards'
+import useSwipeDrawer from '../../hooks/useSwipeDrawer'
+import usePreventPullToRefresh from '../../hooks/usePreventPullToRefresh'
 
 const List = ({ 
   items, 
@@ -67,7 +68,9 @@ const List = ({
       }
     } else {
       // On desktop, use normal item selection
-      onItemSelect(item, type)
+      if (onItemSelect) {
+        onItemSelect(item, type)
+      }
     }
   }
   
@@ -98,18 +101,22 @@ const List = ({
     }
   }, [drawerOpen, setDrawerOffset])
 
+  // Prevent pull-to-refresh in this drawer instance as well
+  const drawerContentRef = useRef(null)
+  usePreventPullToRefresh(drawerContentRef, drawerOpen)
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       // Configure for better mobile touch support
       activationConstraint: {
-        distance: 8, // Require 8px movement before drag starts
+        distance: 10, // Slightly more to avoid accidental drags
       },
     }),
     useSensor(TouchSensor, {
       // Better mobile touch support
       activationConstraint: {
-        delay: 250, // 250ms delay before drag starts
-        tolerance: 5, // 5px tolerance for touch movement
+        delay: 200, // a bit faster
+        tolerance: 8, // allow a little more finger wobble before starting drag
       },
     }),
     useSensor(KeyboardSensor, {
@@ -132,7 +139,11 @@ const List = ({
   // type checks no longer needed locally
 
   return (
-    <div>
+    <div
+      onTouchStart={() => { try { document.body.classList.add('dragging') } catch {} }}
+      onTouchEnd={() => { try { document.body.classList.remove('dragging') } catch {} }}
+      onTouchCancel={() => { try { document.body.classList.remove('dragging') } catch {} }}
+    >
       {/* List Container */}
       <DndContext
         sensors={sensors}
@@ -178,6 +189,7 @@ const List = ({
                 : 'translateY(100%)',
               transition: drawerOffset ? 'none' : 'transform 0.3s ease'
             }}
+            ref={drawerContentRef}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -255,13 +267,21 @@ const SortableItem = ({
       style={style}
       className={`sortable-item ${isSelected ? 'selected' : ''}`}
       data-item-id={item.id}
+      onClick={(e) => {
+        if (!isDragging) {
+          onMobileCardClick(item)
+        }
+      }}
     >
       {/* Always show compact card */}
       <Cards
         item={item}
         type={type}
         mode="compact"
-        onClick={() => onMobileCardClick(item)}
+        onClick={(e) => {
+          // Don't interfere with parent row click
+          if (e && e.stopPropagation) e.stopPropagation()
+        }}
         onDelete={onDelete}
         onEdit={onEdit}
         onToggleVisibility={onToggleVisibility}
