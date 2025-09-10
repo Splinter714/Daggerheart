@@ -416,6 +416,7 @@ const Browser = ({
           onClick={() => onCreateCustom && onCreateCustom(type)}
           size="sm"
           className="browser-create-btn"
+          aria-label="Create custom"
         >
           Create
         </Button>
@@ -566,6 +567,7 @@ const Browser = ({
                         e.stopPropagation()
                         handleAddFromDatabase(item)
                       }}
+                      aria-label={`Add ${item.name}`}
                     >
                       <Plus size={14} />
                     </Button>

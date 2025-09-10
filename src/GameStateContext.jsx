@@ -1,3 +1,4 @@
+import { generateId } from './utils/ids'
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const GameStateContext = createContext();
@@ -202,8 +203,7 @@ export const GameStateProvider = ({ children }) => {
 
   // Adversary management
   const createAdversary = (adversaryData) => {
-    // Generate unique ID with timestamp and random component
-    const uniqueId = `adv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const uniqueId = generateId('adv')
     
     // Check for existing adversaries with the same name to add numbering
     const existingAdversaries = gameState.adversaries || []
@@ -303,8 +303,7 @@ export const GameStateProvider = ({ children }) => {
 
   // Environment management
   const createEnvironment = (environmentData) => {
-    // Generate unique ID with timestamp and random component
-    const uniqueId = `env-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const uniqueId = generateId('env')
     
     // Check for existing environments with the same name to add numbering
     const existingEnvironments = gameState.environments || []
