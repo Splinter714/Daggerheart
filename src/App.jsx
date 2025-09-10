@@ -17,6 +17,12 @@ import AdversaryCreatorMockup from './components/AdversaryCreatorMockup'
 import Button from './components/Buttons'
 import adversariesData from './data/adversaries.json'
 import environmentsData from './data/environments.json'
+import { 
+  getNeededTriggers as getNeededTriggersEngine,
+  getAdvancementForOutcome,
+  getAdvancementForActionRoll,
+  getAdvancementForRest
+} from './utils/countdownEngine'
 
 // Mobile navigation - simple button-based approach
 
@@ -207,101 +213,31 @@ const AppContent = () => {
 
   // Countdown control handlers
   const handleRollOutcome = (outcome) => {
-    console.log('Bottom bar: Handling roll outcome:', outcome)
-    
-    countdowns.forEach(countdown => {
-      let advancement = 0
-      
-      // Handle the actual countdown types being used
-      if (countdown.type === 'standard' || !countdown.type) {
-        // Standard countdowns always advance by 1
-        advancement = 1
-        console.log(`Standard countdown "${countdown.name}" will advance by ${advancement}`)
-      } else if (countdown.type === 'progress' || countdown.type === 'dynamic-progress') {
-        // Progress countdowns advance based on roll outcome
-        switch (outcome) {
-          case 'success-hope':
-            advancement = 2
-            break
-          case 'success-fear':
-            advancement = 1
-            break
-          case 'critical-success':
-            advancement = 3
-            break
-          default:
-            advancement = 0
-        }
-        if (advancement > 0) {
-          console.log(`Progress countdown "${countdown.name}" will advance by ${advancement}`)
-        }
-      } else if (countdown.type === 'consequence' || countdown.type === 'dynamic-consequence') {
-        // Consequence countdowns advance based on roll outcome
-        switch (outcome) {
-          case 'success-fear':
-            advancement = 1
-            break
-          case 'failure-hope':
-            advancement = 2
-            break
-          case 'failure-fear':
-            advancement = 3
-            break
-          default:
-            advancement = 0
-        }
-        if (advancement > 0) {
-          console.log(`Consequence countdown "${countdown.name}" will advance by ${advancement}`)
-        }
-      } else if (countdown.type === 'simple-fear') {
-        // Simple Fear countdowns advance by 1 whenever rolling with fear (simple or complex)
-        if (outcome === 'simple-fear' || outcome === 'success-fear' || outcome === 'failure-fear') {
-          advancement = 1
-          console.log(`Simple Fear countdown "${countdown.name}" will advance by ${advancement}`)
-        }
-      } else if (countdown.type === 'simple-hope') {
-        // Simple Hope countdowns advance by 1 whenever rolling with hope (simple or complex)
-        if (outcome === 'simple-hope' || outcome === 'success-hope' || outcome === 'failure-hope') {
-          advancement = 1
-          console.log(`Simple Hope countdown "${countdown.name}" will advance by ${advancement}`)
-        }
-      }
-      
-      // Apply advancement if any
+    countdowns.forEach((countdown) => {
+      const advancement = getAdvancementForOutcome(countdown, outcome)
       if (advancement > 0) {
-        console.log(`Advancing countdown "${countdown.name}" by ${advancement}`)
         const currentValue = countdown.value || 0
-        const rawNewValue = currentValue + advancement
-        advanceCountdown(countdown.id, rawNewValue)
+        advanceCountdown(countdown.id, currentValue + advancement)
       }
     })
   }
 
   const handleRestTrigger = (restType) => {
-    console.log('Bottom bar: Handling rest trigger:', restType)
-    
-    countdowns.forEach(countdown => {
-      // Long-term countdowns advance on rest
-      if (countdown.type === 'long-term') {
-        const advancement = restType === 'long' ? 2 : 1
-        console.log(`Long-term countdown "${countdown.name}" will advance by ${advancement} on ${restType} rest`)
+    countdowns.forEach((countdown) => {
+      const advancement = getAdvancementForRest(countdown, restType)
+      if (advancement > 0) {
         const currentValue = countdown.value || 0
-        const rawNewValue = currentValue + advancement
-        advanceCountdown(countdown.id, rawNewValue)
+        advanceCountdown(countdown.id, currentValue + advancement)
       }
     })
   }
 
   const handleActionRoll = () => {
-    console.log('Bottom bar: Handling action roll')
-    
-    countdowns.forEach(countdown => {
-      // Standard countdowns advance by 1 on action roll
-      if (countdown.type === 'standard' || !countdown.type) {
-        console.log(`Standard countdown "${countdown.name}" will advance on action roll`)
+    countdowns.forEach((countdown) => {
+      const advancement = getAdvancementForActionRoll(countdown)
+      if (advancement > 0) {
         const currentValue = countdown.value || 0
-        const rawNewValue = currentValue + 1
-        advanceCountdown(countdown.id, rawNewValue)
+        advanceCountdown(countdown.id, currentValue + advancement)
       }
     })
   }
@@ -370,32 +306,7 @@ const AppContent = () => {
   }, [mobileDrawerOpen])
 
   // Determine which triggers are needed based on active countdowns
-  const getNeededTriggers = () => {
-    if (!countdowns || countdowns.length === 0) return { 
-      basicRollTriggers: false, 
-      simpleFearTriggers: false,
-      simpleHopeTriggers: false,
-      complexRollTriggers: false, 
-      restTriggers: false 
-    }
-    
-    const hasDynamicCountdowns = countdowns.some(c => 
-      c.type === 'progress' || c.type === 'consequence' || 
-      c.type === 'dynamic-progress' || c.type === 'dynamic-consequence'
-    )
-    const hasLongTermCountdowns = countdowns.some(c => c.type === 'long-term')
-    const hasSimpleFearCountdowns = countdowns.some(c => c.type === 'simple-fear')
-    const hasSimpleHopeCountdowns = countdowns.some(c => c.type === 'simple-hope')
-    const hasStandardCountdowns = countdowns.some(c => c.type === 'standard' || !c.type)
-    
-    return {
-      basicRollTriggers: hasStandardCountdowns,
-      simpleFearTriggers: hasSimpleFearCountdowns && !hasDynamicCountdowns,
-      simpleHopeTriggers: hasSimpleHopeCountdowns && !hasDynamicCountdowns,
-      complexRollTriggers: hasDynamicCountdowns,
-      restTriggers: hasLongTermCountdowns
-    }
-  }
+  const getNeededTriggers = () => getNeededTriggersEngine(countdowns || [])
 
   // Sync selectedItem with updated data
   useEffect(() => {

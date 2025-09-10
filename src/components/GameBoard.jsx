@@ -22,6 +22,12 @@ import {
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faSkull, faClock, faMoon, faDice, faFire } from '@fortawesome/free-solid-svg-icons'
+import { 
+  getNeededTriggers as getNeededTriggersEngine,
+  getAdvancementForOutcome,
+  getAdvancementForActionRoll,
+  getAdvancementForRest
+} from '../utils/countdownEngine'
 
 // Add Dropdown Menu Component
 const AddDropdownMenu = ({ onOpenDatabase }) => {
@@ -316,103 +322,27 @@ const GameBoard = ({
 
   // GM Control Panel Handlers
   const handleRollOutcome = (outcome) => {
-    console.log('GM Control Panel: Handling roll outcome:', outcome)
-    console.log('Available countdowns:', countdowns)
-    
-    countdowns.forEach(countdown => {
-      let advancement = 0
-      
-      // Handle the actual countdown types being used
-      if (countdown.type === 'standard' || !countdown.type) {
-        // Standard countdowns always advance by 1
-        advancement = 1
-        console.log(`Standard countdown "${countdown.name}" will advance by ${advancement}`)
-      } else if (countdown.type === 'progress') {
-        // Progress countdowns advance based on roll outcome
-        switch (outcome) {
-          case 'success-hope':
-            advancement = 2
-            break
-          case 'success-fear':
-            advancement = 1
-            break
-          case 'critical-success':
-            advancement = 3
-            break
-          default:
-            advancement = 0
-        }
-        if (advancement > 0) {
-          console.log(`Progress countdown "${countdown.name}" will advance by ${advancement}`)
-        }
-      } else if (countdown.type === 'consequence') {
-        // Consequence countdowns advance based on roll outcome
-        switch (outcome) {
-          case 'success-fear':
-            advancement = 1
-            break
-          case 'failure-hope':
-            advancement = 2
-            break
-          case 'failure-fear':
-            advancement = 3
-            break
-          default:
-            advancement = 0
-        }
-        if (advancement > 0) {
-          console.log(`Consequence countdown "${countdown.name}" will advance by ${advancement}`)
-        }
-      } else if (countdown.type === 'simple-fear') {
-        // Simple Fear countdowns advance by 1 whenever rolling with fear (simple or complex)
-        if (outcome === 'simple-fear' || outcome === 'success-fear' || outcome === 'failure-fear') {
-          advancement = 1
-          console.log(`Simple Fear countdown "${countdown.name}" will advance by ${advancement}`)
-        }
-      } else if (countdown.type === 'simple-hope') {
-        // Simple Hope countdowns advance by 1 whenever rolling with hope (simple or complex)
-        if (outcome === 'simple-hope' || outcome === 'success-hope' || outcome === 'failure-hope') {
-          advancement = 1
-          console.log(`Simple Hope countdown "${countdown.name}" will advance by ${advancement}`)
-        }
-      }
-      
-      // Apply advancement if any
-      if (advancement > 0) {
-        console.log(`Advancing countdown "${countdown.name}" by ${advancement}`)
-        for (let i = 0; i < advancement; i++) {
-          incrementCountdown(countdown.id)
-        }
+    countdowns.forEach((countdown) => {
+      const advancement = getAdvancementForOutcome(countdown, outcome)
+      for (let i = 0; i < advancement; i++) {
+        incrementCountdown(countdown.id)
       }
     })
   }
 
   const handleRestTrigger = (restType) => {
-    console.log('GM Control Panel: Handling rest trigger:', restType)
-    console.log('Available countdowns:', countdowns)
-    
-    countdowns.forEach(countdown => {
-      // Long-term countdowns advance on rest
-      if (countdown.type === 'long-term') {
-        const advancement = restType === 'long' ? 2 : 1
-        console.log(`Long-term countdown "${countdown.name}" will advance by ${advancement} on ${restType} rest`)
-        
-        // Apply advancement
-        for (let i = 0; i < advancement; i++) {
-          incrementCountdown(countdown.id)
-        }
+    countdowns.forEach((countdown) => {
+      const advancement = getAdvancementForRest(countdown, restType)
+      for (let i = 0; i < advancement; i++) {
+        incrementCountdown(countdown.id)
       }
     })
   }
 
   const handleActionRoll = () => {
-    console.log('GM Control Panel: Handling action roll')
-    console.log('Available countdowns:', countdowns)
-    
-    countdowns.forEach(countdown => {
-      // Standard countdowns advance by 1 on action roll
-      if (countdown.type === 'standard') {
-        console.log(`Standard countdown "${countdown.name}" will advance on action roll`)
+    countdowns.forEach((countdown) => {
+      const advancement = getAdvancementForActionRoll(countdown)
+      for (let i = 0; i < advancement; i++) {
         incrementCountdown(countdown.id)
       }
     })
