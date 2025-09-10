@@ -33,7 +33,7 @@ const Creator = ({
     // Countdown-specific fields
     max: 5,
     value: 0,
-    type: 'standard',
+    countdownType: 'standard',
     loop: 'none'
   })
 
@@ -54,7 +54,7 @@ const Creator = ({
         hazards: item.hazards || [],
         max: item.max || 5,
         value: item.value || 0,
-        type: item.type || 'standard',
+        countdownType: item.type || 'standard',
         loop: item.loop || 'none'
       })
     }
@@ -116,7 +116,9 @@ const Creator = ({
       }),
       ...(isCountdown && {
         max: formData.max,
-        value: formData.value
+        value: formData.value,
+        type: formData.countdownType,
+        loop: formData.loop
       })
     }
 
@@ -330,8 +332,8 @@ const Creator = ({
                 />
 
                 <select
-                  value={formData.type}
-                  onChange={(e) => handleInputChange('type', e.target.value)}
+                  value={formData.countdownType}
+                  onChange={(e) => handleInputChange('countdownType', e.target.value)}
                   className="form-input"
                 >
                   <option value="standard">Standard</option>
