@@ -580,7 +580,7 @@ const Browser = ({
                             hp: 0, // Show as healthy (0 HP) in browser preview
                             stress: 0 // Show as no stress in browser preview
                           }}
-                          type={expandedCard.category.toLowerCase()}
+                          type={expandedCard.category?.toLowerCase() || (type === 'adversary' ? 'adversary' : 'environment')}
                           mode="compact"
                         />
                       </div>
@@ -599,7 +599,7 @@ const Browser = ({
                             hp: 0, // Show as healthy (0 HP) in browser preview
                             stress: 0 // Show as no stress in browser preview
                           }}
-                          type={expandedCard.category.toLowerCase()}
+                          type={expandedCard.category?.toLowerCase() || (type === 'adversary' ? 'adversary' : 'environment')}
                           mode="expanded"
                         />
                       </div>
