@@ -303,17 +303,65 @@ export const GameStateProvider = ({ children }) => {
 
   // Environment management
   const createEnvironment = (environmentData) => {
+    // Generate unique ID with timestamp and random component
+    const uniqueId = `env-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    
+    // Check for existing environments with the same name to add numbering
+    const existingEnvironments = gameState.environments || []
+    const sameNameEnvironments = existingEnvironments.filter(env => {
+      // Extract base name (without existing number suffix)
+      const baseName = env.name.replace(/\s+\(\d+\)$/, '')
+      return baseName === environmentData.name
+    })
+    
+    let displayName = environmentData.name || 'Unknown'
+    
+    if (sameNameEnvironments.length === 0) {
+      // First environment of this type - no suffix needed
+      displayName = environmentData.name
+    } else if (sameNameEnvironments.length === 1) {
+      // Second environment - first one gets (1), new one gets (2)
+      const firstEnvironment = sameNameEnvironments[0]
+      const firstEnvironmentBaseName = firstEnvironment.name.replace(/\s+\(\d+\)$/, '')
+      
+      // Update the first environment to have (1) suffix
+      const updatedEnvironments = gameState.environments.map(env => 
+        env.id === firstEnvironment.id 
+          ? { ...env, name: `${firstEnvironmentBaseName} (1)` }
+          : env
+      )
+      
+      // Update the game state with the renamed first environment
+      setGameState(prev => ({
+        ...prev,
+        environments: updatedEnvironments
+      }))
+      
+      // New environment gets (2)
+      displayName = `${environmentData.name} (2)`
+    } else {
+      // Find the next available number
+      const usedNumbers = sameNameEnvironments.map(env => {
+        const match = env.name.match(/\((\d+)\)$/)
+        return match ? parseInt(match[1]) : null
+      }).filter(num => num !== null)
+      
+      // Find the first unused number starting from 1
+      let nextNumber = 1
+      while (usedNumbers.includes(nextNumber)) {
+        nextNumber++
+      }
+      
+      displayName = `${environmentData.name} (${nextNumber})`
+    }
+    
     const newEnvironment = {
-      id: `env-${Date.now()}`,
-      name: environmentData.name || 'Unknown',
-      type: environmentData.type || 'Unknown',
-      tier: environmentData.tier || 1,
-      difficulty: environmentData.difficulty || 'Medium',
-      description: environmentData.description || '',
-      impulses: environmentData.impulses || [],
-      features: environmentData.features || [],
-      isVisible: true,
-      ...environmentData
+      // Start with all properties from environmentData
+      ...environmentData,
+      // Override with our specific values to ensure correct initialization
+      id: uniqueId,
+      name: displayName,
+      isVisible: true
     };
     
     setGameState(prev => ({

@@ -329,24 +329,17 @@ const AppContent = () => {
       
       setIsMobile(nowMobile)
       
-      // When transitioning from desktop to mobile, preserve current panel focus
+      // Transition to mobile: prefer drawers instead of switching panels
       if (!wasMobile && nowMobile) {
-        // If browser is open, keep it visible in mobile
-        if (rightColumnMode === 'database') {
-          setMobileView('right')
+        if (rightColumnMode === 'database' || rightColumnMode === 'creator') {
+          setMobileDrawerOpen(true)
         }
-        // If item is selected, keep it visible in mobile
-        else if (rightColumnMode === 'item') {
-          setMobileView('right')
-        }
-        // If creator is open, keep it visible in mobile
-        else if (rightColumnMode === 'creator') {
-          setMobileView('right')
-        }
-        // Otherwise default to left panel
-        else {
-          setMobileView('left')
-        }
+        // Do not force `mobileView` to 'right'; underlying app remains on left
+      }
+
+      // Transition to desktop: close mobile drawers, content remains in right panel
+      if (wasMobile && !nowMobile) {
+        if (mobileDrawerOpen) setMobileDrawerOpen(false)
       }
     }
     
