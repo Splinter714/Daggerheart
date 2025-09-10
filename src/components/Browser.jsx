@@ -331,6 +331,8 @@ const Browser = ({
   // Tooltip helpers for filter buttons
   const tierTooltip = selectedTiers.length === 0 ? 'All' : `${selectedTiers.length} selected`
   const typeTooltip = selectedTypes.length === 0 ? 'All' : `${selectedTypes.length} selected`
+  const isTierFiltered = selectedTiers.length > 0
+  const isTypeFiltered = selectedTypes.length > 0
 
   // Multi-select handlers
   const handleTierSelect = (tier) => {
@@ -440,10 +442,11 @@ const Browser = ({
                       e.stopPropagation()
                       handleFilter('tier')
                     }}
-                    className="header-filter-icon"
+                    className={`header-filter-icon ${isTierFiltered ? 'active' : ''}`}
                     title={`Filter by Tier: ${tierTooltip}`}
                   >
                     <Filter size={14} />
+                    <span className="filter-active-dot" aria-hidden="true" />
                   </button>
                   {showTierDropdown && (
                     <div 
@@ -488,10 +491,11 @@ const Browser = ({
                       e.stopPropagation()
                       handleFilter('type')
                     }}
-                    className="header-filter-icon"
+                    className={`header-filter-icon ${isTypeFiltered ? 'active' : ''}`}
                     title={`Filter by Type: ${typeTooltip}`}
                   >
                     <Filter size={14} />
+                    <span className="filter-active-dot" aria-hidden="true" />
                   </button>
                   {showTypeDropdown && (
                     <div 
