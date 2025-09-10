@@ -1,7 +1,7 @@
 import React from 'react'
 import Button from '../Buttons'
 
-const CountdownCard = ({ item, mode, onClick, onDelete, onIncrement, onDecrement, isEditMode, dragAttributes, dragListeners }) => {
+const CountdownCard = ({ item, mode, onClick, onDelete, onIncrement, onDecrement, dragAttributes, dragListeners }) => {
   if (mode === 'compact') return renderCompact()
   return renderExpanded()
 

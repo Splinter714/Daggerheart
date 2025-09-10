@@ -1,3 +1,4 @@
+/* global __APP_VERSION__ */
 import React from 'react'
 
 const Version = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Button from './Buttons'
 import Cards from './Cards'
-import { Badge, DifficultyBadge, TypeBadge } from './Badges'
+// import { Badge, DifficultyBadge, TypeBadge } from './Badges'
 
 const Creator = ({ 
   type, // 'adversary', 'environment', or 'countdown'

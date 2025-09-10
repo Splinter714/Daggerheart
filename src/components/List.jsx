@@ -8,19 +8,11 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-import { BulkClearButton } from './Buttons'
-import Button from './Buttons'
 import Cards from './Cards'
-import { AddItemButton } from './Cards'
 import useSwipeDrawer from '../hooks/useSwipeDrawer'
 
 const List = ({ 
@@ -33,11 +25,11 @@ const List = ({
   onItemSelect,
   selectedItem,
   selectedType,
-  onOpenDatabase,
+  // onOpenDatabase,
   onApplyDamage,
   onApplyHealing,
   onApplyStressChange,
-  onAdvance, // For countdowns
+  // onAdvance, // For countdowns
   onIncrement, // For countdowns
   onDecrement, // For countdowns
   isEditMode = false
@@ -79,20 +71,13 @@ const List = ({
     }
   }
   
-  // Close drawer
+  // Close drawer (resetSwipeState comes from useSwipeDrawer below)
   const closeDrawer = () => {
     setDrawerOpen(false)
     setDrawerItem(null)
     resetSwipeState()
   }
 
-  // Reset drawer offset when drawer opens
-  useEffect(() => {
-    if (drawerOpen) {
-      setDrawerOffset(0)
-    }
-  }, [drawerOpen])
-  
   const {
     drawerOffset,
     setDrawerOffset,
@@ -105,6 +90,13 @@ const List = ({
     snapThreshold: 30,
     onClose: () => closeDrawer(),
   })
+
+  // Reset drawer offset when drawer opens
+  useEffect(() => {
+    if (drawerOpen) {
+      setDrawerOffset(0)
+    }
+  }, [drawerOpen, setDrawerOffset])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -135,14 +127,9 @@ const List = ({
     }
   }
 
-  const handleItemClick = (item) => {
-    console.log('Item clicked:', item.name, 'Type:', type)
-    onItemSelect(item, type)
-  }
+  // const handleItemClick = (item) => onItemSelect(item, type)
 
-  const isCountdown = type === 'countdown'
-  const isAdversary = type === 'adversary'
-  const isEnvironment = type === 'environment'
+  // type checks no longer needed locally
 
   return (
     <div>
@@ -163,7 +150,6 @@ const List = ({
                 item={item}
                 type={type}
                 isSelected={selectedItem?.id === item.id && selectedType === type}
-                onItemClick={handleItemClick}
                 onDelete={onDelete}
                 onEdit={onEdit}
                 onToggleVisibility={onToggleVisibility}
@@ -173,7 +159,6 @@ const List = ({
                 onIncrement={onIncrement}
                 onDecrement={onDecrement}
                 isEditMode={isEditMode}
-                isMobile={isMobile}
                 onMobileCardClick={handleMobileCardClick}
               />
             ))}
@@ -191,7 +176,7 @@ const List = ({
               transform: drawerOpen 
                 ? `translateY(${drawerOffset}px)` 
                 : 'translateY(100%)',
-              transition: touchStart ? 'none' : 'transform 0.3s ease'
+              transition: drawerOffset ? 'none' : 'transform 0.3s ease'
             }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -238,7 +223,6 @@ const SortableItem = ({
   item, 
   type, 
   isSelected, 
-  onItemClick, 
   onDelete, 
   onEdit, 
   onToggleVisibility,
@@ -248,7 +232,6 @@ const SortableItem = ({
   onIncrement,
   onDecrement,
   isEditMode,
-  isMobile,
   onMobileCardClick
 }) => {
   const {
