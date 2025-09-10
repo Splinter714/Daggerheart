@@ -353,6 +353,7 @@ const GameBoard = ({
               size="sm"
               onClick={() => handleToggleInlineCreator('campaign')}
               title="Add Countdown"
+              aria-label="Add Countdown"
             >
               <Plus size={16} />
             </Button>
@@ -589,6 +590,7 @@ const GameBoard = ({
               size="sm"
               onClick={() => handleOpenDatabase('environment')}
               title="Browse Environments"
+              aria-label="Browse Environments"
             >
               <Plus size={16} />
             </Button>
@@ -639,6 +641,7 @@ const GameBoard = ({
               size="sm"
               onClick={() => handleOpenDatabase('adversary')}
               title="Browse Adversaries"
+              aria-label="Browse Adversaries"
             >
               <Plus size={16} />
             </Button>

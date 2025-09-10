@@ -7,7 +7,9 @@
     "build": "vite build --config config/vite.config.js",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "lint": "eslint \"src/**/*.{js,jsx}\"",
+    "format": "prettier --write \"**/*.{js,jsx,json,css,md}\""
   },
   "homepage": "https://splinter714.github.io/Daggerheart",
   "dependencies": {
