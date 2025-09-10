@@ -172,7 +172,7 @@ const AppContent = () => {
     setSelectedItem(item)
     setSelectedType(type)
     setRightColumnMode('item')
-    if (isMobile) setMobileView('right')
+    if (isMobile) setMobileDrawerOpen(true)
   }
   
   const handleOpenDatabase = (type = 'unified') => {
@@ -180,7 +180,6 @@ const AppContent = () => {
     if (rightColumnMode === 'database' && databaseType === type) {
       setRightColumnMode(null)
       if (isMobile) {
-        setMobileView('left')
         setMobileDrawerOpen(false)
       }
       return
@@ -312,7 +311,6 @@ const AppContent = () => {
     setSelectedItem(null)
     setSelectedType(null)
     if (isMobile) {
-      setMobileView('left')
       setMobileDrawerOpen(false)
       // Reset all drawer state when closing
       setDrawerOffset(0)
@@ -331,7 +329,7 @@ const AppContent = () => {
       
       // Transition to mobile: prefer drawers instead of switching panels
       if (!wasMobile && nowMobile) {
-        if (rightColumnMode === 'database' || rightColumnMode === 'creator') {
+        if (rightColumnMode === 'database' || rightColumnMode === 'creator' || rightColumnMode === 'item') {
           setMobileDrawerOpen(true)
         }
         // Do not force `mobileView` to 'right'; underlying app remains on left
@@ -1019,7 +1017,7 @@ const AppContent = () => {
         </div>
       </div>
 
-      {/* Mobile Drawer for Browser and Creator */}
+      {/* Mobile Drawer for Browser, Creator, and Expanded Cards */}
       {isMobile && (
         <div 
           className={`mobile-drawer ${mobileDrawerOpen ? 'open' : ''}`}
@@ -1100,6 +1098,21 @@ const AppContent = () => {
                     handleCloseRightColumn()
                   }}
                   onCancel={handleCloseRightColumn}
+                />
+              )}
+
+              {/* Expanded Card */}
+              {rightColumnMode === 'item' && selectedItem && (
+                <Cards
+                  item={selectedItem}
+                  type={selectedType}
+                  mode="expanded"
+                  isEditMode={isEditMode}
+                  onDelete={() => handleCloseRightColumn()}
+                  onEdit={() => handleOpenCreator(selectedType)}
+                  onToggleVisibility={() => handleToggleVisibility(selectedItem.id, selectedType, selectedItem.isVisible)}
+                  onReorder={(newOrder) => handleReorder(selectedType, newOrder)}
+                  onApplyDamage={handleAdversaryDamage}
                 />
               )}
             </div>
