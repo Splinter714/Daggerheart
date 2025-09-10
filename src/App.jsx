@@ -800,27 +800,29 @@ const AppContent = () => {
               className="database-display"
               onClick={(e) => e.stopPropagation()}
             >
-              <Browser
-                type={databaseType}
-                onAddItem={(itemData, itemType) => {
-                  console.log('App.jsx onAddItem called with:', itemData, 'type:', itemType)
-                  console.log('Current databaseType:', databaseType)
-                  
-                  if (databaseType === 'adversary') {
-                    console.log('Creating adversary...')
-                    createAdversary(itemData)
-                    setLastAddedItemType('adversary')
-                  } else if (databaseType === 'environment') {
-                    console.log('Creating environment...')
-                    createEnvironment(itemData)
-                    setLastAddedItemType('environment')
-                  }
-                  
-                  // Keep browser open so users can add multiple items
-                }}
-                onCancel={handleCloseRightColumn}
-                onCreateCustom={() => handleOpenCreator(databaseType)}
-              />
+              <Suspense fallback={<div style={{padding:'1rem'}}>Loading...</div>}>
+                <Browser
+                  type={databaseType}
+                  onAddItem={(itemData, itemType) => {
+                    console.log('App.jsx onAddItem called with:', itemData, 'type:', itemType)
+                    console.log('Current databaseType:', databaseType)
+                    
+                    if (databaseType === 'adversary') {
+                      console.log('Creating adversary...')
+                      createAdversary(itemData)
+                      setLastAddedItemType('adversary')
+                    } else if (databaseType === 'environment') {
+                      console.log('Creating environment...')
+                      createEnvironment(itemData)
+                      setLastAddedItemType('environment')
+                    }
+                    
+                    // Keep browser open so users can add multiple items
+                  }}
+                  onCancel={handleCloseRightColumn}
+                  onCreateCustom={() => handleOpenCreator(databaseType)}
+                />
+              </Suspense>
             </div>
           )}
 
@@ -830,22 +832,24 @@ const AppContent = () => {
               className="creator-display"
               onClick={(e) => e.stopPropagation()}
             >
-              <Creator
-                type={databaseType}
-                item={null}
-                source={databaseType === 'countdown' ? creatorFormData.source : undefined}
-                onSave={(itemData) => {
-                  if (databaseType === 'adversary') {
-                    createAdversary(itemData)
-                  } else if (databaseType === 'environment') {
-                    createEnvironment(itemData)
-                  } else if (databaseType === 'countdown') {
-                    createCountdown(itemData)
-                  }
-                  handleCloseRightColumn()
-                }}
-                onCancel={handleCloseRightColumn}
-              />
+              <Suspense fallback={<div style={{padding:'1rem'}}>Loading...</div>}>
+                <Creator
+                  type={databaseType}
+                  item={null}
+                  source={databaseType === 'countdown' ? creatorFormData.source : undefined}
+                  onSave={(itemData) => {
+                    if (databaseType === 'adversary') {
+                      createAdversary(itemData)
+                    } else if (databaseType === 'environment') {
+                      createEnvironment(itemData)
+                    } else if (databaseType === 'countdown') {
+                      createCountdown(itemData)
+                    }
+                    handleCloseRightColumn()
+                  }}
+                  onCancel={handleCloseRightColumn}
+                />
+              </Suspense>
             </div>
           )}
           </>

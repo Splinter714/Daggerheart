@@ -7,12 +7,14 @@ import { Swords, TreePine, Plus, Star, Skull, Filter, Square, CheckSquare } from
 let adversariesData = { adversaries: [] }
 let environmentsData = { environments: [] }
 try {
-  adversariesData = await import(/* @vite-ignore */ '../data/adversaries.json')
+  const mod = await import(/* @vite-ignore */ '../data/adversaries.json')
+  adversariesData = mod?.default || mod
 } catch (e) {
   console.warn('Failed to load adversaries.json dynamically:', e)
 }
 try {
-  environmentsData = await import(/* @vite-ignore */ '../data/environments.json')
+  const mod = await import(/* @vite-ignore */ '../data/environments.json')
+  environmentsData = mod?.default || mod
 } catch (e) {
   console.warn('Failed to load environments.json dynamically:', e)
 }
