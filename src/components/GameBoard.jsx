@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import usePersistentState from '../hooks/usePersistentState'
 import { useGameState } from '../useGameState'
 import Button from './Buttons'
 import List from './List'
@@ -208,32 +209,13 @@ const GameBoard = ({
   })
 
   // State for collapsible sections - initialize from localStorage
-  const [sectionVisibility, setSectionVisibility] = useState(() => {
-    const savedVisibility = localStorage.getItem('sectionVisibility')
-    if (savedVisibility) {
-      try {
-        const parsed = JSON.parse(savedVisibility)
-        return {
-          countdowns: false,
-          environments: false,
-          adversaries: false,
-          ...parsed
-        }
-      } catch (error) {
-        console.error('Error parsing saved section visibility:', error)
-      }
-    }
-    return {
-      countdowns: false,
-      environments: false,
-      adversaries: false
-    }
+  const [sectionVisibility, setSectionVisibility] = usePersistentState('sectionVisibility', {
+    countdowns: false,
+    environments: false,
+    adversaries: false
   })
 
-  // Save section visibility to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('sectionVisibility', JSON.stringify(sectionVisibility))
-  }, [sectionVisibility])
+  // (persisted via usePersistentState)
 
   // Auto-expand section when items are added from browser
   useEffect(() => {

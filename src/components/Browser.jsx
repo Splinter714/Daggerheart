@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
+import usePersistentState from '../hooks/usePersistentState'
 import Button from './Buttons'
 import Cards from './Cards'
 import { Swords, TreePine, Plus, Star, Skull, Filter, Square, CheckSquare } from 'lucide-react'
@@ -25,7 +26,7 @@ const Browser = ({
   console.log('Browser component rendered with props:', { type, onAddItem, onCancel, onCreateCustom })
   console.log('Browser component is being used, not List component')
   
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = usePersistentState(`browser-search-${type}`, '')
   // Load selected filter arrays from localStorage per type
   const getInitialSelectedFilters = () => {
     const saved = localStorage.getItem(`browser-filters-${type}`)
@@ -44,8 +45,8 @@ const Browser = ({
   }
   
   // Multi-select filter states
-  const [selectedTiers, setSelectedTiers] = useState(getInitialSelectedFilters().tiers)
-  const [selectedTypes, setSelectedTypes] = useState(getInitialSelectedFilters().types)
+  const [selectedTiers, setSelectedTiers] = usePersistentState(`browser-filters-tiers-${type}`, getInitialSelectedFilters().tiers)
+  const [selectedTypes, setSelectedTypes] = usePersistentState(`browser-filters-types-${type}`, getInitialSelectedFilters().types)
   // Load initial sort state synchronously to prevent jitter
   const getInitialSortState = () => {
     const savedSort = localStorage.getItem(`browser-sort-${type}`)
@@ -64,7 +65,7 @@ const Browser = ({
     ]
   }
 
-  const [sortFields, setSortFields] = useState(getInitialSortState)
+  const [sortFields, setSortFields] = usePersistentState(`browser-sort-${type}`, getInitialSortState())
   const [showTierDropdown, setShowTierDropdown] = useState(false)
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
   
@@ -135,10 +136,7 @@ const Browser = ({
     }
   }
 
-  // Save sort state to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem(`browser-sort-${type}`, JSON.stringify(sortFields))
-  }, [sortFields, type])
+  // (persisted via usePersistentState)
   
   // Save expanded card state to localStorage whenever it changes
   useEffect(() => {
@@ -149,13 +147,7 @@ const Browser = ({
     }
   }, [expandedCard, type])
   
-  // Persist selected filters per type (avoid writing on type change until values load)
-  useEffect(() => {
-    localStorage.setItem(`browser-filters-${type}`, JSON.stringify({ 
-      tiers: selectedTiers, 
-      types: selectedTypes 
-    }))
-  }, [selectedTiers, selectedTypes])
+  // (persisted via usePersistentState)
 
   // When switching data type, load its saved filters
   useEffect(() => {
