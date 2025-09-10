@@ -77,7 +77,7 @@ export function getAdvancementForOutcome(countdown, outcome) {
   }
 
   if (type === 'simple-hope') {
-    return outcome === 'simple-hope' || outcome === 'success-hope' || outcome === 'failure-hope' ? 1 : 0
+    return outcome === 'simple-hope' || outcome === 'success-hope' || outcome === 'failure-hope' || outcome === 'critical-success' ? 1 : 0
   }
 
   return 0

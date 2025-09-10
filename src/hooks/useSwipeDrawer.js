@@ -15,69 +15,75 @@ export default function useSwipeDrawer({
   const [touchStart, setTouchStart] = useState(null)
   const [touchCurrent, setTouchCurrent] = useState(null)
   const [drawerOffset, setDrawerOffset] = useState(0)
+  const [isSwiping, setIsSwiping] = useState(false)
 
   const onTouchStart = useCallback((e) => {
+    // Only allow swipe-to-close from header/handle area
     const target = e.target
     const isHeaderTouch = headerSelector ? target.closest(headerSelector) : false
-    const bodyEl = bodySelector ? target.closest(bodySelector) : null
-    let isBodyAtTop = false
-    if (bodyEl) {
-      isBodyAtTop = bodyEl.scrollTop <= 10
-    }
-
-    if (!isHeaderTouch && !isBodyAtTop) {
-      // Let normal scrolling occur
+    
+    if (!isHeaderTouch) {
+      // Let normal scrolling occur in content areas
       return
     }
 
-    e.preventDefault()
-    e.stopPropagation()
     const y = e.targetTouches?.[0]?.clientY ?? 0
     setTouchStart(y)
     setTouchCurrent(y)
     setDrawerOffset(0)
-  }, [headerSelector, bodySelector])
+    setIsSwiping(false)
+  }, [headerSelector])
 
   const onTouchMove = useCallback((e) => {
     if (touchStart == null) return
     const y = e.targetTouches?.[0]?.clientY ?? 0
     const delta = y - touchStart
-    if (delta > 0) {
+    const ACTIVATION_DELTA = 6
+    if (!isSwiping && Math.abs(delta) > ACTIVATION_DELTA) {
+      setIsSwiping(true)
+    }
+
+    if (isSwiping) {
       e.preventDefault()
       e.stopPropagation()
       setTouchCurrent(y)
-      setDrawerOffset(delta)
-    } else if (delta < 0) {
-      // Reset so normal upward scroll can occur
-      setTouchStart(null)
-      setTouchCurrent(null)
-      setDrawerOffset(0)
+      setDrawerOffset(Math.max(0, delta))
     }
-  }, [touchStart])
+  }, [touchStart, isSwiping])
 
   const onTouchEnd = useCallback((e) => {
     if (touchStart == null || touchCurrent == null) return
     const distance = touchCurrent - touchStart
-    e.preventDefault()
-    e.stopPropagation()
+    if (isSwiping) {
+      e.preventDefault()
+      e.stopPropagation()
 
-    if (distance > closeThreshold) {
-      setDrawerOffset(window.innerHeight)
-      if (typeof onClose === 'function') {
-        setTimeout(() => onClose(), 300)
-      }
-    } else if (distance > snapThreshold) {
-      setDrawerOffset(0)
-      setTimeout(() => {
+      if (distance > closeThreshold) {
+        setDrawerOffset(window.innerHeight)
+        if (typeof onClose === 'function') {
+          setTimeout(() => onClose(), 300)
+        }
+      } else if (distance > snapThreshold) {
+        setDrawerOffset(0)
+        setTimeout(() => {
+          setTouchStart(null)
+          setTouchCurrent(null)
+          setIsSwiping(false)
+        }, 50)
+      } else {
+        setDrawerOffset(0)
         setTouchStart(null)
         setTouchCurrent(null)
-      }, 50)
+        setIsSwiping(false)
+      }
     } else {
+      // Not swiping: let tap/click go through
       setDrawerOffset(0)
       setTouchStart(null)
       setTouchCurrent(null)
+      setIsSwiping(false)
     }
-  }, [touchStart, touchCurrent, closeThreshold, snapThreshold, onClose])
+  }, [touchStart, touchCurrent, isSwiping, closeThreshold, snapThreshold, onClose])
 
   const resetSwipeState = useCallback(() => {
     setDrawerOffset(0)

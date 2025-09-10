@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import usePersistentState from '../hooks/usePersistentState'
-import Button from './Buttons'
-import Cards from './Cards'
+import Button from './common/Buttons'
+import Cards from './cards/Cards'
 import { Plus, Filter, Square, CheckSquare } from 'lucide-react'
 // Dynamically import JSON data to keep initial bundle smaller
 let adversariesData = { adversaries: [] }

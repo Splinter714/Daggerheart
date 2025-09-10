@@ -1,0 +1,111 @@
+import React, { useEffect, useState } from 'react'
+import { Wrench } from 'lucide-react'
+
+const BottomBar = ({
+  isEditMode,
+  setIsEditMode,
+  showMockup,
+  setShowMockup,
+  adversaries,
+  environments,
+  countdowns,
+  deleteAdversary,
+  deleteEnvironment,
+  deleteCountdown
+}) => {
+  const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.sidebar-nav-item')) {
+        setDeleteFlyoutOpen(false)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
+
+  const hasAnyItems = (adversaries?.length || 0) > 0 || (environments?.length || 0) > 0 || (countdowns?.length || 0) > 0
+  const hasDeadAdversaries = (adversaries || []).some(adv => (adv.hp || 0) >= (adv.hpMax || 1))
+
+  return (
+    <nav className={`sidebar-nav`}>
+      <button
+        className={`sidebar-nav-item ${isEditMode ? 'active' : ''}`}
+        onClick={() => setIsEditMode(!isEditMode)}
+        title={isEditMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
+      >
+        <div className="sidebar-nav-icon">
+          <Wrench size={20} />
+        </div>
+      </button>
+
+      <div
+        className={`sidebar-nav-item ${showMockup ? 'active' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation()
+          setShowMockup(!showMockup)
+          setDeleteFlyoutOpen(false)
+        }}
+        title="Show Creator Mockup"
+        style={{ cursor: 'pointer' }}
+      >
+        <div className="sidebar-nav-icon">
+          <Wrench size={20} />
+        </div>
+      </div>
+
+      <div
+        className={`sidebar-nav-item ${deleteFlyoutOpen ? 'delete-active' : ''} ${!hasAnyItems ? 'disabled' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (hasAnyItems) {
+            setDeleteFlyoutOpen(!deleteFlyoutOpen)
+          }
+        }}
+        title={!hasAnyItems ? 'Nothing to clear' : 'Clear Items'}
+        style={{ cursor: !hasAnyItems ? 'not-allowed' : 'pointer' }}
+      >
+        <div className="sidebar-nav-icon" aria-hidden="true">×</div>
+        <div className={`flyout-menu ${deleteFlyoutOpen ? 'show' : ''}`}>
+          {(adversaries && adversaries.length > 0) && (
+            <button className="flyout-menu-item delete-flyout-item" onClick={(e) => { e.stopPropagation(); setDeleteFlyoutOpen(false); adversaries.forEach(item => deleteAdversary(item.id)) }}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                <span aria-hidden="true">×</span>
+                <span>All Adversaries</span>
+              </div>
+            </button>
+          )}
+          {(adversaries && adversaries.length > 0 && hasDeadAdversaries) && (
+            <button className="flyout-menu-item delete-flyout-item" onClick={(e) => { e.stopPropagation(); setDeleteFlyoutOpen(false); const dead = adversaries.filter(adv => (adv.hp || 0) >= (adv.hpMax || 1)); dead.forEach(item => deleteAdversary(item.id)) }}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                <span aria-hidden="true">×</span>
+                <span>Dead Adversaries</span>
+              </div>
+            </button>
+          )}
+          {(environments && environments.length > 0) && (
+            <button className="flyout-menu-item delete-flyout-item" onClick={(e) => { e.stopPropagation(); setDeleteFlyoutOpen(false); environments.forEach(item => deleteEnvironment(item.id)) }}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                <span aria-hidden="true">×</span>
+                <span>All Environments</span>
+              </div>
+            </button>
+          )}
+          {(countdowns && countdowns.length > 0) && (
+            <button className="flyout-menu-item delete-flyout-item" onClick={(e) => { e.stopPropagation(); setDeleteFlyoutOpen(false); countdowns.forEach(countdown => deleteCountdown(countdown.id)) }}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                <span aria-hidden="true">×</span>
+                <span>All Countdowns</span>
+              </div>
+            </button>
+          )}
+        </div>
+      </div>
+    </nav>
+  )
+}
+
+export default BottomBar
+
+

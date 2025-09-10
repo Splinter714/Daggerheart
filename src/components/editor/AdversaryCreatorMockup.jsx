@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import adversariesData from '../data/adversaries.json'
+import adversariesData from '../../data/adversaries.json'
 
 const AdversaryCreatorMockup = ({ formData, setFormData }) => {
   const handleInputChange = (field, value) => {
@@ -56,7 +56,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
         experience: [...prev.experience, { name: '', modifier: 0 }]
       }))
     }
-  }, [formData.experience])
+  }, [formData.experience, setFormData])
 
   // Auto-add empty features when last one has content for each type
   useEffect(() => {
@@ -71,7 +71,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
         }))
       }
     })
-  }, [formData.passiveFeatures, formData.actionFeatures, formData.reactionFeatures])
+  }, [formData.passiveFeatures, formData.actionFeatures, formData.reactionFeatures, setFormData])
 
   const renderFeatureSection = (type, title) => {
     const features = formData[`${type}Features`]
