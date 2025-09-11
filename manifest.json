@@ -5,7 +5,7 @@
   "start_url": "/Daggerheart/",
   "display": "standalone",
   "background_color": "#1a1a1a",
-  "theme_color": "#4f46e5",
+  "theme_color": "#1a1a1a",
   "orientation": "portrait-primary",
   "scope": "/Daggerheart/",
   "icons": [
