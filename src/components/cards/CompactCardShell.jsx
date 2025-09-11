@@ -12,7 +12,7 @@ const CompactCardShell = ({
   return (
     <div
       className={`simple-list-row compact ${className} ${showDrag ? 'edit-mode' : ''}`}
-      onClick={(e) => {
+      onClick={(_e) => {
         if (onClick) onClick(item)
       }}
       style={{ cursor: onClick ? 'pointer' : 'default' }}

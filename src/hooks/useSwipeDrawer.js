@@ -7,7 +7,6 @@ import { useState, useCallback } from 'react'
  */
 export default function useSwipeDrawer({
   headerSelector = '.drawer-header',
-  bodySelector = '.drawer-body',
   closeThreshold = 100,
   snapThreshold = 30,
   onClose,

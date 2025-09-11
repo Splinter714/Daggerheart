@@ -2,6 +2,36 @@ import React from 'react'
 import Button from '../controls/Buttons'
 
 const CountdownCard = ({ item, mode, onClick, onDelete, onIncrement, onDecrement, _isEditMode, dragAttributes, dragListeners }) => {
+  // Calculate how many pips should go on each row for even distribution
+  const renderDistributedPips = () => {
+    const totalPips = item.max
+    
+    // Group pips into sets of 5 for all countdowns
+    const pipGroups = []
+    for (let i = 0; i < totalPips; i += 5) {
+      const groupSize = Math.min(5, totalPips - i)
+      pipGroups.push(groupSize)
+    }
+    
+    return pipGroups.map((groupSize, groupIndex) => (
+      <div key={groupIndex} className="countdown-pip-group">
+        {Array.from({ length: groupSize }, (_, i) => {
+          const pipIndex = groupIndex * 5 + i
+          return (
+            <span 
+              key={pipIndex} 
+              className={`countdown-symbol ${pipIndex < (item.value || 0) ? 'filled' : 'empty'}`}
+              data-countdown-type={item.type || 'standard'}
+              title={`${pipIndex + 1} of ${item.max}`}
+            >
+              {pipIndex < (item.value || 0) ? '●' : '○'}
+            </span>
+          )
+        })}
+      </div>
+    ))
+  }
+
   if (mode === 'compact') return renderCompact()
   return renderExpanded()
 
@@ -18,16 +48,7 @@ const CountdownCard = ({ item, mode, onClick, onDelete, onIncrement, onDecrement
           <div className="row-main">
             <h4 className="row-title">{item.name}</h4>
             <div className="countdown-symbols">
-              {Array.from({ length: item.max }, (_, i) => (
-                <span 
-                  key={i} 
-                  className={`countdown-symbol ${i < (item.value || 0) ? 'filled' : 'empty'}`}
-                  data-countdown-type={item.type || 'standard'}
-                  title={`${i + 1} of ${item.max}`}
-                >
-                  {i < (item.value || 0) ? '●' : '○'}
-                </span>
-              ))}
+              {renderDistributedPips()}
             </div>
           </div>
           {renderCardActions()}
@@ -151,21 +172,7 @@ const CountdownCard = ({ item, mode, onClick, onDelete, onIncrement, onDecrement
           >
             {item.value >= item.max ? (item.loop && item.loop !== 'none' ? "⟳" : "+") : "+"}
           </Button>
-          {item.value >= item.max && (!item.loop || item.loop === 'none') && (
-            <Button
-              action="delete"
-              size="sm"
-              immediate={true}
-              onClick={(e) => {
-                e.stopPropagation()
-                e.preventDefault()
-                onDelete && onDelete(item.id)
-              }}
-              title="Delete countdown"
-            >
-              ×
-            </Button>
-          )}
+          {/* Removed auto-appearing delete button - too dangerous next to increment button */}
         </div>
         <div className="countdown-delete-space">
           {dragAttributes && dragListeners && (

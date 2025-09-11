@@ -44,7 +44,7 @@ export default function usePreventPullToRefresh(containerRef, enabled = true) {
       const dy = t.clientY - startY
       // Downward move from the top should be prevented to block PTR
       if (dy > 0) {
-        try { e.preventDefault() } catch {}
+        try { e.preventDefault() } catch (_e) { /* ignore */ }
       }
     }
 

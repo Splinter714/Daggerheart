@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from 'react'
+import React, { useMemo, useEffect, useRef, useState } from 'react'
 // removed unused imports after split
 import useBrowser from '../../hooks/useBrowser'
 import BrowserHeader from './BrowserHeader'
@@ -7,25 +7,30 @@ import BrowserRow from './BrowserRow'
 // Dynamically import JSON data to keep initial bundle smaller
 let adversariesData = { adversaries: [] }
 let environmentsData = { environments: [] }
+let _dataLoaded = false
 
 // Load data asynchronously
 const loadData = async () => {
   try {
     const mod = await import(/* @vite-ignore */ '../../data/adversaries.json')
     adversariesData = mod?.default || mod
+    console.log('Loaded adversaries data:', adversariesData)
   } catch (e) {
     console.warn('Failed to load adversaries.json dynamically:', e)
   }
   try {
     const mod = await import(/* @vite-ignore */ '../../data/environments.json')
     environmentsData = mod?.default || mod
+    console.log('Loaded environments data:', environmentsData)
+    console.log('Environments array:', environmentsData.environments)
   } catch (e) {
     console.warn('Failed to load environments.json dynamically:', e)
   }
+  _dataLoaded = true
 }
 
-// Load data immediately
-loadData()
+// Load data immediately and store the promise
+const dataLoadPromise = loadData()
 
 const Browser = ({ 
   type, // 'adversary' or 'environment'
@@ -33,6 +38,15 @@ const Browser = ({
   onCancel, 
   onCreateCustom
 }) => {
+  const [_dataLoadState, setDataLoadState] = useState(0)
+  
+  // Wait for data to load and force re-render
+  useEffect(() => {
+    dataLoadPromise.then(() => {
+      setDataLoadState(prev => prev + 1)
+    })
+  }, [])
+  
   console.log('Browser component rendered with props:', { type, onAddItem, onCancel, onCreateCustom })
   console.log('Browser component is being used, not List component')
   
@@ -40,7 +54,7 @@ const Browser = ({
     searchTerm, setSearchTerm,
     selectedTiers, setSelectedTiers,
     selectedTypes, setSelectedTypes,
-    sortFields, setSortFields,
+    sortFields,
     showTierDropdown, setShowTierDropdown,
     showTypeDropdown, setShowTypeDropdown,
     tierFilterRef, typeFilterRef,
@@ -61,29 +75,8 @@ const Browser = ({
   // Handle type changes without useEffect to prevent jitter
   if (currentTypeRef.current !== type) {
     currentTypeRef.current = type
-    
-    const savedSort = localStorage.getItem(`browser-sort-${type}`)
-    if (savedSort) {
-      try {
-        const parsed = JSON.parse(savedSort)
-        setSortFields(parsed)
-      } catch (e) {
-        console.warn('Failed to parse saved sort state:', e)
-        // Reset to default if parsing fails
-        setSortFields([
-          { field: 'tier', direction: 'asc' },
-          { field: 'displayType', direction: 'asc' },
-          { field: 'displayDifficulty', direction: 'asc' }
-        ])
-      }
-    } else {
-      // No saved state, use default
-      setSortFields([
-        { field: 'tier', direction: 'asc' },
-        { field: 'displayType', direction: 'asc' },
-        { field: 'displayDifficulty', direction: 'asc' }
-      ])
-    }
+    // Sort fields are now handled by usePersistentState in the hook
+    // No need to manually load them here
   }
 
   // (persisted via usePersistentState)
@@ -99,6 +92,9 @@ const Browser = ({
   // Use imported data directly - only the relevant type
   const adversaryData = adversariesData.adversaries || []
   const environmentData = environmentsData.environments || []
+  
+  console.log('Browser render - type:', type, 'adversaryData length:', adversaryData.length, 'environmentData length:', environmentData.length)
+  console.log('environmentsData structure:', environmentsData)
   
   // Select data based on type
   const currentData = type === 'adversary' ? adversaryData : environmentData
@@ -159,24 +155,36 @@ const Browser = ({
   }, [unifiedData])
 
   // Reconcile saved filters with available data to avoid empty results
+  // DISABLED: This was causing table loading issues on refresh
+  // The filters should be trusted as-is from localStorage
+  /*
   useEffect(() => {
-    // Types
-    if (selectedTypes.length > 0) {
-      const validTypes = new Set(itemTypes)
-      const nextTypes = selectedTypes.filter(t => validTypes.has(t))
-      if (nextTypes.length !== selectedTypes.length) {
-        setSelectedTypes(nextTypes.length > 0 ? nextTypes : [])
+    // Only reconcile if we have data loaded AND types/tiers are available
+    if (currentData.length === 0 || itemTypes.length === 0 || itemTiers.length === 0) return
+    
+    // Add a small delay to ensure all state is properly initialized
+    const timeoutId = setTimeout(() => {
+      // Types
+      if (selectedTypes.length > 0) {
+        const validTypes = new Set(itemTypes)
+        const nextTypes = selectedTypes.filter(t => validTypes.has(t))
+        if (nextTypes.length !== selectedTypes.length) {
+          setSelectedTypes(nextTypes.length > 0 ? nextTypes : [])
+        }
       }
-    }
-    // Tiers (compare as strings)
-    if (selectedTiers.length > 0) {
-      const validTiers = new Set(itemTiers.map(t => String(t)))
-      const nextTiers = selectedTiers.filter(t => validTiers.has(String(t)))
-      if (nextTiers.length !== selectedTiers.length) {
-        setSelectedTiers(nextTiers.length > 0 ? nextTiers : [])
+      // Tiers (compare as strings)
+      if (selectedTiers.length > 0) {
+        const validTiers = new Set(itemTiers.map(t => String(t)))
+        const nextTiers = selectedTiers.filter(t => validTiers.has(String(t)))
+        if (nextTiers.length !== selectedTiers.length) {
+          setSelectedTiers(nextTiers.length > 0 ? nextTiers : [])
+        }
       }
-    }
-  }, [itemTypes, itemTiers, selectedTypes, selectedTiers, setSelectedTypes, setSelectedTiers])
+    }, 100) // Small delay to ensure state is stable
+    
+    return () => clearTimeout(timeoutId)
+  }, [currentData.length, itemTypes.length, itemTiers.length, selectedTypes, selectedTiers, setSelectedTypes, setSelectedTiers])
+  */
 
   // Sort and filter items
   const filteredAndSortedItems = useMemo(() => {

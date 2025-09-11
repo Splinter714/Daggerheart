@@ -71,6 +71,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
         }))
       }
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.passiveFeatures, formData.actionFeatures, formData.reactionFeatures, setFormData])
 
   const renderFeatureSection = (type, title) => {
