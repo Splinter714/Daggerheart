@@ -142,7 +142,7 @@ const BottomBar = ({
           {/* DPCGL Attribution */}
           <div className="help-attribution">
             <img 
-              src="/logos/Darrington Press Community Content Logos/Daggerheart/PNGs/DH_CGL_logos_final_black.png"
+              src="/logos/Darrington Press Community Content Logos/Daggerheart/PNGs/DH_CGL_logos_final_white.png"
               alt="Daggerheart Community Content Logo"
               className="help-logo"
             />
