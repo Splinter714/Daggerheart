@@ -162,11 +162,11 @@ const AdversaryDetails = ({ item, HeaderRight, onApplyDamage, onApplyHealing, on
               rows={2}
               style={{ height: descriptionHeight }}
             />
-            <div className="motives-input-container">
-              <label className="motives-label">Motives & Tactics:</label>
+            <div className="motives-row">
+              <span className="motives-label">Motives & Tactics:</span>
               <input
                 type="text"
-                className="form-input-inline"
+                className="inline-field"
                 value={editData.motives || ''}
                 onChange={(e) => handleInputChange('motives', e.target.value)}
                 placeholder="Motives & Tactics"
@@ -186,9 +186,16 @@ const AdversaryDetails = ({ item, HeaderRight, onApplyDamage, onApplyHealing, on
               </div>
             )}
             {item.motives && (
-              <div className="motives-text">
+              <div className="motives-row">
                 <span className="motives-label">Motives & Tactics:</span>
-                <span className="motives-content">{item.motives}</span>
+                <input
+                  type="text"
+                  className="inline-field"
+                  value={item.motives || ""}
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                />
               </div>
             )}
           </>
