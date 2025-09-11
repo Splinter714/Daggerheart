@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, startTransition } from 'react'
+import PWAInstallPrompt from './components/PWAInstallPrompt'
 
 // Simple Error Boundary for debugging
 class _ErrorBoundary extends React.Component {
@@ -450,6 +451,9 @@ const AppContent = () => {
           )}
         </MobileDrawer>
       )}
+      
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
     </div>
   )
 }

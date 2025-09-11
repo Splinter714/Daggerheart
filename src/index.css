@@ -7051,3 +7051,76 @@ input[type="number"] {
 .adversaries-section {
   margin-bottom: 2rem;
 }
+
+/* PWA Install Prompt */
+.pwa-install-prompt {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.install-prompt-content h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.install-prompt-content p {
+  margin: 0 0 1rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.install-prompt-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.install-btn {
+  background: var(--purple);
+  color: var(--text-primary);
+  border: 1px solid var(--purple);
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.install-btn:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.dismiss-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dismiss-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+/* PWA-specific styles */
+@media (display-mode: standalone) {
+  .pwa-install-prompt {
+    display: none;
+  }
+}
