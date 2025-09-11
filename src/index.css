@@ -1676,7 +1676,7 @@ textarea,
   .drawer-body .expanded-card {
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: pan-y !important; /* Allow vertical scrolling, JavaScript handles swipe-to-dismiss */
+    touch-action: auto !important; /* Allow all touch gestures for scrolling */
     overflow-y: auto !important; /* Allow vertical scrolling */
     -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS Safari */
   }
@@ -1749,7 +1749,7 @@ textarea,
   .drawer-body .expanded-card {
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: pan-y !important; /* Allow vertical scroll and taps within cards */
+    touch-action: auto !important; /* Allow all touch gestures for scrolling */
     overflow-y: auto !important; /* Allow vertical scrolling */
     -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS Safari */
   }
