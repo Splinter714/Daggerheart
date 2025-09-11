@@ -2,6 +2,17 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { execSync } from 'child_process'
+import fs from 'fs'
+
+// Get package.json version
+function getPackageVersion() {
+  try {
+    const packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8'))
+    return packageJson.version
+  } catch (error) {
+    return 'dev'
+  }
+}
 
 // Get git commit hash for version
 function getGitCommitHash() {
@@ -17,7 +28,7 @@ export default defineConfig({
   root: path.resolve(__dirname, '../src'),
   base: '/Daggerheart/', // GitHub Pages subdirectory
   define: {
-    __APP_VERSION__: JSON.stringify(getGitCommitHash())
+    __APP_VERSION__: JSON.stringify(`${getPackageVersion()} (${getGitCommitHash()})`)
   },
   server: {
     host: '0.0.0.0', // Bind to all network interfaces

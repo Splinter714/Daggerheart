@@ -6,7 +6,7 @@ const Version = () => {
   
   return (
     <div className="version-display">
-      v{version}
+      {version}
     </div>
   )
 }
