@@ -1674,19 +1674,17 @@ textarea,
   
   /* EXPANDED CARD DRAWER: Prioritize scrolling, only prevent pull-to-refresh */
   .drawer-body .expanded-card {
-    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
-    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: auto !important; /* Allow all touch gestures for scrolling */
+    touch-action: pan-y !important; /* Allow vertical panning only */
     overflow-y: auto !important; /* Allow vertical scrolling */
     -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS Safari */
+    overscroll-behavior-y: contain !important; /* Contain overscroll within card */
   }
   
   .drawer-body .expanded-content {
     overflow-y: auto !important; /* Allow vertical scrolling */
     -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS Safari */
-    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
-    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: pan-y !important; /* Allow vertical scrolling */
+    touch-action: pan-y !important; /* Allow vertical panning only */
+    overscroll-behavior-y: contain !important; /* Contain overscroll within content */
     height: calc(100vh - 200px) !important; /* Force a specific height to enable scrolling */
     max-height: calc(100vh - 200px) !important; /* Don't exceed this height */
   }
@@ -1747,11 +1745,10 @@ textarea,
   
   /* Allow scrolling in expanded card content areas */
   .drawer-body .expanded-card {
-    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
-    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
-    touch-action: auto !important; /* Allow all touch gestures for scrolling */
+    touch-action: pan-y !important; /* Allow vertical panning only */
     overflow-y: auto !important; /* Allow vertical scrolling */
     -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS Safari */
+    overscroll-behavior-y: contain !important; /* Contain overscroll within card */
   }
   
 }
