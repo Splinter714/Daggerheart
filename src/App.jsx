@@ -33,7 +33,6 @@ class _ErrorBoundary extends React.Component {
 }
 import { GameStateProvider } from './state/GameStateContext'
 import { useGameState } from './state/useGameState'
-import Version from './components/ui/Version'
 import TopBar from './components/panels/TopBar'
 import MobileDrawer from './components/panels/MobileDrawer'
 import RightPanel from './components/panels/RightPanel'
@@ -293,8 +292,6 @@ const AppContent = () => {
         }
       }}
     >
-      {/* Version Display */}
-      <Version />
       
       {/* Top Bar: Fear Tracker */}
       <TopBar fear={fear} updateFear={updateFear} />
