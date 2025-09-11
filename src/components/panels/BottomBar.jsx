@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Wrench } from 'lucide-react'
+import { Pencil, Trash2, Wrench } from 'lucide-react'
 
 const BottomBar = ({
   isEditMode,
@@ -36,7 +36,7 @@ const BottomBar = ({
         title={isEditMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
       >
         <div className="sidebar-nav-icon">
-          <Wrench size={20} />
+          <Pencil size={20} />
         </div>
       </button>
 
@@ -66,7 +66,9 @@ const BottomBar = ({
         title={!hasAnyItems ? 'Nothing to clear' : 'Clear Items'}
         style={{ cursor: !hasAnyItems ? 'not-allowed' : 'pointer' }}
       >
-        <div className="sidebar-nav-icon" aria-hidden="true">×</div>
+        <div className="sidebar-nav-icon" aria-hidden="true">
+          <Trash2 size={20} />
+        </div>
         <div className={`flyout-menu ${deleteFlyoutOpen ? 'show' : ''}`}>
           {(adversaries && adversaries.length > 0) && (
             <button className="flyout-menu-item delete-flyout-item" onClick={(e) => { e.stopPropagation(); setDeleteFlyoutOpen(false); adversaries.forEach(item => deleteAdversary(item.id)) }}>
