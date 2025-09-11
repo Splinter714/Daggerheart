@@ -1,3 +1,5 @@
+@import "./styles/motives.css";
+
 :root {
   /* Minimal Color Palette */
   --light: #ffffff;          /* Pure white */
@@ -644,48 +646,7 @@ textarea,
   white-space: pre-wrap;
 }
 
-.expanded-card.adversary .expanded-header .motives-text {
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-  padding: 0;
-  font-size: inherit;
-  font-family: inherit;
-  width: 100%;
-  height: 1.8rem;
-  box-sizing: border-box;
-  line-height: 1.2;
-  overflow: hidden;
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.expanded-card.adversary .expanded-header .motives-text .motives-label {
-  font-weight: bold;
-  color: var(--text-primary);
-  font-size: inherit;
-  font-family: inherit;
-  white-space: nowrap;
-  height: 1.8rem;
-  line-height: 1.8rem;
-  vertical-align: top;
-  display: inline;
-  margin-right: 0.5rem;
-}
-
-.expanded-card.adversary .expanded-header .motives-text .motives-content {
-  padding: 0.25rem !important;
-  margin: 0 !important;
-  height: 1.8rem !important;
-  box-sizing: border-box !important;
-  line-height: 1.2 !important;
-  font-size: inherit !important;
-  font-family: inherit !important;
-  color: var(--text-primary) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 0.25rem !important;
-  flex: 1 !important;
-}
+/* Old motives-text styles removed - now using unified .motives-row approach */
 
 /* Core Stats Block */
 .core-stats-block {
@@ -985,46 +946,7 @@ textarea,
   margin-right: 0;
 }
 
-.expanded-card.adversary .expanded-header .motives-input-container {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  height: 1.8rem;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.expanded-card.adversary .expanded-header .motives-input-container .motives-label {
-  font-weight: bold;
-  color: var(--text-primary);
-  font-size: inherit;
-  font-family: inherit;
-  white-space: nowrap;
-  height: 1.8rem;
-  line-height: 1.8rem;
-  vertical-align: top;
-  display: inline;
-  margin-right: 0.5rem;
-}
-
-.expanded-card.adversary .expanded-header .motives-input-container .form-input-inline {
-  background: transparent !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 0.25rem !important;
-  padding: 0.25rem !important;
-  font-size: inherit !important;
-  color: var(--text-primary) !important;
-  font-family: inherit !important;
-  height: 1.8rem !important;
-  box-sizing: border-box !important;
-  line-height: 1.2 !important;
-  transition: all 0.2s ease !important;
-  text-transform: none !important;
-  font-weight: normal !important;
-  margin: 0 !important;
-  flex: 1 !important;
-}
+/* Old motives-input-container styles removed - now using unified .motives-row approach */
 
 /* Stats form inputs - match stat-item exactly */
 .stat-item .form-input-inline-small {
@@ -2403,6 +2325,7 @@ textarea,
     right: 0;
     transform: none;
     max-width: calc(100vw - 2rem);
+    min-width: 280px;
   }
   
   .flyout-menu.show {
@@ -2454,10 +2377,12 @@ textarea,
 
 /* Help Attribution Section */
 .help-attribution {
-  padding: 1rem;
+  padding: 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background: var(--bg-dark);
-  max-width: 320px;
+  max-width: 280px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .help-logo {
@@ -2469,10 +2394,12 @@ textarea,
 }
 
 .help-attribution-text {
-  font-size: 0.75rem;
-  line-height: 1.4;
+  font-size: 0.7rem;
+  line-height: 1.3;
   color: var(--text-secondary);
   text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .help-attribution-text p {
