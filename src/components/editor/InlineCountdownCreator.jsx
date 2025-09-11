@@ -99,7 +99,7 @@ const InlineCountdownCreator = ({
             type="text"
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
-            placeholder="Countdown name"
+            placeholder="Name"
             className="inline-input"
             required
             autoFocus
@@ -116,6 +116,7 @@ const InlineCountdownCreator = ({
                 onChange={(e) => handleInputChange('max', e.target.value)}
                 onKeyDown={handleKeyDown}
                 className="inline-number"
+                placeholder="Count"
                 title="Max value: 100"
               />
             {error && (

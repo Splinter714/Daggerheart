@@ -563,6 +563,140 @@ textarea,
   border: 1px solid var(--border);
 }
 
+/* Adversary Card Specific Layout - matching image structure */
+.expanded-card.adversary {
+  padding: 0;
+  background: var(--bg-primary);
+}
+
+.expanded-card.adversary .expanded-header {
+  padding: 1rem 1rem 0.5rem 1rem;
+}
+
+.expanded-card.adversary .expanded-header h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 0 0 0.25rem 0;
+  color: var(--text-primary);
+}
+
+.expanded-card.adversary .tier-info {
+  font-size: 0.9rem;
+  font-weight: bold;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.expanded-card.adversary .description-text {
+  font-style: italic;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.expanded-card.adversary .motives-text {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+/* Core Stats Block */
+.core-stats-block {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+}
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0;
+  border-bottom: 1px dotted var(--border);
+}
+
+.stats-row:last-child {
+  border-bottom: none;
+}
+
+.stat-item {
+  color: var(--text-primary);
+}
+
+.stat-separator {
+  margin: 0 0.5rem;
+  color: var(--text-secondary);
+}
+
+/* Features Section */
+.expanded-card.adversary .features-section {
+  padding: 1rem;
+}
+
+.feature-type-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.feature-type-section:last-child {
+  margin-bottom: 0;
+}
+
+.feature-type-header {
+  margin: 0 0 0.75rem 0;
+}
+
+.feature-type-header h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.feature-type-header hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+  opacity: 0.6;
+}
+
+.feature-text {
+  margin-bottom: 0.75rem;
+  text-indent: -1rem;
+  padding-left: 1rem;
+}
+
+.feature-text:last-child {
+  margin-bottom: 0;
+}
+
+.feature-name {
+  font-weight: 900;
+  color: var(--text-primary);
+  text-decoration: underline;
+  margin-bottom: 0;
+}
+
+.feature-separator {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.expanded-card.adversary .feature-description {
+  color: var(--text-primary);
+  line-height: 1.1;
+  font-weight: 300;
+  margin-left: 0;
+  text-indent: 0;
+  padding-left: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .adversary-details .motives-section,
 .adversary-details .core-stats-section,
 .adversary-details .experience-section,
@@ -5601,7 +5735,7 @@ textarea,
 .preview-section {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 0;
 }
 
 .preview-right-column h3 {
@@ -5887,7 +6021,7 @@ textarea,
 
 .preview-section {
   background: var(--bg-primary);
-  padding: 1rem;
+  padding: 0;
   border-radius: 0.25rem;
   border: 1px solid var(--border-color);
   max-height: 400px;
@@ -5906,7 +6040,7 @@ textarea,
   margin-bottom: 1.5rem;
 }
 
-.card-preview h4 {
+.card-preview > h4 {
   margin-bottom: 0.5rem;
   color: var(--text-secondary);
   font-size: 0.875rem;
