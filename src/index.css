@@ -2305,8 +2305,9 @@ textarea,
   pointer-events: none;
   display: flex;
   flex-direction: column; /* Stack vertically */
-  overflow: visible; /* Allow content to show */
-  white-space: nowrap;
+  overflow: hidden; /* Prevent content from spilling out */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
   min-width: 120px; /* Minimum width for text */
   max-width: calc(100vw - 2rem); /* Prevent overflow on narrow screens */
 }
@@ -2381,8 +2382,11 @@ textarea,
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background: var(--bg-dark);
   max-width: 280px;
+  width: 100%;
+  box-sizing: border-box;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .help-logo {
@@ -2400,6 +2404,9 @@ textarea,
   text-align: left;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .help-attribution-text p {
