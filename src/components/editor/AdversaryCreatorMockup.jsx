@@ -190,6 +190,95 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
             />
           </div>
         </div>
+        
+        <div className="form-row">
+          <div className="form-group">
+            <input
+              type="number"
+              inputMode="numeric"
+              enterKeyHint="done"
+              placeholder="Major Threshold"
+              min="1"
+              max="20"
+              value={formData.thresholds?.major || ''}
+              onChange={(e) => handleInputChange('thresholds', { ...formData.thresholds, major: e.target.value === '' ? '' : parseInt(e.target.value) })}
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="number"
+              inputMode="numeric"
+              enterKeyHint="done"
+              placeholder="Severe Threshold"
+              min="1"
+              max="25"
+              value={formData.thresholds?.severe || ''}
+              onChange={(e) => handleInputChange('thresholds', { ...formData.thresholds, severe: e.target.value === '' ? '' : parseInt(e.target.value) })}
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="number"
+              inputMode="numeric"
+              enterKeyHint="done"
+              placeholder="ATK Bonus"
+              min="0"
+              max="10"
+              value={formData.atk || ''}
+              onChange={(e) => handleInputChange('atk', e.target.value === '' ? '' : parseInt(e.target.value))}
+            />
+          </div>
+        </div>
+        
+        <div className="form-row">
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Weapon"
+              value={formData.weapon || ''}
+              onChange={(e) => handleInputChange('weapon', e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <select
+              value={formData.range || ''}
+              onChange={(e) => handleInputChange('range', e.target.value)}
+            >
+              <option value="">Range</option>
+              <option value="Melee">Melee</option>
+              <option value="Very Close">Very Close</option>
+              <option value="Close">Close</option>
+              <option value="Far">Far</option>
+              <option value="Very Far">Very Far</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Damage (e.g., 1d12+2 phy)"
+              value={formData.damage || ''}
+              onChange={(e) => handleInputChange('damage', e.target.value)}
+            />
+          </div>
+        </div>
+        
+        <div className="form-group">
+          <textarea
+            placeholder="Description"
+            value={formData.description || ''}
+            onChange={(e) => handleInputChange('description', e.target.value)}
+            rows={2}
+          />
+        </div>
+        
+        <div className="form-group">
+          <input
+            type="text"
+            placeholder="Motives & Tactics (e.g., Burrow, drag away, feed, reposition)"
+            value={formData.motives || ''}
+            onChange={(e) => handleInputChange('motives', e.target.value)}
+          />
+        </div>
       </div>
 
       {/* Experience */}

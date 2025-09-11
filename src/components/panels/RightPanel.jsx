@@ -31,78 +31,69 @@ const RightPanel = ({
   if (showMockup) {
     return (
       <PanelShell className="right-panel-shell preview-right-column">
-        <div className="creator-header">
-          <h3>Adversary Preview</h3>
-        </div>
         <div className="preview-section">
-          <div className="card-preview">
-            <h4>Compact Card</h4>
-            <Cards
-              item={{
-                ...creatorFormData,
-                id: 'preview',
-                hp: 0,
-                stress: 0,
-                experience: creatorFormData.experience
-                  .filter(exp => exp.name && exp.name.trim())
-                  .map(exp => `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`),
-                features: [
-                  ...creatorFormData.passiveFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Passive' })),
-                  ...creatorFormData.actionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Action' })),
-                  ...creatorFormData.reactionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Reaction' }))
-                ],
-                traits: []
-              }}
-              type="adversary"
-              mode="compact"
-              onClick={() => {}}
-              onDelete={() => {}}
-              onEdit={() => {}}
-              onToggleVisibility={() => {}}
-              onApplyDamage={() => {}}
-              onApplyHealing={() => {}}
-              onApplyStressChange={() => {}}
-              onIncrement={() => {}}
-              onDecrement={() => {}}
-              isEditMode={false}
-              dragAttributes={null}
-              dragListeners={null}
-            />
-          </div>
-          <div className="card-preview">
-            <h4>Expanded Card</h4>
-            <Cards
-              item={{
-                ...creatorFormData,
-                id: 'preview',
-                hp: 0,
-                stress: 0,
-                experience: creatorFormData.experience
-                  .filter(exp => exp.name && exp.name.trim())
-                  .map(exp => `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`),
-                features: [
-                  ...creatorFormData.passiveFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Passive' })),
-                  ...creatorFormData.actionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Action' })),
-                  ...creatorFormData.reactionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Reaction' }))
-                ],
-                traits: []
-              }}
-              type="adversary"
-              mode="expanded"
-              onClick={() => {}}
-              onDelete={() => {}}
-              onEdit={() => {}}
-              onToggleVisibility={() => {}}
-              onApplyDamage={() => {}}
-              onApplyHealing={() => {}}
-              onApplyStressChange={() => {}}
-              onIncrement={() => {}}
-              onDecrement={() => {}}
-              isEditMode={false}
-              dragAttributes={null}
-              dragListeners={null}
-            />
-          </div>
+          <Cards
+            item={{
+              ...creatorFormData,
+              id: 'preview',
+              hp: 0,
+              stress: 0,
+              experience: creatorFormData.experience
+                .filter(exp => exp.name && exp.name.trim())
+                .map(exp => `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`),
+              features: [
+                ...creatorFormData.passiveFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Passive' })),
+                ...creatorFormData.actionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Action' })),
+                ...creatorFormData.reactionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Reaction' }))
+              ],
+              traits: []
+            }}
+            type="adversary"
+            mode="compact"
+            onClick={() => {}}
+            onDelete={() => {}}
+            onEdit={() => {}}
+            onToggleVisibility={() => {}}
+            onApplyDamage={() => {}}
+            onApplyHealing={() => {}}
+            onApplyStressChange={() => {}}
+            onIncrement={() => {}}
+            onDecrement={() => {}}
+            isEditMode={false}
+            dragAttributes={null}
+            dragListeners={null}
+          />
+          <Cards
+            item={{
+              ...creatorFormData,
+              id: 'preview',
+              hp: 0,
+              stress: 0,
+              experience: creatorFormData.experience
+                .filter(exp => exp.name && exp.name.trim())
+                .map(exp => `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`),
+              features: [
+                ...creatorFormData.passiveFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Passive' })),
+                ...creatorFormData.actionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Action' })),
+                ...creatorFormData.reactionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Reaction' }))
+              ],
+              traits: []
+            }}
+            type="adversary"
+            mode="expanded"
+            onClick={() => {}}
+            onDelete={() => {}}
+            onEdit={() => {}}
+            onToggleVisibility={() => {}}
+            onApplyDamage={() => {}}
+            onApplyHealing={() => {}}
+            onApplyStressChange={() => {}}
+            onIncrement={() => {}}
+            onDecrement={() => {}}
+            isEditMode={false}
+            dragAttributes={null}
+            dragListeners={null}
+          />
         </div>
       </PanelShell>
     )
