@@ -1,0 +1,242 @@
+MOTIVES & TACTICS ALIGNMENT DEBUG PROBLEM
+==========================================
+
+PROBLEM DESCRIPTION:
+The "Motives & Tactics" section of the expanded adversary card has a subtle vertical shift between view and edit modes. The text within the bordered boxes appears at slightly different vertical positions. Both modes use identical styling (including padding, height, line-height, and border) but the text baseline/positioning differs, causing a visual jump when toggling between view and edit. The goal is to eliminate this shift while keeping the label and the text content/input on the same line.
+
+CURRENT STATE:
+- Using flexbox with align-items: baseline for containers
+- Both view and edit modes have identical height (1.8rem), padding (0.25rem), line-height (1.2)
+- Both have identical borders (1px solid var(--border))
+- Text still shifts vertically between modes despite identical styling
+
+KEY FILES AND CODE SECTIONS:
+============================
+
+1. REACT COMPONENT: src/components/cards/AdversaryDetails.jsx
+------------------------------------------------------------
+
+VIEW MODE HTML STRUCTURE:
+```jsx
+{item.motives && (
+  <div className="motives-text">
+    <span className="motives-label">Motives & Tactics:</span>
+    <span className="motives-content">{item.motives}</span>
+  </div>
+)}
+```
+
+EDIT MODE HTML STRUCTURE:
+```jsx
+<div className="motives-input-container">
+  <label className="motives-label">Motives & Tactics:</label>
+  <input
+    type="text"
+    className="form-input-inline"
+    value={editData.motives || ''}
+    onChange={(e) => handleInputChange('motives', e.target.value)}
+    placeholder="Motives & Tactics"
+  />
+</div>
+```
+
+2. CSS STYLING: src/index.css
+-----------------------------
+
+VIEW MODE CONTAINER:
+```css
+.expanded-card.adversary .expanded-header .motives-text {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  width: 100%;
+  height: 1.8rem;
+  box-sizing: border-box;
+  line-height: 1.2;
+  overflow: hidden;
+  display: flex;
+  align-items: baseline; /* Current alignment strategy */
+  gap: 0.5rem;
+}
+```
+
+EDIT MODE CONTAINER:
+```css
+.expanded-card.adversary .expanded-header .motives-input-container {
+  display: flex;
+  align-items: baseline; /* Current alignment strategy */
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  height: 1.8rem;
+  padding: 0;
+  box-sizing: border-box;
+}
+```
+
+VIEW MODE LABEL:
+```css
+.expanded-card.adversary .expanded-header .motives-text .motives-label {
+  font-weight: bold;
+  color: var(--text-primary);
+  font-size: inherit;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 1.8rem;
+  line-height: 1.8rem;
+  display: flex;
+  align-items: center;
+  vertical-align: top;
+}
+```
+
+EDIT MODE LABEL:
+```css
+.expanded-card.adversary .expanded-header .motives-input-container .motives-label {
+  font-weight: bold;
+  color: var(--text-primary);
+  font-size: inherit;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 1.8rem;
+  line-height: 1.8rem;
+  display: flex;
+  align-items: center;
+  vertical-align: top;
+}
+```
+
+VIEW MODE CONTENT:
+```css
+.expanded-card.adversary .expanded-header .motives-text .motives-content {
+  flex: 1 !important;
+  padding: 0.25rem !important;
+  margin: 0 !important;
+  height: 1.8rem !important;
+  box-sizing: border-box !important;
+  line-height: 1.2 !important;
+  font-size: inherit !important;
+  font-family: inherit !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.25rem !important;
+  vertical-align: middle !important;
+}
+```
+
+EDIT MODE INPUT:
+```css
+.expanded-card.adversary .expanded-header .motives-input-container .form-input-inline {
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.25rem !important;
+  padding: 0.25rem !important;
+  font-size: inherit !important;
+  color: var(--text-primary) !important;
+  font-family: inherit !important;
+  flex: 1 !important;
+  height: 1.8rem !important;
+  box-sizing: border-box !important;
+  line-height: 1.2 !important;
+  transition: all 0.2s ease !important;
+  text-transform: none !important;
+  font-weight: normal !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+}
+```
+
+3. POTENTIAL OVERRIDES: src/App.css
+-----------------------------------
+
+GENERAL FORM INPUT RULES (potential overrides):
+```css
+.expanded-card .form-input,
+.expanded-card .form-select,
+.expanded-card .form-textarea {
+  width: 100%;
+  padding: 0.5rem; /* This was a key override */
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+```
+
+WHAT'S BEEN TRIED:
+=================
+
+1. TRANSPARENT BORDER STRATEGY:
+   - Added transparent borders to view mode to match edit mode borders
+   - This worked for name and description sections but not motives
+
+2. FLEXBOX APPROACHES:
+   - align-items: center (centered vertically but caused other issues)
+   - align-items: baseline (current approach)
+   - align-items: flex-start (didn't help)
+
+3. VERTICAL ALIGNMENT:
+   - vertical-align: top
+   - vertical-align: middle
+   - vertical-align: baseline
+
+4. HEIGHT AND LINE-HEIGHT MATCHING:
+   - Both containers: height: 1.8rem
+   - Both content/input: height: 1.8rem, line-height: 1.2
+   - Both labels: height: 1.8rem, line-height: 1.8rem
+
+5. PADDING AND MARGIN CONTROL:
+   - Both content/input: padding: 0.25rem
+   - Both content/input: margin: 0
+   - Both containers: padding: 0
+
+6. CSS SPECIFICITY:
+   - Added !important to override App.css rules
+   - Increased selector specificity
+
+7. DISPLAY PROPERTIES:
+   - display: flex (current)
+   - display: inline-block (caused wrapping issues)
+   - display: inline (didn't work)
+
+8. DEBUGGING TECHNIQUES:
+   - Added colored borders to visualize element boundaries
+   - Added background fills to reveal invisible space
+   - Temporarily removed save/cancel buttons to isolate issue
+
+WORKING SECTIONS FOR REFERENCE:
+==============================
+
+NAME SECTION (works perfectly):
+- Uses transparent border strategy
+- No vertical shift between view/edit modes
+- Same height, padding, border approach
+
+DESCRIPTION SECTION (works perfectly):
+- Uses transparent border strategy
+- Auto-resize textarea with height persistence
+- No vertical shift between view/edit modes
+
+CURRENT ISSUE:
+==============
+
+Despite having identical styling properties, the motives section still has a subtle vertical shift. The text appears to be positioned differently within the bordered containers between view and edit modes. This suggests there might be:
+
+1. Browser default styling differences between <span> and <input> elements
+2. Font rendering differences between text content and input fields
+3. Some CSS property not being applied consistently
+4. A layout calculation difference between flex containers
+
+QUESTIONS FOR DEBUGGING:
+========================
+
+1. Are there any browser default styles affecting <input> vs <span> that we haven't overridden?
+2. Is there a difference in how browsers calculate text baseline for input fields vs text content?
+3. Should we try matching the exact approach used in the working name section?
+4. Are there any CSS properties we're missing that could cause this shift?
+
+The goal is to achieve pixel-perfect alignment like the name and description sections.

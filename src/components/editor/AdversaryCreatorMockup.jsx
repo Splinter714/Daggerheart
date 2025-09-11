@@ -2,6 +2,22 @@ import React, { useEffect } from 'react'
 import adversariesData from '../../data/adversaries.json'
 
 const AdversaryCreatorMockup = ({ formData, setFormData }) => {
+  // Ensure formData has all required properties with defaults
+  const safeFormData = {
+    name: '',
+    type: 'Minion',
+    difficulty: '',
+    hp: 0,
+    stressMax: 0,
+    stressCurrent: 0,
+    hpCurrent: 0,
+    passiveFeatures: [{ name: '', description: '' }],
+    actionFeatures: [{ name: '', description: '' }],
+    reactionFeatures: [{ name: '', description: '' }],
+    experience: [{ name: '', modifier: 0 }],
+    ...formData
+  }
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -12,7 +28,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
   const handleFeatureChange = (type, index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      [`${type}Features`]: prev[`${type}Features`].map((feature, i) => 
+      [`${type}Features`]: (prev[`${type}Features`] || [{ name: '', description: '' }]).map((feature, i) => 
         i === index ? { ...feature, [field]: value } : feature
       )
     }))
@@ -20,11 +36,11 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
 
   const removeFeature = (type, index) => {
     // Don't allow removing the last feature of any type
-    if (formData[`${type}Features`].length <= 1) return
+    if (safeFormData[`${type}Features`].length <= 1) return
     
     setFormData(prev => ({
       ...prev,
-      [`${type}Features`]: prev[`${type}Features`].filter((_, i) => i !== index)
+      [`${type}Features`]: (prev[`${type}Features`] || [{ name: '', description: '' }]).filter((_, i) => i !== index)
     }))
   }
 
@@ -39,7 +55,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
 
   const removeExperience = (index) => {
     // Don't allow removing the last experience
-    if (formData.experience.length <= 1) return
+    if (safeFormData.experience.length <= 1) return
     
     setFormData(prev => ({
       ...prev,
@@ -49,33 +65,39 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
 
   // Auto-add empty experience when last one has content
   useEffect(() => {
-    const lastExp = formData.experience[formData.experience.length - 1]
-    if (lastExp && lastExp.name.trim() && lastExp.modifier !== 0) {
+    const experience = safeFormData.experience || []
+    if (experience.length === 0) return
+    
+    const lastExp = experience[experience.length - 1]
+    if (lastExp && lastExp.name && lastExp.name.trim() && lastExp.modifier !== 0) {
       setFormData(prev => ({
         ...prev,
-        experience: [...prev.experience, { name: '', modifier: 0 }]
+        experience: [...(prev.experience || []), { name: '', modifier: 0 }]
       }))
     }
-  }, [formData.experience, setFormData])
+  }, [safeFormData.experience, setFormData])
 
   // Auto-add empty features when last one has content for each type
   useEffect(() => {
     const featureTypes = ['passive', 'action', 'reaction']
     
     featureTypes.forEach(type => {
-      const lastFeature = formData[`${type}Features`][formData[`${type}Features`].length - 1]
-      if (lastFeature && lastFeature.name.trim() && lastFeature.description.trim()) {
+      const features = safeFormData[`${type}Features`] || []
+      if (features.length === 0) return
+      
+      const lastFeature = features[features.length - 1]
+      if (lastFeature && lastFeature.name && lastFeature.name.trim() && lastFeature.description && lastFeature.description.trim()) {
         setFormData(prev => ({
           ...prev,
-          [`${type}Features`]: [...prev[`${type}Features`], { name: '', description: '' }]
+          [`${type}Features`]: [...(prev[`${type}Features`] || []), { name: '', description: '' }]
         }))
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.passiveFeatures, formData.actionFeatures, formData.reactionFeatures, setFormData])
+  }, [safeFormData.passiveFeatures, safeFormData.actionFeatures, safeFormData.reactionFeatures, setFormData])
 
   const renderFeatureSection = (type, title) => {
-    const features = formData[`${type}Features`]
+    const features = safeFormData[`${type}Features`] || [{ name: '', description: '' }]
     
     return (
       <div className="form-section">
@@ -124,13 +146,13 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
             <input
               type="text"
               placeholder="Adversary name"
-              value={formData.name || ''}
+              value={safeFormData.name || ''}
               onChange={(e) => handleInputChange('name', e.target.value)}
             />
           </div>
           <div className="form-group">
             <select
-              value={formData.tier || 1}
+              value={safeFormData.tier || 1}
               onChange={(e) => handleInputChange('tier', parseInt(e.target.value))}
             >
               <option value={1}>Tier 1</option>
@@ -141,7 +163,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
           </div>
           <div className="form-group">
             <select
-              value={formData.type || ''}
+              value={safeFormData.type || ''}
               onChange={(e) => handleInputChange('type', e.target.value)}
             >
               <option value="">Type</option>
@@ -161,7 +183,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
               placeholder="Difficulty"
               min="1"
               max="21"
-              value={formData.difficulty || ''}
+              value={safeFormData.difficulty || ''}
               onChange={(e) => handleInputChange('difficulty', e.target.value === '' ? '' : parseInt(e.target.value))}
             />
           </div>
@@ -173,7 +195,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
               placeholder="Max HP"
               min="1"
               max="12"
-              value={formData.hpMax || ''}
+              value={safeFormData.hpMax || ''}
               onChange={(e) => handleInputChange('hpMax', e.target.value === '' ? '' : parseInt(e.target.value))}
             />
           </div>
@@ -185,7 +207,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
               placeholder="Max Stress"
               min="1"
               max="10"
-              value={formData.stressMax || ''}
+              value={safeFormData.stressMax || ''}
               onChange={(e) => handleInputChange('stressMax', e.target.value === '' ? '' : parseInt(e.target.value))}
             />
           </div>
@@ -200,8 +222,8 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
               placeholder="Major Threshold"
               min="1"
               max="20"
-              value={formData.thresholds?.major || ''}
-              onChange={(e) => handleInputChange('thresholds', { ...formData.thresholds, major: e.target.value === '' ? '' : parseInt(e.target.value) })}
+              value={safeFormData.thresholds?.major || ''}
+              onChange={(e) => handleInputChange('thresholds', { ...safeFormData.thresholds, major: e.target.value === '' ? '' : parseInt(e.target.value) })}
             />
           </div>
           <div className="form-group">
@@ -212,8 +234,8 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
               placeholder="Severe Threshold"
               min="1"
               max="25"
-              value={formData.thresholds?.severe || ''}
-              onChange={(e) => handleInputChange('thresholds', { ...formData.thresholds, severe: e.target.value === '' ? '' : parseInt(e.target.value) })}
+              value={safeFormData.thresholds?.severe || ''}
+              onChange={(e) => handleInputChange('thresholds', { ...safeFormData.thresholds, severe: e.target.value === '' ? '' : parseInt(e.target.value) })}
             />
           </div>
           <div className="form-group">
@@ -224,7 +246,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
               placeholder="ATK Bonus"
               min="0"
               max="10"
-              value={formData.atk || ''}
+              value={safeFormData.atk || ''}
               onChange={(e) => handleInputChange('atk', e.target.value === '' ? '' : parseInt(e.target.value))}
             />
           </div>
@@ -235,13 +257,13 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
             <input
               type="text"
               placeholder="Weapon"
-              value={formData.weapon || ''}
+              value={safeFormData.weapon || ''}
               onChange={(e) => handleInputChange('weapon', e.target.value)}
             />
           </div>
           <div className="form-group">
             <select
-              value={formData.range || ''}
+              value={safeFormData.range || ''}
               onChange={(e) => handleInputChange('range', e.target.value)}
             >
               <option value="">Range</option>
@@ -256,7 +278,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
             <input
               type="text"
               placeholder="Damage (e.g., 1d12+2 phy)"
-              value={formData.damage || ''}
+              value={safeFormData.damage || ''}
               onChange={(e) => handleInputChange('damage', e.target.value)}
             />
           </div>
@@ -265,7 +287,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
         <div className="form-group">
           <textarea
             placeholder="Description"
-            value={formData.description || ''}
+            value={safeFormData.description || ''}
             onChange={(e) => handleInputChange('description', e.target.value)}
             rows={2}
           />
@@ -275,7 +297,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
           <input
             type="text"
             placeholder="Motives & Tactics (e.g., Burrow, drag away, feed, reposition)"
-            value={formData.motives || ''}
+            value={safeFormData.motives || ''}
             onChange={(e) => handleInputChange('motives', e.target.value)}
           />
         </div>
@@ -284,7 +306,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
       {/* Experience */}
       <div className="form-section">
         <h4>Experience</h4>
-        {formData.experience.map((exp, index) => (
+        {safeFormData.experience.map((exp, index) => (
           <div key={index} className="experience-form">
             <div className="form-row">
               <div className="form-group">
@@ -305,7 +327,7 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
                   onChange={(e) => handleExperienceChange(index, 'modifier', e.target.value === '' ? 0 : parseInt(e.target.value))}
                 />
               </div>
-              {formData.experience.length > 1 && (
+              {safeFormData.experience.length > 1 && (
                 <button
                   className="remove-button-small"
                   onClick={() => removeExperience(index)}
