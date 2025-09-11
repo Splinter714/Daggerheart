@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="description" content="Static GM Dashboard for Daggerheart RPG" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/Daggerheart/manifest.json" />
+    
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Daggerheart GM" />
+    <link rel="apple-touch-icon" href="/Daggerheart/icon-192.png" />
+    
     <title>Daggerheart GM Dashboard</title>
     <style>
       * {
@@ -23,14 +35,29 @@
         min-height: 100vh;
       }
     </style>
-    <script type="module" crossorigin src="/Daggerheart/assets/index-7a80b9a3.js"></script>
+    <script type="module" crossorigin src="/Daggerheart/assets/index-546821cd.js"></script>
     <link rel="modulepreload" crossorigin href="/Daggerheart/assets/dndkit-fdc06b07.js">
     <link rel="modulepreload" crossorigin href="/Daggerheart/assets/fa-8ab3eb90.js">
     <link rel="modulepreload" crossorigin href="/Daggerheart/assets/lucide-a8a5326a.js">
-    <link rel="stylesheet" href="/Daggerheart/assets/index-8c5a956b.css">
+    <link rel="stylesheet" href="/Daggerheart/assets/index-5a0e098a.css">
   </head>
   <body>
     <div id="root"></div>
     
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
