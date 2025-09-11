@@ -1,5 +1,4 @@
-import React, { useRef } from 'react'
-import usePreventPullToRefresh from '../../hooks/usePreventPullToRefresh'
+import React from 'react'
 
 const MobileDrawer = ({
   isOpen,
@@ -10,8 +9,6 @@ const MobileDrawer = ({
   children
 }) => {
   const { onTouchStart, onTouchMove, onTouchEnd } = touchHandlers
-  const contentRef = useRef(null)
-  usePreventPullToRefresh(contentRef, isOpen)
   return (
     <div 
       className={`mobile-drawer ${isOpen ? 'open' : ''}`}
@@ -25,7 +22,6 @@ const MobileDrawer = ({
             : 'translateY(100%)',
           transition: drawerOffset ? 'none' : 'transform 0.25s cubic-bezier(0.4, 0.0, 0.2, 1)'
         }}
-        ref={contentRef}
         onTouchStart={(e) => {
           // Only stop propagation for swipe gestures, not normal taps
           // Let the swipe handler determine if this is a swipe gesture
