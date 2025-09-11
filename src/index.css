@@ -1677,6 +1677,8 @@ textarea,
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
     touch-action: pan-y !important; /* Allow vertical scrolling, JavaScript handles swipe-to-dismiss */
+    overflow-y: auto !important; /* Allow vertical scrolling */
+    -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS Safari */
   }
   
   .drawer-body .expanded-content {
@@ -1748,6 +1750,8 @@ textarea,
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
     touch-action: pan-y !important; /* Allow vertical scroll and taps within cards */
+    overflow-y: auto !important; /* Allow vertical scrolling */
+    -webkit-overflow-scrolling: touch !important; /* Smooth scrolling on iOS Safari */
   }
   
 }
@@ -1919,6 +1923,7 @@ textarea,
   overflow: visible; /* Allow content to show */
   white-space: nowrap;
   min-width: 120px; /* Minimum width for text */
+  max-width: calc(100vw - 2rem); /* Prevent overflow on narrow screens */
 }
 
 .flyout-menu.show {
@@ -1926,6 +1931,20 @@ textarea,
   visibility: visible;
   transform: translateX(-50%); /* Keep centered when shown */
   pointer-events: auto;
+}
+
+/* Responsive positioning for narrow screens */
+@media (max-width: 768px) {
+  .flyout-menu {
+    left: auto;
+    right: 0;
+    transform: none;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .flyout-menu.show {
+    transform: none;
+  }
 }
 
 .flyout-menu-item {

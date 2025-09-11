@@ -135,7 +135,7 @@ const BottomBar = ({
           </button>
           <div className="flyout-menu-item help-flyout-item" style={{cursor: 'default', color: 'var(--text-secondary)'}}>
             <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
-              <span>{`Version: 0.1.0 (${typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev'})`}</span>
+              <span>Version {typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev'}</span>
             </div>
           </div>
         </div>
