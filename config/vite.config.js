@@ -26,7 +26,7 @@ function getGitCommitHash() {
 export default defineConfig({
   plugins: [react()],
   root: path.resolve(__dirname, '../src'),
-  base: '/Daggerheart/', // GitHub Pages subdirectory
+  base: process.env.NODE_ENV === 'production' ? '/Daggerheart/' : '/', // GitHub Pages subdirectory only in production
   publicDir: path.resolve(__dirname, '../public'), // Point to public directory
   define: {
     __APP_VERSION__: JSON.stringify(`${getPackageVersion()} (${getGitCommitHash()})`)
@@ -34,6 +34,11 @@ export default defineConfig({
   server: {
     host: '0.0.0.0', // Bind to all network interfaces
     port: 5173, // Default Vite port
+    hmr: {
+      port: 5173,
+      host: 'localhost'
+    },
+    force: true // Force reload on changes
   },
   build: {
     outDir: path.resolve(__dirname, '../dist'),

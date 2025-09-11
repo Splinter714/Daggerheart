@@ -1,0 +1,38 @@
+.motives-row {
+  display: flex;
+  align-items: center;      /* center, not baseline */
+  gap: 0.5rem;
+  height: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.motives-label {
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;           /* avoid baseline drift */
+  height: 1.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.inline-field {
+  appearance: none;
+  -webkit-appearance: none; /* normalize UA quirks */
+  display: flex;            /* identical box model */
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+  height: 1.8rem;
+  padding: 0.25rem 0.5rem;
+  margin: 0;
+  font: inherit;
+  color: var(--text-primary, inherit);
+  line-height: 1;           /* rely on padding for centering */
+}
+
+.inline-field[readonly] {
+  pointer-events: none;
+}

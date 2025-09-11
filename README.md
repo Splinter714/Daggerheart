@@ -151,7 +151,7 @@ Happy gaming!
 *Built with love for the Daggerheart community*
 ## Daggerheart™ Compatibility
 
-![Community Content Logo](assets/logos/README-PLACE-A-COMPATIBLE-LOGO-FILENAME-HERE.png)
+![Community Content Logo](assets/logos/Darrington%20Press%20Community%20Content%20Logos/Daggerheart/PNGs/DH_CGL_logos_final_full_color.png)
 
 This project uses only **Public Game Content** from the **Daggerheart SRD 1.0** and follows the
 **Darrington Press Community Gaming License (DPCGL)**.

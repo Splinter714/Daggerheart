@@ -58,7 +58,23 @@ const Cards = ({
     if (type === 'countdown') {
       return { name: '', description: '', max: 5, value: 0 }
     } else if (type === 'adversary') {
-      return { name: '', description: '', type: '', tier: 1, difficulty: 1, hpMax: 1, stressMax: 0, abilities: [], traits: [] }
+      return { 
+        name: '', 
+        description: '', 
+        type: '', 
+        tier: 1, 
+        difficulty: 1, 
+        hpMax: 1, 
+        stressMax: 0, 
+        passiveFeatures: [{ name: '', description: '' }], 
+        actionFeatures: [{ name: '', description: '' }], 
+        reactionFeatures: [{ name: '', description: '' }],
+        thresholds: { major: 0, severe: 0 },
+        atk: 0,
+        weapon: 'Weapon',
+        range: 'Melee',
+        damage: '1d6 phy'
+      }
     } else {
       return { name: '', description: '', type: '', tier: 1, difficulty: 1, effects: [], hazards: [] }
     }
@@ -72,8 +88,14 @@ const Cards = ({
       return {
         ...defaultData,
         ...item,
-        abilities: item.abilities || [],
-        traits: item.traits || [],
+        passiveFeatures: item.passiveFeatures || item.features?.filter(f => f.type === 'Passive') || [{ name: '', description: '' }],
+        actionFeatures: item.actionFeatures || item.features?.filter(f => f.type === 'Action') || [{ name: '', description: '' }],
+        reactionFeatures: item.reactionFeatures || item.features?.filter(f => f.type === 'Reaction') || [{ name: '', description: '' }],
+        thresholds: item.thresholds || { major: 0, severe: 0 },
+        atk: item.atk || 0,
+        weapon: item.weapon || 'Weapon',
+        range: item.range || 'Melee',
+        damage: item.damage || '1d6 phy',
         effects: item.effects || [],
         hazards: item.hazards || []
       }
@@ -139,7 +161,7 @@ const Cards = ({
   }
 
   function renderExpanded() {
-    if (isEditMode) {
+    if (isEditMode && type !== 'adversary') {
       return renderExpandedEdit()
     } else {
       return renderExpandedDisplay()
@@ -157,7 +179,15 @@ const Cards = ({
         />
       )
     } else if (type === 'adversary') {
-      return (<AdversaryDetails item={item} />)
+      return (<AdversaryDetails 
+        item={item} 
+        onApplyDamage={_onApplyDamage}
+        onApplyHealing={_onApplyHealing}
+        onApplyStressChange={_onApplyStressChange}
+        isEditMode={isEditMode}
+        onSave={onSave}
+        onCancel={onExitEditMode}
+      />)
     } else {
       const HeaderRight = () => (
         <div className="header-actions">
@@ -217,8 +247,16 @@ const Cards = ({
           hpMax: editData.hpMax,
           stress: 0,
           stressMax: editData.stressMax,
-          abilities: editData.abilities.filter(ability => ability.trim()),
-          traits: editData.traits.filter(trait => trait.trim())
+          thresholds: editData.thresholds,
+          atk: editData.atk,
+          weapon: editData.weapon,
+          range: editData.range,
+          damage: editData.damage,
+          features: [
+            ...editData.passiveFeatures.filter(f => f.name.trim()).map(f => ({ ...f, type: 'Passive' })),
+            ...editData.actionFeatures.filter(f => f.name.trim()).map(f => ({ ...f, type: 'Action' })),
+            ...editData.reactionFeatures.filter(f => f.name.trim()).map(f => ({ ...f, type: 'Reaction' }))
+          ]
         }),
         ...(type === 'environment' && {
           effects: editData.effects.filter(effect => effect.trim()),

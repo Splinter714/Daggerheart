@@ -1,13 +1,15 @@
 import React, { Suspense } from 'react'
 import PanelShell from './PanelShell'
 import Cards from '../cards/Cards'
+import Browser from '../browser/Browser'
+import AdversaryCreatorMockup from '../editor/AdversaryCreatorMockup'
 
-const Browser = React.lazy(() => import('../browser/Browser'))
 const Creator = React.lazy(() => import('../editor/Creator'))
 
 const RightPanel = ({
   showMockup,
   creatorFormData,
+  setCreatorFormData,
   rightColumnMode,
   databaseType,
   selectedItem,
@@ -30,71 +32,14 @@ const RightPanel = ({
 }) => {
   if (showMockup) {
     return (
-      <PanelShell className="right-panel-shell preview-right-column">
-        <div className="preview-section">
-          <Cards
-            item={{
-              ...creatorFormData,
-              id: 'preview',
-              hp: 0,
-              stress: 0,
-              experience: creatorFormData.experience
-                .filter(exp => exp.name && exp.name.trim())
-                .map(exp => `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`),
-              features: [
-                ...creatorFormData.passiveFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Passive' })),
-                ...creatorFormData.actionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Action' })),
-                ...creatorFormData.reactionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Reaction' }))
-              ],
-              traits: []
-            }}
-            type="adversary"
-            mode="compact"
-            onClick={() => {}}
-            onDelete={() => {}}
-            onEdit={() => {}}
-            onToggleVisibility={() => {}}
-            onApplyDamage={() => {}}
-            onApplyHealing={() => {}}
-            onApplyStressChange={() => {}}
-            onIncrement={() => {}}
-            onDecrement={() => {}}
-            isEditMode={false}
-            dragAttributes={null}
-            dragListeners={null}
-          />
-          <Cards
-            item={{
-              ...creatorFormData,
-              id: 'preview',
-              hp: 0,
-              stress: 0,
-              experience: creatorFormData.experience
-                .filter(exp => exp.name && exp.name.trim())
-                .map(exp => `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`),
-              features: [
-                ...creatorFormData.passiveFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Passive' })),
-                ...creatorFormData.actionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Action' })),
-                ...creatorFormData.reactionFeatures.filter(f => f.name && f.name.trim()).map(f => ({ ...f, type: 'Reaction' }))
-              ],
-              traits: []
-            }}
-            type="adversary"
-            mode="expanded"
-            onClick={() => {}}
-            onDelete={() => {}}
-            onEdit={() => {}}
-            onToggleVisibility={() => {}}
-            onApplyDamage={() => {}}
-            onApplyHealing={() => {}}
-            onApplyStressChange={() => {}}
-            onIncrement={() => {}}
-            onDecrement={() => {}}
-            isEditMode={false}
-            dragAttributes={null}
-            dragListeners={null}
-          />
+      <PanelShell className="right-panel-shell">
+        <div className="creator-header">
+          <h3>New Adversary</h3>
         </div>
+        <AdversaryCreatorMockup 
+          formData={creatorFormData}
+          setFormData={setCreatorFormData}
+        />
       </PanelShell>
     )
   }
@@ -119,6 +64,9 @@ const RightPanel = ({
             onSave={(updatedItem) => {
               if (selectedType === 'adversary') {
                 updateAdversary(updatedItem.id, updatedItem)
+                // Force a re-render by updating the selectedItem reference
+                // This ensures the Cards component gets the updated data
+                console.log('RightPanel: Updated adversary, should trigger re-render')
               } else if (selectedType === 'environment') {
                 updateEnvironment(updatedItem.id, updatedItem)
               }
@@ -130,20 +78,18 @@ const RightPanel = ({
 
       {rightColumnMode === 'database' && (
         <div className="database-display" onClick={(e) => e.stopPropagation()}>
-          <Suspense fallback={<div style={{padding:'1rem'}}>Loading...</div>}>
-            <Browser
-              type={databaseType}
-              onAddItem={(itemData) => {
-                if (databaseType === 'adversary') {
-                  createAdversary(itemData)
-                } else if (databaseType === 'environment') {
-                  createEnvironment(itemData)
-                }
-              }}
-              onCancel={onClose}
-              onCreateCustom={() => onOpenCreator(databaseType)}
-            />
-          </Suspense>
+          <Browser
+            type={databaseType}
+            onAddItem={(itemData) => {
+              if (databaseType === 'adversary') {
+                createAdversary(itemData)
+              } else if (databaseType === 'environment') {
+                createEnvironment(itemData)
+              }
+            }}
+            onCancel={onClose}
+            onCreateCustom={() => onOpenCreator(databaseType)}
+          />
         </div>
       )}
 

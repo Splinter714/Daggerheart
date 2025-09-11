@@ -579,25 +579,112 @@ textarea,
   text-transform: uppercase;
   margin: 0 0 0.25rem 0;
   color: var(--text-primary);
+  line-height: 1.2;
+  height: 1.8rem; /* Match input height exactly */
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border); /* Reserve space for input border */
+  border-radius: 0.25rem; /* Match input border radius */
+  padding: 0; /* Match input padding */
+  box-sizing: border-box; /* Include border in height calculation */
 }
 
-.expanded-card.adversary .tier-info {
-  font-size: 0.9rem;
-  font-weight: bold;
-  font-style: italic;
+.expanded-card.adversary .tier-type-badges {
+  display: flex;
+  gap: 0.5rem; /* Normal gap, let horizontal shift happen in edit mode */
   margin-bottom: 0.5rem;
-  color: var(--text-primary);
+  align-items: center;
+  min-height: 1.75rem; /* Match dropdown height */
+}
+
+.expanded-card.adversary .tier-type-badges .tier-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center; /* Center text */
+  /* Width determined by content */
+}
+
+.expanded-card.adversary .tier-type-badges .type-badge {
+  padding: 0.25rem 0.5rem; /* Normal padding, center text properly */
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center; /* Center text */
+  /* Width determined by content */
 }
 
 .expanded-card.adversary .description-text {
   font-style: italic;
   margin-bottom: 0.5rem;
   color: var(--text-primary);
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  width: 100%;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+  line-height: 1.2;
+  overflow: hidden;
+  white-space: pre-wrap;
 }
 
-.expanded-card.adversary .motives-text {
+.expanded-card.adversary .expanded-header .motives-text {
   margin-bottom: 0.5rem;
   color: var(--text-primary);
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  width: 100%;
+  height: 1.8rem;
+  box-sizing: border-box;
+  line-height: 1.2;
+  overflow: hidden;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.expanded-card.adversary .expanded-header .motives-text .motives-label {
+  font-weight: bold;
+  color: var(--text-primary);
+  font-size: inherit;
+  font-family: inherit;
+  white-space: nowrap;
+  height: 1.8rem;
+  line-height: 1.8rem;
+  vertical-align: top;
+  display: inline;
+  margin-right: 0.5rem;
+}
+
+.expanded-card.adversary .expanded-header .motives-text .motives-content {
+  padding: 0.25rem !important;
+  margin: 0 !important;
+  height: 1.8rem !important;
+  box-sizing: border-box !important;
+  line-height: 1.2 !important;
+  font-size: inherit !important;
+  font-family: inherit !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.25rem !important;
+  flex: 1 !important;
 }
 
 /* Core Stats Block */
@@ -616,6 +703,7 @@ textarea,
   flex-wrap: wrap;
   gap: 0.25rem;
   overflow: hidden;
+  min-height: 2rem; /* Fixed height for stats rows */
 }
 
 .stats-row:last-child {
@@ -640,6 +728,391 @@ textarea,
   padding: 1rem;
 }
 
+/* Interactive Controls Section */
+.interactive-controls-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  min-height: 4rem; /* Fixed height for controls row */
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3rem; /* Fixed height for control groups */
+}
+
+.control-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hp-controls .hp-symbols,
+.stress-controls .stress-symbols {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.damage-controls {
+  cursor: pointer;
+}
+
+/* Inline Form Elements for Edit Mode */
+.edit-header-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.edit-actions .save-button,
+.edit-actions .cancel-button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-actions .save-button {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: white;
+}
+
+.edit-actions .save-button:hover {
+  background: var(--primary-dark);
+}
+
+.edit-actions .cancel-button:hover {
+  background: var(--bg-card-hover);
+}
+
+/* Fixed container sizes to prevent layout shifts - ALL SECTIONS */
+.expanded-card.adversary {
+  min-height: 40rem; /* Fixed overall card height */
+}
+
+.expanded-header {
+  min-height: 8rem; /* Fixed height to prevent shifts */
+}
+
+.core-stats-block {
+  min-height: 6rem; /* Fixed height for stats section */
+}
+
+.interactive-controls-section {
+  min-height: 8rem; /* Fixed height for controls */
+}
+
+.features-section {
+  min-height: 20rem; /* Fixed height for features */
+}
+
+.feature-type-section {
+  min-height: 6rem; /* Fixed height per feature type */
+}
+
+.feature-text {
+  min-height: 2rem; /* Fixed height per feature */
+}
+
+.feature-edit-row {
+  min-height: 2rem; /* Fixed height per edit row */
+}
+
+.edit-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem; /* Match h2 margin-bottom */
+  height: 1.8rem; /* Match h2 height exactly */
+}
+
+.edit-header-row .form-input-inline {
+  flex: 1;
+  margin-right: 1rem;
+  margin-bottom: 0; /* Remove margin-bottom since edit-header-row provides it */
+}
+
+.edit-header-row .edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.edit-header-row .edit-actions .save-button,
+.edit-header-row .edit-actions .cancel-button {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-header-row .edit-actions .save-button {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: white;
+}
+
+.edit-header-row .edit-actions .save-button:hover {
+  background: var(--primary-dark);
+}
+
+.edit-header-row .edit-actions .cancel-button:hover {
+  background: var(--bg-card-hover);
+}
+
+/* Header form inputs - match h2 exactly */
+.expanded-header .form-input-inline {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  padding: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  font-family: inherit;
+  line-height: 1.2;
+  height: 1.8rem; /* Match h2 height exactly */
+  margin: 0; /* Remove margin since edit-header-row provides spacing */
+  transition: all 0.2s ease;
+  box-sizing: border-box; /* Include border in height calculation */
+  display: flex;
+  align-items: center;
+}
+
+.expanded-header .form-input-inline:focus {
+  outline: none;
+  border-color: var(--purple);
+  background-color: rgba(79, 70, 229, 0.05);
+}
+
+.expanded-header .edit-header-controls .form-select-inline-small {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  padding: 0.25rem 2rem 0.25rem 0.5rem; /* Extra right padding for arrow */
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-family: inherit;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  text-align: center; /* Center text regardless of arrow */
+  transition: all 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1rem;
+  width: 5rem; /* Adequate width for tier dropdown text */
+}
+
+/* Type dropdown needs wider width for longer options */
+.expanded-header .edit-header-controls .form-select-inline-small[data-type="type"] {
+  width: 6.5rem; /* Adequate width for type dropdown text */
+}
+
+.expanded-header .edit-header-controls .form-select-inline-small:focus {
+  outline: none;
+  border-color: var(--purple);
+  background-color: var(--bg-card);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%234f46e5' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+}
+
+.expanded-header .form-textarea-inline {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  padding: 0;
+  font-size: inherit;
+  font-style: italic;
+  color: var(--text-primary);
+  font-family: inherit;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  resize: none;
+  transition: all 0.2s ease;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+  line-height: 1.2;
+  overflow: hidden;
+  vertical-align: top;
+  margin-top: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.expanded-card.adversary .expanded-header .motives-input-container {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  height: 1.8rem;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.expanded-card.adversary .expanded-header .motives-input-container .motives-label {
+  font-weight: bold;
+  color: var(--text-primary);
+  font-size: inherit;
+  font-family: inherit;
+  white-space: nowrap;
+  height: 1.8rem;
+  line-height: 1.8rem;
+  vertical-align: top;
+  display: inline;
+  margin-right: 0.5rem;
+}
+
+.expanded-card.adversary .expanded-header .motives-input-container .form-input-inline {
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.25rem !important;
+  padding: 0.25rem !important;
+  font-size: inherit !important;
+  color: var(--text-primary) !important;
+  font-family: inherit !important;
+  height: 1.8rem !important;
+  box-sizing: border-box !important;
+  line-height: 1.2 !important;
+  transition: all 0.2s ease !important;
+  text-transform: none !important;
+  font-weight: normal !important;
+  margin: 0 !important;
+  flex: 1 !important;
+}
+
+/* Stats form inputs - match stat-item exactly */
+.stat-item .form-input-inline-small {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  width: auto;
+  min-width: 1.5rem;
+  max-width: 3rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.stat-item .form-select-inline-small {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  width: auto;
+  min-width: 2rem;
+  max-width: 4rem;
+  transition: all 0.2s ease;
+}
+
+/* Feature form inputs - match feature-text exactly */
+.feature-edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  background: var(--bg-dark);
+  border-radius: 0.25rem;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.feature-edit-row:hover {
+  border-color: var(--border);
+}
+
+.feature-edit-row .form-input-inline {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 900;
+  text-decoration: underline;
+  color: var(--text-primary);
+  font-family: inherit;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.feature-edit-row .form-textarea-inline {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  padding: 0;
+  font-size: inherit;
+  color: var(--text-primary);
+  line-height: 1.1;
+  font-weight: 300;
+  font-family: inherit;
+  width: 100%;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+/* Focus states for all inline form elements */
+.form-input-inline:focus,
+.form-select-inline-small:focus,
+.form-textarea-inline:focus {
+  outline: none;
+  border-color: var(--purple);
+  background: var(--bg-card);
+}
+
 .feature-type-section {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -654,6 +1127,7 @@ textarea,
 
 .feature-type-header {
   margin: 0 0 0.75rem 0;
+  min-height: 2rem; /* Fixed height for feature headers */
 }
 
 .feature-type-header h4 {
@@ -1976,6 +2450,51 @@ textarea,
 
 .flyout-menu-item.help-flyout-item:last-child:hover {
   background: none;
+}
+
+/* Help Attribution Section */
+.help-attribution {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-dark);
+  max-width: 320px;
+}
+
+.help-logo {
+  width: 120px;
+  height: auto;
+  display: block;
+  margin: 0 auto 1rem auto;
+  filter: brightness(0.9);
+}
+
+.help-attribution-text {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.help-attribution-text p {
+  margin: 0 0 0.75rem 0;
+}
+
+.help-attribution-text p:last-child {
+  margin-bottom: 0;
+}
+
+.help-attribution-text a {
+  color: var(--purple);
+  text-decoration: none;
+}
+
+.help-attribution-text a:hover {
+  text-decoration: underline;
+}
+
+.help-attribution-text em {
+  color: var(--text-secondary);
+  font-style: italic;
 }
 
 /* Countdown Control Panel */
@@ -6444,19 +6963,21 @@ textarea,
   height: 35px !important; /* Keep button square */
   padding: 0 !important;
   margin: 0 !important;
-  border: none !important;
-  border-radius: 0 !important;
+  border: 2px dashed var(--border) !important;
+  border-radius: 0.5rem !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background: var(--purple) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--purple) !important;
+  background: var(--bg-dark) !important;
+  color: var(--text-secondary) !important;
+  transition: all 0.2s ease !important;
 }
 
 .table-add-btn:hover {
-  background: var(--primary-dark) !important;
-  border-color: var(--primary-dark) !important;
+  background: var(--bg-card) !important;
+  border-color: var(--purple) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
 .browser-filters {

@@ -47,8 +47,8 @@ import './App.css'
 // Import all the UI components
 import Cards from './components/cards/Cards'
 import AdversaryCreatorMockup from './components/editor/AdversaryCreatorMockup'
+import Browser from './components/browser/Browser'
 // Lazy-load heavy right-panel components
-const Browser = React.lazy(() => import('./components/browser/Browser'))
 const Creator = React.lazy(() => import('./components/editor/Creator'))
 import { 
   getAdvancementForOutcome,
@@ -316,39 +316,22 @@ const AppContent = () => {
       {/* Main Content Area */}
       <div className="main-content" key={`mobile-${isMobile}`}>
         {/* Unified Layout - Reuse desktop structure for mobile */}
-        {/* Left Panel: Game Board or Creator */}
+        {/* Left Panel: Game Board */}
         <div className={`left-panel ${isMobile && mobileView === 'right' ? 'mobile-hidden' : ''}`}>
-          {showMockup ? (
-            <div className="creator-left-column">
-              <div className="creator-header">
-                <h3>New Adversary</h3>
-              </div>
-              <AdversaryCreatorMockup 
-                formData={creatorFormData}
-                setFormData={setCreatorFormData}
-              />
-            </div>
-          ) : (
-            <>
-              {/* Mobile navigation when on left panel but right content exists - removed View Details button */}
-              
-
-              <LeftPanel
-                onItemSelect={handleItemSelect}
-                onOpenDatabase={handleOpenDatabase}
-                onOpenCreator={handleOpenCreator}
-                isEditMode={isEditMode}
-                onEditModeChange={setIsEditMode}
-                showLongTermCountdowns={showLongTermCountdowns}
-                fear={fear}
-                updateFear={updateFear}
-                handleRollOutcome={handleRollOutcome}
-                handleActionRoll={handleActionRoll}
-                setShowLongTermCountdowns={setShowLongTermCountdowns}
-                lastAddedItemType={lastAddedItemType}
-              />
-            </>
-          )}
+          <LeftPanel
+            onItemSelect={handleItemSelect}
+            onOpenDatabase={handleOpenDatabase}
+            onOpenCreator={handleOpenCreator}
+            isEditMode={isEditMode}
+            onEditModeChange={setIsEditMode}
+            showLongTermCountdowns={showLongTermCountdowns}
+            fear={fear}
+            updateFear={updateFear}
+            handleRollOutcome={handleRollOutcome}
+            handleActionRoll={handleActionRoll}
+            setShowLongTermCountdowns={setShowLongTermCountdowns}
+            lastAddedItemType={lastAddedItemType}
+          />
         </div>
 
         {/* Right Panel: Details, Database, Creator, or Preview */}
@@ -356,6 +339,7 @@ const AppContent = () => {
           <RightPanel
             showMockup={showMockup}
             creatorFormData={creatorFormData}
+            setCreatorFormData={setCreatorFormData}
             rightColumnMode={rightColumnMode}
             databaseType={databaseType}
             selectedItem={selectedItem}
@@ -364,7 +348,13 @@ const AppContent = () => {
             createAdversary={(item) => { createAdversary(item); setLastAddedItemType('adversary') }}
             createEnvironment={(item) => { createEnvironment(item); setLastAddedItemType('environment') }}
             createCountdown={(item) => { createCountdown(item); setLastAddedItemType('countdown') }}
-            updateAdversary={updateAdversary}
+            updateAdversary={(id, updates) => {
+              updateAdversary(id, updates)
+              // Update selectedItem if it's the same adversary
+              if (selectedItem && selectedItem.id === id) {
+                setSelectedItem(prev => ({ ...prev, ...updates }))
+              }
+            }}
             updateEnvironment={updateEnvironment}
             advanceCountdown={advanceCountdown}
             onClose={handleCloseRightColumn}
@@ -389,29 +379,27 @@ const AppContent = () => {
           touchHandlers={{ onTouchStart: handleTouchStart, onTouchMove: handleTouchMove, onTouchEnd: handleTouchEnd }}
         >
           {rightColumnMode === 'database' && (
-            <React.Suspense fallback={<div style={{padding:'1rem'}}>Loading...</div>}>
-              <Browser
-                type={databaseType}
-                onAddItem={(itemData, itemType) => {
-                  console.log('App.jsx onAddItem called with:', itemData, 'type:', itemType)
-                  console.log('Current databaseType:', databaseType)
-                  if (databaseType === 'adversary') {
-                    console.log('Creating adversary...')
-                    createAdversary(itemData)
-                    setLastAddedItemType('adversary')
-                  } else if (databaseType === 'environment') {
-                    console.log('Creating environment...')
-                    createEnvironment(itemData)
-                    setLastAddedItemType('environment')
-                  }
-                  setDrawerOffset(0)
-                  resetSwipeState()
-                  // Removed drawerRefreshKey increment to preserve filter state
-                }}
-                onCancel={handleCloseRightColumn}
-                onCreateCustom={() => handleOpenCreator(databaseType)}
-              />
-            </React.Suspense>
+            <Browser
+              type={databaseType}
+              onAddItem={(itemData, itemType) => {
+                console.log('App.jsx onAddItem called with:', itemData, 'type:', itemType)
+                console.log('Current databaseType:', databaseType)
+                if (databaseType === 'adversary') {
+                  console.log('Creating adversary...')
+                  createAdversary(itemData)
+                  setLastAddedItemType('adversary')
+                } else if (databaseType === 'environment') {
+                  console.log('Creating environment...')
+                  createEnvironment(itemData)
+                  setLastAddedItemType('environment')
+                }
+                setDrawerOffset(0)
+                resetSwipeState()
+                // Removed drawerRefreshKey increment to preserve filter state
+              }}
+              onCancel={handleCloseRightColumn}
+              onCreateCustom={() => handleOpenCreator(databaseType)}
+            />
           )}
           {rightColumnMode === 'creator' && (
             <React.Suspense fallback={<div style={{padding:'1rem'}}>Loading...</div>}>

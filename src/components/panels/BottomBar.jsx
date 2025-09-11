@@ -138,6 +138,20 @@ const BottomBar = ({
               <span>Version {typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev'}</span>
             </div>
           </div>
+          
+          {/* DPCGL Attribution */}
+          <div className="help-attribution">
+            <img 
+              src="/assets/logos/Darrington Press Community Content Logos/Daggerheart/PNGs/DH_CGL_logos_final_black.png"
+              alt="Daggerheart Community Content Logo"
+              className="help-logo"
+            />
+            <div className="help-attribution-text">
+              <p>This product includes materials from the Daggerheart System Reference Document 1.0, © Critical Role, LLC, under the terms of the Darrington Press Community Gaming (DPCGL) License.</p>
+              <p>More information can be found at <a href="https://www.daggerheart.com" target="_blank" rel="noopener noreferrer">daggerheart.com</a></p>
+              <p><em>This project is unofficial and not endorsed by Darrington Press or Critical Role.</em></p>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
