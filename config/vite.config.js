@@ -27,6 +27,7 @@ export default defineConfig({
   plugins: [react()],
   root: path.resolve(__dirname, '../src'),
   base: '/Daggerheart/', // GitHub Pages subdirectory
+  publicDir: path.resolve(__dirname, '../public'), // Point to public directory
   define: {
     __APP_VERSION__: JSON.stringify(`${getPackageVersion()} (${getGitCommitHash()})`)
   },
