@@ -1576,34 +1576,36 @@ textarea,
     background: var(--bg-dark);
     border-top: 1px solid var(--border);
     border-radius: 16px 16px 0 0;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* body will scroll */
-    pointer-events: none; /* hidden by default */
-    visibility: hidden; /* hidden by default */
+    height: 100%; /* Use full height of container */
+    overflow: hidden;
+    pointer-events: none; /* Prevent content from receiving events when hidden */
+    visibility: hidden; /* Ensure content is completely hidden when not open */
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: none !important; /* Prevent all touch gestures to stop pull-to-refresh */
+    /* Removed transition - no animation */
+    will-change: transform; /* Optimize for transform animations */
   }
   
   .drawer-body {
     padding: 0;
+    height: calc(100% - 60px); /* Adjusted for actual header height */
     display: flex;
     flex-direction: column;
-    min-height: 0; /* allow flex child to shrink */
-    flex: 1 1 auto; /* take remaining space */
-    overflow-y: auto; /* primary scroller */
-    -webkit-overflow-scrolling: touch;
+    overflow-y: auto; /* Allow scrolling on drawer body */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: pan-y !important; /* Allow vertical scrolling and taps */
   }
   
-  /* Special case: when drawer contains expanded cards, allow natural scrolling */
-  .drawer-body:has(.expanded-card) {
-    overscroll-behavior: auto !important; /* Allow natural overscroll */
-    overscroll-behavior-y: auto !important; /* Allow natural vertical overscroll */
-    touch-action: auto !important; /* Allow all natural touch gestures */
-  }
   
   .mobile-drawer.open .drawer-content {
-    pointer-events: auto;
-    visibility: visible;
+    pointer-events: auto; /* Allow content events only when drawer is open */
+    visibility: visible; /* Make content visible when drawer is open */
+    overscroll-behavior: none !important; /* Ensure PTR prevention when open */
+    overscroll-behavior-y: none !important; /* Ensure vertical PTR prevention when open */
+    touch-action: pan-y !important; /* Allow vertical scrolling and taps when open */
   }
   
   .drawer-header {
@@ -1644,12 +1646,6 @@ textarea,
     /* Remove PTR restrictions to allow natural scrolling */
   }
   
-  /* When drawer contains expanded cards, remove ALL restrictions */
-  .drawer-body:has(.expanded-card) {
-    overscroll-behavior: auto !important;
-    overscroll-behavior-y: auto !important;
-    touch-action: auto !important;
-  }
 
   /* Mobile drawer browser specific styles */
   .drawer-body .browser-container {
@@ -1738,11 +1734,6 @@ textarea,
     touch-action: none !important; /* Prevent PTR on handle drag */
   }
   
-  /* Allow scrolling in expanded card content areas */
-  .drawer-body .expanded-card {
-    overflow-y: auto !important; /* Enable scrolling */
-    -webkit-overflow-scrolling: touch !important; /* Smooth iOS scrolling */
-  }
   
 }
 
@@ -3241,6 +3232,8 @@ textarea,
   flex-wrap: wrap;
   align-content: flex-start;
   row-gap: 0.125rem;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .simple-list-row.compact.adversary .hp-controls,
