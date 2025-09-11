@@ -54,7 +54,7 @@ const AdversaryDetails = ({ item, HeaderRight }) => {
         {/* Primary Stats Row */}
         <div className="stats-row">
           <span className="stat-item">
-            <strong>Difficulty:</strong> {item.difficulty}
+            <strong>Diff:</strong> {item.difficulty}
           </span>
           <span className="stat-separator">|</span>
           <span className="stat-item">
