@@ -24,18 +24,28 @@ export const GameStateProvider = ({ children }) => {
   // Load state from localStorage on mount
   useEffect(() => {
     const savedState = localStorage.getItem('daggerheart-game-state');
+    console.log('Loading game state from localStorage:', savedState);
     if (savedState) {
       try {
         const parsedState = JSON.parse(savedState);
-        setGameState(parsedState);
+        console.log('Parsed game state:', parsedState);
+        // Only set state if it's not empty
+        if (parsedState.adversaries?.length > 0 || parsedState.environments?.length > 0 || parsedState.countdowns?.length > 0) {
+          setGameState(parsedState);
+        } else {
+          console.log('Saved state is empty, keeping default state');
+        }
       } catch (error) {
         console.error('Failed to load saved state:', error);
       }
+    } else {
+      console.log('No saved game state found in localStorage');
     }
   }, []);
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
+    console.log('Saving game state to localStorage:', gameState);
     localStorage.setItem('daggerheart-game-state', JSON.stringify(gameState));
   }, [gameState]);
 

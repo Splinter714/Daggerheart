@@ -94,7 +94,7 @@ const Button = ({
       } else if (action === 'edit' || action === 'view' || action === 'filter' || action === 'increment' || action === 'decrement') {
         variantClass = 'btn-secondary'     // Informational/adjustment actions
       } else if (action === 'confirm' || action === 'add' || action === 'save') {
-        variantClass = 'btn-success'       // Positive actions
+        variantClass = 'btn-primary'       // Positive actions - changed from btn-success (green) to btn-primary (blue)
       } else if (action === 'toggle' || action === 'cancel') {
         variantClass = 'btn-secondary'     // State changes
       } else if (action === 'success' || action === 'critical') {

@@ -43,7 +43,11 @@ const CountdownsSection = ({
         addButtonAria="Add Countdown"
       />
       {showInlineCreator.campaign && (
-        <InlineCountdownCreator source="campaign" onCreateCountdown={onCreateCountdown} />
+        <InlineCountdownCreator 
+          source="campaign" 
+          onCreateCountdown={onCreateCountdown}
+          onCancel={() => onToggleInlineCreator('campaign')}
+        />
       )}
       {sectionVisibility.countdowns && countdowns && countdowns.length > 0 && (
         <CountdownTriggerControls

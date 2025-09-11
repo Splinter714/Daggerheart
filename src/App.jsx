@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, startTransition } from 'react'
 
 // Simple Error Boundary for debugging
-class ErrorBoundary extends React.Component {
+class _ErrorBoundary extends React.Component {
   constructor(props) {
     super(props)
     this.state = { hasError: false, error: null }
@@ -88,7 +88,6 @@ const AppContent = () => {
   const [showMockup, setShowMockup] = useState(false)
   const [lastAddedItemType, setLastAddedItemType] = useState(null)
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
-  const [drawerRefreshKey, setDrawerRefreshKey] = useState(0)
   
   // Touch gesture handling for mobile drawer via reusable hook
   const {
@@ -234,13 +233,16 @@ const AppContent = () => {
     
     if (hasAnyDrawerOpen) {
       document.body.classList.add('mobile-drawer-open')
+      document.documentElement.classList.add('mobile-drawer-open')
     } else {
       document.body.classList.remove('mobile-drawer-open')
+      document.documentElement.classList.remove('mobile-drawer-open')
     }
     
     // Cleanup on unmount
     return () => {
       document.body.classList.remove('mobile-drawer-open')
+      document.documentElement.classList.remove('mobile-drawer-open')
     }
   }, [isMobile, mobileDrawerOpen, selectedItem])
 
@@ -387,7 +389,6 @@ const AppContent = () => {
           setDrawerOffset={setDrawerOffset}
           onClose={handleCloseRightColumn}
           touchHandlers={{ onTouchStart: handleTouchStart, onTouchMove: handleTouchMove, onTouchEnd: handleTouchEnd }}
-          refreshKey={drawerRefreshKey}
         >
           {rightColumnMode === 'database' && (
             <React.Suspense fallback={<div style={{padding:'1rem'}}>Loading...</div>}>
@@ -407,7 +408,7 @@ const AppContent = () => {
                   }
                   setDrawerOffset(0)
                   resetSwipeState()
-                  setDrawerRefreshKey(prev => prev + 1)
+                  // Removed drawerRefreshKey increment to preserve filter state
                 }}
                 onCancel={handleCloseRightColumn}
                 onCreateCustom={() => handleOpenCreator(databaseType)}

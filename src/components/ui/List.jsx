@@ -58,14 +58,7 @@ const List = ({
       setDrawerItem(item)
       setDrawerOpen(true)
       
-      // Focus the tapped card in the main view
-      const cardElement = document.querySelector(`[data-item-id="${item.id}"]`)
-      if (cardElement) {
-        cardElement.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
-        })
-      }
+      // Auto-scroll behavior removed - no longer needed
     } else {
       // On desktop, use normal item selection
       if (onItemSelect) {
@@ -140,9 +133,9 @@ const List = ({
 
   return (
     <div
-      onTouchStart={() => { try { document.body.classList.add('dragging') } catch {} }}
-      onTouchEnd={() => { try { document.body.classList.remove('dragging') } catch {} }}
-      onTouchCancel={() => { try { document.body.classList.remove('dragging') } catch {} }}
+      onTouchStart={() => { try { document.body.classList.add('dragging') } catch (_e) { /* ignore */ } }}
+      onTouchEnd={() => { try { document.body.classList.remove('dragging') } catch (_e) { /* ignore */ } }}
+      onTouchCancel={() => { try { document.body.classList.remove('dragging') } catch (_e) { /* ignore */ } }}
     >
       {/* List Container */}
       <DndContext
@@ -267,7 +260,7 @@ const SortableItem = ({
       style={style}
       className={`sortable-item ${isSelected ? 'selected' : ''}`}
       data-item-id={item.id}
-      onClick={(e) => {
+      onClick={(_e) => {
         if (!isDragging) {
           onMobileCardClick(item)
         }

@@ -1,28 +1,80 @@
-import React, { useState } from 'react'
-import { Check } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Check, X } from 'lucide-react'
 
 const InlineCountdownCreator = ({ 
   source, // 'adversary', 'environment', or 'campaign'
-  onCreateCountdown
+  onCreateCountdown,
+  onCancel
 }) => {
   const [formData, setFormData] = useState({
     name: '',
-    max: 5,
+    max: '',
     type: 'standard',
     loop: 'none'
   })
+  const [error, setError] = useState('')
+
+  // Handle escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onCancel && onCancel()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onCancel])
+
+  const validateMaxValue = (value) => {
+    const numValue = parseInt(value)
+    if (numValue > 100) {
+      setError('Maximum value is 100')
+      setFormData(prev => ({ ...prev, max: '100' }))
+      setTimeout(() => setError(''), 2000)
+      return false
+    }
+    return true
+  }
 
   const handleInputChange = (field, value) => {
+    if (field === 'max') {
+      if (!validateMaxValue(value)) {
+        return
+      }
+      setError('') // Clear error when valid value is entered
+    }
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.target.name === 'max' || e.target.className.includes('inline-number')) {
+      const currentValue = parseInt(e.target.value) || 0
+      
+      // Handle arrow keys and other increment strategies
+      if (e.key === 'ArrowUp' && currentValue >= 100) {
+        e.preventDefault()
+        validateMaxValue('101') // Trigger validation
+        return
+      }
+      
+      if (e.key === 'ArrowDown' && currentValue <= 1) {
+        e.preventDefault()
+        setFormData(prev => ({ ...prev, max: '1' }))
+        return
+      }
+    }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!formData.name.trim()) return
     
+    const maxValue = parseInt(formData.max) || 1
+    const clampedMax = Math.min(Math.max(maxValue, 1), 100) // Clamp between 1 and 100
+    
     const countdownData = {
       name: formData.name.trim(),
-      max: formData.max,
+      max: clampedMax,
       type: formData.type,
       loop: formData.loop,
       source: source
@@ -33,7 +85,7 @@ const InlineCountdownCreator = ({
     // Reset form
     setFormData({
       name: '',
-      max: 5,
+      max: '',
       type: 'standard',
       loop: 'none'
     })
@@ -53,16 +105,25 @@ const InlineCountdownCreator = ({
             autoFocus
           />
           
-          <input
-            type="number"
-            inputMode="numeric"
-            enterKeyHint="done"
-            min="1"
-            max="20"
-            value={formData.max}
-            onChange={(e) => handleInputChange('max', parseInt(e.target.value) || 1)}
-            className="inline-number"
-          />
+          <div className="inline-number-container">
+              <input
+                type="number"
+                inputMode="numeric"
+                enterKeyHint="done"
+                min="1"
+                max="100"
+                value={formData.max}
+                onChange={(e) => handleInputChange('max', e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="inline-number"
+                title="Max value: 100"
+              />
+            {error && (
+              <div className="error-popup">
+                <div className="error-message">{error}</div>
+              </div>
+            )}
+          </div>
           
           <select
             value={formData.type}
@@ -89,6 +150,14 @@ const InlineCountdownCreator = ({
           </select>
           
           <div className="inline-countdown-actions">
+            <button
+              type="button"
+              className="inline-btn cancel"
+              title="Cancel"
+              onClick={onCancel}
+            >
+              <X size={14} />
+            </button>
             <button
               type="submit"
               className="inline-btn save"

@@ -3,18 +3,8 @@ import usePersistentState from './usePersistentState'
 
 export default function useBrowser(type) {
   const [searchTerm, setSearchTerm] = usePersistentState(`browser-search-${type}`, '')
-  const getInitialSelectedFilters = () => {
-    const saved = localStorage.getItem(`browser-filters-${type}`)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        return { tiers: Array.isArray(parsed.tiers) ? parsed.tiers : [], types: Array.isArray(parsed.types) ? parsed.types : [] }
-      } catch (e) { return { tiers: [], types: [] } }
-    }
-    return { tiers: [], types: [] }
-  }
-  const [selectedTiers, setSelectedTiers] = usePersistentState(`browser-filters-tiers-${type}`, getInitialSelectedFilters().tiers)
-  const [selectedTypes, setSelectedTypes] = usePersistentState(`browser-filters-types-${type}`, getInitialSelectedFilters().types)
+  const [selectedTiers, setSelectedTiers] = usePersistentState(`browser-filters-tiers-${type}`, [])
+  const [selectedTypes, setSelectedTypes] = usePersistentState(`browser-filters-types-${type}`, [])
   const getInitialSortState = () => {
     const savedSort = localStorage.getItem(`browser-sort-${type}`)
     if (savedSort) {
@@ -46,20 +36,6 @@ export default function useBrowser(type) {
     }
   }, [expandedCard, type])
 
-  useEffect(() => {
-    const saved = localStorage.getItem(`browser-filters-${type}`)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setSelectedTiers(Array.isArray(parsed.tiers) ? parsed.tiers : [])
-        setSelectedTypes(Array.isArray(parsed.types) ? parsed.types : [])
-      } catch {
-        setSelectedTiers([]); setSelectedTypes([])
-      }
-    } else {
-      setSelectedTiers([]); setSelectedTypes([])
-    }
-  }, [type, setSelectedTiers, setSelectedTypes])
 
   const handleSort = (field) => {
     setSortFields(prev => {

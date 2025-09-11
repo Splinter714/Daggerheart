@@ -913,7 +913,7 @@ textarea,
   border-radius: 0.25rem;
   background: var(--bg-dark);
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: 1rem; /* 16px to prevent mobile auto-zoom */
 }
 
 .stat-block-divider {
@@ -1421,9 +1421,9 @@ textarea,
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: transparent; /* No background shadow */
     opacity: 0;
-    transition: opacity 0.3s ease;
+    /* Removed transition - no fade animation */
     pointer-events: none; /* Prevent backdrop from receiving events when hidden */
     visibility: hidden; /* Ensure backdrop is completely hidden when not open */
   }
@@ -1449,6 +1449,8 @@ textarea,
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
     touch-action: none !important; /* Prevent all touch gestures to stop pull-to-refresh */
+    /* Removed transition - no animation */
+    will-change: transform; /* Optimize for transform animations */
   }
   
   .drawer-body {
@@ -1563,10 +1565,17 @@ textarea,
 
   /* Prevent background scrolling when any mobile drawer is open */
   body.mobile-drawer-open {
-    overflow: hidden; /* Lock background scroll without fixing body */
+    overflow: hidden !important; /* Lock background scroll */
+    height: 100vh !important; /* Prevent height changes */
     touch-action: pan-y; /* Allow vertical scrolling and taps inside drawers */
-    overscroll-behavior: none; /* Prevent pull-to-refresh */
-    overscroll-behavior-y: none; /* Prevent vertical pull-to-refresh */
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+  }
+  
+  /* Additional prevention for html element */
+  html.mobile-drawer-open {
+    overflow: hidden !important;
+    height: 100vh !important;
   }
   
   /* Prevent page movement while dragging list items */
@@ -2103,10 +2112,15 @@ textarea,
 
 .countdown-symbols {
   display: flex;
-  gap: 0.0625rem; /* Reduced from 0.125rem */
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Allow groups to wrap to new rows */
+  gap: 0.5rem; /* Increased gap between groups for more visual separation */
   align-content: flex-start;
-  row-gap: 0.125rem;
+}
+
+.countdown-pip-group {
+  display: flex;
+  gap: 0.03125rem; /* Tightened spacing between pips within each group */
+  justify-content: flex-start; /* Keep pips within each group tight */
 }
 
 .countdown-symbol {
@@ -2125,6 +2139,7 @@ textarea,
 .countdown-symbol.empty {
   color: var(--grey);
   font-size: 0.875rem; /* Ensure consistent font size */
+  font-weight: 600; /* Match filled symbols to prevent layout shift */
 }
 
 .countdown-symbol:hover {
@@ -3005,10 +3020,15 @@ textarea,
 
 .simple-list-row.compact.countdown .countdown-symbols {
   display: flex;
-  gap: 0.125rem;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Allow groups to wrap to new rows */
+  gap: 0.5rem; /* Increased gap between groups for more visual separation */
   align-content: flex-start;
-  row-gap: 0.125rem;
+}
+
+.simple-list-row.compact.countdown .countdown-pip-group {
+  display: flex;
+  gap: 0.0625rem; /* Tightened spacing between pips within each group */
+  justify-content: flex-start; /* Keep pips within each group tight */
 }
 
 .simple-list-row.compact.countdown .countdown-symbol {
@@ -3029,6 +3049,7 @@ textarea,
   color: var(--text-secondary);
   opacity: 0.6;
   font-size: 0.875rem; /* Ensure consistent font size */
+  font-weight: 600; /* Match filled symbols to prevent layout shift */
 }
 
 .simple-list-row.compact.countdown .countdown-symbol:hover {
@@ -3171,7 +3192,6 @@ textarea,
 .difficulty-section {
   display: flex;
   align-items: center;
-  margin-left: 0.5rem;
 }
 
 .difficulty-shield-container {
@@ -3289,7 +3309,7 @@ textarea,
   border-radius: 0.375rem;
   background: var(--bg-dark);
   color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: 1rem; /* 16px to prevent mobile auto-zoom */
   transition: all 0.2s ease;
 }
 
@@ -4345,7 +4365,7 @@ textarea,
   align-items: center;
   gap: 0.75rem;
   position: relative;
-  width: fit-content; /* Make container only as wide as needed */
+  width: 100%; /* Use full width for consistent button alignment */
 }
 
 .section-title-row h3 {
@@ -4355,6 +4375,9 @@ textarea,
   font-size: 1rem;
   font-weight: 600;
   white-space: nowrap; /* Prevent text wrapping */
+  width: 140px; /* Fixed width for consistent button positioning - increased for "ENVIRONMENTS" */
+  flex-shrink: 0;
+  text-align: left; /* Ensure text is left-aligned within the container */
 }
 
 .section-title-row .btn {
@@ -4705,7 +4728,7 @@ textarea,
   border-radius: 0.5rem;
   background: var(--bg-card);
   color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: 1rem; /* 16px to prevent mobile auto-zoom */
   width: 100%;
 }
 
@@ -5437,6 +5460,7 @@ textarea,
   color: var(--text-secondary);
   opacity: 0.6;
   font-size: 0.875rem; /* Ensure consistent font size */
+  font-weight: 600; /* Match filled symbols to prevent layout shift */
 }
 
 .countdown-symbols-section {
@@ -5959,12 +5983,14 @@ textarea,
 .countdown-symbol.filled {
   color: var(--purple);
   font-size: 0.875rem; /* Ensure consistent font size */
+  font-weight: 600; /* Match filled symbols to prevent layout shift */
 }
 
 .countdown-symbol.empty {
   color: var(--text-secondary);
   opacity: 0.6;
   font-size: 0.875rem; /* Ensure consistent font size */
+  font-weight: 600; /* Match filled symbols to prevent layout shift */
 }
 
 .description-badge {
@@ -6767,4 +6793,87 @@ textarea,
     font-size: 0.7rem;
     padding: 0.2rem 0.4rem;
   }
+}
+
+/* Prevent mobile auto-zoom on all input elements */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Disable pull-to-refresh on entire gameboard/left panel on mobile */
+@media (max-width: 768px) {
+  .left-panel,
+  .gameboard,
+  .gameboard * {
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    touch-action: pan-y !important; /* Allow vertical scrolling but prevent PTR */
+  }
+}
+
+/* Remove number input arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Error popup styles */
+.error-popup {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #dc2626; /* Less intense red */
+  color: white;
+  padding: 6px 10px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  z-index: 1000;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
+.error-popup::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 3px solid transparent;
+  border-top-color: #dc2626; /* Match the less intense red */
+}
+
+.error-message {
+  white-space: nowrap;
+}
+
+/* Make inline countdown creator relative for error popup positioning */
+.inline-countdown-creator {
+  position: relative;
+}
+
+/* Position error popup relative to the number input specifically */
+.inline-number-container {
+  position: relative;
+}
+
+/* Add space below adversary section for better scrolling */
+.adversaries-section {
+  margin-bottom: 2rem;
 }

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef } from 'react'
 import usePreventPullToRefresh from '../../hooks/usePreventPullToRefresh'
 
 const MobileDrawer = ({
@@ -7,8 +7,7 @@ const MobileDrawer = ({
   setDrawerOffset,
   onClose,
   touchHandlers,
-  children,
-  refreshKey
+  children
 }) => {
   const { onTouchStart, onTouchMove, onTouchEnd } = touchHandlers
   const contentRef = useRef(null)
@@ -16,7 +15,6 @@ const MobileDrawer = ({
   return (
     <div 
       className={`mobile-drawer ${isOpen ? 'open' : ''}`}
-      key={`drawer-${refreshKey}`}
     >
       <div className="drawer-backdrop" onClick={onClose} />
       <div 
@@ -25,7 +23,7 @@ const MobileDrawer = ({
           transform: isOpen 
             ? `translateY(${drawerOffset}px)` 
             : 'translateY(100%)',
-          transition: drawerOffset ? 'none' : 'transform 0.3s ease'
+          transition: drawerOffset ? 'none' : 'transform 0.25s cubic-bezier(0.4, 0.0, 0.2, 1)'
         }}
         ref={contentRef}
         onTouchStart={(e) => {
