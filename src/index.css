@@ -1745,6 +1745,11 @@ textarea,
   color: var(--text-primary);
 }
 
+.sidebar-nav-item.help-active {
+  background: var(--purple);
+  color: var(--text-primary);
+}
+
 .sidebar-nav-item.disabled {
   opacity: 0.4;
   cursor: not-allowed;
@@ -1813,6 +1818,22 @@ textarea,
 .flyout-menu-item.delete-flyout-item:hover {
   background: var(--red);
   color: var(--text-primary);
+}
+
+.flyout-menu-item.help-flyout-item {
+  justify-content: flex-start;
+  text-align: left;
+  padding: 0.25rem 1rem;
+  height: auto;
+  min-height: 32px;
+}
+
+.flyout-menu-item.help-flyout-item:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.flyout-menu-item.help-flyout-item:last-child:hover {
+  background: none;
 }
 
 /* Countdown Control Panel */

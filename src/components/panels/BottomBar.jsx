@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Pencil, Trash2, Wrench } from 'lucide-react'
+import { Pencil, Trash2, Wrench, HelpCircle } from 'lucide-react'
 
 const BottomBar = ({
   isEditMode,
@@ -14,11 +14,13 @@ const BottomBar = ({
   deleteCountdown
 }) => {
   const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
+  const [helpFlyoutOpen, setHelpFlyoutOpen] = useState(false)
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.sidebar-nav-item')) {
         setDeleteFlyoutOpen(false)
+        setHelpFlyoutOpen(false)
       }
     }
     document.addEventListener('click', handleClickOutside)
@@ -102,6 +104,40 @@ const BottomBar = ({
               </div>
             </button>
           )}
+        </div>
+      </div>
+
+      <div
+        className={`sidebar-nav-item ${helpFlyoutOpen ? 'help-active' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation()
+          setHelpFlyoutOpen(!helpFlyoutOpen)
+          setDeleteFlyoutOpen(false)
+        }}
+        title="Help & Info"
+        style={{ cursor: 'pointer' }}
+      >
+        <div className="sidebar-nav-icon">
+          <HelpCircle size={20} />
+        </div>
+        <div className={`flyout-menu ${helpFlyoutOpen ? 'show' : ''}`}>
+          <button 
+            className="flyout-menu-item help-flyout-item" 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              setHelpFlyoutOpen(false); 
+              window.open('https://github.com/Splinter714/Daggerheart', '_blank')
+            }}
+          >
+            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+              <span>GitHub</span>
+            </div>
+          </button>
+          <div className="flyout-menu-item help-flyout-item" style={{cursor: 'default', color: 'var(--text-secondary)'}}>
+            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+              <span>{`Version: 0.1.0 (${typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev'})`}</span>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
