@@ -9,12 +9,212 @@ const AdversaryDetails = ({ item, HeaderRight, onApplyDamage, onApplyHealing, on
   // Edit mode state
   const [editData, setEditData] = useState(item)
   const [descriptionHeight, setDescriptionHeight] = useState('auto')
+  const [motivesHeight, setMotivesHeight] = useState('auto')
 
   // Update edit data when item changes
   React.useEffect(() => {
     console.log('AdversaryDetails: Item prop changed:', item)
     setEditData(item)
   }, [item])
+
+  // Recalculate description height on window resize
+  React.useEffect(() => {
+    const recalculateHeight = () => {
+      if (editData.description) {
+        // Try to find the actual textarea element first (when in edit mode)
+        let actualTextarea = document.querySelector('.expanded-header .form-textarea-inline')
+        
+        // If not found, try to find any form-textarea-inline element to get base styles
+        if (!actualTextarea) {
+          actualTextarea = document.querySelector('.form-textarea-inline')
+        }
+        
+        // If still not found, create a temporary element to get computed styles
+        if (!actualTextarea) {
+          const tempDiv = document.createElement('div')
+          tempDiv.className = 'expanded-header'
+          const tempTextarea = document.createElement('textarea')
+          tempTextarea.className = 'form-textarea-inline'
+          tempDiv.appendChild(tempTextarea)
+          document.body.appendChild(tempDiv)
+          actualTextarea = tempTextarea
+        }
+        
+        const computedStyle = window.getComputedStyle(actualTextarea)
+        
+        // Create a temporary textarea with the same styles
+        const tempTextarea = document.createElement('textarea')
+        tempTextarea.style.cssText = `
+          position: absolute;
+          top: -9999px;
+          left: -9999px;
+          width: ${computedStyle.width};
+          padding: ${computedStyle.padding};
+          border: ${computedStyle.border};
+          border-radius: ${computedStyle.borderRadius};
+          font-family: ${computedStyle.fontFamily};
+          font-size: ${computedStyle.fontSize};
+          line-height: ${computedStyle.lineHeight};
+          font-weight: ${computedStyle.fontWeight};
+          font-style: ${computedStyle.fontStyle};
+          box-sizing: ${computedStyle.boxSizing};
+          resize: none;
+          overflow: hidden;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+        `
+        tempTextarea.value = editData.description
+        document.body.appendChild(tempTextarea)
+        
+        const newHeight = tempTextarea.scrollHeight + 'px'
+        document.body.removeChild(tempTextarea)
+        
+        // Clean up temporary element if we created one
+        if (!document.querySelector('.expanded-header .form-textarea-inline') && !document.querySelector('.form-textarea-inline')) {
+          const tempDiv = actualTextarea.parentElement
+          if (tempDiv && tempDiv.className === 'expanded-header') {
+            document.body.removeChild(tempDiv)
+          }
+        }
+        
+        setDescriptionHeight(newHeight)
+      }
+    }
+
+    // Calculate initial height if description exists, or set default height
+    if (editData.description && descriptionHeight === 'auto') {
+      // Use setTimeout to ensure the DOM is ready
+      setTimeout(recalculateHeight, 0)
+    } else if (descriptionHeight === 'auto') {
+      // Let browser calculate natural single-line height
+      setDescriptionHeight('auto')
+    }
+
+    // Add resize listener
+    window.addEventListener('resize', recalculateHeight)
+    
+    return () => {
+      window.removeEventListener('resize', recalculateHeight)
+    }
+  }, [editData.description, descriptionHeight])
+
+  // Ensure height is applied when switching to edit mode
+  React.useEffect(() => {
+    if (isEditMode && editData.description && descriptionHeight !== 'auto') {
+      // Use setTimeout to ensure the textarea is rendered
+      setTimeout(() => {
+        const textarea = document.querySelector('.expanded-header .form-textarea-inline')
+        if (textarea) {
+          textarea.style.height = descriptionHeight
+        }
+      }, 0)
+    }
+  }, [isEditMode, editData.description, descriptionHeight])
+
+  // Recalculate motives height on window resize
+  React.useEffect(() => {
+    const recalculateMotivesHeight = () => {
+      if (editData.motives) {
+        // Try to find the actual motives input element first (when in edit mode)
+        let actualInput = document.querySelector('.motives-field .inline-field')
+        
+        // If not found, try to find any inline-field element to get base styles
+        if (!actualInput) {
+          actualInput = document.querySelector('.inline-field')
+        }
+        
+        // If still not found, create a temporary element to get computed styles
+        if (!actualInput) {
+          const tempDiv = document.createElement('div')
+          tempDiv.className = 'motives-field'
+          const tempTextarea = document.createElement('textarea')
+          tempTextarea.className = 'inline-field'
+          tempDiv.appendChild(tempTextarea)
+          document.body.appendChild(tempDiv)
+          actualInput = tempTextarea
+        }
+        
+        const computedStyle = window.getComputedStyle(actualInput)
+        
+        // Create a temporary textarea with the same styles
+        const tempTextarea = document.createElement('textarea')
+        tempTextarea.style.cssText = `
+          position: absolute;
+          top: -9999px;
+          left: -9999px;
+          width: ${computedStyle.width};
+          padding: ${computedStyle.padding};
+          border: ${computedStyle.border};
+          border-radius: ${computedStyle.borderRadius};
+          font-family: ${computedStyle.fontFamily};
+          font-size: ${computedStyle.fontSize};
+          line-height: ${computedStyle.lineHeight};
+          font-weight: ${computedStyle.fontWeight};
+          font-style: ${computedStyle.fontStyle};
+          box-sizing: ${computedStyle.boxSizing};
+          resize: none;
+          overflow: hidden;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+        `
+        tempTextarea.value = editData.motives
+        document.body.appendChild(tempTextarea)
+        
+        const newHeight = tempTextarea.scrollHeight + 'px'
+        document.body.removeChild(tempTextarea)
+        
+        // Clean up temporary element if we created one
+        if (!document.querySelector('.motives-field .inline-field') && !document.querySelector('.inline-field')) {
+          const tempDiv = actualInput.parentElement
+          if (tempDiv && tempDiv.className === 'motives-field') {
+            document.body.removeChild(tempDiv)
+          }
+        }
+        
+        setMotivesHeight(newHeight)
+        
+        // Also update any existing container heights
+        const containers = document.querySelectorAll('.motives-field')
+        containers.forEach(container => {
+          container.style.height = newHeight
+        })
+      }
+    }
+
+    // Calculate initial height if motives exists, or set default height
+    if (editData.motives && motivesHeight === 'auto') {
+      // Use setTimeout to ensure the DOM is ready
+      setTimeout(recalculateMotivesHeight, 0)
+    } else if (motivesHeight === 'auto') {
+      // Let browser calculate natural single-line height
+      setMotivesHeight('auto')
+    }
+
+    // Add resize listener
+    window.addEventListener('resize', recalculateMotivesHeight)
+    
+    return () => {
+      window.removeEventListener('resize', recalculateMotivesHeight)
+    }
+  }, [editData.motives, motivesHeight])
+
+  // Ensure motives height is applied when switching to edit mode
+  React.useEffect(() => {
+    if (isEditMode && editData.motives && motivesHeight !== 'auto') {
+      // Use setTimeout to ensure the textarea is rendered
+      setTimeout(() => {
+        const textarea = document.querySelector('.motives-field .inline-field')
+        if (textarea) {
+          textarea.style.height = motivesHeight
+          // Also update the container height
+          const container = textarea.parentElement
+          if (container) {
+            container.style.height = motivesHeight
+          }
+        }
+      }, 0)
+    }
+  }, [isEditMode, editData.motives, motivesHeight])
 
   const handleInputChange = (field, value) => {
     setEditData(prev => ({
@@ -103,7 +303,7 @@ const AdversaryDetails = ({ item, HeaderRight, onApplyDamage, onApplyHealing, on
                 placeholder="Adversary name"
               />
               <div className="edit-actions">
-                {/* <button 
+                <button 
                   className="save-button"
                   onClick={handleSave}
                 >
@@ -114,7 +314,7 @@ const AdversaryDetails = ({ item, HeaderRight, onApplyDamage, onApplyHealing, on
                   onClick={onCancel}
                 >
                   Cancel
-                </button> */}
+                </button>
               </div>
             </div>
             <div className="edit-header-controls">
@@ -159,18 +359,32 @@ const AdversaryDetails = ({ item, HeaderRight, onApplyDamage, onApplyHealing, on
                 setDescriptionHeight(newHeight)
               }}
               placeholder="Description"
-              rows={2}
               style={{ height: descriptionHeight }}
             />
             <div className="motives-row">
               <span className="motives-label">Motives & Tactics:</span>
-              <input
-                type="text"
-                className="inline-field"
-                value={editData.motives || ''}
-                onChange={(e) => handleInputChange('motives', e.target.value)}
-                placeholder="Motives & Tactics"
-              />
+              <div className="motives-field" style={{ height: motivesHeight }}>
+                <textarea
+                  className="inline-field"
+                  value={editData.motives || ''}
+                  onChange={(e) => {
+                    handleInputChange('motives', e.target.value)
+                    // Auto-resize textarea and save height
+                    e.target.style.height = 'auto'
+                    const newHeight = e.target.scrollHeight + 'px'
+                    e.target.style.height = newHeight
+                    setMotivesHeight(newHeight)
+                    
+                    // Update the container height to match
+                    const container = e.target.parentElement
+                    if (container) {
+                      container.style.height = newHeight
+                    }
+                  }}
+                  placeholder="Motives & Tactics"
+                  style={{ height: motivesHeight }}
+                />
+              </div>
             </div>
           </>
         ) : (
@@ -188,14 +402,16 @@ const AdversaryDetails = ({ item, HeaderRight, onApplyDamage, onApplyHealing, on
             {item.motives && (
               <div className="motives-row">
                 <span className="motives-label">Motives & Tactics:</span>
-                <input
-                  type="text"
-                  className="inline-field"
-                  value={item.motives || ""}
-                  readOnly
-                  aria-readonly="true"
-                  tabIndex={-1}
-                />
+                <div className="motives-field" style={{ height: motivesHeight }}>
+                  <textarea
+                    className="inline-field"
+                    value={item.motives || ""}
+                    readOnly
+                    aria-readonly="true"
+                    tabIndex={-1}
+                    style={{ height: motivesHeight }}
+                  />
+                </div>
               </div>
             )}
           </>
@@ -268,19 +484,60 @@ const AdversaryDetails = ({ item, HeaderRight, onApplyDamage, onApplyHealing, on
           ) : (
             <>
               <span className="stat-item">
-                <strong>Diff:</strong> {item.difficulty}
+                <strong>Diff:</strong> 
+                <input
+                  type="number"
+                  className="form-input-inline-small"
+                  value={item.difficulty || ''}
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                />
               </span>
               <span className="stat-separator">|</span>
               <span className="stat-item">
-                <strong>Thresholds:</strong> {item.thresholds?.major || '?'}/{item.thresholds?.severe || '?'}
+                <strong>Thresholds:</strong> 
+                <input
+                  type="number"
+                  className="form-input-inline-small"
+                  value={item.thresholds?.major || ''}
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                />
+                /
+                <input
+                  type="number"
+                  className="form-input-inline-small"
+                  value={item.thresholds?.severe || ''}
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                />
               </span>
               <span className="stat-separator">|</span>
               <span className="stat-item">
-                <strong>HP:</strong> {item.hpMax || 1}
+                <strong>HP:</strong> 
+                <input
+                  type="number"
+                  className="form-input-inline-small"
+                  value={item.hpMax || ''}
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                />
               </span>
               <span className="stat-separator">|</span>
               <span className="stat-item">
-                <strong>Stress:</strong> {item.stressMax || 0}
+                <strong>Stress:</strong> 
+                <input
+                  type="number"
+                  className="form-input-inline-small"
+                  value={item.stressMax || ''}
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                />
               </span>
             </>
           )}
@@ -291,13 +548,13 @@ const AdversaryDetails = ({ item, HeaderRight, onApplyDamage, onApplyHealing, on
           {isEditMode ? (
             <>
               <span className="stat-item">
-                <strong>ATK:</strong> +
+                <strong>ATK:</strong> 
                 <input
                   type="number"
                   className="form-input-inline-small"
                   value={editData.atk || ''}
                   onChange={(e) => handleInputChange('atk', e.target.value === '' ? '' : parseInt(e.target.value))}
-                  min="0"
+                  min="-10"
                   max="10"
                 />
               </span>
@@ -314,15 +571,16 @@ const AdversaryDetails = ({ item, HeaderRight, onApplyDamage, onApplyHealing, on
                 </strong>: 
                 <select
                   className="form-select-inline-small"
+                  data-field="range"
                   value={editData.range || ''}
                   onChange={(e) => handleInputChange('range', e.target.value)}
                 >
-                  <option value="">Range</option>
+                  <option value="">Select Range</option>
                   <option value="Melee">Melee</option>
+                  <option value="Very Close">Very Close</option>
                   <option value="Close">Close</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Long">Long</option>
-                  <option value="Extreme">Extreme</option>
+                  <option value="Far">Far</option>
+                  <option value="Very Far">Very Far</option>
                 </select>
               </span>
               <span className="stat-separator">|</span>
@@ -339,15 +597,53 @@ const AdversaryDetails = ({ item, HeaderRight, onApplyDamage, onApplyHealing, on
           ) : (
             <>
               <span className="stat-item">
-                <strong>ATK:</strong> +{item.atk || 0}
+                <strong>ATK:</strong> 
+                <input
+                  type="number"
+                  className="form-input-inline-small"
+                  value={item.atk || ''}
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                />
               </span>
               <span className="stat-separator">|</span>
               <span className="stat-item">
-                <strong>{item.weapon || 'Weapon'}:</strong> {item.range || 'Melee'}
+                <strong>
+                  <input
+                    type="text"
+                    className="form-input-inline-small"
+                    value={item.weapon || ''}
+                    readOnly
+                    aria-readonly="true"
+                    tabIndex={-1}
+                  />
+                </strong>: 
+                <select
+                  className="form-select-inline-small"
+                  data-field="range"
+                  value={item.range || ''}
+                  disabled
+                  tabIndex={-1}
+                >
+                  <option value="">Select Range</option>
+                  <option value="Melee">Melee</option>
+                  <option value="Very Close">Very Close</option>
+                  <option value="Close">Close</option>
+                  <option value="Far">Far</option>
+                  <option value="Very Far">Very Far</option>
+                </select>
               </span>
               <span className="stat-separator">|</span>
               <span className="stat-item">
-                {item.damage || '1d6 phy'}
+                <input
+                  type="text"
+                  className="form-input-inline-small"
+                  value={item.damage || ''}
+                  readOnly
+                  aria-readonly="true"
+                  tabIndex={-1}
+                />
               </span>
             </>
           )}

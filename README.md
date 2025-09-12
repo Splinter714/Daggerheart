@@ -149,6 +149,9 @@ We welcome contributions! Check out our [GitHub Issues](https://github.com/Splin
 Happy gaming!
 
 *Built with love for the Daggerheart community*
+
+---
+
 ## Daggerheart™ Compatibility
 
 ![Community Content Logo](assets/logos/Darrington%20Press%20Community%20Content%20Logos/Daggerheart/PNGs/DH_CGL_logos_final_full_color.png)

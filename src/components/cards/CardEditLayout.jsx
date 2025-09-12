@@ -115,12 +115,14 @@ const CardEditLayout = ({
           {/* Combat Stats Row */}
           <div className="stats-row">
             <span className="stat-item">
-              <strong>ATK:</strong> +
+              <strong>ATK:</strong> 
               <input
                 type="number"
-                value={editData.atk || 0}
-                onChange={(e) => onChange('atk', parseInt(e.target.value) || 0)}
+                value={editData.atk || ''}
+                onChange={(e) => onChange('atk', e.target.value === '' ? '' : parseInt(e.target.value))}
                 className="form-input-inline-small"
+                min="-10"
+                max="10"
               />
             </span>
             <span className="stat-separator">|</span>
