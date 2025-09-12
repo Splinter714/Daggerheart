@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import AdversaryDetails from '../cards/AdversaryDetails'
 import CardEditLayout from '../cards/CardEditLayout'
-import AdversaryEditForm from './forms/AdversaryEditForm'
 import EnvironmentEditForm from './forms/EnvironmentEditForm'
 import CountdownEditForm from './forms/CountdownEditForm'
 
@@ -154,36 +154,36 @@ const Creator = ({
   return (
     <div className="creator-container">
       <form onSubmit={handleSubmit} className="creator-form">
-        <CardEditLayout
-          item={item}
-          type={type}
-          editData={formData}
-          onChange={handleInputChange}
-          onSave={handleSubmit}
-          onCancel={onCancel}
-          showMetaDetails={!isCountdown}
-        >
-          {isCountdown && (
-            <CountdownEditForm data={formData} onChange={handleInputChange} />
-          )}
-          {isAdversary && (
-            <AdversaryEditForm
-              data={formData}
-              onChange={handleInputChange}
-              onArrayChange={handleArrayChange}
-              onAddItem={addArrayItem}
-              onRemoveItem={removeArrayItem}
-            />
-          )}
-          {isEnvironment && (
-            <EnvironmentEditForm
-              data={formData}
-              onArrayChange={handleArrayChange}
-              onAddItem={addArrayItem}
-              onRemoveItem={removeArrayItem}
-            />
-          )}
-        </CardEditLayout>
+        {isAdversary ? (
+          <AdversaryDetails
+            item={formData}
+            isEditMode={true}
+            onSave={handleSubmit}
+            onCancel={onCancel}
+          />
+        ) : (
+          <CardEditLayout
+            item={item}
+            type={type}
+            editData={formData}
+            onChange={handleInputChange}
+            onSave={handleSubmit}
+            onCancel={onCancel}
+            showMetaDetails={!isCountdown}
+          >
+            {isCountdown && (
+              <CountdownEditForm data={formData} onChange={handleInputChange} />
+            )}
+            {isEnvironment && (
+              <EnvironmentEditForm
+                data={formData}
+                onArrayChange={handleArrayChange}
+                onAddItem={addArrayItem}
+                onRemoveItem={removeArrayItem}
+              />
+            )}
+          </CardEditLayout>
+        )}
       </form>
     </div>
   )
