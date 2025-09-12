@@ -17,7 +17,7 @@ const CardEditLayout = ({
   console.log('CardEditLayout: type =', type, 'isCreating =', isCreating, 'item =', item)
   if (type === 'adversary') {
     return (
-      <div className="expanded-card adversary edit-mode" style={{backgroundColor: '#ff000020', border: '2px solid red'}}>
+      <div className="expanded-card adversary edit-mode" style={{backgroundColor: '#ff0000', border: '5px solid red', minHeight: '200px', zIndex: 9999}}>
         {/* Header Section - matches expanded card */}
         <div className="expanded-header">
           <div className="edit-header-controls">
@@ -172,7 +172,7 @@ const CardEditLayout = ({
 
   // Original layout for non-adversary types
   return (
-    <div className="expanded-card edit-mode" style={{backgroundColor: '#00ff0020', border: '2px solid green'}}>
+    <div className="expanded-card edit-mode" style={{backgroundColor: '#00ff00', border: '5px solid green', minHeight: '200px', zIndex: 9999}}>
       <div className="edit-header">
         <h2>{isCreating ? 'Create' : 'Edit'} {type === 'adversary' ? 'Adversary' : type === 'environment' ? 'Environment' : 'Countdown'}</h2>
         <div className="edit-actions">
