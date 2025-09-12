@@ -124,9 +124,17 @@ const BottomBar = ({
           {/* DPCGL Attribution */}
           <div className="help-attribution">
             <img 
-              src="/logos/Darrington Press Community Content Logos/Daggerheart/PNGs/DH_CGL_logos_final_white.png"
+              src="/logos/daggerheart/logo.png"
               alt="Daggerheart Community Content Logo"
               className="help-logo"
+              onError={(e) => {
+                console.error('Failed to load Daggerheart logo:', e.target.src);
+                // Fallback to original path if new path fails
+                e.target.src = "/logos/Darrington%20Press%20Community%20Content%20Logos/Daggerheart/PNGs/DH_CGL_logos_final_white.png";
+              }}
+              onLoad={() => {
+                console.log('Daggerheart logo loaded successfully');
+              }}
             />
             <div className="help-attribution-text">
               <p>This product includes materials from the Daggerheart System Reference Document 1.0, © Critical Role, LLC, under the terms of the Darrington Press Community Gaming (DPCGL) License.</p>
