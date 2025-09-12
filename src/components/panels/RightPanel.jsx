@@ -30,7 +30,7 @@ const RightPanel = ({
   onApplyStressChange,
   onExitEditMode
 }) => {
-  if (showMockup) {
+  if (showMockup && rightColumnMode === null) {
     return (
       <PanelShell className="right-panel-shell">
         <div className="creator-header">
