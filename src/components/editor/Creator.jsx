@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import Button from '../controls/Buttons'
-import Cards from '../cards/Cards'
-import ArrayFieldList from './ArrayFieldList'
-// BasicInfo now covered by CardEditLayout name input
-import DetailsSection from './DetailsSection'
-import CountdownSettings from './CountdownSettings'
-import CombatStats from './CombatStats'
-import EnvironmentEffects from './EnvironmentEffects'
 import CardEditLayout from '../cards/CardEditLayout'
-// import { Badge, DifficultyBadge, TypeBadge } from './Badges'
+import AdversaryEditForm from './forms/AdversaryEditForm'
+import EnvironmentEditForm from './forms/EnvironmentEditForm'
+import CountdownEditForm from './forms/CountdownEditForm'
 
 const Creator = ({ 
   type, // 'adversary', 'environment', or 'countdown'
@@ -28,12 +22,19 @@ const Creator = ({
     tier: 1,
     type: '',
     difficulty: 1,
+    description: '',
     source: source, // Set source from prop
     // Adversary-specific fields
     hpMax: 1,
     stressMax: 0,
-    abilities: [],
-    traits: [],
+    passiveFeatures: [{ name: '', description: '' }],
+    actionFeatures: [{ name: '', description: '' }],
+    reactionFeatures: [{ name: '', description: '' }],
+    thresholds: { major: 0, severe: 0 },
+    atk: 0,
+    weapon: 'Weapon',
+    range: 'Melee',
+    damage: '1d6 phy',
     // Environment-specific fields
     effects: [],
     hazards: [],
@@ -52,11 +53,18 @@ const Creator = ({
         tier: item.tier || 1,
         type: item.type || '',
         difficulty: item.difficulty || 1,
+        description: item.description || '',
         source: item.source || source, // Use item source or fallback to prop
         hpMax: item.hpMax || 1,
         stressMax: item.stressMax || 0,
-        abilities: item.abilities || [],
-        traits: item.traits || [],
+        passiveFeatures: item.passiveFeatures || item.features?.filter(f => f.type === 'Passive') || [{ name: '', description: '' }],
+        actionFeatures: item.actionFeatures || item.features?.filter(f => f.type === 'Action') || [{ name: '', description: '' }],
+        reactionFeatures: item.reactionFeatures || item.features?.filter(f => f.type === 'Reaction') || [{ name: '', description: '' }],
+        thresholds: item.thresholds || { major: 0, severe: 0 },
+        atk: item.atk || 0,
+        weapon: item.weapon || 'Weapon',
+        range: item.range || 'Melee',
+        damage: item.damage || '1d6 phy',
         effects: item.effects || [],
         hazards: item.hazards || [],
         max: item.max || 5,
@@ -108,14 +116,23 @@ const Creator = ({
     const itemData = {
       ...formData,
       name: formData.name.trim(),
+      description: formData.description.trim(),
       // Add game-specific properties
       ...(isAdversary && {
         hp: 0, // Start with 0 HP (no damage taken)
         hpMax: formData.hpMax,
         stress: 0, // Start with no stress
         stressMax: formData.stressMax,
-        abilities: formData.abilities.filter(ability => ability.trim()),
-        traits: formData.traits.filter(trait => trait.trim())
+        thresholds: formData.thresholds,
+        atk: formData.atk,
+        weapon: formData.weapon,
+        range: formData.range,
+        damage: formData.damage,
+        features: [
+          ...formData.passiveFeatures.filter(f => f.name.trim()).map(f => ({ ...f, type: 'Passive' })),
+          ...formData.actionFeatures.filter(f => f.name.trim()).map(f => ({ ...f, type: 'Action' })),
+          ...formData.reactionFeatures.filter(f => f.name.trim()).map(f => ({ ...f, type: 'Reaction' }))
+        ]
       }),
       ...(isEnvironment && {
         effects: formData.effects.filter(effect => effect.trim()),
@@ -132,36 +149,8 @@ const Creator = ({
     onSave(itemData)
   }
 
-  const renderArrayField = (field, label, placeholder) => (
-    <ArrayFieldList
-      label={label}
-      values={formData[field]}
-      placeholder={placeholder}
-      onChange={(index, value) => handleArrayChange(field, index, value)}
-      onRemove={(index) => removeArrayItem(field, index)}
-      onAdd={() => addArrayItem(field)}
-    />
-  )
-
   return (
     <div className="creator-container">
-      <div className="creator-header">
-        {!isCountdown && (
-          <>
-            <h2>{isEditing ? 'Edit' : 'Create'} {type === 'adversary' ? 'Adversary' : 'Environment'}</h2>
-            <div className="creator-actions">
-              <Button
-                action="cancel"
-                onClick={onCancel}
-                size="sm"
-              >
-                Cancel
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
-
       <form onSubmit={handleSubmit} className="creator-form">
         <CardEditLayout
           item={item}
@@ -173,75 +162,24 @@ const Creator = ({
           showMetaDetails={!isCountdown}
         >
           {isCountdown && (
-            <CountdownSettings
-              name={formData.name}
-              description={formData.description}
-              max={formData.max}
-              countdownType={formData.countdownType}
-              loop={formData.loop}
-              onNameChange={(value) => handleInputChange('name', value)}
-              onDescriptionChange={(value) => handleInputChange('description', value)}
-              onMaxChange={(value) => handleInputChange('max', value)}
-              onTypeChange={(value) => handleInputChange('countdownType', value)}
-              onLoopChange={(value) => handleInputChange('loop', value)}
-            />
+            <CountdownEditForm data={formData} onChange={handleInputChange} />
           )}
           {isAdversary && (
-            <>
-              <DetailsSection
-                tier={formData.tier}
-                typeValue={formData.type}
-                difficulty={formData.difficulty}
-                onTierChange={(value) => handleInputChange('tier', value)}
-                onTypeChange={(value) => handleInputChange('type', value)}
-                onDifficultyChange={(value) => handleInputChange('difficulty', value)}
-              />
-              <CombatStats
-                hpMax={formData.hpMax}
-                stressMax={formData.stressMax}
-                onHpMaxChange={(value) => handleInputChange('hpMax', value)}
-                onStressMaxChange={(value) => handleInputChange('stressMax', value)}
-              />
-              {renderArrayField('abilities', 'Abilities', 'Enter ability description')}
-              {renderArrayField('traits', 'Traits', 'Enter trait description')}
-            </>
+            <AdversaryEditForm
+              data={formData}
+              onChange={handleInputChange}
+              onArrayChange={handleArrayChange}
+              onAddItem={addArrayItem}
+              onRemoveItem={removeArrayItem}
+            />
           )}
           {isEnvironment && (
-            <>
-              <DetailsSection
-                tier={formData.tier}
-                typeValue={formData.type}
-                difficulty={formData.difficulty}
-                onTierChange={(value) => handleInputChange('tier', value)}
-                onTypeChange={(value) => handleInputChange('type', value)}
-                onDifficultyChange={(value) => handleInputChange('difficulty', value)}
-              />
-              <EnvironmentEffects
-                effects={formData.effects}
-                hazards={formData.hazards}
-                onEffectChange={(index, value) => handleArrayChange('effects', index, value)}
-                onAddEffect={() => addArrayItem('effects')}
-                onRemoveEffect={(index) => removeArrayItem('effects', index)}
-                onHazardChange={(index, value) => handleArrayChange('hazards', index, value)}
-                onAddHazard={() => addArrayItem('hazards')}
-                onRemoveHazard={(index) => removeArrayItem('hazards', index)}
-              />
-            </>
-          )}
-          {!isCountdown && (
-            <div className="form-section">
-              <h3>Preview</h3>
-              <div className="preview-card">
-                <Cards item={formData} type={type} mode="compact" preview={true} />
-              </div>
-            </div>
-          )}
-          {!isCountdown && (
-            <div className="form-actions">
-              <Button action="save" type="submit" size="lg">
-                {isEditing ? 'Update' : 'Create'} {type === 'adversary' ? 'Adversary' : 'Environment'}
-              </Button>
-            </div>
+            <EnvironmentEditForm
+              data={formData}
+              onArrayChange={handleArrayChange}
+              onAddItem={addArrayItem}
+              onRemoveItem={removeArrayItem}
+            />
           )}
         </CardEditLayout>
       </form>
