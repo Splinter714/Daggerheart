@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import CardEditLayout from '../cards/CardEditLayout'
-import AdversaryEditForm from './forms/AdversaryEditForm'
 import EnvironmentEditForm from './forms/EnvironmentEditForm'
 import CountdownEditForm from './forms/CountdownEditForm'
 
@@ -349,13 +348,131 @@ const Creator = ({
             
             {/* Features Section */}
             <div className="features-section">
-              <AdversaryEditForm
-                data={formData}
-                onChange={handleInputChange}
-                onArrayChange={handleArrayChange}
-                onAddItem={addArrayItem}
-                onRemoveItem={removeArrayItem}
-              />
+              {/* Passives Section */}
+              {formData.passiveFeatures && formData.passiveFeatures.length > 0 && (
+                <div className="feature-type-section">
+                  <div className="feature-type-header">
+                    <h4>Passives</h4>
+                    <hr />
+                  </div>
+                  {formData.passiveFeatures.map((feature, index) => (
+                    <div key={index} className="feature-edit-row">
+                      <input
+                        type="text"
+                        className="form-input-inline"
+                        value={feature.name || ''}
+                        onChange={(e) => handleArrayChange('passiveFeatures', index, { ...feature, name: e.target.value })}
+                        placeholder="Feature name"
+                      />
+                      <textarea
+                        className="form-textarea-inline"
+                        value={feature.description || ''}
+                        onChange={(e) => handleArrayChange('passiveFeatures', index, { ...feature, description: e.target.value })}
+                        placeholder="Feature description"
+                        rows={2}
+                      />
+                      <button 
+                        className="remove-feature-btn"
+                        onClick={() => removeArrayItem('passiveFeatures', index)}
+                        type="button"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button 
+                    className="add-feature-btn"
+                    onClick={() => addArrayItem('passiveFeatures')}
+                    type="button"
+                  >
+                    Add Passive
+                  </button>
+                </div>
+              )}
+              
+              {/* Actions Section */}
+              {formData.actionFeatures && formData.actionFeatures.length > 0 && (
+                <div className="feature-type-section">
+                  <div className="feature-type-header">
+                    <h4>Actions</h4>
+                    <hr />
+                  </div>
+                  {formData.actionFeatures.map((feature, index) => (
+                    <div key={index} className="feature-edit-row">
+                      <input
+                        type="text"
+                        className="form-input-inline"
+                        value={feature.name || ''}
+                        onChange={(e) => handleArrayChange('actionFeatures', index, { ...feature, name: e.target.value })}
+                        placeholder="Feature name"
+                      />
+                      <textarea
+                        className="form-textarea-inline"
+                        value={feature.description || ''}
+                        onChange={(e) => handleArrayChange('actionFeatures', index, { ...feature, description: e.target.value })}
+                        placeholder="Feature description"
+                        rows={2}
+                      />
+                      <button 
+                        className="remove-feature-btn"
+                        onClick={() => removeArrayItem('actionFeatures', index)}
+                        type="button"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button 
+                    className="add-feature-btn"
+                    onClick={() => addArrayItem('actionFeatures')}
+                    type="button"
+                  >
+                    Add Action
+                  </button>
+                </div>
+              )}
+              
+              {/* Reactions Section */}
+              {formData.reactionFeatures && formData.reactionFeatures.length > 0 && (
+                <div className="feature-type-section">
+                  <div className="feature-type-header">
+                    <h4>Reactions</h4>
+                    <hr />
+                  </div>
+                  {formData.reactionFeatures.map((feature, index) => (
+                    <div key={index} className="feature-edit-row">
+                      <input
+                        type="text"
+                        className="form-input-inline"
+                        value={feature.name || ''}
+                        onChange={(e) => handleArrayChange('reactionFeatures', index, { ...feature, name: e.target.value })}
+                        placeholder="Feature name"
+                      />
+                      <textarea
+                        className="form-textarea-inline"
+                        value={feature.description || ''}
+                        onChange={(e) => handleArrayChange('reactionFeatures', index, { ...feature, description: e.target.value })}
+                        placeholder="Feature description"
+                        rows={2}
+                      />
+                      <button 
+                        className="remove-feature-btn"
+                        onClick={() => removeArrayItem('reactionFeatures', index)}
+                        type="button"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button 
+                    className="add-feature-btn"
+                    onClick={() => addArrayItem('reactionFeatures')}
+                    type="button"
+                  >
+                    Add Reaction
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ) : (
