@@ -14,6 +14,7 @@ const CardEditLayout = ({
   const isCreating = !item
   
   // For adversaries, use the new layout that matches expanded card
+  console.log('CardEditLayout: type =', type, 'isCreating =', isCreating)
   if (type === 'adversary') {
     return (
       <div className="expanded-card adversary edit-mode">
