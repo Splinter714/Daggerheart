@@ -2420,6 +2420,7 @@ textarea,
 .help-attribution {
   padding: 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: var(--bg-dark);
   max-width: 280px;
   width: 100%;
@@ -2430,7 +2431,7 @@ textarea,
 }
 
 .help-logo {
-  width: 120px;
+  width: 100%;
   height: auto;
   display: block;
   margin: 0 auto 1rem auto;
@@ -2446,8 +2447,8 @@ textarea,
   }
   
   .help-logo {
-    width: 100px;
-    max-width: calc(100% - 1rem);
+    width: 100%;
+    max-width: 100%;
     /* Ensure image is visible on mobile */
     display: block !important;
     visibility: visible !important;
