@@ -2365,6 +2365,8 @@ textarea,
     transform: none;
     max-width: calc(100vw - 2rem);
     min-width: 280px;
+    /* Ensure content is visible and not clipped */
+    overflow: visible;
   }
   
   .flyout-menu.show {
@@ -2433,6 +2435,26 @@ textarea,
   display: block;
   margin: 0 auto 1rem auto;
   filter: brightness(0.9);
+  max-width: 100%;
+}
+
+/* Mobile adjustments for help attribution */
+@media (max-width: 768px) {
+  .help-attribution {
+    max-width: 100%;
+    padding: 0.5rem;
+  }
+  
+  .help-logo {
+    width: 100px;
+    max-width: calc(100% - 1rem);
+    /* Ensure image is visible on mobile */
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    /* Prevent image from being clipped */
+    object-fit: contain;
+  }
 }
 
 .help-attribution-text {
