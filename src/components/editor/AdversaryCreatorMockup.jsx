@@ -295,13 +295,15 @@ const AdversaryCreatorMockup = ({ formData, setFormData }) => {
         
         <div className="motives-row">
           <span className="motives-label">Motives & Tactics:</span>
-          <input
-            type="text"
-            className="inline-field"
-            placeholder="Motives & Tactics (e.g., Burrow, drag away, feed, reposition)"
-            value={safeFormData.motives || ''}
-            onChange={(e) => handleInputChange('motives', e.target.value)}
-          />
+          <div className="motives-field">
+            <input
+              type="text"
+              className="inline-field"
+              placeholder="Motives & Tactics (e.g., Burrow, drag away, feed, reposition)"
+              value={safeFormData.motives || ''}
+              onChange={(e) => handleInputChange('motives', e.target.value)}
+            />
+          </div>
         </div>
       </div>
 

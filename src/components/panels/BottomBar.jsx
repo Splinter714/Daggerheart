@@ -121,6 +121,20 @@ const BottomBar = ({
           <HelpCircle size={20} />
         </div>
         <div className={`flyout-menu ${helpFlyoutOpen ? 'show' : ''}`}>
+          {/* DPCGL Attribution */}
+          <div className="help-attribution">
+            <img 
+              src="/logos/Darrington Press Community Content Logos/Daggerheart/PNGs/DH_CGL_logos_final_white.png"
+              alt="Daggerheart Community Content Logo"
+              className="help-logo"
+            />
+            <div className="help-attribution-text">
+              <p>This product includes materials from the Daggerheart System Reference Document 1.0, © Critical Role, LLC, under the terms of the Darrington Press Community Gaming (DPCGL) License.</p>
+              <p>More information can be found at <a href="https://www.daggerheart.com" target="_blank" rel="noopener noreferrer">daggerheart.com</a></p>
+              <p><em>This project is unofficial and not endorsed by Darrington Press or Critical Role.</em></p>
+            </div>
+          </div>
+          
           <button 
             className="flyout-menu-item help-flyout-item" 
             onClick={(e) => { 
@@ -136,20 +150,6 @@ const BottomBar = ({
           <div className="flyout-menu-item help-flyout-item" style={{cursor: 'default', color: 'var(--text-secondary)'}}>
             <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
               <span>Version {typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev'}</span>
-            </div>
-          </div>
-          
-          {/* DPCGL Attribution */}
-          <div className="help-attribution">
-            <img 
-              src="/logos/Darrington Press Community Content Logos/Daggerheart/PNGs/DH_CGL_logos_final_white.png"
-              alt="Daggerheart Community Content Logo"
-              className="help-logo"
-            />
-            <div className="help-attribution-text">
-              <p>This product includes materials from the Daggerheart System Reference Document 1.0, © Critical Role, LLC, under the terms of the Darrington Press Community Gaming (DPCGL) License.</p>
-              <p>More information can be found at <a href="https://www.daggerheart.com" target="_blank" rel="noopener noreferrer">daggerheart.com</a></p>
-              <p><em>This project is unofficial and not endorsed by Darrington Press or Critical Role.</em></p>
             </div>
           </div>
         </div>
