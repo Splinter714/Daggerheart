@@ -11,6 +11,7 @@ const Creator = ({
   onSave, 
   onCancel 
 }) => {
+  console.log('Creator component called with type =', type, 'item =', item)
   const isEditing = !!item
   const isAdversary = type === 'adversary'
   const isEnvironment = type === 'environment'
