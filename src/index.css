@@ -7514,6 +7514,23 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0;
 }
 
+/* Debug styles to override everything */
+.debug-red {
+  background-color: #ff0000 !important;
+  border: 10px solid red !important;
+  min-height: 200px !important;
+  z-index: 9999 !important;
+  position: relative !important;
+}
+
+.debug-green {
+  background-color: #00ff00 !important;
+  border: 10px solid green !important;
+  min-height: 200px !important;
+  z-index: 9999 !important;
+  position: relative !important;
+}
+
 input[type="number"] {
   -moz-appearance: textfield;
 }
