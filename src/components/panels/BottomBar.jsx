@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Pencil, Trash2, Wrench, HelpCircle } from 'lucide-react'
+import logoImage from '../../assets/logo.png'
 
 const BottomBar = ({
   isEditMode,
@@ -124,16 +125,16 @@ const BottomBar = ({
           {/* DPCGL Attribution */}
           <div className="help-attribution">
             <img 
-              src="/logos/daggerheart/logo.png"
+              src={logoImage}
               alt="Daggerheart Community Content Logo"
               className="help-logo"
               onError={(e) => {
                 console.error('Failed to load Daggerheart logo:', e.target.src);
-                // Fallback to original path if new path fails
+                // Fallback to public path if import fails
                 e.target.src = "/logos/Darrington%20Press%20Community%20Content%20Logos/Daggerheart/PNGs/DH_CGL_logos_final_white.png";
               }}
               onLoad={() => {
-                console.log('Daggerheart logo loaded successfully');
+                console.log('Daggerheart logo loaded successfully from:', arguments[0].target.src);
               }}
             />
             <div className="help-attribution-text">
