@@ -133,8 +133,8 @@ const BottomBar = ({
                 // Fallback to public path if import fails
                 e.target.src = "/logos/Darrington%20Press%20Community%20Content%20Logos/Daggerheart/PNGs/DH_CGL_logos_final_white.png";
               }}
-              onLoad={() => {
-                console.log('Daggerheart logo loaded successfully from:', arguments[0].target.src);
+              onLoad={(e) => {
+                console.log('Daggerheart logo loaded successfully from:', e.target.src);
               }}
             />
             <div className="help-attribution-text">

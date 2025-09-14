@@ -122,10 +122,19 @@ const AppContent = () => {
   // Right column handlers
   const handleItemSelect = (item, type) => {
     startTransition(() => {
-      setSelectedItem(item)
-      setSelectedType(type)
-      setRightColumnMode('item')
-      if (isMobile) setMobileDrawerOpen(true)
+      // If clicking the same item that's already selected, close the expanded view
+      if (selectedItem && selectedItem.id === item.id && selectedType === type && rightColumnMode === 'item') {
+        setSelectedItem(null)
+        setSelectedType(null)
+        setRightColumnMode(null)
+        if (isMobile) setMobileDrawerOpen(false)
+      } else {
+        // Otherwise, open the expanded view
+        setSelectedItem(item)
+        setSelectedType(type)
+        setRightColumnMode('item')
+        if (isMobile) setMobileDrawerOpen(true)
+      }
     })
   }
   

@@ -1,153 +1,108 @@
 import React, { useState } from 'react'
 import { Droplet, Activity, CheckCircle } from 'lucide-react'
-import Button from '../controls/Buttons'
-import { TypeBadge, DifficultyBadge } from '../ui/Badges'
-import CompactCardShell from './CompactCardShell'
+import { DifficultyBadge } from '../ui/Badges'
 
-const AdversaryCard = ({
-  item,
-  mode,
-  onClick,
-  onDelete,
-  onApplyDamage,
-  onApplyHealing,
-  onApplyStressChange,
-  dragAttributes,
-  dragListeners,
-}) => {
+const AdversaryInteractiveControlsSection = ({ item, onApplyDamage, onApplyHealing, onApplyStressChange }) => {
   const [showDamageInput, setShowDamageInput] = useState(false)
   const [damageValue, setDamageValue] = useState('')
 
-  if (mode !== 'compact') return null
-
-  const baseName = item.baseName || item.name?.replace(/\s+\(\d+\)$/, '') || ''
-  const duplicateNumber = item.duplicateNumber || (item.name?.match(/\((\d+)\)$/) ? parseInt(item.name.match(/\((\d+)\)$/)[1]) : 1)
-
   return (
-    <CompactCardShell
-      className={`adversary ${(item.hp || 0) >= (item.hpMax || 1) ? 'dead' : ''}`}
-      item={item}
-      onClick={onClick}
-      dragAttributes={dragAttributes}
-      dragListeners={dragListeners}
-    >
-      <div className="row-main">
-        <h4 className="row-title">
-          {baseName} ({duplicateNumber})
-        </h4>
-        <div className="row-meta">
-          {item.type && <TypeBadge type={item.type} />}
+    <div className="interactive-controls-section">
+      <div className="countdown-control-buttons">
+        {/* HP Controls */}
+        <div className="hp-section">
+          <div 
+            className="hp-symbols"
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              const currentHp = item.hp || 0
+              const hpMax = item.hpMax || 1
+              const symbolsRect = e.currentTarget.getBoundingClientRect()
+              const clickX = e.clientX - symbolsRect.left
+              const symbolWidth = symbolsRect.width / hpMax
+              const clickedIndex = Math.floor(clickX / symbolWidth)
+              
+              if (clickedIndex < currentHp) {
+                // Clicked on filled pip - heal (reduce damage)
+                onApplyHealing && onApplyHealing(item.id, 1, item.hp)
+              } else {
+                // Clicked on empty pip - take damage
+                onApplyDamage && onApplyDamage(item.id, 1, item.hp, item.hpMax)
+              }
+            }}
+            style={{ cursor: 'pointer', padding: '2px' }}
+          >
+            {Array.from({ length: item.hpMax || 1 }, (_, i) => (
+              <span
+                key={i}
+                className={`countdown-symbol ${i < (item.hp || 0) ? 'filled' : 'empty'}`}
+                title={i < (item.hp || 0) ? 'Click to heal (reduce damage)' : 'Click to take damage'}
+                style={{ cursor: 'pointer' }}
+              >
+                <Droplet size={16} />
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
-      <div className="card-actions countdown-actions">
-          <div className="countdown-control-buttons">
-            <div className="hp-section">
-              <div 
-                className="hp-symbols"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  e.preventDefault()
-                  const currentHp = item.hp || 0
-                  const hpMax = item.hpMax || 1
-                  const symbolsRect = e.currentTarget.getBoundingClientRect()
-                  const clickX = e.clientX - symbolsRect.left
-                  const symbolWidth = symbolsRect.width / hpMax
-                  const clickedIndex = Math.floor(clickX / symbolWidth)
-                  
-                  if (clickedIndex < currentHp) {
-                    // Clicked on filled pip - heal (reduce damage)
-                    onApplyHealing && onApplyHealing(item.id, 1, item.hp)
-                  } else {
-                    // Clicked on empty pip - take damage
-                    onApplyDamage && onApplyDamage(item.id, 1, item.hp, item.hpMax)
-                  }
-                }}
-                style={{ cursor: 'pointer', padding: '2px' }}
-              >
-                {Array.from({ length: item.hpMax || 1 }, (_, i) => (
-                  <span
-                    key={i}
-                    className={`countdown-symbol ${i < (item.hp || 0) ? 'filled' : 'empty'}`}
-                    title={i < (item.hp || 0) ? 'Click to heal (reduce damage)' : 'Click to take damage'}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <Droplet size={16} />
-                  </span>
-                ))}
-              </div>
-            </div>
-            {item.stressMax > 0 && (
-              <div className="stress-section">
-                <div 
-                  className="stress-symbols"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    e.preventDefault()
-                    const currentStress = item.stress || 0
-                    const stressMax = item.stressMax || 1
-                    const symbolsRect = e.currentTarget.getBoundingClientRect()
-                    const clickX = e.clientX - symbolsRect.left
-                    const symbolWidth = symbolsRect.width / stressMax
-                    const clickedIndex = Math.floor(clickX / symbolWidth)
-                    
-                    if (clickedIndex < currentStress) {
-                      // Clicked on filled pip - reduce stress
-                      onApplyStressChange && onApplyStressChange(item.id, -1, item.stress, item.stressMax)
-                    } else {
-                      // Clicked on empty pip - increase stress
-                      onApplyStressChange && onApplyStressChange(item.id, 1, item.stress, item.stressMax)
-                    }
-                  }}
-                  style={{ cursor: 'pointer', padding: '2px' }}
+
+        {/* Stress Controls */}
+        {item.stressMax > 0 && (
+          <div className="stress-section">
+            <div 
+              className="stress-symbols"
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                const currentStress = item.stress || 0
+                const stressMax = item.stressMax || 1
+                const symbolsRect = e.currentTarget.getBoundingClientRect()
+                const clickX = e.clientX - symbolsRect.left
+                const symbolWidth = symbolsRect.width / stressMax
+                const clickedIndex = Math.floor(clickX / symbolWidth)
+                
+                if (clickedIndex < currentStress) {
+                  // Clicked on filled pip - reduce stress
+                  onApplyStressChange && onApplyStressChange(item.id, -1, item.stress, item.stressMax)
+                } else {
+                  // Clicked on empty pip - increase stress
+                  onApplyStressChange && onApplyStressChange(item.id, 1, item.stress, item.stressMax)
+                }
+              }}
+              style={{ cursor: 'pointer', padding: '2px' }}
+            >
+              {Array.from({ length: item.stressMax }, (_, i) => (
+                <span
+                  key={i}
+                  className={`countdown-symbol ${i < (item.stress || 0) ? 'filled' : 'empty'}`}
+                  title={i < (item.stress || 0) ? 'Click to reduce stress' : 'Click to increase stress'}
+                  style={{ cursor: 'pointer' }}
                 >
-                  {Array.from({ length: item.stressMax }, (_, i) => (
-                    <span
-                      key={i}
-                      className={`countdown-symbol ${i < (item.stress || 0) ? 'filled' : 'empty'}`}
-                      title={i < (item.stress || 0) ? 'Click to reduce stress' : 'Click to increase stress'}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <Activity size={16} />
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          {item.difficulty && (
-            <div className="difficulty-section">
-              <div 
-                onClick={(e) => {
-                  e.stopPropagation()
-                  if ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') {
-                    setShowDamageInput(true)
-                    setDamageValue(item.type === 'Minion' ? '1' : '')
-                  }
-                }}
-                style={{ cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default' }}
-                title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
-              >
-                <DifficultyBadge difficulty={item.difficulty} />
-              </div>
+                  <Activity size={16} />
+                </span>
+              ))}
             </div>
-          )}
-          <div className="countdown-delete-space">
-            {dragAttributes && dragListeners && (
-              <Button
-                action="delete"
-                size="sm"
-                immediate={true}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  e.preventDefault()
-                  onDelete && onDelete(item.id)
-                }}
-                title="Delete adversary"
-              >
-                ×
-              </Button>
-            )}
           </div>
+        )}
+
+        {/* Damage Input */}
+        {item.difficulty && ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') && (
+          <div className="difficulty-section">
+            <div 
+              onClick={(e) => {
+                e.stopPropagation()
+                if ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') {
+                  setShowDamageInput(true)
+                  setDamageValue(item.type === 'Minion' ? '1' : '')
+                }
+              }}
+              style={{ cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default' }}
+              title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
+            >
+              <DifficultyBadge difficulty={item.difficulty} />
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Damage Input Popup */}
@@ -302,10 +257,8 @@ const AdversaryCard = ({
           </div>
         </div>
       )}
-    </CompactCardShell>
+    </div>
   )
 }
 
-export default AdversaryCard
-
-
+export default AdversaryInteractiveControlsSection
