@@ -572,61 +572,166 @@ textarea,
 }
 
 .expanded-card.adversary .expanded-header {
-  padding: 1rem 1rem 0.5rem 1rem;
+  /* Match compact card styling exactly */
+  display: flex;
+  align-items: center;
+  padding: 0.5rem; /* Same padding on all sides */
+  background: var(--bg-dark);
+  border: 1px solid transparent; /* Transparent border */
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  /* Reduce height to match compact card */
+  min-height: auto;
 }
 
-.expanded-card.adversary .expanded-header h2 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin: 0 0 0.25rem 0;
+.expanded-card.adversary .expanded-header .row-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.expanded-card.adversary .expanded-header .row-title {
+  /* Match compact card font-size exactly - use default h4 size */
+  font-weight: 600;
+  margin: 0;
   color: var(--text-primary);
   line-height: 1.2;
-  height: 1.8rem; /* Match input height exactly */
-  display: flex;
-  align-items: center;
-  border: 1px solid transparent; /* Reserve space for input border */
-  border-radius: 0.25rem; /* Match input border radius */
-  padding: 0; /* Match input padding */
-  box-sizing: border-box; /* Include border in height calculation */
 }
 
-.expanded-card.adversary .tier-type-badges {
+.expanded-card.adversary .expanded-header .row-meta {
   display: flex;
-  gap: 0.5rem; /* Normal gap, let horizontal shift happen in edit mode */
-  margin-bottom: 0.5rem;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.expanded-card.adversary .expanded-header .tier-type-row {
+  display: flex;
   align-items: center;
-  min-height: 1.75rem; /* Match dropdown height */
+  gap: 0.25rem;
+}
+
+/* Expanded card header should use same styling as compact card */
+.expanded-card.adversary .expanded-header .card-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.5rem !important;
+}
+
+.expanded-card.adversary .expanded-header .countdown-control-buttons {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important; /* Tighter vertical spacing */
+  align-items: flex-end !important; /* Right-align the trackers */
+}
+
+.expanded-card.adversary .expanded-header .hp-section,
+.expanded-card.adversary .expanded-header .stress-section,
+.expanded-card.adversary .expanded-header .difficulty-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.expanded-card.adversary .expanded-header .hp-symbols,
+.expanded-card.adversary .expanded-header .stress-symbols {
+  display: flex;
+  gap: 0.125rem;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  row-gap: 0.125rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* HP and Stress symbol colors for expanded card */
+.expanded-card.adversary .expanded-header .hp-symbols .countdown-symbol.filled {
+  color: var(--red);
+  text-shadow: 0 0 4px rgba(220, 38, 38, 0.5);
+  font-size: 0.875rem; /* Ensure consistent font size */
+}
+
+.expanded-card.adversary .expanded-header .stress-symbols .countdown-symbol.filled {
+  color: #f59e0b;
+  text-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
+  font-size: 0.875rem; /* Ensure consistent font size */
+}
+
+/* Fix edit mode layout to match compact card */
+.expanded-card.adversary .expanded-header .edit-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.expanded-card.adversary .expanded-header .name-edit-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.expanded-card.adversary .expanded-header .edit-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.expanded-card.adversary .expanded-header .save-button,
+.expanded-card.adversary .expanded-header .cancel-button {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.expanded-card.adversary .expanded-header .save-button:hover {
+  background: var(--purple);
+  color: var(--text-primary);
+}
+
+.expanded-card.adversary .expanded-header .cancel-button:hover {
+  background: var(--bg-card-hover);
+}
+
+.expanded-card.adversary .expanded-header .tier-text {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #6b7280; /* gray-500 - muted color */
 }
 
 .expanded-card.adversary .tier-type-badges .tier-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
+  padding: 0;
+  border-radius: 0;
   font-size: 0.75rem;
-  font-weight: 500;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  height: 1.75rem;
-  display: inline-flex;
+  font-weight: 400;
+  background: transparent;
+  border: none;
+  color: #6b7280; /* gray-500 - muted color */
+  height: auto;
+  display: inline;
   align-items: center;
-  justify-content: center; /* Center text */
-  /* Width determined by content */
 }
 
 .expanded-card.adversary .tier-type-badges .type-badge {
-  padding: 0.25rem 0.5rem; /* Normal padding, center text properly */
-  border-radius: 0.375rem;
+  padding: 0;
+  border-radius: 0;
   font-size: 0.75rem;
-  font-weight: 500;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  height: 1.75rem;
-  display: inline-flex;
+  font-weight: 400;
+  background: transparent;
+  border: none;
+  color: #6b7280; /* gray-500 - muted color */
+  height: auto;
+  display: inline;
   align-items: center;
-  justify-content: center; /* Center text */
-  /* Width determined by content */
+  justify-content: center;
 }
 
 .expanded-card.adversary .description-text {
@@ -652,14 +757,14 @@ textarea,
 .core-stats-block {
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   overflow: hidden;
 }
 
 .stats-row {
   display: flex;
   align-items: center;
-  padding: 0.25rem 0;
+  padding: 0.125rem 0;
   border-bottom: 1px dotted var(--border);
   flex-wrap: wrap;
   gap: 0.25rem;
@@ -698,20 +803,93 @@ textarea,
   margin-bottom: 1rem;
 }
 
-.controls-row {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  min-height: 4rem; /* Fixed height for controls row */
-}
-
-.control-group {
+.interactive-controls-section .countdown-control-buttons {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.experience-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.experience-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.add-experience-btn,
+.add-feature-btn {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 2px dashed var(--border);
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+  width: 100%;
+  text-align: center;
+}
+
+.add-experience-btn:hover,
+.add-feature-btn:hover {
+  border-color: var(--purple);
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--purple);
+  border-style: solid;
+}
+
+.remove-experience-btn,
+.remove-feature-btn {
+  padding: 0.125rem 0.25rem;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.remove-experience-btn:hover,
+.remove-feature-btn:hover {
+  background: var(--red);
+  color: white;
+}
+
+.feature-edit-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.feature-edit-row input,
+.feature-edit-row textarea {
+  flex: 1;
+}
+
+.name-edit-group {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 3rem; /* Fixed height for control groups */
+}
+
+.form-textarea-inline,
+.inline-field {
+  min-height: 1.2em;
+  line-height: 1.2;
+  resize: none;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .control-label {
@@ -869,7 +1047,6 @@ textarea,
   padding: 0;
   font-size: 1.5rem;
   font-weight: bold;
-  text-transform: uppercase;
   color: var(--text-primary);
   font-family: inherit;
   line-height: 1.2;
@@ -887,41 +1064,38 @@ textarea,
   background-color: rgba(79, 70, 229, 0.05);
 }
 
-.expanded-header .edit-header-controls .form-select-inline-small {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 0.25rem;
-  padding: 0.25rem 1.5rem 0.25rem 0.5rem;
+.expanded-header .tier-type-row .form-select-inline-small {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-weight: 400;
+  color: #6b7280; /* gray-500 - muted color */
   font-family: inherit;
-  height: 1.75rem;
-  display: inline-flex;
-  align-items: center;
-  text-align: center;
-  transition: all 0.2s ease;
+  height: auto;
+  display: inline;
+  text-align: left;
+  transition: none;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 0.75rem;
-  width: 5rem;
+  background-image: none;
+  width: auto;
   box-shadow: none;
+  cursor: pointer;
 }
 
 /* Type dropdown needs wider width for longer options */
-.expanded-header .edit-header-controls .form-select-inline-small[data-type="type"] {
-  width: 6.5rem; /* Adequate width for type dropdown text */
+.expanded-header .tier-type-row .form-select-inline-small[data-type="type"] {
+  width: auto; /* Let it size naturally */
 }
 
-.expanded-header .edit-header-controls .form-select-inline-small:focus {
+.expanded-header .tier-type-row .form-select-inline-small:focus {
   outline: none;
-  border-color: var(--purple);
-  background-color: var(--bg-card);
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%234f46e5' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  border: none;
+  background: transparent;
+  background-image: none;
 }
 
 .expanded-header .form-textarea-inline {
@@ -3656,9 +3830,7 @@ textarea,
 .simple-list-row {
   display: flex;
   align-items: center;
-  padding: 0.5rem; /* Reduced from 0.75rem */
-  padding-left: 1rem; /* More space between left edge and content */
-  padding-right: 0.5rem; /* Reduced from 0.75rem */
+  padding: 0.5rem; /* Same padding on all sides */
   background: var(--bg-dark);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
@@ -4683,12 +4855,6 @@ textarea,
   gap: 0.25rem;
 }
 
-.row-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
-}
 
 .row-meta {
   display: flex;

@@ -4,30 +4,26 @@ export const buildAdversaryActions = (getGameState, setGameState) => {
   const createAdversary = (adversaryData) => {
     const uniqueId = generateId('adv')
     const existingAdversaries = getGameState().adversaries || []
-    const sameNameAdversaries = existingAdversaries.filter(adv => adv.name.replace(/\s+\(\d+\)$/, '') === adversaryData.name)
-    let displayName = adversaryData.name || 'Unknown'
+    const baseName = adversaryData.name || 'Unknown'
+    const sameNameAdversaries = existingAdversaries.filter(adv => adv.baseName === baseName)
+    
+    let duplicateNumber = 1
     if (sameNameAdversaries.length === 0) {
-      displayName = adversaryData.name
-    } else if (sameNameAdversaries.length === 1) {
-      const first = sameNameAdversaries[0]
-      const firstBase = first.name.replace(/\s+\(\d+\)$/, '')
-      const updated = getGameState().adversaries.map(adv => adv.id === first.id ? { ...adv, name: `${firstBase} (1)` } : adv)
-      setGameState(prev => ({ ...prev, adversaries: updated }))
-      displayName = `${adversaryData.name} (2)`
+      duplicateNumber = 1
     } else {
-      const usedNumbers = sameNameAdversaries.map(adv => {
-        const match = adv.name.match(/\((\d+)\)$/)
-        return match ? parseInt(match[1]) : null
-      }).filter(n => n !== null)
+      // Find the next available number
+      const usedNumbers = sameNameAdversaries.map(adv => adv.duplicateNumber || 1)
       let next = 1
       while (usedNumbers.includes(next)) next++
-      displayName = `${adversaryData.name} (${next})`
+      duplicateNumber = next
     }
 
     const newAdversary = {
       ...adversaryData,
       id: uniqueId,
-      name: displayName,
+      baseName: baseName,
+      duplicateNumber: duplicateNumber,
+      name: `${baseName} (${duplicateNumber})`,
       hp: 0,
       stress: 0,
       isVisible: true
@@ -38,7 +34,21 @@ export const buildAdversaryActions = (getGameState, setGameState) => {
   const updateAdversary = (id, updates) => {
     setGameState(prev => ({
       ...prev,
-      adversaries: prev.adversaries.map(a => a.id === id ? { ...a, ...updates } : a)
+      adversaries: prev.adversaries.map(a => {
+        if (a.id === id) {
+          const updated = { ...a, ...updates }
+          
+          // If baseName is being updated, recalculate the display name
+          if (updates.baseName !== undefined) {
+            const baseName = updates.baseName
+            const duplicateNumber = updated.duplicateNumber || 1
+            updated.name = duplicateNumber === 1 ? baseName : `${baseName} (${duplicateNumber})`
+          }
+          
+          return updated
+        }
+        return a
+      })
     }))
   }
 
