@@ -1,0 +1,169 @@
+/* Flyout Menu Layout Styles */
+
+/* ========================================
+   FLYOUT MENU STYLES
+   ======================================== */
+
+.flyout-menu {
+  position: absolute;
+  bottom: 100%; /* Fly upward from bottom bar */
+  left: 50%;
+  transform: translateX(-50%); /* Center horizontally */
+  background: #1a1a1a; /* Explicit dark background to match sidebar exactly */
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4); /* Shadow above */
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  margin-bottom: 8px; /* Small gap from bottom bar */
+  pointer-events: none;
+  display: flex;
+  flex-direction: column; /* Stack vertically */
+  overflow: hidden; /* Prevent content from spilling out */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-width: 120px; /* Minimum width for text */
+  max-width: calc(100vw - 2rem); /* Prevent overflow on narrow screens */
+}
+
+.flyout-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%); /* Keep centered when shown */
+  pointer-events: auto;
+}
+
+/* Responsive positioning for narrow screens */
+@media (max-width: 768px) {
+  .flyout-menu {
+    left: auto;
+    right: 0;
+    transform: none;
+    max-width: calc(100vw - 2rem);
+    min-width: 280px;
+    /* Ensure content is visible and not clipped */
+    overflow: visible;
+  }
+  
+  .flyout-menu.show {
+    transform: none;
+  }
+}
+
+.flyout-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  height: 48px; /* Match sidebar button height exactly */
+}
+
+.flyout-menu-item:hover {
+  background: var(--gray-dark);
+}
+
+.flyout-menu-item.delete-flyout-item:hover {
+  background: var(--red);
+  color: var(--text-primary);
+}
+
+.flyout-menu-item.help-flyout-item {
+  justify-content: flex-start;
+  text-align: left;
+  padding: 0.25rem 1rem;
+  height: auto;
+  min-height: 32px;
+}
+
+.flyout-menu-item.help-flyout-item:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.flyout-menu-item.help-flyout-item:last-child:hover {
+  background: none;
+}
+
+/* Help Attribution Section */
+.help-attribution {
+  padding: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-primary);
+  max-width: 280px;
+  width: 100%;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.help-logo {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 1rem auto;
+  filter: brightness(0.9);
+  max-width: 100%;
+}
+
+/* Mobile adjustments for help attribution */
+@media (max-width: 768px) {
+  .help-attribution {
+    max-width: 100%;
+    padding: 0.5rem;
+  }
+  
+  .help-logo {
+    width: 100%;
+    max-width: 100%;
+    /* Ensure image is visible on mobile */
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    /* Prevent image from being clipped */
+    object-fit: contain;
+  }
+}
+
+.help-attribution-text {
+  font-size: 0.7rem;
+  line-height: 1.3;
+  color: var(--text-secondary);
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.help-attribution-text p {
+  margin: 0 0 0.75rem 0;
+}
+
+.help-attribution-text p:last-child {
+  margin-bottom: 0;
+}
+
+.help-attribution-text a {
+  color: var(--purple);
+  text-decoration: none;
+}
+
+.help-attribution-text a:hover {
+  text-decoration: underline;
+}
+
+.help-attribution-text em {
+  color: var(--text-secondary);
+  font-style: italic;
+}

@@ -1,0 +1,100 @@
+# Daggerheart Project Organization Rules
+
+## Core Principle: Component-Based Co-Location
+Organize files by **domain/component** rather than by **file type**. Keep related functionality together.
+
+## Directory Structure Rules
+
+### 1. Component Organization
+```
+src/
+├── state/                     # Global state management only
+│   ├── GameStateContext.jsx
+│   ├── useGameState.js
+│   ├── state.json
+│   └── usePersistentState.js
+├── components/                # All UI components + their utilities
+│   ├── Layout/               # App layout + layout-specific utilities
+│   │   ├── Layout.jsx
+│   │   ├── Layout.css
+│   │   ├── usePreventPullToRefresh.js  # Layout-specific
+│   │   ├── TopBar/
+│   │   ├── BottomBar/
+│   │   │   └── logo.png      # Co-located asset
+│   │   ├── LeftPanel/
+│   │   ├── RightPanel/
+│   │   │   └── useRightPanelSync.js    # Panel-specific
+│   │   └── Drawer/
+│   │       └── useSwipeDrawer.js       # Drawer-specific
+│   ├── Browser/              # Database browsing + browser utilities
+│   │   └── useBrowser.js              # Browser-specific
+│   ├── GameBoard/            # Game interface + game utilities
+│   │   └── ids.js                     # Used by game entities
+│   ├── Adversaries/          # Adversary domain (data + logic + utilities)
+│   │   ├── adversaries.json           # Data co-located with logic
+│   │   ├── adversaries.js             # Actions
+│   │   └── useAdversaryHandlers.js    # Adversary-specific
+│   ├── Environments/         # Environment domain
+│   │   ├── environments.json
+│   │   ├── environments.js
+│   │   └── [environment utilities]
+│   ├── Countdowns/           # Countdown domain
+│   │   ├── countdowns.js
+│   │   ├── countdownEngine.js
+│   │   └── countdownEngine.test.js
+│   ├── Fear/                 # Fear component + utilities
+│   └── PWAInstallPrompt/     # PWA component
+└── styles/                   # Global styles (to be migrated)
+```
+
+### 2. Co-Location Rules
+
+#### A. Utilities Go With Their Users
+- **useRightPanelSync** → `RightPanel/` (used only by RightPanel)
+- **useSwipeDrawer** → `Drawer/` (used only by Drawer)
+- **useBrowser** → `Browser/` (used only by Browser)
+- **useAdversaryHandlers** → `Adversaries/` (adversary-specific)
+
+#### B. Data Goes With Logic
+- **adversaries.json** → `Adversaries/` (with adversaries.js)
+- **environments.json** → `Environments/` (with environments.js)
+- **logo.png** → `BottomBar/` (used only by help button)
+
+#### C. Domain-Specific Utilities
+- **ids.js** → `GameBoard/` (generates IDs for game entities)
+- **countdownEngine.js** → `Countdowns/` (countdown-specific logic)
+
+### 3. What Goes in `state/` vs `components/`
+- **`state/`**: Only truly global state management (GameStateContext, useGameState, state.json, usePersistentState)
+- **`components/`**: Everything else, organized by domain/component
+
+## Migration Guidelines
+
+### When Adding New Files:
+1. **Ask**: "Which component/domain uses this?"
+2. **Place**: In that component's directory
+3. **Exception**: Only put in `state/` if used by multiple domains
+
+### When Moving Files:
+1. **Use VSCode refactoring tools** (drag & drop, F2 rename) - they auto-update imports
+2. **Update import paths** if manual moves are needed
+3. **Verify** all imports are working
+
+### File Naming Conventions:
+- **Components**: `ComponentName.jsx` + `ComponentName.css`
+- **Utilities**: `useUtilityName.js` or `utilityName.js`
+- **Data**: `domain.json` (co-located with domain logic)
+- **Assets**: Co-located with the component that uses them
+
+## Benefits of This Structure:
+- ✅ **Intuitive**: "Need adversary stuff? Go to Adversaries/"
+- ✅ **Co-located**: Everything related is together
+- ✅ **Scalable**: Easy to add new domains/components
+- ✅ **Maintainable**: Changes stay within domain boundaries
+- ✅ **Non-coder friendly**: Logical organization
+
+## Anti-Patterns to Avoid:
+- ❌ Grouping by file type (`hooks/`, `utils/`, `data/`)
+- ❌ Deep nesting (keep it flat under `components/`)
+- ❌ Global directories for domain-specific code
+- ❌ Scattered related functionality

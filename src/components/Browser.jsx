@@ -1,248 +1,99 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react'
-import usePersistentState from '../hooks/usePersistentState'
-import Button from './common/Buttons'
-import Cards from './cards/Cards'
-import { Plus, Filter, Square, CheckSquare } from 'lucide-react'
+import React, { useMemo, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { Filter, Square, CheckSquare } from 'lucide-react'
+import GameCard from './GameCard'
+
 // Dynamically import JSON data to keep initial bundle smaller
 let adversariesData = { adversaries: [] }
 let environmentsData = { environments: [] }
-try {
-  const mod = await import(/* @vite-ignore */ '../data/adversaries.json')
-  adversariesData = mod?.default || mod
-} catch (e) {
-  console.warn('Failed to load adversaries.json dynamically:', e)
-}
-try {
-  const mod = await import(/* @vite-ignore */ '../data/environments.json')
-  environmentsData = mod?.default || mod
-} catch (e) {
-  console.warn('Failed to load environments.json dynamically:', e)
+let _dataLoaded = false
+
+// Load data asynchronously
+const loadData = async () => {
+  try {
+    const mod = await import(/* @vite-ignore */ '../data/adversaries.json')
+    adversariesData = mod?.default || mod
+  } catch (e) {
+    console.warn('Failed to load adversaries.json:', e)
+  }
+  try {
+    const mod = await import(/* @vite-ignore */ '../data/environments.json')
+    environmentsData = mod?.default || mod
+  } catch (e) {
+    console.warn('Failed to load environments.json:', e)
+  }
+  _dataLoaded = true
 }
 
-const Browser = ({ 
-  type, // 'adversary' or 'environment'
-  onAddItem, 
-  onCancel, 
-  onCreateCustom
-}) => {
-  console.log('Browser component rendered with props:', { type, onAddItem, onCancel, onCreateCustom })
-  console.log('Browser component is being used, not List component')
+// Custom hook for browser functionality - all logic inline
+const useBrowser = (type) => {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortFields, setSortFields] = useState([{ field: 'name', direction: 'asc' }])
+  const [expandedCard, setExpandedCard] = useState(null)
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
   
-  const [searchTerm, setSearchTerm] = usePersistentState(`browser-search-${type}`, '')
-  // Load selected filter arrays from localStorage per type
-  const getInitialSelectedFilters = () => {
-    const saved = localStorage.getItem(`browser-filters-${type}`)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        return {
-          tiers: Array.isArray(parsed.tiers) ? parsed.tiers : [],
-          types: Array.isArray(parsed.types) ? parsed.types : []
-        }
-      } catch (e) {
-        console.warn('Failed to parse saved selected filters:', e)
-      }
-    }
-    return { tiers: [], types: [] }
-  }
-  
-  // Multi-select filter states
-  const [selectedTiers, setSelectedTiers] = usePersistentState(`browser-filters-tiers-${type}`, getInitialSelectedFilters().tiers)
-  const [selectedTypes, setSelectedTypes] = usePersistentState(`browser-filters-types-${type}`, getInitialSelectedFilters().types)
-  // Load initial sort state synchronously to prevent jitter
-  const getInitialSortState = () => {
-    const savedSort = localStorage.getItem(`browser-sort-${type}`)
-    if (savedSort) {
-      try {
-        return JSON.parse(savedSort)
-      } catch (e) {
-        console.warn('Failed to parse saved sort state:', e)
-      }
-    }
-    // Default sort: tier, type, difficulty
-    return [
-      { field: 'tier', direction: 'asc' },
-      { field: 'displayType', direction: 'asc' },
-      { field: 'displayDifficulty', direction: 'asc' }
-    ]
-  }
-
-  const [sortFields, setSortFields] = usePersistentState(`browser-sort-${type}`, getInitialSortState())
+  // Advanced filtering state
+  const [selectedTiers, setSelectedTiers] = useState([])
+  const [selectedTypes, setSelectedTypes] = useState([])
   const [showTierDropdown, setShowTierDropdown] = useState(false)
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
   
-  // Refs for filter buttons
+  // Refs for dropdown positioning
   const tierFilterRef = useRef(null)
   const typeFilterRef = useRef(null)
-  
-  // Load expanded card state from localStorage
-  const getInitialExpandedCard = () => {
-    const savedExpanded = localStorage.getItem(`browser-expanded-${type}`)
-    if (savedExpanded) {
-      try {
-        const parsed = JSON.parse(savedExpanded)
-        // Find the card in current data
-        const currentData = type === 'adversary' ? adversariesData.adversaries : environmentsData.environments
-        return currentData.find(item => item.id === parsed.id) || null
-      } catch (e) {
-        console.warn('Failed to parse saved expanded card state:', e)
-      }
-    }
-    return null
-  }
-  
-  // Track which card is expanded
-  const [expandedCard, setExpandedCard] = useState(getInitialExpandedCard)
-  
-  // (mobile detection removed)
-  
-  // Track the current type to detect changes
-  const currentTypeRef = useRef(type)
-  
-  // Handle type changes without useEffect to prevent jitter
-  if (currentTypeRef.current !== type) {
-    currentTypeRef.current = type
-    
-    const savedSort = localStorage.getItem(`browser-sort-${type}`)
-    if (savedSort) {
-      try {
-        const parsed = JSON.parse(savedSort)
-        setSortFields(parsed)
-      } catch (e) {
-        console.warn('Failed to parse saved sort state:', e)
-        // Reset to default if parsing fails
-        setSortFields([
-          { field: 'tier', direction: 'asc' },
-          { field: 'displayType', direction: 'asc' },
-          { field: 'displayDifficulty', direction: 'asc' }
-        ])
-      }
-    } else {
-      // No saved state, use default
-      setSortFields([
-        { field: 'tier', direction: 'asc' },
-        { field: 'displayType', direction: 'asc' },
-        { field: 'displayDifficulty', direction: 'asc' }
-      ])
-    }
-  }
 
-  // (persisted via usePersistentState)
-  
-  // Save expanded card state to localStorage whenever it changes
   useEffect(() => {
-    if (expandedCard) {
-      localStorage.setItem(`browser-expanded-${type}`, JSON.stringify({ id: expandedCard.id }))
-    } else {
-      localStorage.removeItem(`browser-expanded-${type}`)
-    }
-  }, [expandedCard, type])
-  
-  // (persisted via usePersistentState)
-
-  // When switching data type, load its saved filters
-  useEffect(() => {
-    const saved = localStorage.getItem(`browser-filters-${type}`)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setSelectedTiers(Array.isArray(parsed.tiers) ? parsed.tiers : [])
-        setSelectedTypes(Array.isArray(parsed.types) ? parsed.types : [])
-      } catch (e) {
-        setSelectedTiers([])
-        setSelectedTypes([])
-      }
-    } else {
-      setSelectedTiers([])
-      setSelectedTypes([])
-    }
-  }, [type, setSelectedTiers, setSelectedTypes])
-
-  // (moved below itemTypes/itemTiers)
-
-  // Use imported data directly - only the relevant type
-  const adversaryData = adversariesData.adversaries || []
-  const environmentData = environmentsData.environments || []
-  
-  // Select data based on type
-  const currentData = type === 'adversary' ? adversaryData : environmentData
-  const dataType = type === 'adversary' ? 'adversary' : 'environment'
-
-  // Close dropdowns when clicking anywhere outside the dropdown or filter buttons
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      const clickedInsideDropdown = event.target.closest('.filter-dropdown')
-      const clickedFilterButton = event.target.closest('.header-filter-icon')
-      if (!clickedInsideDropdown && !clickedFilterButton) {
-        setShowTierDropdown(false)
-        setShowTypeDropdown(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
-
-  // Combine and prepare data for unified view
-  const unifiedData = useMemo(() => {
-    const items = currentData.map(item => ({
-      ...item,
-      category: dataType === 'adversary' ? 'Adversary' : 'Environment',
-      displayType: item.type,
-      displayDifficulty: item.difficulty === 'Special (see Relative Strength)' ? 'Relative' : item.difficulty
-    }))
-    
-    return items
-  }, [currentData, dataType])
-
-  // Get unique types for filter
-  const itemTypes = useMemo(() => {
-    const types = [...new Set(unifiedData.map(item => item.displayType).filter(Boolean))]
-    return types.sort()
-  }, [unifiedData])
-
-  // Get unique tiers for filter
-  const itemTiers = useMemo(() => {
-    const tiers = [...new Set(unifiedData.map(item => item.tier).filter(Boolean))]
-    return tiers.sort((a, b) => a - b)
-  }, [unifiedData])
-
-  // Reconcile saved filters with available data to avoid empty results
-  useEffect(() => {
-    // Types
-    if (selectedTypes.length > 0) {
-      const validTypes = new Set(itemTypes)
-      const nextTypes = selectedTypes.filter(t => validTypes.has(t))
-      if (nextTypes.length !== selectedTypes.length) {
-        setSelectedTypes(nextTypes.length > 0 ? nextTypes : [])
-      }
-    }
-    // Tiers (compare as strings)
-    if (selectedTiers.length > 0) {
-      const validTiers = new Set(itemTiers.map(t => String(t)))
-      const nextTiers = selectedTiers.filter(t => validTiers.has(String(t)))
-      if (nextTiers.length !== selectedTiers.length) {
-        setSelectedTiers(nextTiers.length > 0 ? nextTiers : [])
-      }
-    }
-  }, [itemTypes, itemTiers, selectedTypes, selectedTiers, setSelectedTypes, setSelectedTiers])
-
-  // Sort and filter items
-  const filteredAndSortedItems = useMemo(() => {
-    let filtered = unifiedData.filter(item => {
-      const matchesSearch = searchTerm === '' || 
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    const initializeData = async () => {
+      await loadData()
+      setLoading(false)
       
+      // Set data after loading is complete
+      let sourceData = []
+      if (type === 'adversary') {
+        sourceData = adversariesData.adversaries || []
+      } else if (type === 'environment') {
+        sourceData = environmentsData.environments || []
+      }
+      
+      setData(sourceData)
+    }
+    
+    initializeData()
+  }, [type])
+
+  // Get unique values for filtering
+  const getUniqueValues = (field) => {
+    const values = data.map(item => item[field]).filter(Boolean)
+    return [...new Set(values)].sort((a, b) => {
+      // Sort numbers numerically, strings alphabetically
+      if (typeof a === 'number' && typeof b === 'number') {
+        return a - b
+      }
+      return String(a).localeCompare(String(b))
+    })
+  }
+
+  const uniqueTiers = getUniqueValues('tier')
+  const uniqueTypes = getUniqueValues('type')
+
+  const filteredAndSortedData = useMemo(() => {
+    let filtered = data.filter(item => {
+      // Search filter
+      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      // Tier filter
       const matchesTier = selectedTiers.length === 0 || selectedTiers.includes(item.tier.toString())
-      const matchesType = selectedTypes.length === 0 || selectedTypes.includes(item.displayType)
+      
+      // Type filter
+      const matchesType = selectedTypes.length === 0 || selectedTypes.includes(item.type)
       
       return matchesSearch && matchesTier && matchesType
     })
 
-    // Apply multi-level sorting
+    // Apply multi-level sorting (like archived version)
     filtered.sort((a, b) => {
       for (const sort of sortFields) {
         const { field, direction } = sort
@@ -252,7 +103,7 @@ const Browser = ({
         if (field === 'tier') {
           aValue = parseInt(aValue) || 0
           bValue = parseInt(bValue) || 0
-        } else if (field === 'displayDifficulty') {
+        } else if (field === 'difficulty') {
           // Handle difficulty sorting - numeric difficulties first, then special cases
           const aNum = parseInt(aValue)
           const bNum = parseInt(bValue)
@@ -296,320 +147,830 @@ const Browser = ({
     })
 
     return filtered
-  }, [unifiedData, searchTerm, selectedTiers, selectedTypes, sortFields])
+  }, [data, searchTerm, sortFields, selectedTiers, selectedTypes])
 
   const handleSort = (field) => {
-    setSortFields(prevSortFields => {
-      // Check if this field is already the primary sort
-      if (prevSortFields[0]?.field === field) {
-        // Toggle direction of primary sort
-        return [{ field, direction: prevSortFields[0].direction === 'asc' ? 'desc' : 'asc' }, ...prevSortFields.slice(1)]
+    setSortFields(prev => {
+      // Check if this field is already in the sort fields
+      const existingIndex = prev.findIndex(sort => sort.field === field)
+      
+      if (existingIndex >= 0) {
+        // Field exists - check if it's the primary field
+        if (existingIndex === 0) {
+          // It's the primary field - toggle direction
+          const newSortFields = [...prev]
+          newSortFields[0] = {
+            ...newSortFields[0],
+            direction: newSortFields[0].direction === 'asc' ? 'desc' : 'asc'
+          }
+          return newSortFields
+        } else {
+          // It's not the primary field - move it to primary position and reset to asc
+          const newSortFields = [...prev]
+          const existingSort = newSortFields.splice(existingIndex, 1)[0]
+          return [{ field, direction: 'asc' }, ...newSortFields]
+        }
       } else {
-        // Remove this field from existing sorts and add as new primary
-        const filteredSorts = prevSortFields.filter(sort => sort.field !== field)
-        return [{ field, direction: 'asc' }, ...filteredSorts]
+        // Field doesn't exist - add it as new primary sort
+        return [{ field, direction: 'asc' }, ...prev]
       }
     })
   }
 
-  const handleFilter = (filterType) => {
-    if (filterType === 'tier') {
-      setShowTierDropdown(!showTierDropdown)
-      setShowTypeDropdown(false)
-    } else if (filterType === 'type') {
-      setShowTypeDropdown(!showTypeDropdown)
-      setShowTierDropdown(false)
-    }
+  const toggleExpanded = (id) => {
+    setExpandedCard(expandedCard === id ? null : id)
   }
 
-  // Tooltip helpers for filter buttons
-  const tierTooltip = selectedTiers.length === 0 ? 'All' : `${selectedTiers.length} selected`
-  const typeTooltip = selectedTypes.length === 0 ? 'All' : `${selectedTypes.length} selected`
-  const isTierFiltered = selectedTiers.length > 0
-  const isTypeFiltered = selectedTypes.length > 0
-
-  // Multi-select handlers
   const handleTierSelect = (tier) => {
-    setSelectedTiers(prev => {
-      if (prev.includes(tier)) {
-        return prev.filter(t => t !== tier)
-      } else {
-        return [...prev, tier]
-      }
-    })
+    if (tier === 'clear') {
+      setSelectedTiers([])
+    } else {
+      setSelectedTiers(prev => 
+        prev.includes(tier) 
+          ? prev.filter(t => t !== tier)
+          : [...prev, tier]
+      )
+    }
+    // Don't close dropdown - allow multiple selections
   }
 
   const handleTypeSelect = (type) => {
-    setSelectedTypes(prev => {
-      if (prev.includes(type)) {
-        return prev.filter(t => t !== type)
-      } else {
-        return [...prev, type]
-      }
-    })
+    if (type === 'clear') {
+      setSelectedTypes([])
+    } else {
+      setSelectedTypes(prev => 
+        prev.includes(type) 
+          ? prev.filter(t => t !== type)
+          : [...prev, type]
+      )
+    }
+    // Don't close dropdown - allow multiple selections
   }
 
-  // Calculate dropdown position based on the header cell (th); let CSS size it to content
-  const getDropdownStyle = (buttonRef) => {
-    if (!buttonRef?.current) return {}
-    const thEl = buttonRef.current.closest('th')
-    if (!thEl) return {}
-    const thRect = thEl.getBoundingClientRect()
-    const gutter = 8
-    const left = Math.max(gutter, thRect.left)
+  const isTierFiltered = selectedTiers.length > 0
+  const isTypeFiltered = selectedTypes.length > 0
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleGlobalDown = (event) => {
+      const inDropdown = event.target.closest('.filter-dropdown')
+      const onFilterButton = event.target.closest('.header-filter-icon')
+      if (inDropdown || onFilterButton) return
+      setShowTierDropdown(false)
+      setShowTypeDropdown(false)
+    }
+    const handleKey = (event) => {
+      if (event.key === 'Escape') {
+        setShowTierDropdown(false)
+        setShowTypeDropdown(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', handleGlobalDown, true)
+    document.addEventListener('mousedown', handleGlobalDown, true)
+    document.addEventListener('touchstart', handleGlobalDown, true)
+    document.addEventListener('click', handleGlobalDown, true)
+    document.addEventListener('keydown', handleKey, true)
+    return () => {
+      document.removeEventListener('pointerdown', handleGlobalDown, true)
+      document.removeEventListener('mousedown', handleGlobalDown, true)
+      document.removeEventListener('touchstart', handleGlobalDown, true)
+      document.removeEventListener('click', handleGlobalDown, true)
+      document.removeEventListener('keydown', handleKey, true)
+    }
+  }, [setShowTierDropdown, setShowTypeDropdown])
+
+  // Get dropdown positioning
+  const getDropdownStyle = (ref) => {
+    if (!ref.current) return {}
+    const rect = ref.current.getBoundingClientRect()
     return {
       position: 'fixed',
-      top: thRect.bottom + 4,
-      left,
+      top: rect.bottom + 4,
+      left: rect.left,
       zIndex: 99999
     }
   }
 
-  const handleAddFromDatabase = (itemData) => {
-    console.log('Browser handleAddFromDatabase called with:', itemData)
-    
-    // Add the item to the game state
-    if (onAddItem) {
-      onAddItem(itemData, type)
+  return {
+    searchTerm,
+    setSearchTerm,
+    sortFields,
+    handleSort,
+    expandedCard,
+    toggleExpanded,
+    filteredAndSortedData,
+    loading,
+    // Advanced filtering
+    selectedTiers,
+    selectedTypes,
+    showTierDropdown,
+    setShowTierDropdown,
+    showTypeDropdown,
+    setShowTypeDropdown,
+    tierFilterRef,
+    typeFilterRef,
+    uniqueTiers,
+    uniqueTypes,
+    handleTierSelect,
+    handleTypeSelect,
+    isTierFiltered,
+    isTypeFiltered,
+    getDropdownStyle
+  }
+}
+
+// Browser Header Component
+const BrowserHeader = ({ searchTerm, onSearchChange, type }) => {
+  return (
+    <div style={styles.browserHeader}>
+      <input
+        type="text"
+        placeholder="Search"
+        value={searchTerm}
+        onChange={(e) => onSearchChange(e.target.value)}
+        style={styles.searchInput}
+      />
+    </div>
+  )
+}
+
+// Browser Table Header Component
+const BrowserTableHeader = ({ 
+  sortFields, 
+  onSort, 
+  type,
+  // Advanced filtering props
+  uniqueTiers,
+  uniqueTypes,
+  selectedTiers,
+  selectedTypes,
+  showTierDropdown,
+  setShowTierDropdown,
+  showTypeDropdown,
+  setShowTypeDropdown,
+  tierFilterRef,
+  typeFilterRef,
+  handleTierSelect,
+  handleTypeSelect,
+  isTierFiltered,
+  isTypeFiltered,
+  getDropdownStyle
+}) => {
+  const [hoveredColumn, setHoveredColumn] = useState(null)
+
+  const getColumns = () => {
+    if (type === 'adversary') {
+      return [
+        { key: 'name', label: 'Name' },
+        { key: 'tier', label: 'Tier', hasFilter: true },
+        { key: 'type', label: 'Type', hasFilter: true },
+        { key: 'difficulty', label: 'Diff' },
+        { key: 'action', label: '' } // Empty label for action column
+      ]
+    } else if (type === 'environment') {
+      return [
+        { key: 'name', label: 'Name' },
+        { key: 'tier', label: 'Tier', hasFilter: true },
+        { key: 'type', label: 'Type', hasFilter: true },
+        { key: 'difficulty', label: 'Diff' },
+        { key: 'action', label: '' } // Empty label for action column
+      ]
     }
+    return []
   }
 
-  const handleCardClick = (item) => {
-    console.log('Browser handleCardClick called:', item.name)
-    if (expandedCard?.id === item.id) {
-      setExpandedCard(null)
-      console.log('Collapsing card')
-    } else {
-      setExpandedCard(item)
-      console.log('Expanding card:', item.name, 'expandedCard state:', expandedCard)
+  const columns = getColumns()
+
+  const renderFilterDropdown = (filterType, values, selected, onSelect, isOpen, setIsOpen, filterRef, isFiltered) => {
+    if (!isOpen) return null
+
+    const handleClear = () => {
+      if (filterType === 'tier') {
+        // Clear tier selection
+        onSelect('clear')
+      } else if (filterType === 'type') {
+        // Clear type selection  
+        onSelect('clear')
+      }
     }
+
+    return createPortal(
+      <div 
+        className="filter-dropdown"
+        style={{
+          ...styles.filterDropdown,
+          ...getDropdownStyle(filterRef),
+          maxHeight: '60vh',
+          overflow: 'auto'
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div 
+          style={{
+            ...styles.filterOption,
+            ...(selected.length === 0 ? styles.filterOptionSelected : {})
+          }}
+          onClick={handleClear}
+        >
+          <span style={styles.checkIcon}>
+            {selected.length === 0 ? <CheckSquare size={16}/> : <Square size={16}/>}
+          </span>
+          <span style={styles.filterLabel}>All</span>
+        </div>
+        {values.map(value => {
+          const isSelected = selected.includes(value.toString())
+          return (
+            <div
+              key={value}
+              style={{
+                ...styles.filterOption,
+                ...(isSelected ? styles.filterOptionSelected : {})
+              }}
+              onClick={() => onSelect(value.toString())}
+            >
+              <span style={styles.checkIcon}>
+                {isSelected ? <CheckSquare size={16}/> : <Square size={16}/>}
+              </span>
+              <span style={styles.filterLabel}>{value}</span>
+            </div>
+          )
+        })}
+      </div>,
+      document.body
+    )
   }
 
   return (
-    <div 
-      className="browser-wrapper"
-      onClick={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
-      onMouseUp={(e) => e.stopPropagation()}
-    >
-      {/* Fixed Header Row */}
-      <div className="browser-header">
-        <input
-          type="text"
-          placeholder="Search"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="browser-search-input"
-        />
-        
-        <Button
-          action="add"
-          onClick={() => onCreateCustom && onCreateCustom(type)}
-          size="sm"
-          className="browser-create-btn"
-          aria-label="Create custom"
+    <tr style={styles.tableHeader}>
+      {columns.map(column => (
+        <th
+          key={column.key}
+          style={{
+            ...styles.tableHeaderCell,
+            ...(hoveredColumn === column.key ? styles.tableHeaderCellHover : {}),
+            position: 'relative',
+            // Apply column-specific widths
+            ...(column.key === 'name' ? { width: 'auto', minWidth: '0' } : {}),
+            ...(column.key === 'tier' ? { width: '80px', minWidth: '80px', maxWidth: '80px' } : {}),
+            ...(column.key === 'type' ? { width: '100px', minWidth: '100px', maxWidth: '100px' } : {}),
+            ...(column.key === 'difficulty' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {}),
+            ...(column.key === 'action' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {})
+          }}
+          onClick={() => onSort(column.key)}
+          onMouseEnter={() => setHoveredColumn(column.key)}
+          onMouseLeave={() => setHoveredColumn(null)}
         >
-          Create
-        </Button>
+          {column.hasFilter ? (
+            <div style={styles.headerWithFilter}>
+              <span 
+                style={{ cursor: 'pointer' }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onSort(column.key)
+                }}
+              >
+                {column.label}
+              </span>
+              <button
+                ref={column.key === 'tier' ? tierFilterRef : typeFilterRef}
+                style={{
+                  ...styles.headerFilterIcon,
+                  ...(column.key === 'tier' && isTierFiltered ? styles.headerFilterIconActive : {}),
+                  ...(column.key === 'type' && isTypeFiltered ? styles.headerFilterIconActive : {})
+                }}
+                className="header-filter-icon"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (column.key === 'tier') {
+                    setShowTierDropdown(!showTierDropdown)
+                    setShowTypeDropdown(false)
+                  } else if (column.key === 'type') {
+                    setShowTypeDropdown(!showTypeDropdown)
+                    setShowTierDropdown(false)
+                  }
+                }}
+              >
+                <Filter size={14} />
+                {(column.key === 'tier' && isTierFiltered) || (column.key === 'type' && isTypeFiltered) ? (
+                  <span style={styles.filterActiveDot}></span>
+                ) : null}
+              </button>
+            </div>
+          ) : (
+            column.label
+          )}
+          
+          {/* Filter dropdowns */}
+          {column.key === 'tier' && renderFilterDropdown(
+            'tier', uniqueTiers, selectedTiers, handleTierSelect,
+            showTierDropdown, setShowTierDropdown, tierFilterRef, isTierFiltered
+          )}
+          {column.key === 'type' && renderFilterDropdown(
+            'type', uniqueTypes, selectedTypes, handleTypeSelect,
+            showTypeDropdown, setShowTypeDropdown, typeFilterRef, isTypeFiltered
+          )}
+        </th>
+      ))}
+    </tr>
+  )
+}
+
+// Browser Row Component
+const BrowserRow = ({ item, isExpanded, onToggleExpanded, onAdd, type }) => {
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handleAdd = () => {
+    onAdd(item)
+  }
+
+  const renderContent = () => {
+    if (type === 'adversary') {
+      return (
+        <>
+          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left'}}>{item.name}</td>
+          <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center'}}>{item.tier}</td>
+          <td style={{...styles.rowCell, width: '100px', minWidth: '100px', maxWidth: '100px', textAlign: 'center'}}>{item.type}</td>
+          <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center'}}>{item.difficulty}</td>
+        </>
+      )
+    } else if (type === 'environment') {
+      return (
+        <>
+          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left'}}>{item.name}</td>
+          <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center'}}>{item.tier}</td>
+          <td style={{...styles.rowCell, width: '100px', minWidth: '100px', maxWidth: '100px', textAlign: 'center'}}>{item.type}</td>
+          <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center'}}>{item.difficulty}</td>
+        </>
+      )
+    }
+    return null
+  }
+
+  return (
+    <>
+      <tr 
+        style={{
+          ...styles.row,
+          ...(isHovered ? styles.rowHover : {})
+        }}
+        onClick={() => onToggleExpanded(item.id)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {renderContent()}
+        <td style={{ 
+          width: '40px', 
+          minWidth: '40px', 
+          maxWidth: '40px', 
+          textAlign: 'center', 
+          padding: '0', 
+          margin: '0', 
+          border: 'none', 
+          verticalAlign: 'middle',
+          boxSizing: 'border-box',
+          overflow: 'visible',
+          textOverflow: 'unset',
+          whiteSpace: 'nowrap'
+        }}>
+          <button
+            style={styles.addButton}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleAdd()
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'var(--gray-dark)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'var(--purple)'
+            }}
+          >
+            +
+          </button>
+        </td>
+      </tr>
+      
+      {isExpanded && (
+        <tr style={styles.expandedRow}>
+          <td colSpan="5" style={styles.expandedContent}>
+            <GameCard
+              item={item}
+              type={type}
+              mode="expanded"
+              onClick={() => {}} // No-op since we're already expanded
+              onDelete={() => {}} // No-op in browser
+            />
+          </td>
+        </tr>
+      )}
+    </>
+  )
+}
+
+// Main Browser Component
+const Browser = ({ type, onAddItem, onCancel }) => {
+  const {
+    searchTerm,
+    setSearchTerm,
+    sortFields,
+    handleSort,
+    expandedCard,
+    toggleExpanded,
+    filteredAndSortedData,
+    loading,
+    // Advanced filtering
+    selectedTiers,
+    selectedTypes,
+    showTierDropdown,
+    setShowTierDropdown,
+    showTypeDropdown,
+    setShowTypeDropdown,
+    tierFilterRef,
+    typeFilterRef,
+    uniqueTiers,
+    uniqueTypes,
+    handleTierSelect,
+    handleTypeSelect,
+    isTierFiltered,
+    isTypeFiltered,
+    getDropdownStyle
+  } = useBrowser(type)
+
+  if (loading) {
+    return (
+      <div style={styles.browser}>
+        <div style={styles.loading}>Loading...</div>
       </div>
+    )
+  }
 
-      {/* Scrollable Content */}
-      <div className="browser-content">
+  return (
+    <div style={styles.browserWrapper}>
+      {/* Fixed Header Row */}
+      <BrowserHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        type={type}
+      />
 
-        <table className="browser-table">
+      {/* Scrollable Content with Sticky Header */}
+      <div className="browser-content" style={styles.browserContent}>
+        <table style={styles.browserTable}>
           <thead>
-            <tr>
-              <th 
-                onClick={() => handleSort('name')} 
-                className={`sortable ${sortFields[0]?.field === 'name' ? 'active' : ''} ${sortFields[0]?.field === 'name' ? sortFields[0].direction : ''}`}
-              >
-                Name
-              </th>
-              <th 
-                onClick={() => handleSort('tier')} 
-                className={`sortable ${sortFields[0]?.field === 'tier' ? 'active' : ''} ${sortFields[0]?.field === 'tier' ? sortFields[0].direction : ''}`}
-              >
-                <div className="header-with-filter">
-                  Tier
-                  <button
-                    ref={tierFilterRef}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleFilter('tier')
-                    }}
-                    className={`header-filter-icon ${isTierFiltered ? 'active' : ''}`}
-                    title={`Filter by Tier: ${tierTooltip}`}
-                  >
-                    <Filter size={14} />
-                    <span className="filter-active-dot" aria-hidden="true" />
-                  </button>
-                  {showTierDropdown && (
-                    <div 
-                      className="filter-dropdown" 
-                      style={getDropdownStyle(tierFilterRef)}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div 
-                        className={`filter-option ${selectedTiers.length === 0 ? 'selected' : ''}`} 
-                        onClick={() => setSelectedTiers([])}
-                      >
-                        <span className="check-icon">{selectedTiers.length === 0 ? <CheckSquare size={16}/> : <Square size={16}/>}</span>
-                        <span className="filter-label">All</span>
-                      </div>
-                      {itemTiers.map(tier => {
-                        const isSelected = selectedTiers.includes(tier.toString())
-                        return (
-                          <div 
-                            key={tier} 
-                            className={`filter-option ${isSelected ? 'selected' : ''}`}
-                            onClick={() => handleTierSelect(tier.toString())}
-                          >
-                            <span className="check-icon">{isSelected ? <CheckSquare size={16}/> : <Square size={16}/>}</span>
-                            <span className="filter-label">{tier}</span>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              </th>
-              <th 
-                onClick={() => handleSort('displayType')} 
-                className={`sortable ${sortFields[0]?.field === 'displayType' ? 'active' : ''} ${sortFields[0]?.field === 'displayType' ? sortFields[0].direction : ''}`}
-              >
-                <div className="header-with-filter">
-                  Type
-                  <button
-                    ref={typeFilterRef}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleFilter('type')
-                    }}
-                    className={`header-filter-icon ${isTypeFiltered ? 'active' : ''}`}
-                    title={`Filter by Type: ${typeTooltip}`}
-                  >
-                    <Filter size={14} />
-                    <span className="filter-active-dot" aria-hidden="true" />
-                  </button>
-                  {showTypeDropdown && (
-                    <div 
-                      className="filter-dropdown" 
-                      style={getDropdownStyle(typeFilterRef)}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div 
-                        className={`filter-option ${selectedTypes.length === 0 ? 'selected' : ''}`} 
-                        onClick={() => setSelectedTypes([])}
-                      >
-                        <span className="check-icon">{selectedTypes.length === 0 ? <CheckSquare size={16}/> : <Square size={16}/>}</span>
-                        <span className="filter-label">All</span>
-                      </div>
-                      {itemTypes.map(type => {
-                        const isSelected = selectedTypes.includes(type)
-                        return (
-                          <div 
-                            key={type} 
-                            className={`filter-option ${isSelected ? 'selected' : ''}`}
-                            onClick={() => handleTypeSelect(type)}
-                          >
-                            <span className="check-icon">{isSelected ? <CheckSquare size={16}/> : <Square size={16}/>}</span>
-                            <span className="filter-label">{type}</span>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              </th>
-              <th 
-                onClick={() => handleSort('displayDifficulty')} 
-                className={`sortable ${sortFields[0]?.field === 'displayDifficulty' ? 'active' : ''} ${sortFields[0]?.field === 'displayDifficulty' ? sortFields[0].direction : ''}`}
-              >
-                <div className="header-with-filter">
-                  Diff
-                </div>
-              </th>
-              <th></th>
-            </tr>
+            <BrowserTableHeader
+              sortFields={sortFields}
+              onSort={handleSort}
+              type={type}
+              uniqueTiers={uniqueTiers}
+              uniqueTypes={uniqueTypes}
+              selectedTiers={selectedTiers}
+              selectedTypes={selectedTypes}
+              showTierDropdown={showTierDropdown}
+              setShowTierDropdown={setShowTierDropdown}
+              showTypeDropdown={showTypeDropdown}
+              setShowTypeDropdown={setShowTypeDropdown}
+              tierFilterRef={tierFilterRef}
+              typeFilterRef={typeFilterRef}
+              handleTierSelect={handleTierSelect}
+              handleTypeSelect={handleTypeSelect}
+              isTierFiltered={isTierFiltered}
+              isTypeFiltered={isTypeFiltered}
+              getDropdownStyle={getDropdownStyle}
+            />
           </thead>
           <tbody>
-            {filteredAndSortedItems.map((item) => (
-              <React.Fragment key={item.id}>
-                <tr 
-                  className="browser-row"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    handleCardClick(item)
-                  }}
-                >
-                  <td className="column-name" data-label="Name">{item.name}</td>
-                  <td className="column-tier" data-label="Tier">{item.tier}</td>
-                  <td className="column-type" data-label="Type">{item.displayType}</td>
-                  <td className="column-description" data-label="Difficulty">{item.displayDifficulty}</td>
-                  <td className="column-action" data-label="Add">
-                    <Button
-                      action="add"
-                      size="sm"
-                      className="table-add-btn"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleAddFromDatabase(item)
-                      }}
-                      aria-label={`Add ${item.name}`}
-                    >
-                      <Plus size={14} />
-                    </Button>
-                  </td>
-                </tr>
-                
-                {/* Condensed Card View - Both Desktop and Mobile */}
-                {expandedCard?.id === item.id && (
-                  <tr className="condensed-card-row">
-                    <td colSpan={5} className="condensed-card-cell">
-                      <div className="condensed-card-container">
-                        <Cards
-                          item={{
-                            ...expandedCard,
-                            hp: 0, // Show as healthy (0 HP) in browser preview
-                            stress: 0 // Show as no stress in browser preview
-                          }}
-                          type={expandedCard.category?.toLowerCase() || (type === 'adversary' ? 'adversary' : 'environment')}
-                          mode="compact"
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                )}
-                
-                {/* Inline Expanded Card View - Both Desktop and Mobile */}
-                {expandedCard?.id === item.id && (
-                  <tr className="expanded-card-row">
-                    <td colSpan={5} className="expanded-card-cell">
-                      <div className="expanded-card-container">
-                        <Cards
-                          item={{
-                            ...expandedCard,
-                            hp: 0, // Show as healthy (0 HP) in browser preview
-                            stress: 0 // Show as no stress in browser preview
-                          }}
-                          type={expandedCard.category?.toLowerCase() || (type === 'adversary' ? 'adversary' : 'environment')}
-                          mode="expanded"
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
+            {filteredAndSortedData.map(item => (
+              <BrowserRow
+                key={item.id}
+                item={item}
+                isExpanded={expandedCard === item.id}
+                onToggleExpanded={toggleExpanded}
+                onAdd={onAddItem}
+                type={type}
+              />
             ))}
           </tbody>
         </table>
       </div>
-
     </div>
   )
+}
+
+// All styles in one place - comprehensive styles from all CSS files
+const styles = {
+  browserWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    background: 'var(--bg-primary)',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--border)',
+    overflow: 'hidden',
+    height: '100%',
+    width: '100%', // Ensure wrapper uses full width
+    position: 'relative' // Ensure proper positioning context
+  },
+  browserContent: {
+    flex: 1,
+    overflowY: 'auto',
+    overflowX: 'visible',
+    padding: 0,
+    width: '100%' // Ensure content uses full width
+  },
+  tableHeaderContainer: {
+    flexShrink: 0, // Prevent header from shrinking
+    position: 'sticky',
+    top: 0,
+    zIndex: 15,
+    backgroundColor: '#1a1a1a'
+  },
+  browserTable: {
+    width: '100%',
+    minWidth: '100%', // Ensure it uses full width
+    borderCollapse: 'collapse',
+    tableLayout: 'fixed', // Fixed layout for precise control
+    background: 'var(--bg-primary)',
+    margin: 0
+  },
+  browserHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '16px',
+    borderBottom: '1px solid var(--border)',
+    backgroundColor: 'var(--bg-secondary)',
+    flexShrink: 0, // Prevent header from shrinking
+    position: 'sticky',
+    top: 0,
+    zIndex: 20
+  },
+  browserTitle: {
+    margin: 0,
+    color: 'var(--text-primary)',
+    fontSize: '18px',
+    fontWeight: '600'
+  },
+  closeButton: {
+    background: 'none',
+    border: 'none',
+    color: 'var(--text-primary)',
+    fontSize: '24px',
+    cursor: 'pointer',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    transition: 'background-color 0.2s'
+  },
+  searchInput: {
+    flex: 1,
+    padding: '8px 12px',
+    border: '1px solid var(--border)',
+    borderRadius: '4px',
+    backgroundColor: 'var(--bg-primary)',
+    color: 'var(--text-primary)',
+    fontSize: '14px',
+    marginRight: '12px',
+    transition: 'all 0.2s ease'
+  },
+  searchInputFocus: {
+    outline: 'none',
+    borderColor: '#8b5cf6',
+    boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)'
+  },
+  tableHeader: {
+    background: '#1a1a1a',
+    borderBottom: '1px solid var(--border)',
+    boxShadow: '0 1px 0 var(--border)',
+    position: 'sticky',
+    top: '0',
+    zIndex: 10
+  },
+  tableHeaderCell: {
+    backgroundColor: '#1a1a1a',
+    fontWeight: '700',
+    borderBottom: '1px solid var(--border)',
+    cursor: 'pointer',
+    userSelect: 'none',
+    minWidth: '100px',
+    whiteSpace: 'nowrap',
+    padding: '4px 4px', // Reduced padding to match archived version
+    color: 'var(--text-primary)',
+    textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+    boxShadow: '0 1px 0 var(--border)',
+    transition: 'background-color 0.2s',
+    position: 'sticky',
+    top: '0',
+    zIndex: 10
+  },
+  tableHeaderCellHover: {
+    backgroundColor: 'var(--bg-hover)'
+  },
+  sortIndicator: {
+    fontSize: '12px',
+    color: '#4a90e2'
+  },
+  tableBody: {
+    flex: 1,
+    overflowY: 'auto',
+    padding: '8px',
+    backgroundColor: '#1a1a1a'
+  },
+  row: {
+    height: '35px',
+    borderBottom: '1px solid var(--border)',
+    transition: 'background-color 0.2s ease',
+    cursor: 'pointer'
+  },
+  rowHover: {
+    backgroundColor: 'var(--bg-hover)'
+  },
+  expandedRow: {
+    backgroundColor: 'var(--bg-secondary)'
+  },
+  rowCell: {
+    padding: '4px 4px', // Reduced padding to match archived version
+    verticalAlign: 'middle',
+    color: 'var(--text-primary)',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    borderBottom: '1px solid var(--border)'
+  },
+  rowCellName: {
+    fontWeight: '500',
+    minWidth: '150px'
+  },
+  rowCellCenter: {
+    textAlign: 'center',
+    justifyContent: 'center',
+    minWidth: '80px'
+  },
+  rowActions: {
+    width: '80px',
+    textAlign: 'center',
+    padding: '4px 8px',
+    borderBottom: '1px solid var(--border)'
+  },
+  addButton: {
+    width: '1.5rem', // 24px - matches GameBoard purple button
+    height: '1.5rem', // 24px - matches GameBoard purple button
+    border: '1px solid var(--purple)',
+    borderRadius: 'var(--radius-sm)',
+    background: 'var(--purple)',
+    color: 'white',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '14px',
+    fontWeight: '500'
+  },
+  expandedContent: {
+    padding: '16px',
+    backgroundColor: 'var(--bg-secondary)',
+    borderBottom: '1px solid var(--border)'
+  },
+  // Column-specific widths (matching archived version)
+  columnName: {
+    width: 'auto', // Name column gets remaining space
+    minWidth: '0',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    paddingLeft: '8px', // Increased left padding for name column
+    textAlign: 'left'
+  },
+  columnTier: {
+    width: '80px', // Tier column - increased width to accommodate filter button
+    textAlign: 'center',
+    overflow: 'visible', // Don't hide text
+    textOverflow: 'unset' // No ellipsis for text
+  },
+  columnType: {
+    width: '100px', // Type column - fit "Type" header
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    textAlign: 'center' // Center the type content
+  },
+  columnDifficulty: {
+    width: '40px', // Diff column - minimal width for "Diff" header
+    textAlign: 'center',
+    overflow: 'visible', // Don't hide text
+    textOverflow: 'unset' // No ellipsis for text
+  },
+  columnAction: {
+    width: '24px', // Add button column - just enough for the 24px button
+    minWidth: '24px',
+    maxWidth: '24px',
+    textAlign: 'center',
+    padding: '0', // Remove cell padding
+    margin: '0', // Remove cell margins
+    border: 'none', // Remove cell borders
+    verticalAlign: 'middle',
+    color: 'var(--text-primary)',
+    whiteSpace: 'nowrap',
+    overflow: 'visible',
+    textOverflow: 'unset'
+  },
+  loading: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '200px',
+    color: '#fff',
+    fontSize: '16px'
+  },
+  // Mobile responsive styles
+  mobileBrowser: {
+    width: '95vw',
+    height: '90vh',
+    maxWidth: 'none'
+  },
+  mobileSearchInput: {
+    fontSize: '16px' // Prevent zoom on iOS
+  },
+  // Filter dropdown styles
+  headerWithFilter: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '4px',
+    position: 'relative'
+  },
+  headerFilterIcon: {
+    background: 'none',
+    border: 'none',
+    color: 'var(--text-secondary)',
+    cursor: 'pointer',
+    padding: '2px 4px',
+    borderRadius: 'var(--radius-sm)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
+    position: 'relative'
+  },
+  headerFilterIconActive: {
+    color: 'var(--purple)'
+  },
+  filterIcon: {
+    fontSize: '12px'
+  },
+  filterActiveDot: {
+    position: 'absolute',
+    left: '50%',
+    top: '2px',
+    transform: 'translateX(-50%)',
+    width: '4px',
+    height: '4px',
+    borderRadius: '50%',
+    background: 'var(--purple)',
+    pointerEvents: 'none'
+  },
+  filterDropdown: {
+    position: 'absolute',
+    top: '100%',
+    left: '0',
+    background: 'var(--bg-secondary)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-md)',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+    zIndex: 99999,
+    marginTop: '4px',
+    overflow: 'hidden',
+    width: 'max-content',
+    minWidth: '120px',
+    maxWidth: '200px'
+  },
+  filterOption: {
+    padding: '8px 12px',
+    cursor: 'pointer',
+    color: 'var(--text-primary)',
+    fontSize: '14px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    borderBottom: '1px solid rgba(255,255,255,0.06)',
+    transition: 'background-color 0.2s ease',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
+  },
+  filterOptionSelected: {
+    backgroundColor: 'var(--bg-hover)'
+  },
+  checkIcon: {
+    width: '16px',
+    height: '16px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'var(--text-secondary)',
+    fontSize: '12px'
+  },
+  filterLabel: {
+    flex: 1
+  }
 }
 
 export default Browser

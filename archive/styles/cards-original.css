@@ -1,0 +1,144 @@
+/* Shared Card Styles - Reusable patterns for all card types */
+
+/* ========================================
+   BASE CARD LAYOUT (All Card Types)
+   ======================================== */
+
+/* Base card container - shared by all card types */
+.expanded-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Card header - consistent layout for all card types */
+.expanded-header {
+  background: var(--gray-dark);
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--border);
+  /* Prevent pull-to-refresh when expanded card content is short */
+  overscroll-behavior: none !important;
+  overscroll-behavior-y: none !important;
+  touch-action: none !important;
+}
+
+.expanded-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.expanded-content {
+  padding: var(--space-md);
+}
+
+/* ========================================
+   VIEW MODE SPECIFIC STYLES
+   ======================================== */
+
+/* View mode maintains clean display layout */
+.expanded-card:not(.edit-mode) {
+  /* Inherits base styles */
+}
+
+/* ========================================
+   EDIT MODE SPECIFIC STYLES
+   ======================================== */
+
+/* Edit mode adds form styling */
+.expanded-card.edit-mode {
+  /* Inherits base styles */
+}
+
+/* Edit mode header styling */
+.expanded-card.edit-mode .expanded-header {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--purple);
+}
+
+/* Edit mode content styling */
+.expanded-card.edit-mode .expanded-content {
+  background: var(--bg-primary);
+}
+
+/* ========================================
+   SHARED CARD PATTERNS
+   ======================================== */
+
+/* Card title and meta information */
+.card-title {
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+}
+
+.card-tier {
+  background: var(--purple);
+  color: white;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.card-type {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* Card stats and controls */
+.card-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.card-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Card sections */
+.card-section {
+  margin-bottom: 1rem;
+}
+
+.card-section-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.card-section-content {
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ========================================
+   SHARED UTILITY CLASSES
+   ======================================== */
+
+/* HP and Stress symbols - shared across card types */
+.hp-symbols,
+.stress-symbols {
+  /* Utility classes applied directly in components */
+}
+
+/* Difficulty Section - shared by all card types */
+.difficulty-section {
+  /* Utility classes applied directly in components */
+}

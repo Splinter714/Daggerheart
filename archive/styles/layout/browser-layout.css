@@ -1,0 +1,184 @@
+/* Browser Layout Styles */
+
+/* ========================================
+   BROWSER/TABLE LAYOUT STYLES
+   ======================================== */
+
+.browser-wrapper {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  height: 100%;
+  max-width: 100%;
+  min-width: 0; /* Allow flex item to shrink below content size */
+  overflow: hidden;
+}
+
+.browser-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+  overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+  touch-action: none !important; /* Block PTR in header area; taps still work */
+}
+
+.browser-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: visible; /* Allow dropdowns to extend horizontally */
+  padding: 0; /* eliminate gap above sticky header */
+  /* Force scrolling to happen here, not in parent containers */
+  max-height: 100%;
+  contain: layout style;
+  display: flex;
+  flex-direction: column;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+  overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+  touch-action: pan-y !important; /* Allow vertical scrolling only */
+}
+
+/* Right panel browser content - match drawer behavior */
+.database-display .browser-content {
+  height: calc(100vh - 200px); /* Specific height constraint like drawer */
+  max-height: calc(100vh - 200px); /* Don't exceed this height */
+}
+
+.browser-search-input {
+  flex: 1;
+  height: 36px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  transition: all 0.2s ease;
+}
+
+.browser-search-input:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* Browser button styles moved to Button component */
+
+.header-with-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the content */
+  gap: 0.25rem; /* Reduced from 0.5rem */
+  position: relative; /* Enable absolute positioning for dropdowns */
+}
+
+.browser-content th {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.browser-content th:nth-child(1) { min-width: 150px; } /* Name */
+.browser-content th:nth-child(2) { min-width: 80px; }  /* Tier */
+.browser-content th:nth-child(3) { min-width: 100px; } /* Type */
+
+.browser-table th:nth-child(2),
+.browser-table th:nth-child(4) {
+  text-align: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Left-align name and type headers to match their content */
+.browser-table th:nth-child(1) {
+  text-align: left !important;
+  padding: 0.25rem 0.25rem 0.25rem 0.5rem !important; /* Match content left padding */
+}
+
+.browser-table th:nth-child(3) {
+  text-align: center !important; /* Center the type header */
+  padding: 0.25rem 0.25rem !important;
+}
+
+/* Center tier and difficulty column content */
+.browser-table td:nth-child(2),
+.browser-table td:nth-child(4) {
+  text-align: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Table add button styles moved to Button component */
+
+.browser-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.5rem;
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+}
+
+.filter-section {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.filter-select option {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.results-info {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-style: italic;
+}
+
+.data-management-section {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.data-management-btn {
+  padding: var(--space-sm) var(--space-md);
+  border: none;
+  border-radius: 0.375rem;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}

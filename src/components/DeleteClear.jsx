@@ -1,0 +1,160 @@
+import React, { useState, useEffect } from 'react'
+import { Trash2 } from 'lucide-react'
+
+const DeleteClear = ({
+  adversaries,
+  environments,
+  countdowns,
+  deleteAdversary,
+  deleteEnvironment,
+  deleteCountdown
+}) => {
+  const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.delete-clear-container')) {
+        setDeleteFlyoutOpen(false)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
+
+  const hasAnyItems = (adversaries?.length || 0) > 0 || (environments?.length || 0) > 0 || (countdowns?.length || 0) > 0
+  const hasDeadAdversaries = (adversaries || []).some(adv => (adv.hp || 0) <= 0)
+
+  const flyoutStyle = {
+    position: 'absolute',
+    bottom: '100%',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: 'var(--bg-secondary)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-md)',
+    padding: '0.5rem',
+    minWidth: '200px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+    zIndex: 1000,
+    display: deleteFlyoutOpen ? 'block' : 'none'
+  }
+
+  const buttonStyle = {
+    background: 'none',
+    border: 'none',
+    color: hasAnyItems ? 'var(--text-primary)' : 'var(--text-secondary)',
+    cursor: hasAnyItems ? 'pointer' : 'not-allowed',
+    padding: '0.5rem',
+    borderRadius: 'var(--radius-sm)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s',
+    opacity: hasAnyItems ? 1 : 0.5
+  }
+
+  const flyoutItemStyle = {
+    background: 'none',
+    border: 'none',
+    color: 'var(--text-primary)',
+    cursor: 'pointer',
+    padding: '0.5rem',
+    borderRadius: 'var(--radius-sm)',
+    width: '100%',
+    textAlign: 'left',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    transition: 'background-color 0.2s'
+  }
+
+  const flyoutItemHoverStyle = {
+    backgroundColor: 'var(--bg-hover)'
+  }
+
+  return (
+    <div className="delete-clear-container" style={{ position: 'relative' }}>
+      <button
+        style={buttonStyle}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (hasAnyItems) {
+            setDeleteFlyoutOpen(!deleteFlyoutOpen)
+          }
+        }}
+        title={!hasAnyItems ? 'Nothing to clear' : 'Clear Items'}
+      >
+        <Trash2 size={20} />
+      </button>
+      
+      <div style={flyoutStyle}>
+        {(adversaries && adversaries.length > 0) && (
+          <button 
+            style={flyoutItemStyle}
+            onMouseEnter={(e) => Object.assign(e.target.style, flyoutItemHoverStyle)}
+            onMouseLeave={(e) => Object.assign(e.target.style, flyoutItemStyle)}
+            onClick={(e) => { 
+              e.stopPropagation()
+              setDeleteFlyoutOpen(false)
+              adversaries.forEach(item => deleteAdversary(item.id))
+            }}
+          >
+            <span>×</span>
+            <span>All Adversaries</span>
+          </button>
+        )}
+        
+        {(adversaries && adversaries.length > 0 && hasDeadAdversaries) && (
+          <button 
+            style={flyoutItemStyle}
+            onMouseEnter={(e) => Object.assign(e.target.style, flyoutItemHoverStyle)}
+            onMouseLeave={(e) => Object.assign(e.target.style, flyoutItemStyle)}
+            onClick={(e) => { 
+              e.stopPropagation()
+              setDeleteFlyoutOpen(false)
+              const dead = adversaries.filter(adv => (adv.hp || 0) <= 0)
+              dead.forEach(item => deleteAdversary(item.id))
+            }}
+          >
+            <span>×</span>
+            <span>Dead Adversaries</span>
+          </button>
+        )}
+        
+        {(environments && environments.length > 0) && (
+          <button 
+            style={flyoutItemStyle}
+            onMouseEnter={(e) => Object.assign(e.target.style, flyoutItemHoverStyle)}
+            onMouseLeave={(e) => Object.assign(e.target.style, flyoutItemStyle)}
+            onClick={(e) => { 
+              e.stopPropagation()
+              setDeleteFlyoutOpen(false)
+              environments.forEach(item => deleteEnvironment(item.id))
+            }}
+          >
+            <span>×</span>
+            <span>All Environments</span>
+          </button>
+        )}
+        
+        {(countdowns && countdowns.length > 0) && (
+          <button 
+            style={flyoutItemStyle}
+            onMouseEnter={(e) => Object.assign(e.target.style, flyoutItemHoverStyle)}
+            onMouseLeave={(e) => Object.assign(e.target.style, flyoutItemStyle)}
+            onClick={(e) => { 
+              e.stopPropagation()
+              setDeleteFlyoutOpen(false)
+              countdowns.forEach(countdown => deleteCountdown(countdown.id))
+            }}
+          >
+            <span>×</span>
+            <span>All Countdowns</span>
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default DeleteClear

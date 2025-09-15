@@ -9,6 +9,7 @@ if [ "$current_branch" != "main" ]; then
     echo "⚠️  Warning: You're not on the main branch (currently on: $current_branch)"
     echo "   Consider switching to main branch first: git checkout main"
     read -p "Continue anyway? (y/N): " -n 1 -r
+
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "❌ Deployment cancelled"

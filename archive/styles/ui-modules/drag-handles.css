@@ -1,0 +1,87 @@
+/* Drag Handle Component Styles */
+
+/* ========================================
+   DRAG HANDLES
+   ======================================== */
+
+.drag-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  background: var(--bg-secondary);
+  /* Removed vertical line border-right */
+  transition: all 0.2s ease;
+  z-index: 10;
+  /* Block native scrolling when dragging via handle */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: auto;
+}
+
+.drag-handle:hover {
+  background: var(--bg-hover);
+  /* Removed purple border-color */
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-handle-compact {
+  cursor: grab;
+  color: #94a3b8;
+  font-size: var(--text-sm);
+  padding: 0.125rem;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 2rem; /* 32px wide drag area */
+  z-index: 10;
+  background: transparent;
+  border-radius: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  border-left: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.drag-handle-compact:hover {
+  opacity: 1;
+  background: rgba(148, 163, 184, 0.1); /* Subtle highlight */
+  border-left-color: var(--border);
+}
+
+/* ========================================
+   DRAG HANDLE ALTERNATIVE
+   ======================================== */
+
+.drag-handle {
+  cursor: grab;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  background: var(--bg-secondary);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
