@@ -421,31 +421,37 @@ export function useAdversaryHandlers({ adversaries, updateAdversary, deleteAdver
 // ============================================================================
 
 const styles = {
+  // Transition definitions - centralized
+  transitions: {
+    hoverIn: 'all 0.1s ease',        // Fast hover-in
+    hoverOut: 'all 0.3s ease',       // Graceful hover-out
+    colorIn: 'color 0.1s ease',
+    colorOut: 'color 0.3s ease',
+    backgroundIn: 'background-color 0.1s ease',
+    backgroundOut: 'background-color 0.3s ease'
+  },
+
   // Container styles
   card: {
-    backgroundColor: '#1a1a1a',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#333',
+    backgroundColor: 'var(--bg-card)',
     borderRadius: '8px',
     padding: '12px',
     marginTop: '0.5rem',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.1s ease',
     position: 'relative'
   },
   cardHover: {
-    borderColor: '#555',
-    backgroundColor: '#222'
+    backgroundColor: 'var(--bg-card-hover)'
   },
   cardDead: {
     opacity: 0.6,
-    backgroundColor: '#0f0f0f',
-    borderColor: '#444'
+    backgroundColor: 'var(--gray-800)',
+    borderColor: 'var(--border)'
   },
   cardAtMax: {
-    backgroundColor: '#0d4f0d',
-    borderColor: '#28a745'
+    backgroundColor: 'var(--success)',
+    borderColor: 'var(--success)'
   },
 
   // Layout styles
@@ -458,7 +464,7 @@ const styles = {
   rowTitle: {
     fontSize: '16px',
     fontWeight: '600',
-    color: '#fff',
+    color: 'var(--text-primary)',
     margin: 0
   },
   rowMeta: {
@@ -488,7 +494,7 @@ const styles = {
   },
   pipSymbol: {
     fontSize: '16px',
-    transition: 'color 0.2s ease'
+    transition: 'color 0.1s ease'
   },
   pipGroup: {
     display: 'flex',
@@ -505,35 +511,32 @@ const styles = {
     textTransform: 'uppercase'
   },
   typeBadge: {
-    backgroundColor: '#6f42c1',
-    color: '#fff'
+    backgroundColor: 'var(--purple)',
+    color: 'var(--text-primary)'
   },
   difficultyBadge: {
-    backgroundColor: '#4a5568',
-    color: '#fff',
+    backgroundColor: 'var(--gray-500)',
+    color: 'var(--text-primary)',
     cursor: 'pointer',
-    transition: 'background-color 0.2s ease'
+    transition: 'background-color 0.1s ease'
   },
   tierBadge: {
-    backgroundColor: '#17a2b8',
-    color: '#fff'
+    backgroundColor: 'var(--info)',
+    color: 'var(--text-primary)'
   },
 
   // Base form input styles
   inputBase: {
     padding: '8px',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#6b7280',
-    borderRadius: '4px',
-    backgroundColor: '#1a1a1a',
-    color: '#ffffff',
+    borderColor: 'var(--gray-500)',
+    backgroundColor: 'var(--gray-900)',
+    color: 'var(--text-primary)',
     fontSize: '14px',
     transition: 'all 0.2s ease'
   },
   inputBaseFocus: {
     outline: 'none',
-    borderColor: '#4f46e5',
+    borderColor: 'var(--purple)',
     boxShadow: '0 0 0 2px rgba(79, 70, 229, 0.1)'
   },
   inputBaseDisabled: {
@@ -543,37 +546,37 @@ const styles = {
 
   // Button styles
   button: {
-    backgroundColor: '#dc3545',
-    color: '#fff',
+    backgroundColor: 'var(--danger)',
+    color: 'var(--text-primary)',
     borderWidth: '0',
     borderStyle: 'none',
     borderRadius: '4px',
     padding: '4px 8px',
     fontSize: '14px',
     cursor: 'pointer',
-    transition: 'background-color 0.2s ease'
+    transition: 'background-color 0.1s ease'
   },
   incrementButton: {
-    backgroundColor: '#28a745',
-    color: '#fff',
+    backgroundColor: 'var(--success)',
+    color: 'var(--text-primary)',
     borderWidth: '0',
     borderStyle: 'none',
     borderRadius: '4px',
     padding: '4px 8px',
     fontSize: '14px',
     cursor: 'pointer',
-    transition: 'background-color 0.2s ease'
+    transition: 'background-color 0.1s ease'
   },
   decrementButton: {
-    backgroundColor: '#ffc107',
-    color: '#000',
+    backgroundColor: 'var(--warning)',
+    color: 'var(--text-primary)',
     borderWidth: '0',
     borderStyle: 'none',
     borderRadius: '4px',
     padding: '4px 8px',
     fontSize: '14px',
     cursor: 'pointer',
-    transition: 'background-color 0.2s ease'
+    transition: 'background-color 0.1s ease'
   },
 
   // Damage input styles
@@ -591,10 +594,10 @@ const styles = {
     borderRadius: '8px'
   },
   damageInputContent: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: 'var(--gray-900)',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: '#555',
+    borderColor: 'var(--border)',
     borderRadius: '8px',
     padding: '16px',
     display: 'flex',
@@ -603,13 +606,13 @@ const styles = {
     minWidth: '200px'
   },
   damageInput: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'var(--gray-900)',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: '#555',
+    borderColor: 'var(--border)',
     borderRadius: '4px',
     padding: '8px',
-    color: '#fff',
+    color: 'var(--text-primary)',
     fontSize: '14px'
   },
   damageIndicators: {
@@ -620,20 +623,20 @@ const styles = {
   },
   damageDrop: {
     fontSize: '16px',
-    color: '#666',
+    color: 'var(--text-secondary)',
     cursor: 'pointer',
-    transition: 'color 0.2s ease'
+    transition: 'color 0.1s ease'
   },
   applyButton: {
-    backgroundColor: '#28a745',
-    color: '#fff',
+    backgroundColor: 'var(--success)',
+    color: 'var(--text-primary)',
     borderWidth: '0',
     borderStyle: 'none',
     borderRadius: '4px',
     padding: '4px 8px',
     fontSize: '14px',
     cursor: 'pointer',
-    transition: 'background-color 0.2s ease'
+    transition: 'background-color 0.1s ease'
   }
 }
 
@@ -750,7 +753,7 @@ const useCountdownLogic = (item, onIncrement, onDecrement) => {
               key={pipIndex} 
               style={{
                 ...styles.pipSymbol,
-                color: pipIndex < (item.value || 0) ? '#ff6b6b' : '#666'
+                color: pipIndex < (item.value || 0) ? 'var(--red)' : 'var(--text-secondary)'
               }}
               title={`${pipIndex + 1} of ${item.max}`}
             >
@@ -785,24 +788,42 @@ const GameCard = ({
   dragListeners,
   adversaries = [], // All adversaries for duplicate checking
 }) => {
-  // Get type-specific logic
-  const adversaryLogic = (type === 'adversary' || type === 'adversaries') ? useAdversaryLogic(item, onApplyDamage, onApplyHealing, onApplyStressChange) : null
-  const countdownLogic = type === 'countdown' ? useCountdownLogic(item, onIncrement, onDecrement) : null
+  // Get type-specific logic - always call hooks to maintain consistent hook order
+  const adversaryLogic = useAdversaryLogic(item, onApplyDamage, onApplyHealing, onApplyStressChange)
+  const countdownLogic = useCountdownLogic(item, onIncrement, onDecrement)
   
-  // Create fallback handlers for when logic is null
-  const handleDifficultyClick = adversaryLogic?.handleDifficultyClick || (() => {
-    console.warn('adversaryLogic.handleDifficultyClick not available')
+  // Create fallback handlers for when logic is not applicable to current type
+  const handleDifficultyClick = (type === 'adversary' || type === 'adversaries') ? adversaryLogic.handleDifficultyClick : (() => {
+    console.warn('adversaryLogic.handleDifficultyClick not available for type:', type)
   })
 
   // Hover state management
   const [isHovered, setIsHovered] = useState(false)
 
+  // Transition management with different speeds for hover in/out
+  const handleMouseEnter = () => {
+    setIsHovered(true)
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovered(false)
+  }
+
   // ============================================================================
   // STYLING LOGIC
   // ============================================================================
 
-  const getCardStyle = () => {
+  const getCardStyle = (isExpanded = false) => {
     let cardStyle = { ...styles.card }
+    
+    // Use appropriate transition speed based on hover state
+    cardStyle.transition = isHovered ? styles.transitions.hoverIn : styles.transitions.hoverOut
+    
+    // Remove top margin for expanded cards
+    if (isExpanded) {
+      const { marginTop, ...cardStyleWithoutMargin } = cardStyle
+      cardStyle = cardStyleWithoutMargin
+    }
     
     if (isHovered) {
       cardStyle = { ...cardStyle, ...styles.cardHover }
@@ -819,20 +840,43 @@ const GameCard = ({
     return cardStyle
   }
 
+  const getCardClassName = () => {
+    let className = 'border rounded-lg'
+    
+    if (isHovered) {
+      className += ' border-hover'
+    }
+    
+    return className
+  }
+
   // ============================================================================
   // RENDERING HELPERS
   // ============================================================================
 
   const renderTitle = () => {
-    if (type === 'adversary') {
+    if (type === 'adversary' || type === 'adversaries') {
       const baseName = item.baseName || item.name?.replace(/\s+\(\d+\)$/, '') || ''
       const duplicateNumber = item.duplicateNumber || (item.name?.match(/\((\d+)\)$/) ? parseInt(item.name.match(/\((\d+)\)$/)[1]) : 1)
       
       // Check if there are other adversaries with the same base name
-      const sameNameAdversaries = adversaries.filter(adv => adv.baseName === baseName)
+      // Include the current item in the check to ensure accurate duplicate detection
+      const allAdversaries = [...adversaries]
+      if (!adversaries.some(adv => adv.id === item.id)) {
+        allAdversaries.push(item)
+      }
+      const sameNameAdversaries = allAdversaries.filter(adv => adv.baseName === baseName)
       const hasDuplicates = sameNameAdversaries.length > 1
       
-      return hasDuplicates ? `${baseName} (${duplicateNumber})` : baseName
+      
+      
+      
+      // Show duplicate number if there are actually duplicates (including the first one)
+      if (hasDuplicates) {
+        return `${baseName} (${duplicateNumber})`
+      } else {
+        return baseName
+      }
     }
     return item.name
   }
@@ -871,11 +915,11 @@ const GameCard = ({
               alignItems: 'center',
               cursor: 'pointer',
               padding: '0.125rem',
-              borderRadius: '0.25rem',
+              borderRadius: '0.5rem',
               transition: 'all 0.2s ease'
             }}
-            onClick={adversaryLogic.handleHpClick}
-            onMouseEnter={(e) => e.target.style.background = '#2a2a2a'}
+            onClick={(type === 'adversary' || type === 'adversaries') ? adversaryLogic.handleHpClick : undefined}
+            onMouseEnter={(e) => e.target.style.background = 'var(--gray-800)'}
             onMouseLeave={(e) => e.target.style.background = 'transparent'}
           >
             {Array.from({ length: item.hpMax || 1 }, (_, i) => (
@@ -883,9 +927,9 @@ const GameCard = ({
                 key={i}
                 style={{
                   fontSize: '1rem',
-                  transition: 'color 0.2s ease',
+                  transition: 'color 0.1s ease',
                   cursor: 'pointer',
-                  color: i < (item.hp || 0) ? '#ff6b6b' : '#666'
+                  color: i < (item.hp || 0) ? 'var(--red)' : 'var(--text-secondary)'
                 }}
                 title={i < (item.hp || 0) ? 'Click to heal (reduce damage)' : 'Click to take damage'}
               >
@@ -905,11 +949,11 @@ const GameCard = ({
                 alignItems: 'center',
                 cursor: 'pointer',
                 padding: '0.125rem',
-                borderRadius: '0.25rem',
+                borderRadius: '0.5rem',
                 transition: 'all 0.2s ease'
               }}
-              onClick={adversaryLogic.handleStressClick}
-              onMouseEnter={(e) => e.target.style.background = '#2a2a2a'}
+              onClick={(type === 'adversary' || type === 'adversaries') ? adversaryLogic.handleStressClick : undefined}
+              onMouseEnter={(e) => e.target.style.background = 'var(--gray-800)'}
               onMouseLeave={(e) => e.target.style.background = 'transparent'}
             >
               {Array.from({ length: item.stressMax }, (_, i) => (
@@ -917,9 +961,9 @@ const GameCard = ({
                   key={i}
                   style={{
                     fontSize: '1rem',
-                    transition: 'color 0.2s ease',
+                    transition: 'color 0.1s ease',
                     cursor: 'pointer',
-                    color: i < (item.stress || 0) ? '#ffd700' : '#666'
+                    color: i < (item.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)'
                   }}
                   title={i < (item.stress || 0) ? 'Click to reduce stress' : 'Click to increase stress'}
                 >
@@ -934,29 +978,28 @@ const GameCard = ({
         {item.difficulty && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div 
-              onClick={adversaryLogic.handleDifficultyClick}
+              onClick={(type === 'adversary' || type === 'adversaries') ? adversaryLogic.handleDifficultyClick : undefined}
               style={{
                 cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default'
               }}
               title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
             >
-              <div style={{
+              <div className="border rounded-md" style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.25rem',
-                background: '#1a1a1a',
-                border: '1px solid #333',
-                borderRadius: '0.25rem',
+                background: 'var(--gray-900)',
+                borderColor: 'var(--border)',
                 padding: '0.25rem 0.5rem',
                 transition: 'all 0.2s ease'
               }}
-              onMouseEnter={(e) => e.target.style.background = '#2a2a2a'}
-              onMouseLeave={(e) => e.target.style.background = '#1a1a1a'}
+              onMouseEnter={(e) => e.target.style.background = 'var(--gray-800)'}
+              onMouseLeave={(e) => e.target.style.background = 'var(--gray-900)'}
               >
                 <span style={{
                   fontSize: '0.875rem',
                   fontWeight: 600,
-                  color: '#fff'
+                  color: 'var(--text-primary)'
                 }}>
                   {item.difficulty}
                 </span>
@@ -971,9 +1014,9 @@ const GameCard = ({
         {dragAttributes && dragListeners && (
           <button
             style={{
-              background: '#2a2a2a',
-              border: '1px solid #333',
-              borderRadius: '0.25rem',
+              background: 'var(--gray-800)',
+              border: '0.5px solid var(--gray-600)',
+              borderRadius: '0.5rem',
               padding: '0.25rem',
               minWidth: '1.5rem',
               height: '1.5rem',
@@ -981,8 +1024,8 @@ const GameCard = ({
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              color: '#fff',
+              transition: 'all 0.1s ease',
+              color: 'var(--text-primary)',
               fontSize: '1rem'
             }}
             onClick={(e) => {
@@ -990,8 +1033,8 @@ const GameCard = ({
               e.preventDefault()
               onDelete && onDelete(item.id)
             }}
-            onMouseEnter={(e) => e.target.style.background = '#3a3a3a'}
-            onMouseLeave={(e) => e.target.style.background = '#2a2a2a'}
+            onMouseEnter={(e) => e.target.style.background = 'var(--gray-700)'}
+            onMouseLeave={(e) => e.target.style.background = 'var(--gray-800)'}
             title="Delete adversary"
           >
             ×
@@ -1050,7 +1093,7 @@ const GameCard = ({
     if (type === 'countdown') {
       return (
         <div style={styles.pipSymbols}>
-          {countdownLogic.renderDistributedPips()}
+          {type === 'countdown' ? countdownLogic.renderDistributedPips() : null}
         </div>
       )
     }
@@ -1068,13 +1111,19 @@ const GameCard = ({
         onClick={(e) => {
           e.stopPropagation()
           if (e.target === e.currentTarget) {
-            adversaryLogic.setShowDamageInput(false)
-            adversaryLogic.setDamageValue('')
+            if (type === 'adversary' || type === 'adversaries') {
+              adversaryLogic.setShowDamageInput(false)
+              adversaryLogic.setDamageValue('')
+            }
           }
         }}
       >
         <div 
-          style={styles.damageInputContent}
+          className="border rounded-lg"
+          style={{
+            ...styles.damageInputContent,
+            borderColor: 'var(--border)'
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           <input
@@ -1083,16 +1132,24 @@ const GameCard = ({
             enterKeyHint="done"
             placeholder="Damage"
             min={item.type === 'Minion' ? "1" : "0"}
-            value={adversaryLogic.damageValue}
-            onChange={(e) => adversaryLogic.setDamageValue(e.target.value)}
-            onKeyDown={adversaryLogic.handleKeyDown}
-            style={styles.damageInput}
+            value={(type === 'adversary' || type === 'adversaries') ? adversaryLogic.damageValue : ''}
+            onChange={(e) => {
+              if (type === 'adversary' || type === 'adversaries') {
+                adversaryLogic.setDamageValue(e.target.value)
+              }
+            }}
+            onKeyDown={(type === 'adversary' || type === 'adversaries') ? adversaryLogic.handleKeyDown : undefined}
+            className="border rounded-sm"
+            style={{
+              ...styles.damageInput,
+              borderColor: 'var(--border)'
+            }}
             autoFocus
           />
           <div style={styles.damageIndicators}>
             {item.type === 'Minion' ? (
               (() => {
-                const damage = parseInt(adversaryLogic.damageValue) || 0
+                const damage = parseInt((type === 'adversary' || type === 'adversaries') ? adversaryLogic.damageValue : '0') || 0
                 const minionFeature = item.features?.find(f => f.name?.startsWith('Minion ('))
                 const minionThreshold = minionFeature ? parseInt(minionFeature.name.match(/\((\d+)\)/)?.[1] || '1') : 1
                 const additionalMinions = Math.floor(damage / minionThreshold)
@@ -1102,7 +1159,7 @@ const GameCard = ({
                     <span 
                       style={{
                         ...styles.damageDrop,
-                        color: '#28a745'
+                        color: 'var(--success)'
                       }}
                       title={`${damage} damage can defeat ${additionalMinions + 1} minion${additionalMinions + 1 !== 1 ? 's' : ''} (1 + ${additionalMinions} additional)`}
                     >
@@ -1122,7 +1179,7 @@ const GameCard = ({
               })()
             ) : (
               [1, 2, 3].map((level) => {
-                const damage = parseInt(adversaryLogic.damageValue) || 0
+                const damage = parseInt((type === 'adversary' || type === 'adversaries') ? adversaryLogic.damageValue : '0') || 0
                 let isActive = false
                 if (level === 1 && damage >= 1) isActive = true
                 if (level === 2 && damage >= item.thresholds.major) isActive = true
@@ -1133,16 +1190,18 @@ const GameCard = ({
                     key={level}
                     style={{
                       ...styles.damageDrop,
-                      color: isActive ? '#ff6b6b' : '#666'
+                      color: isActive ? 'var(--red)' : 'var(--text-secondary)'
                     }}
                     onClick={(e) => {
                       e.stopPropagation()
-                      if (level === 1) {
-                        adversaryLogic.setDamageValue('1')
-                      } else if (level === 2) {
-                        adversaryLogic.setDamageValue(item.thresholds.major.toString())
-                      } else if (level === 3) {
-                        adversaryLogic.setDamageValue(item.thresholds.severe.toString())
+                      if (type === 'adversary' || type === 'adversaries') {
+                        if (level === 1) {
+                          adversaryLogic.setDamageValue('1')
+                        } else if (level === 2) {
+                          adversaryLogic.setDamageValue(item.thresholds.major.toString())
+                        } else if (level === 3) {
+                          adversaryLogic.setDamageValue(item.thresholds.severe.toString())
+                        }
                       }
                     }}
                     title={`Click to set damage to ${level === 1 ? '1' : level === 2 ? item.thresholds.major : item.thresholds.severe}`}
@@ -1155,11 +1214,13 @@ const GameCard = ({
             <button
               style={{
                 ...styles.applyButton,
-                backgroundColor: (!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? '#666' : '#28a745'
+                backgroundColor: (!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? 'var(--gray-600)' : 'var(--success)'
               }}
               onClick={(e) => {
                 e.stopPropagation()
-                adversaryLogic.applyDamage()
+                if (type === 'adversary' || type === 'adversaries') {
+                  adversaryLogic.applyDamage()
+                }
               }}
               title="Apply damage"
               disabled={!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1}
@@ -1184,28 +1245,82 @@ const GameCard = ({
 
     return (
       <div 
+        className={getCardClassName()}
         style={{
-          ...getCardStyle(),
-          padding: '1rem',
+          ...getCardStyle(true),
+          padding: 0,
           minHeight: '400px',
-          opacity: isDead ? 0.6 : 1
+          opacity: isDead ? 0.7 : 1,
+          backgroundColor: isDead ? 'var(--gray-900)' : getCardStyle(true).backgroundColor,
+          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isHovered ? 'var(--border-hover)' : 'var(--border)'),
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative'
         }}
         {...dragAttributes}
         {...dragListeners}
         onClick={onClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
-        {/* Header Section - Identical to Compact View */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '0.5rem',
-          marginBottom: '1rem',
-          paddingBottom: '0.75rem',
-          borderBottom: '1px solid var(--border)'
+        {/* DEFEATED overlay */}
+        {isDead && (
+          <>
+            {/* Diagonal striping pattern */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: `repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 8px,
+                var(--gray-600) 1px,
+                var(--gray-600) 9px
+              )`,
+              pointerEvents: 'none',
+              zIndex: 9999
+            }} />
+            {/* DEFEATED text */}
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              color: 'var(--text-secondary)',
+              fontSize: '1rem',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              zIndex: 10000,
+              pointerEvents: 'none',
+              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
+              backgroundColor: 'var(--gray-900)',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '0.5rem',
+              border: '0.5px solid var(--gray-600)'
+            }}>
+              DEFEATED
+            </div>
+          </>
+        )}
+        {/* Fixed Header Section - Identical to Compact View */}
+        <div className="border-b" style={{
+          padding: '1rem',
+          flexShrink: 0,
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: '8px 8px 0 0',
+          position: 'relative',
+          zIndex: isDead ? 1 : 'auto'
         }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
           {/* Left side - Name and Type */}
           <div style={{
             display: 'flex',
@@ -1216,7 +1331,7 @@ const GameCard = ({
             <h2 style={{
               fontSize: '1rem',
               fontWeight: 600,
-              color: 'var(--text-primary)',
+              color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-primary)',
               margin: 0
             }}>
               {renderTitle()}
@@ -1231,7 +1346,7 @@ const GameCard = ({
                   <span style={{
                     fontSize: '0.75rem',
                     fontWeight: 500,
-                    color: 'var(--text-secondary)',
+                    color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
                     letterSpacing: '0.5px'
                   }}>
                     Tier {item.tier}
@@ -1241,7 +1356,7 @@ const GameCard = ({
                   <span style={{
                     fontSize: '0.75rem',
                     fontWeight: 500,
-                    color: 'var(--text-secondary)',
+                    color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
                     letterSpacing: '0.5px'
                   }}>
                     {item.type}
@@ -1333,9 +1448,9 @@ const GameCard = ({
               >
                 <Shield 
                   size={32} 
-                  strokeWidth={0.5}
+                  strokeWidth={1}
                   style={{
-                    color: 'var(--text-primary)'
+                    color: 'var(--text-secondary)'
                   }}
                 />
                 <span style={{
@@ -1353,10 +1468,10 @@ const GameCard = ({
             {/* Delete Button */}
             {showDrag && (
               <button
+                className="border rounded-md"
                 style={{
-                  background: '#2a2a2a',
-                  border: '1px solid #333',
-                  borderRadius: '0.25rem',
+                  background: 'var(--gray-800)',
+                  borderColor: 'var(--border)',
                   padding: '0.25rem',
                   minWidth: '1.5rem',
                   height: '1.5rem',
@@ -1364,8 +1479,8 @@ const GameCard = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  color: '#fff',
+                  transition: 'all 0.1s ease',
+                  color: 'var(--text-primary)',
                   fontSize: '1rem'
                 }}
                 onClick={(e) => {
@@ -1373,8 +1488,8 @@ const GameCard = ({
                   e.preventDefault()
                   onDelete && onDelete(item.id)
                 }}
-                onMouseEnter={(e) => e.target.style.background = '#3a3a3a'}
-                onMouseLeave={(e) => e.target.style.background = '#2a2a2a'}
+                onMouseEnter={(e) => e.target.style.background = 'var(--gray-700)'}
+                onMouseLeave={(e) => e.target.style.background = 'var(--gray-800)'}
                 title="Delete item"
               >
                 ×
@@ -1382,8 +1497,18 @@ const GameCard = ({
             )}
           </div>
         </div>
+        </div>
 
-        {/* Description Section */}
+        {/* Scrollable Content Area */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '1rem',
+          borderRadius: '0 0 8px 8px',
+          position: 'relative',
+          zIndex: isDead ? 1 : 'auto'
+        }}>
+          {/* Description Section */}
         {item.description && (
           <div style={{
             marginBottom: '1rem',
@@ -1405,7 +1530,7 @@ const GameCard = ({
                   minHeight: '100px',
                   padding: '0.5rem',
                   border: '1px solid var(--border)',
-                  borderRadius: '0.25rem',
+                  borderRadius: '0.5rem',
                   backgroundColor: 'var(--bg-secondary)',
                   color: 'var(--text-primary)',
                   fontSize: '0.875rem',
@@ -1455,7 +1580,7 @@ const GameCard = ({
                   minHeight: '80px',
                   padding: '0.5rem',
                   border: '1px solid var(--border)',
-                  borderRadius: '0.25rem',
+                  borderRadius: '0.5rem',
                   backgroundColor: 'var(--bg-secondary)',
                   color: 'var(--text-primary)',
                   fontSize: '0.875rem',
@@ -1700,6 +1825,7 @@ const GameCard = ({
             )}
           </div>
         )}
+        </div>
 
         {/* Damage Input Popup for Adversaries */}
         {renderDamageInput()}
@@ -1719,12 +1845,12 @@ const GameCard = ({
   // For other modes, only support compact mode
   if (mode !== 'compact') {
     return (
-      <div style={getCardStyle()}>
+      <div className={getCardClassName()} style={getCardStyle(true)}>
         <div style={styles.rowMain}>
           <h4 style={styles.rowTitle}>{renderTitle()}</h4>
           <div style={styles.rowMeta}>{renderMeta()}</div>
         </div>
-        <p style={{ color: '#666', fontSize: '12px', margin: 0 }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
           Expanded view coming soon for {type}
         </p>
       </div>
@@ -1738,20 +1864,64 @@ const GameCard = ({
     
     return (
       <div
+        className={getCardClassName()}
         style={{
           ...getCardStyle(),
-          opacity: isDead ? 0.6 : 1,
-          backgroundColor: isDead ? '#2a1a1a' : getCardStyle().backgroundColor,
-          borderColor: isDead ? '#4a2a2a' : getCardStyle().borderColor,
+          opacity: isDead ? 0.7 : 1,
+          backgroundColor: isDead ? 'var(--gray-900)' : getCardStyle().backgroundColor,
+          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isHovered ? 'var(--border-hover)' : 'var(--border)'),
           paddingLeft: showDrag ? '2.25rem' : '0.75rem',
           position: 'relative'
         }}
         onClick={onClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         {...dragAttributes}
         {...dragListeners}
       >
+        {/* DEFEATED overlay */}
+        {isDead && (
+          <>
+            {/* Diagonal striping pattern */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: `repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 8px,
+                var(--gray-600) 1px,
+                var(--gray-600) 9px
+              )`,
+              pointerEvents: 'none',
+              zIndex: 9999
+            }} />
+            {/* DEFEATED text */}
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              color: 'var(--text-secondary)',
+              fontSize: '1rem',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              zIndex: 10000,
+              pointerEvents: 'none',
+              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
+              backgroundColor: 'var(--gray-900)',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '0.5rem',
+              border: '0.5px solid var(--gray-600)'
+            }}>
+              DEFEATED
+            </div>
+          </>
+        )}
         {showDrag && (
           <div 
             style={{
@@ -1759,12 +1929,12 @@ const GameCard = ({
               left: '0.5rem',
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#666',
+              color: 'var(--text-secondary)',
               cursor: 'grab',
               fontSize: '0.875rem',
               lineHeight: 1,
               padding: '0.25rem',
-              borderRadius: '0.25rem',
+              borderRadius: '0.5rem',
               transition: 'all 0.2s ease'
             }}
             {...dragAttributes} 
@@ -1779,7 +1949,9 @@ const GameCard = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: '0.5rem'
+          gap: '0.5rem',
+          position: 'relative',
+          zIndex: isDead ? 1 : 'auto'
         }}>
           {/* Left side - Name and Type */}
           <div style={{
@@ -1788,15 +1960,17 @@ const GameCard = ({
             alignItems: 'flex-start',
             gap: '0.25rem'
           }}>
-            <h4 style={styles.rowTitle}>
+            <h4 style={{
+              ...styles.rowTitle,
+              color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color
+            }}>
               {renderTitle()}
             </h4>
             {item.type && (
               <span style={{
                 fontSize: '0.75rem',
                 fontWeight: 500,
-                color: 'var(--text-secondary)',
-                textTransform: 'uppercase',
+                color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
                 letterSpacing: '0.5px'
               }}>
                 {item.type}
@@ -1886,9 +2060,9 @@ const GameCard = ({
               >
                 <Shield 
                   size={32} 
-                  strokeWidth={0.5}
+                  strokeWidth={1}
                   style={{
-                    color: 'var(--text-primary)'
+                    color: 'var(--text-secondary)'
                   }}
                 />
                 <span style={{
@@ -1906,10 +2080,10 @@ const GameCard = ({
             {/* Delete Button */}
             {dragAttributes && dragListeners && (
               <button
+                className="border rounded-md"
                 style={{
-                  background: '#2a2a2a',
-                  border: '1px solid #333',
-                  borderRadius: '0.25rem',
+                  background: 'var(--gray-800)',
+                  borderColor: 'var(--border)',
                   padding: '0.25rem',
                   minWidth: '1.5rem',
                   height: '1.5rem',
@@ -1917,8 +2091,8 @@ const GameCard = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  color: '#fff',
+                  transition: 'all 0.1s ease',
+                  color: 'var(--text-primary)',
                   fontSize: '1rem'
                 }}
                 onClick={(e) => {
@@ -1926,8 +2100,8 @@ const GameCard = ({
                   e.preventDefault()
                   onDelete && onDelete(item.id)
                 }}
-                onMouseEnter={(e) => e.target.style.background = '#3a3a3a'}
-                onMouseLeave={(e) => e.target.style.background = '#2a2a2a'}
+                onMouseEnter={(e) => e.target.style.background = 'var(--gray-700)'}
+                onMouseLeave={(e) => e.target.style.background = 'var(--gray-800)'}
                 title="Delete item"
               >
                 ×
@@ -1945,6 +2119,7 @@ const GameCard = ({
   // For other types, use the original layout
   return (
     <div
+      className={getCardClassName()}
       style={getCardStyle()}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
