@@ -489,7 +489,37 @@ const LayoutContent = () => {
           isOpen={mobileDrawerOpen}
           onClose={handleCloseRightColumn}
         >
-          {/* Drawer content will be handled by the individual components */}
+          {rightColumnMode === 'database' && (
+            <div className="browser-container">
+              <Browser
+                type={databaseType}
+                onAddItem={(itemData) => {
+                  if (databaseType === 'adversary') {
+                    createAdversary(itemData)
+                    setLastAddedItemType('adversary')
+                  } else if (databaseType === 'environment') {
+                    createEnvironment(itemData)
+                    setLastAddedItemType('environment')
+                  }
+                }}
+                onCancel={handleCloseRightColumn}
+              />
+            </div>
+          )}
+          {rightColumnMode === 'item' && selectedItem && (
+            <div className="expanded-content">
+              <GameCard
+                type={selectedType}
+                item={selectedItem}
+                mode={isEditMode ? "edit" : "expanded"}
+                onApplyDamage={handleAdversaryDamage}
+                onApplyHealing={handleAdversaryHealing}
+                onApplyStressChange={handleAdversaryStressChange}
+                onUpdate={selectedType === 'adversaries' ? updateAdversary : selectedType === 'environments' ? updateEnvironment : updateCountdown}
+                adversaries={adversaries}
+              />
+            </div>
+          )}
         </Drawer>
       )}
       

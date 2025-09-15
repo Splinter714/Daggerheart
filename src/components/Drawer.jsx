@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 
 /**
  * Reusable swipe-to-dismiss gesture handler for bottom drawers.
@@ -119,20 +119,53 @@ const Drawer = ({
     onClose,
   })
 
+  // Reset swipe state when drawer closes
+  useEffect(() => {
+    if (!isOpen) {
+      resetSwipeState()
+    }
+  }, [isOpen, resetSwipeState])
+
   return (
-    <div className="mobile-drawer">
+    <div className={`mobile-drawer ${isOpen ? 'open' : ''}`}>
+      <div className="drawer-backdrop" onClick={onClose} />
       <div 
         className="drawer-content"
         style={{
-          transform: `translateY(${drawerOffset}px)`,
-          transition: drawerOffset === 0 ? 'transform 0.3s ease-out' : 'none'
+          transform: isOpen 
+            ? `translateY(${drawerOffset}px)` 
+            : 'translateY(100%)',
+          transition: drawerOffset ? 'none' : 'transform 0.25s cubic-bezier(0.4, 0.0, 0.2, 1)'
         }}
-        {...touchHandlers}
+        onTouchStart={(e) => {
+          // Only stop propagation for swipe gestures, not normal taps
+          // Let the swipe handler determine if this is a swipe gesture
+          touchHandlers.onTouchStart(e)
+        }}
+        onTouchMove={(e) => {
+          // Only stop propagation during active swipes
+          touchHandlers.onTouchMove(e)
+        }}
+        onTouchEnd={(e) => {
+          // Only stop propagation during active swipes
+          touchHandlers.onTouchEnd(e)
+        }}
+        onClick={(e) => {
+          // Allow clicks inside without closing; backdrop handles outside clicks
+          e.stopPropagation()
+        }}
       >
-        <div className="drawer-header">
-          Mobile Drawer - Coming Soon
+        <div className="drawer-header" onClick={() => {
+          setDrawerOffset(window.innerHeight)
+          setTimeout(() => {
+            onClose()
+          }, 300)
+        }}>
+          <div className="drawer-handle" />
         </div>
-        {children}
+        <div className="drawer-body">
+          {children}
+        </div>
       </div>
     </div>
   )
