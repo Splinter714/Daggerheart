@@ -548,11 +548,7 @@ input[type="number"] {
   background: var(--gray-dark) !important;
 }
 
-/* Component-specific forms */
-@import "./component-modules/Browser/forms.css";
-
-/* Component-specific overrides */
-@import "./component-modules/Browser/browser-specific.css";
+/* Component-specific forms and overrides - removed non-existent imports */
 
 /* ========================================
    FEAR PIPS STYLES
