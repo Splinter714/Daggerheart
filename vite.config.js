@@ -7,7 +7,7 @@ import fs from 'fs'
 // Get package.json version
 function getPackageVersion() {
   try {
-    const packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8'))
+    const packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, './package.json'), 'utf8'))
     return packageJson.version
   } catch (error) {
     return 'dev'
