@@ -10,17 +10,37 @@
   --red: #ef4444;
   --gold: #eab308;
   
-  /* Grays - use these for everything else */
-  --gray-light: #a3a3a3;
-  --gray: #6b7280;
-  --gray-dark: #404040;
+  /* Status colors */
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #ffc107;
+  --info: #17a2b8;
+  
+  /* Gray scale - systematic numbering */
+  --gray-100: #e6e6e6;  /* lightest - 90% lightness, straight grayscale */
+  --gray-200: #cccccc;  /* 80% lightness, straight grayscale */
+  --gray-300: #b3b3b3;  /* 70% lightness, straight grayscale */
+  --gray-400: #999999;  /* 60% lightness, straight grayscale */
+  --gray-500: #808080;  /* 50% lightness, straight grayscale */
+  --gray-600: #666666;  /* 40% lightness, straight grayscale */
+  --gray-700: #4d4d4d;  /* 30% lightness, straight grayscale */
+  --gray-800: #333333;  /* 20% lightness, straight grayscale */
+  --gray-900: #1a1a1a;  /* darkest - 10% lightness, straight grayscale */
+  
+  /* Legacy grays - to be removed */
+  --gray-light: var(--gray-400);
+  --gray: var(--gray-500);
+  --gray-dark: var(--gray-800);
   
   /* Use grays for backgrounds instead of derived colors */
   --bg-primary: var(--black);
-  --bg-secondary: var(--gray-dark);
+  --bg-secondary: var(--gray-800);
+  --bg-card: var(--gray-900);
+  --bg-card-hover: var(--gray-900);
   --text-primary: var(--white);
-  --text-secondary: var(--gray-light);
-  --border: var(--gray);
+  --text-secondary: var(--gray-400);
+  --border: var(--gray-800);
+  --border-hover: var(--purple);
   
   /* Spacing */
   --space-xs: 0.25rem;
@@ -172,6 +192,9 @@ div[style*="color: rgb(255, 255, 255)"],
 .border-b { border-bottom: 1px solid var(--border); }
 .border-l { border-left: 1px solid var(--border); }
 .border-r { border-right: 1px solid var(--border); }
+
+/* Border hover utilities */
+.border-hover { border-color: var(--border-hover); }
 
 .rounded-sm { border-radius: var(--radius-sm); }
 .rounded-md { border-radius: var(--radius-md); }
@@ -555,7 +578,6 @@ input[type="number"] {
 
 .fear-pip.empty {
   color: var(--gray-dark);
-  opacity: 0.3;
 }
 
 /* Specialized styles */

@@ -221,7 +221,7 @@ const PIP_TYPES = {
       flexShrink: 0
     },
     filledColor: 'var(--red)',
-    emptyColor: '#a3a3a3',
+    emptyColor: 'var(--gray-400)',
     tooltipTitle: 'Click to adjust HP:',
     tooltipInstructions: [
       { text: 'Filled pip:', description: 'Click to heal (reduce damage)' },
@@ -252,7 +252,7 @@ const PIP_TYPES = {
       flexShrink: 0
     },
     filledColor: 'var(--gold)',
-    emptyColor: '#a3a3a3',
+    emptyColor: 'var(--gray-400)',
     tooltipTitle: 'Click to adjust stress:',
     tooltipInstructions: [
       { text: 'Filled pip:', description: 'Click to reduce stress' },
@@ -488,7 +488,7 @@ const Pips = ({
           }}>
             <div style={{
               fontWeight: 600,
-              color: '#e2e8f0',
+              color: 'var(--gray-200)',
               marginBottom: '0.75rem',
               fontSize: 'var(--text-sm)'
             }}>{config.tooltipTitle}</div>
@@ -496,10 +496,10 @@ const Pips = ({
               <div key={idx} style={{
                 marginBottom: '0.5rem',
                 fontSize: '0.8rem',
-                color: '#cbd5e1',
+                color: 'var(--gray-300)',
                 lineHeight: 1.4
               }}>
-                <strong style={{ color: '#e2e8f0' }}>{instruction.text}</strong> {instruction.description}
+                <strong style={{ color: 'var(--gray-200)' }}>{instruction.text}</strong> {instruction.description}
               </div>
             ))}
           </div>

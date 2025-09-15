@@ -683,7 +683,7 @@ const styles = {
     position: 'sticky',
     top: 0,
     zIndex: 15,
-    backgroundColor: '#1a1a1a'
+    backgroundColor: 'var(--gray-800)'
   },
   browserTable: {
     width: '100%',
@@ -738,7 +738,7 @@ const styles = {
     boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)'
   },
   tableHeader: {
-    background: '#1a1a1a',
+    background: 'var(--gray-800)',
     borderBottom: '1px solid var(--border)',
     boxShadow: '0 1px 0 var(--border)',
     position: 'sticky',
@@ -746,7 +746,7 @@ const styles = {
     zIndex: 10
   },
   tableHeaderCell: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'var(--gray-800)',
     fontWeight: '700',
     borderBottom: '1px solid var(--border)',
     cursor: 'pointer',
@@ -773,7 +773,7 @@ const styles = {
     flex: 1,
     overflowY: 'auto',
     padding: '8px',
-    backgroundColor: '#1a1a1a'
+    backgroundColor: 'var(--gray-800)'
   },
   row: {
     height: '35px',
