@@ -1,32 +1,6 @@
 <svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#2a2a2a;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  
-  <!-- Background -->
-  <rect width="192" height="192" rx="24" fill="url(#bg)"/>
-  
-  <!-- D20 Icon -->
-  <g transform="translate(96, 96)">
-    <!-- D20 Shape -->
-    <polygon points="0,-60 35,-30 35,30 0,60 -35,30 -35,-30" 
-             fill="#4f46e5" stroke="#ffffff" stroke-width="2"/>
-    
-    <!-- Center Dot -->
-    <circle cx="0" cy="0" r="8" fill="#ffffff"/>
-    
-    <!-- Corner Dots -->
-    <circle cx="0" cy="-45" r="4" fill="#ffffff"/>
-    <circle cx="39" cy="-22" r="4" fill="#ffffff"/>
-    <circle cx="39" cy="22" r="4" fill="#ffffff"/>
-    <circle cx="0" cy="45" r="4" fill="#ffffff"/>
-    <circle cx="-39" cy="22" r="4" fill="#ffffff"/>
-    <circle cx="-39" cy="-22" r="4" fill="#ffffff"/>
-  </g>
-  
-  <!-- Text -->
-  <text x="96" y="160" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">GM</text>
+  <rect width="192" height="192" fill="#1a1a1a"/>
+  <rect x="16" y="16" width="160" height="160" fill="#4f46e5" rx="16"/>
+  <text x="96" y="110" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="white">D</text>
+  <text x="96" y="140" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="white">GM</text>
 </svg>

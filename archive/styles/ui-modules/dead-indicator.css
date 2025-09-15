@@ -1,0 +1,68 @@
+/* Dead Indicator Component Styles */
+
+/* ========================================
+   DEAD INDICATOR
+   ======================================== */
+
+.dead-indicator-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+  min-width: 3rem;
+  min-height: 1.5rem;
+}
+
+.dead-label {
+  color: var(--red);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 0.125rem 0.375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.dead-clear-btn {
+  opacity: 0;
+  color: var(--red);
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.dead-indicator-left:hover .dead-label {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.dead-indicator-left:hover .dead-clear-btn {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  color: var(--red);
+}
+
+/* Dead adversary control styles */
+.simple-list-row.dead .hp-controls button,
+.simple-list-row.dead .stress-controls button {
+  opacity: 0.5;
+}

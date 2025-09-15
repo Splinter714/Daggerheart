@@ -1,0 +1,115 @@
+/* List Component Styles */
+
+/* ========================================
+   LISTS
+   ======================================== */
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-item {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.list-item:hover {
+  background: var(--bg-secondary);
+}
+
+/* ========================================
+   SIMPLE LISTS
+   ======================================== */
+
+.simple-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.simple-list-row {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem; /* Same padding on all sides */
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+/* When in edit mode, add space for drag handle */
+.simple-list-row.edit-mode {
+  padding-left: 2.25rem; /* Space for drag handle, closer to content */
+}
+
+.simple-list-row:hover {
+  background: var(--bg-secondary);
+  /* Removed purple border-color */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.simple-list-row:hover .drag-handle {
+  background: var(--bg-hover);
+  /* Removed purple border-color */
+}
+
+.simple-list-row.selected {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: var(--text-primary);
+}
+
+.simple-list-row.selected .row-title,
+.simple-list-row.selected .description-text,
+.simple-list-row.selected .no-description {
+  color: var(--text-primary);
+}
+
+.simple-list-row.selected .tier-badge,
+.simple-list-row.selected .type-badge {
+  background: var(--grey-dark);
+  color: var(--text-primary);
+}
+
+/* Dead adversary styling */
+.simple-list-row.dead {
+  opacity: 0.7;
+  background: rgba(107, 114, 128, 0.15);
+  border-color: rgba(107, 114, 128, 0.4);
+  position: relative;
+}
+
+.simple-list-row.dead .row-title,
+.simple-list-row.dead .row-meta,
+.simple-list-row.dead .row-status {
+  color: rgba(156, 163, 175, 0.8);
+}
+
+/* Dead text overlay (no badge container) */
+.simple-list-row.dead::after {
+  content: 'DEAD';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-primary); /* Full white for better visibility */
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  z-index: 10;
+  pointer-events: none;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}

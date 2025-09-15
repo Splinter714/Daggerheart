@@ -1,0 +1,1143 @@
+import React, { useState, useCallback } from 'react'
+import { Droplet, Activity, CheckCircle, X, Plus, Minus } from 'lucide-react'
+
+// ============================================================================
+// UTILITIES
+// ============================================================================
+
+function generateId(prefix) {
+  const base = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  return prefix ? `${prefix}-${base}` : base
+}
+
+// ============================================================================
+// BUSINESS LOGIC - All domain actions consolidated
+// ============================================================================
+
+export const buildAdversaryActions = (getGameState, setGameState) => {
+  const createAdversary = (adversaryData) => {
+    const uniqueId = generateId('adv')
+    const existingAdversaries = getGameState().adversaries || []
+    const baseName = adversaryData.name || 'Unknown'
+    const sameNameAdversaries = existingAdversaries.filter(adv => adv.baseName === baseName)
+    
+    let duplicateNumber = 1
+    if (sameNameAdversaries.length === 0) {
+      duplicateNumber = 1
+    } else {
+      // Find the next available number
+      const usedNumbers = sameNameAdversaries.map(adv => adv.duplicateNumber || 1)
+      let next = 1
+      while (usedNumbers.includes(next)) next++
+      duplicateNumber = next
+    }
+
+    const newAdversary = {
+      ...adversaryData,
+      id: uniqueId,
+      baseName: baseName,
+      duplicateNumber: duplicateNumber,
+      name: `${baseName} (${duplicateNumber})`,
+      hp: 0,
+      stress: 0,
+      isVisible: true
+    }
+    setGameState(prev => ({ ...prev, adversaries: [...prev.adversaries, newAdversary] }))
+  }
+
+  const updateAdversary = (id, updates) => {
+    setGameState(prev => ({
+      ...prev,
+      adversaries: prev.adversaries.map(a => {
+        if (a.id === id) {
+          const updated = { ...a, ...updates }
+          
+          // If baseName is being updated, recalculate the display name
+          if (updates.baseName !== undefined) {
+            const baseName = updates.baseName
+            const duplicateNumber = updated.duplicateNumber || 1
+            updated.name = duplicateNumber === 1 ? baseName : `${baseName} (${duplicateNumber})`
+          }
+          
+          return updated
+        }
+        return a
+      })
+    }))
+  }
+
+  const deleteAdversary = (id) => {
+    setGameState(prev => ({
+      ...prev,
+      adversaries: prev.adversaries.filter(a => a.id !== id)
+    }))
+  }
+
+  const reorderAdversaries = (newOrder) => {
+    setGameState(prev => {
+      const [oldIndex, newIndex] = newOrder
+      const next = [...prev.adversaries]
+      const [moved] = next.splice(oldIndex, 1)
+      next.splice(newIndex, 0, moved)
+      return { ...prev, adversaries: next }
+    })
+  }
+
+  return { createAdversary, updateAdversary, deleteAdversary, reorderAdversaries }
+}
+
+export const buildCountdownActions = (setGameState) => {
+  const createCountdown = (countdownData) => {
+    const newCountdown = {
+      id: generateId('countdown'),
+      name: countdownData.name || 'Countdown',
+      max: parseInt(countdownData.max) || 1,
+      value: 0,
+      visible: true,
+      type: countdownData.type || 'standard',
+      loop: countdownData.loop || 'none',
+      source: countdownData.source || 'campaign'
+    }
+    setGameState(prev => ({ ...prev, countdowns: [...prev.countdowns, newCountdown] }))
+  }
+
+  const updateCountdown = (id, updates) => {
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(c => c.id === id ? { ...c, ...updates } : c)
+    }))
+  }
+
+  const deleteCountdown = (id) => {
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.filter(c => c.id !== id)
+    }))
+  }
+
+  const advanceCountdown = (id, newValue) => {
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(countdown => {
+        if (countdown.id !== id) return countdown
+        let finalValue = newValue
+        if (countdown.loop === 'loop') {
+          if (finalValue > countdown.max) {
+            // For loop countdowns, wrap to the overflow amount
+            finalValue = ((finalValue - 1) % countdown.max) + 1
+          } else if (finalValue < 0) {
+            finalValue = countdown.max
+          }
+        } else if (countdown.loop === 'increasing') {
+          if (finalValue > countdown.max) return { ...countdown, max: countdown.max + 1, value: 1 }
+          else if (finalValue < 0) return { ...countdown, max: Math.max(1, countdown.max - 1), value: 1 }
+          finalValue = Math.max(0, finalValue)
+        } else if (countdown.loop === 'decreasing') {
+          if (finalValue > countdown.max) return { ...countdown, max: Math.max(1, countdown.max - 1), value: 1 }
+          else if (finalValue < 0) return { ...countdown, max: countdown.max + 1, value: 1 }
+          finalValue = Math.min(countdown.max, finalValue)
+        } else {
+          finalValue = Math.max(0, Math.min(finalValue, countdown.max))
+        }
+        return { ...countdown, value: finalValue }
+      })
+    }))
+  }
+
+  const incrementCountdown = (id, amount = 1) => {
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(countdown => {
+        if (countdown.id !== id) return countdown
+        let newValue = countdown.value + amount
+        if (countdown.loop === 'loop') {
+          if (newValue > countdown.max) {
+            // For loop countdowns, wrap to the overflow amount
+            newValue = ((newValue - 1) % countdown.max) + 1
+          }
+        } else if (countdown.loop === 'increasing') {
+          if (newValue > countdown.max) return { ...countdown, max: countdown.max + 1, value: 1 }
+        } else if (countdown.loop === 'decreasing') {
+          if (newValue > countdown.max) return { ...countdown, max: Math.max(1, countdown.max - 1), value: 1 }
+        } else {
+          newValue = Math.min(newValue, countdown.max)
+        }
+        return { ...countdown, value: newValue }
+      })
+    }))
+  }
+
+  const decrementCountdown = (id) => {
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(countdown => {
+        if (countdown.id !== id) return countdown
+        let newValue = countdown.value - 1
+        if (countdown.loop === 'loop') {
+          if (newValue < 0) newValue = countdown.max
+        } else if (countdown.loop === 'increasing') {
+          if (newValue < 0) return { ...countdown, max: Math.max(1, countdown.max - 1), value: countdown.max }
+          newValue = Math.max(0, newValue)
+        } else if (countdown.loop === 'decreasing') {
+          if (newValue < 0) return { ...countdown, max: countdown.max + 1, value: 1 }
+        } else {
+          newValue = Math.max(0, newValue)
+        }
+        return { ...countdown, value: newValue }
+      })
+    }))
+  }
+
+  const reorderCountdowns = (newOrder) => {
+    setGameState(prev => {
+      const [oldIndex, newIndex] = newOrder
+      const newCountdowns = [...prev.countdowns]
+      const [movedItem] = newCountdowns.splice(oldIndex, 1)
+      newCountdowns.splice(newIndex, 0, movedItem)
+      return { ...prev, countdowns: newCountdowns }
+    })
+  }
+
+  return {
+    createCountdown,
+    updateCountdown,
+    deleteCountdown,
+    advanceCountdown,
+    incrementCountdown,
+    decrementCountdown,
+    reorderCountdowns
+  }
+}
+
+export const buildEnvironmentActions = (getGameState, setGameState) => {
+  const createEnvironment = (environmentData) => {
+    const uniqueId = generateId('env')
+    const existing = getGameState().environments || []
+    const same = existing.filter(env => env.name.replace(/\s+\(\d+\)$/, '') === environmentData.name)
+    let displayName = environmentData.name || 'Unknown'
+    if (same.length === 0) {
+      displayName = environmentData.name
+    } else if (same.length === 1) {
+      const first = same[0]
+      const firstBase = first.name.replace(/\s+\(\d+\)$/, '')
+      const updated = getGameState().environments.map(env => env.id === first.id ? { ...env, name: `${firstBase} (1)` } : env)
+      setGameState(prev => ({ ...prev, environments: updated }))
+      displayName = `${environmentData.name} (2)`
+    } else {
+      const used = same.map(env => {
+        const match = env.name.match(/\((\d+)\)$/)
+        return match ? parseInt(match[1]) : null
+      }).filter(n => n !== null)
+      let next = 1
+      while (used.includes(next)) next++
+      displayName = `${environmentData.name} (${next})`
+    }
+
+    const newEnv = {
+      ...environmentData,
+      id: uniqueId,
+      name: displayName,
+      isVisible: true
+    }
+    setGameState(prev => ({ ...prev, environments: [...prev.environments, newEnv] }))
+  }
+
+  const updateEnvironment = (id, updates) => {
+    setGameState(prev => ({
+      ...prev,
+      environments: prev.environments.map(e => e.id === id ? { ...e, ...updates } : e)
+    }))
+  }
+
+  const deleteEnvironment = (id) => {
+    setGameState(prev => ({
+      ...prev,
+      environments: prev.environments.filter(e => e.id !== id)
+    }))
+  }
+
+  const reorderEnvironments = (newOrder) => {
+    setGameState(prev => {
+      const [oldIndex, newIndex] = newOrder
+      const next = [...prev.environments]
+      const [moved] = next.splice(oldIndex, 1)
+      next.splice(newIndex, 0, moved)
+      return { ...prev, environments: next }
+    })
+  }
+
+  return { createEnvironment, updateEnvironment, deleteEnvironment, reorderEnvironments }
+}
+
+// ============================================================================
+// COUNTDOWN ENGINE - Centralized countdown logic
+// ============================================================================
+
+export function getNeededTriggers(countdowns = []) {
+  if (!Array.isArray(countdowns) || countdowns.length === 0) {
+    return {
+      basicRollTriggers: false,
+      simpleFearTriggers: false,
+      simpleHopeTriggers: false,
+      complexRollTriggers: false,
+      restTriggers: false,
+    }
+  }
+
+  const hasDynamicCountdowns = countdowns.some((c) =>
+    c?.type === 'progress' ||
+    c?.type === 'consequence' ||
+    c?.type === 'dynamic-progress' ||
+    c?.type === 'dynamic-consequence'
+  )
+  const hasLongTermCountdowns = countdowns.some((c) => c?.type === 'long-term')
+  const hasSimpleFearCountdowns = countdowns.some((c) => c?.type === 'simple-fear')
+  const hasSimpleHopeCountdowns = countdowns.some((c) => c?.type === 'simple-hope')
+  const hasStandardCountdowns = countdowns.some((c) => c?.type === 'standard' || !c?.type)
+
+  return {
+    basicRollTriggers: hasStandardCountdowns,
+    simpleFearTriggers: hasSimpleFearCountdowns && !hasDynamicCountdowns,
+    simpleHopeTriggers: hasSimpleHopeCountdowns && !hasDynamicCountdowns,
+    complexRollTriggers: hasDynamicCountdowns,
+    restTriggers: hasLongTermCountdowns,
+  }
+}
+
+export function getAdvancementForOutcome(countdown, outcome) {
+  const type = countdown?.type || 'standard'
+
+  if (type === 'standard') {
+    return 1
+  }
+
+  if (type === 'progress' || type === 'dynamic-progress') {
+    switch (outcome) {
+      case 'success-hope':
+        return 2
+      case 'success-fear':
+        return 1
+      case 'critical-success':
+        return 3
+      default:
+        return 0
+    }
+  }
+
+  if (type === 'consequence' || type === 'dynamic-consequence') {
+    switch (outcome) {
+      case 'success-fear':
+        return 1
+      case 'failure-hope':
+        return 2
+      case 'failure-fear':
+        return 3
+      default:
+        return 0
+    }
+  }
+
+  if (type === 'simple-fear') {
+    return outcome === 'simple-fear' || outcome === 'success-fear' || outcome === 'failure-fear' ? 1 : 0
+  }
+
+  if (type === 'simple-hope') {
+    return outcome === 'simple-hope' || outcome === 'success-hope' || outcome === 'failure-hope' || outcome === 'critical-success' ? 1 : 0
+  }
+
+  return 0
+}
+
+export function getAdvancementForActionRoll(countdown) {
+  const type = countdown?.type || 'standard'
+  return type === 'standard' ? 1 : 0
+}
+
+export function getAdvancementForRest(countdown, restType) {
+  if (countdown?.type !== 'long-term') return 0
+  return restType === 'long' ? 2 : 1
+}
+
+// ============================================================================
+// ADVERSARY HANDLERS - Consolidated adversary interaction logic
+// ============================================================================
+
+export function useAdversaryHandlers({ adversaries, updateAdversary, deleteAdversary, selectedItem, setSelectedItem }) {
+  const handleAdversaryDamage = useCallback((id, damage, currentHp, maxHp) => {
+    const target = adversaries.find(adv => adv.id === id)
+    if (!target) return
+    const isMinion = target.type === 'Minion'
+    const minionFeature = target.features?.find(f => f.name?.startsWith('Minion ('))
+    const threshold = minionFeature ? parseInt(minionFeature.name.match(/\((\d+)\)/)?.[1] || '1') : 1
+    if (isMinion) {
+      deleteAdversary(id)
+      const additional = Math.floor(damage / threshold)
+      if (additional > 0) {
+        const sameType = adversaries.filter(adv => adv.type === 'Minion' && adv.id !== id && adv.name === target.name)
+        for (let i = 0; i < Math.min(additional, sameType.length); i++) {
+          deleteAdversary(sameType[i].id)
+        }
+      }
+      return
+    }
+    const newHp = Math.min(currentHp + damage, maxHp)
+    if (selectedItem && selectedItem.id === id) {
+      setSelectedItem(prev => ({ ...prev, hp: newHp }))
+    }
+    updateAdversary(id, { hp: newHp })
+  }, [adversaries, updateAdversary, deleteAdversary, selectedItem, setSelectedItem])
+
+  const handleAdversaryHealing = useCallback((id, healing, currentHp) => {
+    const newHp = Math.max(0, currentHp - healing)
+    if (selectedItem && selectedItem.id === id) {
+      setSelectedItem(prev => ({ ...prev, hp: newHp }))
+    }
+    updateAdversary(id, { hp: newHp })
+  }, [updateAdversary, selectedItem, setSelectedItem])
+
+  const handleAdversaryStressChange = useCallback((id, stressDelta, currentStress, maxStress) => {
+    const adv = adversaries.find(a => a.id === id)
+    if (!adv) return
+    let newStress = currentStress + stressDelta
+    let newHp = adv.hp || 0
+    if (newStress > maxStress) {
+      const overflow = newStress - maxStress
+      newStress = maxStress
+      newHp = Math.min(adv.hpMax || 0, newHp + overflow)
+    }
+    newStress = Math.max(0, newStress)
+    if (selectedItem && selectedItem.id === id) {
+      setSelectedItem(prev => ({ ...prev, stress: newStress, hp: newHp }))
+    }
+    updateAdversary(id, { stress: newStress, hp: newHp })
+  }, [adversaries, updateAdversary, selectedItem, setSelectedItem])
+
+  return { handleAdversaryDamage, handleAdversaryHealing, handleAdversaryStressChange }
+}
+
+// ============================================================================
+// STYLES - All CSS consolidated into inline styles
+// ============================================================================
+
+const styles = {
+  // Container styles
+  card: {
+    backgroundColor: '#1a1a1a',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#333',
+    borderRadius: '8px',
+    padding: '12px',
+    margin: '4px 0',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    position: 'relative'
+  },
+  cardHover: {
+    borderColor: '#555',
+    backgroundColor: '#222'
+  },
+  cardDead: {
+    opacity: 0.6,
+    backgroundColor: '#0f0f0f',
+    borderColor: '#444'
+  },
+  cardAtMax: {
+    backgroundColor: '#0d4f0d',
+    borderColor: '#28a745'
+  },
+
+  // Layout styles
+  rowMain: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '8px'
+  },
+  rowTitle: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: '#fff',
+    margin: 0
+  },
+  rowMeta: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center'
+  },
+  cardActions: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '12px'
+  },
+  controlButtons: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center'
+  },
+
+  // Pip styles
+  pipSymbols: {
+    display: 'flex',
+    gap: '4px',
+    alignItems: 'center',
+    cursor: 'pointer',
+    padding: '2px'
+  },
+  pipSymbol: {
+    fontSize: '16px',
+    transition: 'color 0.2s ease'
+  },
+  pipGroup: {
+    display: 'flex',
+    gap: '4px',
+    marginBottom: '4px'
+  },
+
+  // Badge styles
+  badge: {
+    padding: '2px 6px',
+    borderRadius: '3px',
+    fontSize: '10px',
+    fontWeight: '600',
+    textTransform: 'uppercase'
+  },
+  typeBadge: {
+    backgroundColor: '#6f42c1',
+    color: '#fff'
+  },
+  difficultyBadge: {
+    backgroundColor: '#4a5568',
+    color: '#fff',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
+  },
+  tierBadge: {
+    backgroundColor: '#17a2b8',
+    color: '#fff'
+  },
+
+  // Base form input styles
+  inputBase: {
+    padding: '8px',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#6b7280',
+    borderRadius: '4px',
+    backgroundColor: '#1a1a1a',
+    color: '#ffffff',
+    fontSize: '14px',
+    transition: 'all 0.2s ease'
+  },
+  inputBaseFocus: {
+    outline: 'none',
+    borderColor: '#4f46e5',
+    boxShadow: '0 0 0 2px rgba(79, 70, 229, 0.1)'
+  },
+  inputBaseDisabled: {
+    opacity: 0.6,
+    cursor: 'not-allowed'
+  },
+
+  // Button styles
+  button: {
+    backgroundColor: '#dc3545',
+    color: '#fff',
+    borderWidth: '0',
+    borderStyle: 'none',
+    borderRadius: '4px',
+    padding: '4px 8px',
+    fontSize: '14px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
+  },
+  incrementButton: {
+    backgroundColor: '#28a745',
+    color: '#fff',
+    borderWidth: '0',
+    borderStyle: 'none',
+    borderRadius: '4px',
+    padding: '4px 8px',
+    fontSize: '14px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
+  },
+  decrementButton: {
+    backgroundColor: '#ffc107',
+    color: '#000',
+    borderWidth: '0',
+    borderStyle: 'none',
+    borderRadius: '4px',
+    padding: '4px 8px',
+    fontSize: '14px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
+  },
+
+  // Damage input styles
+  damageInputPopup: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    borderRadius: '8px'
+  },
+  damageInputContent: {
+    backgroundColor: '#2a2a2a',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#555',
+    borderRadius: '8px',
+    padding: '16px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    minWidth: '200px'
+  },
+  damageInput: {
+    backgroundColor: '#1a1a1a',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#555',
+    borderRadius: '4px',
+    padding: '8px',
+    color: '#fff',
+    fontSize: '14px'
+  },
+  damageIndicators: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  damageDrop: {
+    fontSize: '16px',
+    color: '#666',
+    cursor: 'pointer',
+    transition: 'color 0.2s ease'
+  },
+  applyButton: {
+    backgroundColor: '#28a745',
+    color: '#fff',
+    borderWidth: '0',
+    borderStyle: 'none',
+    borderRadius: '4px',
+    padding: '4px 8px',
+    fontSize: '14px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
+  }
+}
+
+// ============================================================================
+// HOOKS
+// ============================================================================
+
+// Adversary-specific logic
+const useAdversaryLogic = (item, onApplyDamage, onApplyHealing, onApplyStressChange) => {
+  const [showDamageInput, setShowDamageInput] = useState(false)
+  const [damageValue, setDamageValue] = useState('')
+
+  const handleHpClick = (e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    const currentHp = item.hp || 0
+    const hpMax = item.hpMax || 1
+    const symbolsRect = e.currentTarget.getBoundingClientRect()
+    const clickX = e.clientX - symbolsRect.left
+    const symbolWidth = symbolsRect.width / hpMax
+    const clickedIndex = Math.floor(clickX / symbolWidth)
+    
+    if (clickedIndex < currentHp) {
+      onApplyHealing && onApplyHealing(item.id, 1, item.hp)
+    } else {
+      onApplyDamage && onApplyDamage(item.id, 1, item.hp, item.hpMax)
+    }
+  }
+
+  const handleStressClick = (e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    const currentStress = item.stress || 0
+    const stressMax = item.stressMax || 1
+    const symbolsRect = e.currentTarget.getBoundingClientRect()
+    const clickX = e.clientX - symbolsRect.left
+    const symbolWidth = symbolsRect.width / stressMax
+    const clickedIndex = Math.floor(clickX / symbolWidth)
+    
+    if (clickedIndex < currentStress) {
+      onApplyStressChange && onApplyStressChange(item.id, -1, item.stress, item.stressMax)
+    } else {
+      onApplyStressChange && onApplyStressChange(item.id, 1, item.stress, item.stressMax)
+    }
+  }
+
+  const handleDifficultyClick = (e) => {
+    e.stopPropagation()
+    if ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') {
+      setShowDamageInput(true)
+      setDamageValue(item.type === 'Minion' ? '1' : '')
+    }
+  }
+
+  const applyDamage = () => {
+    const damage = parseInt(damageValue)
+    if (damage > 0) {
+      if (item.type === 'Minion') {
+        onApplyDamage && onApplyDamage(item.id, damage, item.hp, item.hpMax)
+      } else {
+        let hpDamage = 0
+        if (damage >= item.thresholds.severe) {
+          hpDamage = 3
+        } else if (damage >= item.thresholds.major) {
+          hpDamage = 2
+        } else if (damage >= 1) {
+          hpDamage = 1
+        }
+        onApplyDamage && onApplyDamage(item.id, hpDamage, item.hp, item.hpMax)
+      }
+      setShowDamageInput(false)
+      setDamageValue('')
+    }
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      applyDamage()
+    } else if (e.key === 'Escape') {
+      setShowDamageInput(false)
+      setDamageValue('')
+    }
+  }
+
+  return {
+    showDamageInput,
+    damageValue,
+    setDamageValue,
+    setShowDamageInput,
+    handleHpClick,
+    handleStressClick,
+    handleDifficultyClick,
+    applyDamage,
+    handleKeyDown
+  }
+}
+
+// Countdown-specific logic
+const useCountdownLogic = (item, onIncrement, onDecrement) => {
+  const renderDistributedPips = () => {
+    const totalPips = item.max
+    const pipGroups = []
+    for (let i = 0; i < totalPips; i += 5) {
+      const groupSize = Math.min(5, totalPips - i)
+      pipGroups.push(groupSize)
+    }
+    
+    return pipGroups.map((groupSize, groupIndex) => (
+      <div key={groupIndex} style={styles.pipGroup}>
+        {Array.from({ length: groupSize }, (_, i) => {
+          const pipIndex = groupIndex * 5 + i
+          return (
+            <span 
+              key={pipIndex} 
+              style={{
+                ...styles.pipSymbol,
+                color: pipIndex < (item.value || 0) ? '#ff6b6b' : '#666'
+              }}
+              title={`${pipIndex + 1} of ${item.max}`}
+            >
+              {pipIndex < (item.value || 0) ? '●' : '○'}
+            </span>
+          )
+        })}
+      </div>
+    ))
+  }
+
+  return { renderDistributedPips }
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+const GameCard = ({
+  item,
+  type, // 'adversary', 'environment', 'countdown'
+  mode = 'compact', // 'compact', 'expanded', 'edit'
+  onClick,
+  onDelete,
+  onApplyDamage,
+  onApplyHealing,
+  onApplyStressChange,
+  onIncrement,
+  onDecrement,
+  dragAttributes,
+  dragListeners,
+}) => {
+  // Get type-specific logic
+  const adversaryLogic = type === 'adversary' ? useAdversaryLogic(item, onApplyDamage, onApplyHealing, onApplyStressChange) : null
+  const countdownLogic = type === 'countdown' ? useCountdownLogic(item, onIncrement, onDecrement) : null
+
+  // Hover state management
+  const [isHovered, setIsHovered] = useState(false)
+
+  // ============================================================================
+  // STYLING LOGIC
+  // ============================================================================
+
+  const getCardStyle = () => {
+    let cardStyle = { ...styles.card }
+    
+    if (isHovered) {
+      cardStyle = { ...cardStyle, ...styles.cardHover }
+    }
+    
+    if (type === 'adversary' && (item.hp || 0) >= (item.hpMax || 1)) {
+      cardStyle = { ...cardStyle, ...styles.cardDead }
+    }
+    
+    if (type === 'countdown' && (item.value || 0) >= item.max) {
+      cardStyle = { ...cardStyle, ...styles.cardAtMax }
+    }
+    
+    return cardStyle
+  }
+
+  // ============================================================================
+  // RENDERING HELPERS
+  // ============================================================================
+
+  const renderTitle = () => {
+    if (type === 'adversary') {
+      const baseName = item.baseName || item.name?.replace(/\s+\(\d+\)$/, '') || ''
+      const duplicateNumber = item.duplicateNumber || (item.name?.match(/\((\d+)\)$/) ? parseInt(item.name.match(/\((\d+)\)$/)[1]) : 1)
+      return `${baseName} (${duplicateNumber})`
+    }
+    return item.name
+  }
+
+  const renderMeta = () => {
+    const badges = []
+    
+    if (item.type) {
+      badges.push(
+        <span key="type" style={{ ...styles.badge, ...styles.typeBadge }}>
+          {item.type}
+        </span>
+      )
+    }
+    
+    if (type === 'environment' && item.tier) {
+      badges.push(
+        <span key="tier" style={{ ...styles.badge, ...styles.tierBadge }}>
+          Tier {item.tier}
+        </span>
+      )
+    }
+    
+    return badges
+  }
+
+  const renderAdversaryContent = () => (
+    <>
+      {/* HP Pips */}
+      <div style={styles.pipSymbols} onClick={adversaryLogic.handleHpClick}>
+        {Array.from({ length: item.hpMax || 1 }, (_, i) => (
+          <span
+            key={i}
+            style={{
+              ...styles.pipSymbol,
+              color: i < (item.hp || 0) ? '#ff6b6b' : '#666'
+            }}
+            title={i < (item.hp || 0) ? 'Click to heal (reduce damage)' : 'Click to take damage'}
+          >
+            <Droplet size={16} />
+          </span>
+        ))}
+      </div>
+
+      {/* Stress Pips */}
+      {item.stressMax > 0 && (
+        <div style={styles.pipSymbols} onClick={adversaryLogic.handleStressClick}>
+          {Array.from({ length: item.stressMax }, (_, i) => (
+            <span
+              key={i}
+              style={{
+                ...styles.pipSymbol,
+                color: i < (item.stress || 0) ? '#ffd700' : '#666'
+              }}
+              title={i < (item.stress || 0) ? 'Click to reduce stress' : 'Click to increase stress'}
+            >
+              <Activity size={16} />
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Difficulty Badge */}
+      {item.difficulty && (
+        <div 
+          onClick={adversaryLogic.handleDifficultyClick}
+          style={{
+            ...styles.badge,
+            ...styles.difficultyBadge,
+            cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default'
+          }}
+          title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
+        >
+          {item.difficulty}
+        </div>
+      )}
+    </>
+  )
+
+  const renderEnvironmentContent = () => (
+    // Environments are simple - just show type and tier badges
+    null
+  )
+
+  const renderCountdownContent = () => (
+    <>
+      <button
+        style={styles.decrementButton}
+        onClick={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          onDecrement && onDecrement(item.id)
+        }}
+        title="Decrease progress"
+      >
+        <Minus size={16} />
+      </button>
+      <button
+        style={styles.incrementButton}
+        onClick={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          onIncrement && onIncrement(item.id)
+        }}
+        title={item.value >= item.max ? (item.loop && item.loop !== 'none' ? "Loop countdown" : "Countdown at max") : "Increase progress"}
+      >
+        {item.value >= item.max ? (item.loop && item.loop !== 'none' ? "⟳" : <Plus size={16} />) : <Plus size={16} />}
+      </button>
+    </>
+  )
+
+  const renderTypeSpecificContent = () => {
+    switch (type) {
+      case 'adversary':
+        return renderAdversaryContent()
+      case 'environment':
+        return renderEnvironmentContent()
+      case 'countdown':
+        return renderCountdownContent()
+      default:
+        return null
+    }
+  }
+
+  const renderProgressPips = () => {
+    if (type === 'countdown') {
+      return (
+        <div style={styles.pipSymbols}>
+          {countdownLogic.renderDistributedPips()}
+        </div>
+      )
+    }
+    return null
+  }
+
+  const renderDamageInput = () => {
+    if (type !== 'adversary' || !adversaryLogic.showDamageInput || !((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion')) {
+      return null
+    }
+
+    return (
+      <div 
+        style={styles.damageInputPopup}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (e.target === e.currentTarget) {
+            adversaryLogic.setShowDamageInput(false)
+            adversaryLogic.setDamageValue('')
+          }
+        }}
+      >
+        <div 
+          style={styles.damageInputContent}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <input
+            type="number"
+            inputMode="numeric"
+            enterKeyHint="done"
+            placeholder="Damage"
+            min={item.type === 'Minion' ? "1" : "0"}
+            value={adversaryLogic.damageValue}
+            onChange={(e) => adversaryLogic.setDamageValue(e.target.value)}
+            onKeyDown={adversaryLogic.handleKeyDown}
+            style={styles.damageInput}
+            autoFocus
+          />
+          <div style={styles.damageIndicators}>
+            {item.type === 'Minion' ? (
+              (() => {
+                const damage = parseInt(adversaryLogic.damageValue) || 0
+                const minionFeature = item.features?.find(f => f.name?.startsWith('Minion ('))
+                const minionThreshold = minionFeature ? parseInt(minionFeature.name.match(/\((\d+)\)/)?.[1] || '1') : 1
+                const additionalMinions = Math.floor(damage / minionThreshold)
+                
+                if (damage >= minionThreshold && additionalMinions > 0) {
+                  return (
+                    <span 
+                      style={{
+                        ...styles.damageDrop,
+                        color: '#28a745'
+                      }}
+                      title={`${damage} damage can defeat ${additionalMinions + 1} minion${additionalMinions + 1 !== 1 ? 's' : ''} (1 + ${additionalMinions} additional)`}
+                    >
+                      +{additionalMinions} additional minion(s)
+                    </span>
+                  )
+                } else {
+                  return (
+                    <span 
+                      style={styles.damageDrop}
+                      title={`${damage} damage defeats this minion only`}
+                    >
+                      +0 additional minion(s)
+                    </span>
+                  )
+                }
+              })()
+            ) : (
+              [1, 2, 3].map((level) => {
+                const damage = parseInt(adversaryLogic.damageValue) || 0
+                let isActive = false
+                if (level === 1 && damage >= 1) isActive = true
+                if (level === 2 && damage >= item.thresholds.major) isActive = true
+                if (level === 3 && damage >= item.thresholds.severe) isActive = true
+                
+                return (
+                  <span 
+                    key={level}
+                    style={{
+                      ...styles.damageDrop,
+                      color: isActive ? '#ff6b6b' : '#666'
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (level === 1) {
+                        adversaryLogic.setDamageValue('1')
+                      } else if (level === 2) {
+                        adversaryLogic.setDamageValue(item.thresholds.major.toString())
+                      } else if (level === 3) {
+                        adversaryLogic.setDamageValue(item.thresholds.severe.toString())
+                      }
+                    }}
+                    title={`Click to set damage to ${level === 1 ? '1' : level === 2 ? item.thresholds.major : item.thresholds.severe}`}
+                  >
+                    <Droplet size={16} />
+                  </span>
+                )
+              })
+            )}
+            <button
+              style={{
+                ...styles.applyButton,
+                backgroundColor: (!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? '#666' : '#28a745'
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                adversaryLogic.applyDamage()
+              }}
+              title="Apply damage"
+              disabled={!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1}
+            >
+              <CheckCircle size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // MAIN RENDER
+  // ============================================================================
+
+  // For now, only support compact mode
+  if (mode !== 'compact') {
+    return (
+      <div style={getCardStyle()}>
+        <div style={styles.rowMain}>
+          <h4 style={styles.rowTitle}>{renderTitle()}</h4>
+          <div style={styles.rowMeta}>{renderMeta()}</div>
+        </div>
+        <p style={{ color: '#666', fontSize: '12px', margin: 0 }}>
+          Expanded view coming soon
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      style={getCardStyle()}
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      {...dragAttributes}
+      {...dragListeners}
+    >
+      {/* Header */}
+      <div style={styles.rowMain}>
+        <h4 style={styles.rowTitle}>
+          {renderTitle()}
+        </h4>
+        <div style={styles.rowMeta}>
+          {renderMeta()}
+        </div>
+      </div>
+
+      {/* Progress pips for countdowns */}
+      {renderProgressPips()}
+
+      {/* Actions */}
+      <div style={styles.cardActions}>
+        <div style={styles.controlButtons}>
+          {renderTypeSpecificContent()}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {dragAttributes && dragListeners && (
+            <button
+              style={styles.button}
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                onDelete && onDelete(item.id)
+              }}
+              title={`Delete ${type}`}
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+      
+      {/* Damage Input Popup for Adversaries */}
+      {renderDamageInput()}
+    </div>
+  )
+}
+
+export default GameCard

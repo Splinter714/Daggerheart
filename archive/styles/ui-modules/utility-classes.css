@@ -1,0 +1,71 @@
+/* Utility Class Styles */
+
+/* ========================================
+   TEXT UTILITIES
+   ======================================== */
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* ========================================
+   VISIBILITY UTILITIES
+   ======================================== */
+
+.hidden {
+  display: none !important;
+}
+
+.visible {
+  visibility: visible !important;
+}
+
+.invisible {
+  visibility: hidden !important;
+}
+
+.opacity-0 {
+  opacity: 0 !important;
+}
+
+.opacity-50 {
+  opacity: 0.5 !important;
+}
+
+.opacity-100 {
+  opacity: 1 !important;
+}
+
+/* ========================================
+   DIVIDERS
+   ======================================== */
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 1rem 0;
+}
+
+.divider-vertical {
+  width: 1px;
+  background: var(--border);
+  margin: 0 1rem;
+}
+
+/* ========================================
+   DATABASE AND CREATOR DISPLAY
+   ======================================== */
+
+.database-display,
+.creator-display {
+  height: 100%;
+  overflow-y: auto;
+}

@@ -1,0 +1,386 @@
+/* Browser Controls Component Styles */
+
+/* ========================================
+   BROWSER HEADER AND CONTROLS
+   ======================================== */
+
+.browser-wrapper {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  height: 100%;
+}
+
+.browser-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  /* Prevent pull-to-refresh */
+  overscroll-behavior: none !important;
+  overscroll-behavior-y: none !important;
+  touch-action: none !important;
+}
+
+.browser-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: visible; /* Allow dropdowns to extend horizontally */
+  padding: 0; /* eliminate gap above sticky header */
+  /* Force scrolling to happen here, not in parent containers */
+  overscroll-behavior: none !important;
+  overscroll-behavior-y: none !important;
+  touch-action: pan-y !important;
+}
+
+/* Right panel browser content - match drawer behavior */
+.database-display .browser-content {
+  height: calc(100vh - 200px); /* Specific height constraint like drawer */
+  max-height: calc(100vh - 200px); /* Don't exceed this height */
+}
+
+.browser-search-input {
+  flex: 1;
+  height: 36px;
+  padding: 0 0.75rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  transition: all 0.2s ease;
+}
+
+.browser-search-input:focus {
+  outline: none;
+  border-color: var(--border);
+}
+
+.browser-top-row .btn {
+  flex-shrink: 0;
+}
+
+.browser-back-btn {
+  min-width: 40px !important;
+  width: 40px !important;
+  padding: 0.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.browser-add-btn {
+  min-width: 35px !important;
+  width: 35px !important;
+  height: 35px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  background: var(--purple) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--purple) !important;
+}
+
+.browser-add-btn:hover {
+  background: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+}
+
+.browser-table-container {
+  flex: 1;
+  overflow: visible; /* Allow dropdowns to show */
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  max-width: 100%;
+}
+
+.browser-table-container table {
+  margin: 0; /* remove default margin to eliminate gap above header */
+}
+
+/* ========================================
+   SEARCH AND FILTER CONTROLS
+   ======================================== */
+
+.search-filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.search-section {
+  display: flex;
+  justify-content: center;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem; /* 16px to prevent mobile auto-zoom */
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   BROWSER SEARCH
+   ======================================== */
+
+.browser-search-input {
+  flex: 1;
+  height: 36px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  transition: all 0.2s ease;
+}
+
+.browser-search-input:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.browser-search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   BROWSER FILTER CONTROLS
+   ======================================== */
+
+.header-with-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the content */
+  gap: 0.25rem; /* Reduced from 0.5rem */
+  position: relative; /* Enable absolute positioning for dropdowns */
+}
+
+.header-filter-icon {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative; /* Enable absolute positioning for dropdowns */
+}
+
+.header-filter-icon:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.header-filter-icon.active {
+  color: var(--purple);
+}
+
+.filter-active-dot {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--purple);
+  display: none;
+  pointer-events: none;
+}
+
+.header-filter-icon.active .filter-active-dot {
+  display: block;
+}
+
+.filter-dropdown {
+  position: fixed;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 99999;
+  margin-top: 0.25rem;
+  overflow: hidden;
+  width: max-content;
+  max-width: 60vw;
+}
+
+.filter-option {
+  padding: 0.25rem 0.5rem; /* Match table row padding */
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 1rem; /* Explicitly match default font size */
+  height: 35px; /* Match table row height */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filter-option:last-child {
+  border-bottom: none;
+}
+
+.filter-option:hover { 
+  background: var(--bg-hover); 
+}
+
+.filter-option.selected .check-icon { 
+  color: var(--text-primary); 
+}
+
+.filter-option.selected .filter-label { 
+  color: var(--text-primary); 
+}
+
+.check-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.filter-label { 
+  flex: 1; 
+}
+
+.filter-option:first-child {
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.filter-option:last-child {
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* ========================================
+   BROWSER FILTER CONTROLS
+   ======================================== */
+
+.browser-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.filter-section {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.filter-select option {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ========================================
+   MOBILE BROWSER STYLES
+   ======================================== */
+
+@media (max-width: 768px) {
+  .browser-wrapper {
+    height: 100vh;
+  }
+  
+  .browser-content {
+    height: calc(100vh - 200px); /* Specific height constraint like drawer */
+    max-height: calc(100vh - 200px); /* Don't exceed this height */
+  }
+  
+  .browser-header {
+    padding: 0.75rem;
+  }
+  
+  .browser-search-input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+@media (max-width: 800px) {
+  .browser-wrapper {
+    overflow: visible !important; /* Ensure browser is visible on mobile */
+  }
+  
+  .browser-table-container {
+    overflow: auto !important; /* Allow scrolling if needed */
+  }
+  
+  .browser-top-row {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .browser-back-btn {
+    min-width: 36px !important;
+    width: 36px !important;
+  }
+  
+  .browser-add-btn {
+    min-width: 36px !important;
+    width: 36px !important;
+  }
+  
+  .browser-filters {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

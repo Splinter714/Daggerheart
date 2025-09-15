@@ -1,0 +1,322 @@
+/* Countdown Card Component Specific Styles */
+
+/* ========================================
+   COMPACT COUNTDOWN LAYOUT
+   ======================================== */
+
+.simple-list-row.compact.countdown .row-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.simple-list-row.compact.countdown .row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem; /* Much tighter spacing between name and pips */
+  align-items: flex-start;
+}
+
+.simple-list-row.compact.countdown .row-meta {
+  flex-shrink: 0;
+}
+
+.simple-list-row.compact.countdown .progress-badge {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.countdown-control-panel {
+  padding: var(--space-md);
+  min-width: 150px;
+  max-width: 150px;
+  overflow: visible; /* Allow all buttons to show */
+}
+
+.countdown-control-panel h4 {
+  margin: 0 0 1rem 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.countdown-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.countdown-action-btn {
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.countdown-action-btn:hover {
+  background: var(--gray-dark);
+  border-color: var(--purple);
+}
+
+/* Roll Result Button Styling */
+.countdown-action-btn.success-fear {
+  border-color: var(--purple);
+  color: var(--purple);
+}
+
+.countdown-action-btn.fail-fear {
+  border-color: var(--purple);
+  color: var(--purple);
+}
+
+.countdown-action-btn.success-hope {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.countdown-action-btn.fail-hope {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.countdown-action-btn.crit-success {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.countdown-action-btn.short-rest {
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
+}
+
+.countdown-action-btn.long-rest {
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
+}
+
+/* Countdown card container */
+.countdown-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Countdown card header */
+.countdown-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.countdown-card-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.countdown-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* Countdown progress */
+.countdown-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.countdown-progress-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  min-width: 60px;
+}
+
+.countdown-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.countdown-progress-fill {
+  height: 100%;
+  background: var(--purple);
+  transition: width 0.3s ease;
+}
+
+/* Countdown controls */
+.countdown-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.countdown-control-button {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: var(--text-sm);
+}
+
+.countdown-control-button:hover {
+  background: var(--gray-dark);
+}
+
+.countdown-control-button.active {
+  background: var(--purple);
+  color: white;
+}
+
+/* Countdown description */
+.countdown-description {
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0.5rem 0;
+}
+
+/* Countdown triggers */
+.countdown-triggers {
+  margin-top: 0.75rem;
+}
+
+.countdown-trigger-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.countdown-trigger-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--purple);
+}
+
+/* Countdown-specific expanded card styling */
+.expanded-card.countdown {
+  /* Inherits base card styles */
+}
+
+.expanded-card.countdown .expanded-header {
+  /* Inherits base header styles */
+}
+
+.expanded-card.countdown .expanded-content {
+  /* Inherits base content styles */
+}
+
+/* Countdown edit mode specific styling */
+.expanded-card.countdown.edit-mode {
+  /* Inherits base edit mode styles */
+}
+
+.expanded-card.countdown.edit-mode .expanded-header {
+  /* Inherits base edit header styles */
+}
+
+.expanded-card.countdown.edit-mode .expanded-content {
+  /* Inherits base edit content styles */
+}
+
+/* ========================================
+   INLINE COUNTDOWN CREATOR
+   ======================================== */
+
+/* Inline Countdown Creator */
+.inline-countdown-creator {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+.inline-countdown-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.inline-countdown-main-row {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.inline-input {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem; /* 16px to prevent mobile auto-zoom */
+  min-width: 8rem;
+}
+
+.inline-input:focus {
+  outline: none;
+  border-color: var(--purple);
+}
+
+.inline-number {
+  width: 3rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.inline-select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  min-width: 5rem;
+}
+
+.inline-countdown-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* Position error popup relative to the number input specifically */
+.inline-number-container {
+  position: relative;
+}
