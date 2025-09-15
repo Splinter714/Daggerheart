@@ -25,7 +25,7 @@ const PIP_TYPES = {
     pipStyle: {
       fontSize: 'var(--text-lg)',
       fontWeight: 600,
-      transition: 'color 0.2s ease',
+      transition: 'color 0.3s ease',
       height: '1.5rem',
       width: '1.5rem',
       display: 'inline-block',
@@ -55,7 +55,7 @@ const PIP_TYPES = {
     pipStyle: {
       fontSize: 'var(--text-sm)',
       fontWeight: 600,
-      transition: 'color 0.2s ease',
+      transition: 'color 0.3s ease',
       height: '1.5rem',
       width: '1.5rem',
       display: 'inline-block',
@@ -84,7 +84,7 @@ const PIP_TYPES = {
     pipStyle: {
       fontSize: 'var(--text-sm)',
       fontWeight: 600,
-      transition: 'color 0.2s ease',
+      transition: 'color 0.3s ease',
       height: '1.5rem',
       width: '1.5rem',
       display: 'inline-block',
@@ -113,7 +113,7 @@ const PIP_TYPES = {
     pipStyle: {
       fontSize: 'var(--text-sm)',
       fontWeight: 600,
-      transition: 'color 0.2s ease',
+      transition: 'color 0.3s ease',
       height: '1.5rem',
       width: '1.5rem',
       display: 'inline-block',
@@ -145,7 +145,7 @@ const PIP_TYPES = {
       height: '8px',
       borderRadius: '50%',
       border: '1px solid var(--border)',
-      transition: 'all 0.2s ease'
+      transition: 'background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease'
     },
     filledStyle: {
       background: 'var(--red)',
@@ -178,7 +178,7 @@ const PIP_TYPES = {
       height: '8px',
       borderRadius: '50%',
       border: '1px solid var(--border)',
-      transition: 'all 0.2s ease'
+      transition: 'background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease'
     },
     filledStyle: {
       background: 'var(--purple)',
@@ -211,11 +211,17 @@ const PIP_TYPES = {
     pipStyle: {
       fontSize: 'var(--text-sm)',
       fontWeight: 600,
-      transition: 'all 0.2s ease',
-      cursor: 'pointer'
+      transition: 'color 0.3s ease',
+      cursor: 'pointer',
+      width: '1rem',
+      height: '1rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0
     },
     filledColor: 'var(--red)',
-    emptyColor: 'var(--text-secondary)',
+    emptyColor: '#a3a3a3',
     tooltipTitle: 'Click to adjust HP:',
     tooltipInstructions: [
       { text: 'Filled pip:', description: 'Click to heal (reduce damage)' },
@@ -236,11 +242,17 @@ const PIP_TYPES = {
     pipStyle: {
       fontSize: 'var(--text-sm)',
       fontWeight: 600,
-      transition: 'all 0.2s ease',
-      cursor: 'pointer'
+      transition: 'color 0.3s ease',
+      cursor: 'pointer',
+      width: '1rem',
+      height: '1rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0
     },
     filledColor: 'var(--gold)',
-    emptyColor: 'var(--text-secondary)',
+    emptyColor: '#a3a3a3',
     tooltipTitle: 'Click to adjust stress:',
     tooltipInstructions: [
       { text: 'Filled pip:', description: 'Click to reduce stress' },
@@ -260,7 +272,7 @@ const PIP_TYPES = {
     pipStyle: {
       fontSize: 'var(--text-sm)',
       fontWeight: 600,
-      transition: 'color 0.2s ease',
+      transition: 'color 0.3s ease',
       height: '1.5rem',
       width: '1.5rem',
       display: 'inline-block',
@@ -329,9 +341,7 @@ const Pips = ({
     const outerRect = event.currentTarget.getBoundingClientRect()
     const containerElement = event.currentTarget.querySelector('.pip-container')
     
-    // Debug: make sure we found the container
     if (!containerElement) {
-      console.warn('Could not find .pip-container element')
       return
     }
     
@@ -398,7 +408,7 @@ const Pips = ({
   const renderPips = () => (
     <>
       {pipGroups.map((group) => (
-        <div key={group.groupIndex} style={{ display: 'inline-block' }}>
+        <React.Fragment key={group.groupIndex}>
           {[...Array(group.end - group.start)].map((_, i) => {
             const pipIndex = group.start + i
             const isFilled = pipIndex < safeValue
@@ -423,13 +433,14 @@ const Pips = ({
               const IconComponent = config.icon
               const isFontAwesome = IconComponent && typeof IconComponent === 'object' && IconComponent.iconName
               
+              const currentColor = isFilled ? filledColor : config.emptyColor
               return (
                 <span 
                   key={pipIndex} 
                   className={`fear-pip ${isFilled ? 'filled' : 'empty'}`}
                   style={{ 
                     ...config.pipStyle,
-                    color: isFilled ? filledColor : config.emptyColor,
+                    color: currentColor,
                     cursor: (onChange || onPipClick) ? 'pointer' : 'default',
                     ...pipStyle
                   }}
@@ -437,15 +448,20 @@ const Pips = ({
                   title={`${pipIndex + 1} of ${effectiveMaxValue}`}
                 >
                   {isFontAwesome ? (
-                    <FontAwesomeIcon icon={IconComponent} size={size} />
+                    <FontAwesomeIcon 
+                      icon={IconComponent} 
+                      size={size}
+                    />
                   ) : (
-                    <IconComponent size={16} />
+                    <IconComponent 
+                      size={16}
+                    />
                   )}
                 </span>
               )
             }
           })}
-        </div>
+        </React.Fragment>
       ))}
       
       {showTooltip && (
@@ -506,13 +522,18 @@ const Pips = ({
         justifyContent: centerPips ? 'center' : 'flex-start',
         ...containerStyle
       }}
-      onClick={enableBoundaryClick ? handleBoundaryClick : undefined}
+      onClick={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+        if (enableBoundaryClick) {
+          handleBoundaryClick(e)
+        }
+      }}
       onMouseEnter={() => setShowTooltip(showTooltip)}
       onMouseLeave={() => setShowTooltip(false)}
     >
       <div className="pip-container" style={{
         ...config.containerStyle,
-        display: 'inline-block',
         width: 'auto',
         height: '100%',
         padding: '0.125rem',

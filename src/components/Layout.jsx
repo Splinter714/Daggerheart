@@ -3,6 +3,7 @@ import { GameStateProvider, useGameState } from '../state/state'
 import Pips from './Pips'
 import HelpButton from './HelpButton'
 import DeleteClear from './DeleteClear'
+import GlobalEdit from './GlobalEdit'
 import Bar from './Toolbars'
 import Panel from './Panels'
 import GameBoard from './GameBoard'
@@ -392,6 +393,10 @@ const LayoutContent = () => {
       {/* Bottom Bar */}
       <div className="bottom-bar-container">
         <Bar position="bottom">
+          <GlobalEdit 
+            isEditMode={isEditMode}
+            setIsEditMode={setIsEditMode}
+          />
           <DeleteClear
             adversaries={adversaries}
             environments={environments}
@@ -433,41 +438,40 @@ const LayoutContent = () => {
           className={`${isMobile && mobileView === 'left' ? 'mobile-hidden' : ''}`}
           style={rightColumnMode === 'database' ? { overflowY: 'hidden' } : {}}
         >
-          <div className="right-panel-shell">
-            <div className="panel-content">
-              {rightColumnMode === 'database' && (
-                <div className="database-display">
-                  <Browser
-                    type={databaseType}
-                    onAddItem={(itemData) => {
-                      if (databaseType === 'adversary') {
-                        createAdversary(itemData)
-                        setLastAddedItemType('adversary')
-                      } else if (databaseType === 'environment') {
-                        createEnvironment(itemData)
-                        setLastAddedItemType('environment')
-                      }
-                    }}
-                    onCancel={handleCloseRightColumn}
-                  />
-                </div>
-              )}
-              {rightColumnMode === 'item' && selectedItem && (
-                <div className="item-display">
-                  <GameCard
-                    type={selectedType}
-                    item={selectedItem}
-                    mode="expanded"
-                  />
-                </div>
-              )}
-              {!rightColumnMode && (
-                <div className="panel-content">
-                  {/* Right panel content - to be implemented */}
-                </div>
-              )}
+          {rightColumnMode === 'database' && (
+            <div className="database-display">
+              <Browser
+                type={databaseType}
+                onAddItem={(itemData) => {
+                  if (databaseType === 'adversary') {
+                    createAdversary(itemData)
+                    setLastAddedItemType('adversary')
+                  } else if (databaseType === 'environment') {
+                    createEnvironment(itemData)
+                    setLastAddedItemType('environment')
+                  }
+                }}
+                onCancel={handleCloseRightColumn}
+              />
             </div>
-          </div>
+          )}
+          {rightColumnMode === 'item' && selectedItem && (
+            <GameCard
+              type={selectedType}
+              item={selectedItem}
+              mode={isEditMode ? "edit" : "expanded"}
+              onApplyDamage={handleAdversaryDamage}
+              onApplyHealing={handleAdversaryHealing}
+              onApplyStressChange={handleAdversaryStressChange}
+              onUpdate={selectedType === 'adversaries' ? updateAdversary : selectedType === 'environments' ? updateEnvironment : updateCountdown}
+              adversaries={adversaries}
+            />
+          )}
+          {!rightColumnMode && (
+            <div>
+              {/* Right panel content - to be implemented */}
+            </div>
+          )}
         </Panel>
       </div>
 
