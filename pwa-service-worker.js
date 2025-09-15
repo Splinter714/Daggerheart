@@ -1,20 +1,20 @@
 const CACHE_NAME = 'daggerheart-gm-v1.0.0'
 const STATIC_CACHE_URLS = [
-  '/Daggerheart/',
-  '/Daggerheart/index.html',
-  '/Daggerheart/assets/index.css',
-  '/Daggerheart/assets/index.js',
-  '/Daggerheart/assets/lucide.js',
-  '/Daggerheart/assets/fa.js',
-  '/Daggerheart/assets/dndkit.js',
-  '/Daggerheart/assets/Creator.js',
-  '/Daggerheart/assets/Browser.js',
-  '/Daggerheart/assets/environments.js'
+  './',
+  './index.html',
+  './assets/index.css',
+  './assets/index.js',
+  './assets/lucide.js',
+  './assets/fa.js',
+  './assets/dndkit.js',
+  './assets/Creator.js',
+  './assets/Browser.js',
+  './assets/environments.js'
 ]
 
 const DATA_CACHE_URLS = [
-  '/Daggerheart/data/adversaries.json',
-  '/Daggerheart/data/environments.json'
+  './src/data/adversaries.json',
+  './src/data/environments.json'
 ]
 
 // Install event - cache static assets
@@ -105,7 +105,7 @@ self.addEventListener('fetch', (event) => {
             
             // Return offline page for navigation requests
             if (event.request.mode === 'navigate') {
-              return caches.match('/Daggerheart/index.html')
+              return caches.match('./index.html')
             }
             
             throw error
