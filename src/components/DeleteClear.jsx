@@ -22,7 +22,7 @@ const DeleteClear = ({
   }, [])
 
   const hasAnyItems = (adversaries?.length || 0) > 0 || (environments?.length || 0) > 0 || (countdowns?.length || 0) > 0
-  const hasDeadAdversaries = (adversaries || []).some(adv => (adv.hp || 0) <= 0)
+  const hasDeadAdversaries = (adversaries || []).some(adv => (adv.hp || 0) >= (adv.hpMax || 1))
 
   const flyoutStyle = {
     position: 'absolute',
@@ -112,7 +112,7 @@ const DeleteClear = ({
             onClick={(e) => { 
               e.stopPropagation()
               setDeleteFlyoutOpen(false)
-              const dead = adversaries.filter(adv => (adv.hp || 0) <= 0)
+              const dead = adversaries.filter(adv => (adv.hp || 0) >= (adv.hpMax || 1))
               dead.forEach(item => deleteAdversary(item.id))
             }}
           >

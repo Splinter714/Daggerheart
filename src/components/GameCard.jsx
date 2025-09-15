@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react'
-import { Droplet, Activity, CheckCircle, X, Plus, Minus } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Plus, Minus, Shield } from 'lucide-react'
+import Pips from './Pips'
 
 // ============================================================================
 // UTILITIES
@@ -428,7 +429,7 @@ const styles = {
     borderColor: '#333',
     borderRadius: '8px',
     padding: '12px',
-    margin: '4px 0',
+    marginTop: '0.5rem',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
     position: 'relative'
@@ -777,14 +778,21 @@ const GameCard = ({
   onApplyDamage,
   onApplyHealing,
   onApplyStressChange,
+  onUpdate,
   onIncrement,
   onDecrement,
   dragAttributes,
   dragListeners,
+  adversaries = [], // All adversaries for duplicate checking
 }) => {
   // Get type-specific logic
-  const adversaryLogic = type === 'adversary' ? useAdversaryLogic(item, onApplyDamage, onApplyHealing, onApplyStressChange) : null
+  const adversaryLogic = (type === 'adversary' || type === 'adversaries') ? useAdversaryLogic(item, onApplyDamage, onApplyHealing, onApplyStressChange) : null
   const countdownLogic = type === 'countdown' ? useCountdownLogic(item, onIncrement, onDecrement) : null
+  
+  // Create fallback handlers for when logic is null
+  const handleDifficultyClick = adversaryLogic?.handleDifficultyClick || (() => {
+    console.warn('adversaryLogic.handleDifficultyClick not available')
+  })
 
   // Hover state management
   const [isHovered, setIsHovered] = useState(false)
@@ -819,7 +827,12 @@ const GameCard = ({
     if (type === 'adversary') {
       const baseName = item.baseName || item.name?.replace(/\s+\(\d+\)$/, '') || ''
       const duplicateNumber = item.duplicateNumber || (item.name?.match(/\((\d+)\)$/) ? parseInt(item.name.match(/\((\d+)\)$/)[1]) : 1)
-      return `${baseName} (${duplicateNumber})`
+      
+      // Check if there are other adversaries with the same base name
+      const sameNameAdversaries = adversaries.filter(adv => adv.baseName === baseName)
+      const hasDuplicates = sameNameAdversaries.length > 1
+      
+      return hasDuplicates ? `${baseName} (${duplicateNumber})` : baseName
     }
     return item.name
   }
@@ -847,56 +860,145 @@ const GameCard = ({
   }
 
   const renderAdversaryContent = () => (
-    <>
-      {/* HP Pips */}
-      <div style={styles.pipSymbols} onClick={adversaryLogic.handleHpClick}>
-        {Array.from({ length: item.hpMax || 1 }, (_, i) => (
-          <span
-            key={i}
+    <div style={styles.cardActions}>
+      <div style={styles.controlButtons}>
+        {/* HP Pips */}
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div 
             style={{
-              ...styles.pipSymbol,
-              color: i < (item.hp || 0) ? '#ff6b6b' : '#666'
+              display: 'flex',
+              gap: '0.25rem',
+              alignItems: 'center',
+              cursor: 'pointer',
+              padding: '0.125rem',
+              borderRadius: '0.25rem',
+              transition: 'all 0.2s ease'
             }}
-            title={i < (item.hp || 0) ? 'Click to heal (reduce damage)' : 'Click to take damage'}
+            onClick={adversaryLogic.handleHpClick}
+            onMouseEnter={(e) => e.target.style.background = '#2a2a2a'}
+            onMouseLeave={(e) => e.target.style.background = 'transparent'}
           >
-            <Droplet size={16} />
-          </span>
-        ))}
+            {Array.from({ length: item.hpMax || 1 }, (_, i) => (
+              <span
+                key={i}
+                style={{
+                  fontSize: '1rem',
+                  transition: 'color 0.2s ease',
+                  cursor: 'pointer',
+                  color: i < (item.hp || 0) ? '#ff6b6b' : '#666'
+                }}
+                title={i < (item.hp || 0) ? 'Click to heal (reduce damage)' : 'Click to take damage'}
+              >
+                <Droplet size={16} />
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Stress Pips */}
+        {item.stressMax > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div 
+              style={{
+                display: 'flex',
+                gap: '0.25rem',
+                alignItems: 'center',
+                cursor: 'pointer',
+                padding: '0.125rem',
+                borderRadius: '0.25rem',
+                transition: 'all 0.2s ease'
+              }}
+              onClick={adversaryLogic.handleStressClick}
+              onMouseEnter={(e) => e.target.style.background = '#2a2a2a'}
+              onMouseLeave={(e) => e.target.style.background = 'transparent'}
+            >
+              {Array.from({ length: item.stressMax }, (_, i) => (
+                <span
+                  key={i}
+                  style={{
+                    fontSize: '1rem',
+                    transition: 'color 0.2s ease',
+                    cursor: 'pointer',
+                    color: i < (item.stress || 0) ? '#ffd700' : '#666'
+                  }}
+                  title={i < (item.stress || 0) ? 'Click to reduce stress' : 'Click to increase stress'}
+                >
+                  <Activity size={16} />
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Difficulty Badge */}
+        {item.difficulty && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div 
+              onClick={adversaryLogic.handleDifficultyClick}
+              style={{
+                cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default'
+              }}
+              title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                background: '#1a1a1a',
+                border: '1px solid #333',
+                borderRadius: '0.25rem',
+                padding: '0.25rem 0.5rem',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.background = '#2a2a2a'}
+              onMouseLeave={(e) => e.target.style.background = '#1a1a1a'}
+              >
+                <span style={{
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: '#fff'
+                }}>
+                  {item.difficulty}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Stress Pips */}
-      {item.stressMax > 0 && (
-        <div style={styles.pipSymbols} onClick={adversaryLogic.handleStressClick}>
-          {Array.from({ length: item.stressMax }, (_, i) => (
-            <span
-              key={i}
-              style={{
-                ...styles.pipSymbol,
-                color: i < (item.stress || 0) ? '#ffd700' : '#666'
-              }}
-              title={i < (item.stress || 0) ? 'Click to reduce stress' : 'Click to increase stress'}
-            >
-              <Activity size={16} />
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Difficulty Badge */}
-      {item.difficulty && (
-        <div 
-          onClick={adversaryLogic.handleDifficultyClick}
-          style={{
-            ...styles.badge,
-            ...styles.difficultyBadge,
-            cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default'
-          }}
-          title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
-        >
-          {item.difficulty}
-        </div>
-      )}
-    </>
+      {/* Delete Button */}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {dragAttributes && dragListeners && (
+          <button
+            style={{
+              background: '#2a2a2a',
+              border: '1px solid #333',
+              borderRadius: '0.25rem',
+              padding: '0.25rem',
+              minWidth: '1.5rem',
+              height: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              color: '#fff',
+              fontSize: '1rem'
+            }}
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              onDelete && onDelete(item.id)
+            }}
+            onMouseEnter={(e) => e.target.style.background = '#3a3a3a'}
+            onMouseLeave={(e) => e.target.style.background = '#2a2a2a'}
+            title="Delete adversary"
+          >
+            ×
+          </button>
+        )}
+      </div>
+    </div>
   )
 
   const renderEnvironmentContent = () => (
@@ -1071,10 +1173,550 @@ const GameCard = ({
   }
 
   // ============================================================================
+  // EXPANDED VIEW RENDERERS
+  // ============================================================================
+
+  const renderExpandedAdversary = () => {
+    const showDrag = !!(dragAttributes && dragListeners)
+    const isDead = (item.hp || 0) >= (item.hpMax || 1)
+    const isEditMode = mode === 'edit'
+    
+
+    return (
+      <div 
+        style={{
+          ...getCardStyle(),
+          padding: '1rem',
+          minHeight: '400px',
+          opacity: isDead ? 0.6 : 1
+        }}
+        {...dragAttributes}
+        {...dragListeners}
+        onClick={onClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Header Section - Identical to Compact View */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginBottom: '1rem',
+          paddingBottom: '0.75rem',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          {/* Left side - Name and Type */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '0.25rem'
+          }}>
+            <h2 style={{
+              fontSize: '1rem',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              margin: 0
+            }}>
+              {renderTitle()}
+            </h2>
+            {(item.tier || item.type) && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem'
+              }}>
+                {item.tier && (
+                  <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    color: 'var(--text-secondary)',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Tier {item.tier}
+                  </span>
+                )}
+                {item.type && (
+                  <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    color: 'var(--text-secondary)',
+                    letterSpacing: '0.5px'
+                  }}>
+                    {item.type}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Right side - HP pips, Stress pips, Difficulty, Delete */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            {/* Control Buttons Group - HP and Stress stacked vertically */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.125rem',
+              alignItems: 'flex-end'
+            }}>
+              {/* HP Pips */}
+              <Pips
+                type="adversaryHP"
+                value={item.hp || 0}
+                maxValue={item.hpMax || 1}
+                onChange={(newValue) => {
+                  const currentHp = item.hp || 0
+                  if (newValue > currentHp) {
+                    // Increase HP = take damage
+                    onApplyDamage && onApplyDamage(item.id, newValue - currentHp, item.hp, item.hpMax)
+                  } else if (newValue < currentHp) {
+                    // Decrease HP = heal
+                    onApplyHealing && onApplyHealing(item.id, currentHp - newValue, item.hp)
+                  }
+                }}
+                containerStyle={{
+                  cursor: 'pointer',
+                  padding: '0.0625rem',
+                  borderRadius: '0.125rem',
+                  transition: 'all 0.2s ease'
+                }}
+                pipStyle={{
+                  fontSize: '0.75rem'
+                }}
+                showTooltip={false}
+                enableBoundaryClick={true}
+              />
+
+              {/* Stress Pips */}
+              {item.stressMax > 0 && (
+                <Pips
+                  type="adversaryStress"
+                  value={item.stress || 0}
+                  maxValue={item.stressMax}
+                  onChange={(newValue) => {
+                    const currentStress = item.stress || 0
+                    const stressChange = newValue - currentStress
+                    onApplyStressChange && onApplyStressChange(item.id, stressChange, item.stress)
+                  }}
+                  containerStyle={{
+                    cursor: 'pointer',
+                    padding: '0.0625rem',
+                    borderRadius: '0.125rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  pipStyle={{
+                    fontSize: '0.75rem'
+                  }}
+                  showTooltip={false}
+                  enableBoundaryClick={true}
+                />
+              )}
+            </div>
+
+            {/* Difficulty Badge */}
+            {item.difficulty && (
+              <div 
+                onClick={handleDifficultyClick}
+                style={{
+                  cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
+                }}
+                title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
+              >
+                <Shield 
+                  size={32} 
+                  strokeWidth={0.5}
+                  style={{
+                    color: 'var(--text-primary)'
+                  }}
+                />
+                <span style={{
+                  position: 'absolute',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  pointerEvents: 'none'
+                }}>
+                  {item.difficulty}
+                </span>
+              </div>
+            )}
+
+            {/* Delete Button */}
+            {showDrag && (
+              <button
+                style={{
+                  background: '#2a2a2a',
+                  border: '1px solid #333',
+                  borderRadius: '0.25rem',
+                  padding: '0.25rem',
+                  minWidth: '1.5rem',
+                  height: '1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  color: '#fff',
+                  fontSize: '1rem'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  onDelete && onDelete(item.id)
+                }}
+                onMouseEnter={(e) => e.target.style.background = '#3a3a3a'}
+                onMouseLeave={(e) => e.target.style.background = '#2a2a2a'}
+                title="Delete item"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Description Section */}
+        {item.description && (
+          <div style={{
+            marginBottom: '1rem',
+            paddingBottom: '0.75rem',
+            borderBottom: '1px solid var(--border)'
+          }}>
+            <h3 style={{
+              fontSize: '1rem',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              margin: '0 0 0.5rem 0'
+            }}>
+              Description
+            </h3>
+            {isEditMode ? (
+              <textarea
+                style={{
+                  width: '100%',
+                  minHeight: '100px',
+                  padding: '0.5rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.25rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                  lineHeight: 1.5,
+                  resize: 'vertical',
+                  fontFamily: 'inherit'
+                }}
+                value={item.description}
+                onChange={(e) => {
+                  onUpdate && onUpdate(item.id, { description: e.target.value })
+                }}
+                placeholder="Enter adversary description..."
+              />
+            ) : (
+              <p style={{
+                fontSize: '0.875rem',
+                lineHeight: 1.5,
+                color: 'var(--text-secondary)',
+                margin: 0,
+                whiteSpace: 'pre-wrap'
+              }}>
+                {item.description}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Motives Section */}
+        {item.motives && (
+          <div style={{
+            marginBottom: '1rem',
+            paddingBottom: '0.75rem',
+            borderBottom: '1px solid var(--border)'
+          }}>
+            <h3 style={{
+              fontSize: '1rem',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              margin: '0 0 0.5rem 0'
+            }}>
+              Motives
+            </h3>
+            {isEditMode ? (
+              <textarea
+                style={{
+                  width: '100%',
+                  minHeight: '80px',
+                  padding: '0.5rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.25rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                  lineHeight: 1.5,
+                  resize: 'vertical',
+                  fontFamily: 'inherit'
+                }}
+                value={item.motives}
+                onChange={(e) => {
+                  onUpdate && onUpdate(item.id, { motives: e.target.value })
+                }}
+                placeholder="Enter adversary motives..."
+              />
+            ) : (
+              <p style={{
+                fontSize: '0.875rem',
+                lineHeight: 1.5,
+                color: 'var(--text-secondary)',
+                margin: 0,
+                whiteSpace: 'pre-wrap'
+              }}>
+                {item.motives}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Core Stats Section */}
+        <div style={{
+          marginBottom: '1rem',
+          paddingBottom: '0.75rem',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem',
+            fontSize: '0.875rem'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              flexWrap: 'wrap'
+            }}>
+              <span><strong>Difficulty:</strong> {item.difficulty}</span>
+              {item.thresholds && (
+                <span><strong>Thresholds:</strong> {item.thresholds.major}/{item.thresholds.severe}</span>
+              )}
+              <span><strong>HP:</strong> {item.hpMax}</span>
+              {item.stressMax > 0 && (
+                <span><strong>Stress:</strong> {item.stressMax}</span>
+              )}
+            </div>
+            {(item.atk !== undefined || item.weapon || item.damage) && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                flexWrap: 'wrap'
+              }}>
+                {item.atk !== undefined && (
+                  <span><strong>ATK:</strong> {item.atk >= 0 ? '+' : ''}{item.atk}</span>
+                )}
+                {item.weapon && (
+                  <span><strong>{item.weapon}:</strong> {item.range || 'Melee'}</span>
+                )}
+                {item.damage && (
+                  <span><strong>Damage:</strong> {item.damage}</span>
+                )}
+              </div>
+            )}
+            {item.experience && item.experience.length > 0 && (
+              <div>
+                <strong>Experience:</strong> {item.experience.map(exp => 
+                  typeof exp === 'string' ? exp : `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`
+                ).join(', ')}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Features Section - Organized by Type */}
+        {item.features && item.features.length > 0 && (
+          <div style={{
+            marginBottom: '1rem'
+          }}>
+            {/* Passives */}
+            {item.features.filter(f => f.type === 'Passive').length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  marginBottom: '0.75rem'
+                }}>
+                  <h4 style={{
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    color: 'var(--text-primary)',
+                    margin: 0,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Passives
+                  </h4>
+                  <hr style={{
+                    flex: 1,
+                    border: 'none',
+                    borderTop: '1px solid var(--border)',
+                    margin: 0
+                  }} />
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
+                  {item.features.filter(f => f.type === 'Passive').map((feature, index) => (
+                    <div key={index} style={{
+                      fontSize: '0.875rem',
+                      lineHeight: 1.4,
+                      color: 'var(--text-secondary)'
+                    }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {feature.name}
+                      </span>
+                      {feature.description && (
+                        <>
+                          <span> - </span>
+                          <span>{feature.description}</span>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            {item.features.filter(f => f.type === 'Action').length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  marginBottom: '0.75rem'
+                }}>
+                  <h4 style={{
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    color: 'var(--text-primary)',
+                    margin: 0,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Actions
+                  </h4>
+                  <hr style={{
+                    flex: 1,
+                    border: 'none',
+                    borderTop: '1px solid var(--border)',
+                    margin: 0
+                  }} />
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
+                  {item.features.filter(f => f.type === 'Action').map((feature, index) => (
+                    <div key={index} style={{
+                      fontSize: '0.875rem',
+                      lineHeight: 1.4,
+                      color: 'var(--text-secondary)'
+                    }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {feature.name}
+                      </span>
+                      {feature.description && (
+                        <>
+                          <span> - </span>
+                          <span>{feature.description}</span>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Reactions */}
+            {item.features.filter(f => f.type === 'Reaction').length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  marginBottom: '0.75rem'
+                }}>
+                  <h4 style={{
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    color: 'var(--text-primary)',
+                    margin: 0,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Reactions
+                  </h4>
+                  <hr style={{
+                    flex: 1,
+                    border: 'none',
+                    borderTop: '1px solid var(--border)',
+                    margin: 0
+                  }} />
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
+                  {item.features.filter(f => f.type === 'Reaction').map((feature, index) => (
+                    <div key={index} style={{
+                      fontSize: '0.875rem',
+                      lineHeight: 1.4,
+                      color: 'var(--text-secondary)'
+                    }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {feature.name}
+                      </span>
+                      {feature.description && (
+                        <>
+                          <span> - </span>
+                          <span>{feature.description}</span>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Damage Input Popup for Adversaries */}
+        {renderDamageInput()}
+      </div>
+    )
+  }
+
+  // ============================================================================
   // MAIN RENDER
   // ============================================================================
 
-  // For now, only support compact mode
+  // Render expanded view for adversaries
+  if ((mode === 'expanded' || mode === 'edit') && (type === 'adversary' || type === 'adversaries')) {
+    return renderExpandedAdversary()
+  }
+
+  // For other modes, only support compact mode
   if (mode !== 'compact') {
     return (
       <div style={getCardStyle()}>
@@ -1083,12 +1725,224 @@ const GameCard = ({
           <div style={styles.rowMeta}>{renderMeta()}</div>
         </div>
         <p style={{ color: '#666', fontSize: '12px', margin: 0 }}>
-          Expanded view coming soon
+          Expanded view coming soon for {type}
         </p>
       </div>
     )
   }
 
+  // For adversaries, use the improved compact layout
+  if (type === 'adversary' || type === 'adversaries') {
+    const showDrag = !!(dragAttributes && dragListeners)
+    const isDead = (item.hp || 0) >= (item.hpMax || 1)
+    
+    return (
+      <div
+        style={{
+          ...getCardStyle(),
+          opacity: isDead ? 0.6 : 1,
+          backgroundColor: isDead ? '#2a1a1a' : getCardStyle().backgroundColor,
+          borderColor: isDead ? '#4a2a2a' : getCardStyle().borderColor,
+          paddingLeft: showDrag ? '2.25rem' : '0.75rem',
+          position: 'relative'
+        }}
+        onClick={onClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        {...dragAttributes}
+        {...dragListeners}
+      >
+        {showDrag && (
+          <div 
+            style={{
+              position: 'absolute',
+              left: '0.5rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#666',
+              cursor: 'grab',
+              fontSize: '0.875rem',
+              lineHeight: 1,
+              padding: '0.25rem',
+              borderRadius: '0.25rem',
+              transition: 'all 0.2s ease'
+            }}
+            {...dragAttributes} 
+            {...dragListeners}
+          >
+            ⋮⋮
+          </div>
+        )}
+        
+        {/* Main Row - Name/Type on left, HP/Stress/Difficulty on right */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          {/* Left side - Name and Type */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '0.25rem'
+          }}>
+            <h4 style={styles.rowTitle}>
+              {renderTitle()}
+            </h4>
+            {item.type && (
+              <span style={{
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                color: 'var(--text-secondary)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                {item.type}
+              </span>
+            )}
+          </div>
+
+          {/* Right side - HP pips, Stress pips, Difficulty, Delete */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            {/* Control Buttons Group - HP and Stress stacked vertically */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.125rem',
+              alignItems: 'flex-end'
+            }}>
+              {/* HP Pips */}
+              <Pips
+                type="adversaryHP"
+                value={item.hp || 0}
+                maxValue={item.hpMax || 1}
+                onChange={(newValue) => {
+                  const currentHp = item.hp || 0
+                  if (newValue > currentHp) {
+                    // Increase HP = take damage
+                    onApplyDamage && onApplyDamage(item.id, newValue - currentHp, item.hp, item.hpMax)
+                  } else if (newValue < currentHp) {
+                    // Decrease HP = heal
+                    onApplyHealing && onApplyHealing(item.id, currentHp - newValue, item.hp)
+                  }
+                }}
+                containerStyle={{
+                  cursor: 'pointer',
+                  padding: '0.0625rem',
+                  borderRadius: '0.125rem',
+                  transition: 'all 0.2s ease'
+                }}
+                pipStyle={{
+                  fontSize: '0.75rem'
+                }}
+                showTooltip={false}
+                enableBoundaryClick={true}
+              />
+
+              {/* Stress Pips */}
+              {item.stressMax > 0 && (
+                <Pips
+                  type="adversaryStress"
+                  value={item.stress || 0}
+                  maxValue={item.stressMax}
+                  onChange={(newValue) => {
+                    const currentStress = item.stress || 0
+                    const stressChange = newValue - currentStress
+                    onApplyStressChange && onApplyStressChange(item.id, stressChange, item.stress)
+                  }}
+                  containerStyle={{
+                    cursor: 'pointer',
+                    padding: '0.0625rem',
+                    borderRadius: '0.125rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  pipStyle={{
+                    fontSize: '0.75rem'
+                  }}
+                  showTooltip={false}
+                  enableBoundaryClick={true}
+                />
+              )}
+            </div>
+
+            {/* Difficulty Badge */}
+            {item.difficulty && (
+              <div 
+                onClick={handleDifficultyClick}
+                style={{
+                  cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
+                }}
+                title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
+              >
+                <Shield 
+                  size={32} 
+                  strokeWidth={0.5}
+                  style={{
+                    color: 'var(--text-primary)'
+                  }}
+                />
+                <span style={{
+                  position: 'absolute',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  pointerEvents: 'none'
+                }}>
+                  {item.difficulty}
+                </span>
+              </div>
+            )}
+
+            {/* Delete Button */}
+            {dragAttributes && dragListeners && (
+              <button
+                style={{
+                  background: '#2a2a2a',
+                  border: '1px solid #333',
+                  borderRadius: '0.25rem',
+                  padding: '0.25rem',
+                  minWidth: '1.5rem',
+                  height: '1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  color: '#fff',
+                  fontSize: '1rem'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  onDelete && onDelete(item.id)
+                }}
+                onMouseEnter={(e) => e.target.style.background = '#3a3a3a'}
+                onMouseLeave={(e) => e.target.style.background = '#2a2a2a'}
+                title="Delete item"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
+        
+        {/* Damage Input Popup for Adversaries */}
+        {renderDamageInput()}
+      </div>
+    )
+  }
+
+  // For other types, use the original layout
   return (
     <div
       style={getCardStyle()}

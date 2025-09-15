@@ -5,7 +5,7 @@
 :root {
   /* Core colors - just what you actually use */
   --white: #ffffff;
-  --black: #1a1a1a;
+  --black: #000000;
   --purple: #4f46e5;
   --red: #ef4444;
   --gold: #eab308;
@@ -468,7 +468,7 @@ input[type="number"] {
 
 /* Panel content styles */
 .panel-header {
-  padding: 1rem;
+  padding: 0.5rem;
   border-bottom: 1px solid var(--border);
   background: var(--bg-primary);
 }
@@ -476,7 +476,7 @@ input[type="number"] {
 .panel-content {
   flex: 1;
   overflow-y: auto;
-  padding: 0.5rem;
+  padding: 0.25rem;
   min-height: 0; /* Allow shrinking below content size */
 }
 
@@ -498,22 +498,6 @@ input[type="number"] {
   padding: 1rem;
   border-top: 1px solid var(--border);
   background: var(--bg-primary);
-}
-
-/* Right panel shell styles */
-.right-panel-shell {
-  padding: 0;
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  height: 0; /* Force flex item to respect container height */
-}
-
-/* When Panel has overflow hidden (database mode), right-panel-shell should also be hidden */
-.right-panel-shell:has(.database-display) {
-  overflow-y: hidden;
 }
 
 /* Button styles */

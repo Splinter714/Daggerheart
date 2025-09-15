@@ -17,6 +17,7 @@ const Panel = ({
     display: isLeft ? 'block' : 'flex',
     flexDirection: isLeft ? 'initial' : 'column',
     height: '100%',
+    padding: isLeft ? '1rem 0.5rem 1rem 1rem' : '1rem 1rem 1rem 0.5rem', // More padding on outer edges, less on middle edge
     ...style
   }
 

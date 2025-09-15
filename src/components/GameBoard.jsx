@@ -19,7 +19,8 @@ const ElementList = ({
   onIncrement, 
   onDecrement, 
   isEditMode,
-  elementType 
+  elementType,
+  adversaries = [] // Pass adversaries for duplicate checking
 }) => {
   // Don't render anything for empty sections
   if (!items || items.length === 0) {
@@ -37,7 +38,8 @@ const ElementList = ({
         onDragStart: (e) => {
           e.dataTransfer.setData('text/plain', item.id)
         }
-      } : null
+      } : null,
+      adversaries // Pass adversaries for duplicate checking
     }
 
     switch (elementType) {
@@ -93,6 +95,7 @@ const GameBoardElementSection = ({
   items = [],
   sectionVisibility,
   toggleSection,
+  adversaries = [], // All adversaries for duplicate checking
   
   // Actions
   onOpenDatabase,
@@ -132,16 +135,13 @@ const GameBoardElementSection = ({
 
 
   return (
-    <div style={{marginBottom: '2rem'}}>
+    <div style={{marginBottom: '0.75rem'}}>
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
         gap: '0.25rem',
-        marginBottom: '0.25rem',
-        position: 'relative',
-        paddingLeft: '0.25rem',
-        paddingTop: '0.75rem'
+        position: 'relative'
       }}>
         <div style={{
           display: 'flex',
@@ -162,7 +162,7 @@ const GameBoardElementSection = ({
               border: 'none',
               color: hasItems ? 'var(--text-primary)' : 'var(--text-secondary)',
               cursor: hasItems ? 'pointer' : 'default',
-              padding: '0.25rem 0.5rem',
+              padding: '0.125rem 0.25rem',
               fontSize: 'inherit',
               fontWeight: 'inherit',
               transition: 'opacity 0.2s ease',
@@ -242,6 +242,7 @@ const GameBoardElementSection = ({
           onDecrement={onDecrement}
           isEditMode={isEditMode}
           elementType={elementType}
+          adversaries={adversaries}
         />
       )}
 
@@ -405,23 +406,17 @@ const GameBoard = ({
 
   return (
     <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      background: 'var(--bg-primary)'
+      flex: 1,
+      overflowY: 'auto'
     }}>
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '1rem'
-      }}>
-        <GameBoardElementSection
-          elementType="countdowns"
-          title="Countdowns"
-          sectionKey="countdowns"
-          items={countdowns}
-          sectionVisibility={sectionVisibility}
-          toggleSection={toggleSection}
+      <GameBoardElementSection
+        elementType="countdowns"
+        title="Countdowns"
+        sectionKey="countdowns"
+        items={countdowns}
+        sectionVisibility={sectionVisibility}
+        toggleSection={toggleSection}
+        adversaries={adversaries}
           showInlineCreator={showInlineCreator}
           onToggleInlineCreator={handleToggleInlineCreator}
           onCreateCountdown={handleCreateCountdown}
@@ -450,6 +445,7 @@ const GameBoard = ({
           items={environments}
           sectionVisibility={sectionVisibility}
           toggleSection={toggleSection}
+          adversaries={adversaries}
           onOpenDatabase={handleOpenDatabase}
           onDeleteItem={handleDeleteItem}
           onEditItem={handleEditItem}
@@ -473,6 +469,7 @@ const GameBoard = ({
           items={adversaries}
           sectionVisibility={sectionVisibility}
           toggleSection={toggleSection}
+          adversaries={adversaries}
           onOpenDatabase={handleOpenDatabase}
           onDeleteItem={handleDeleteItem}
           onEditItem={handleEditItem}
@@ -514,7 +511,6 @@ const GameBoard = ({
           }}
           isEditMode={isEditMode}
         />
-      </div>
     </div>
   )
 }
