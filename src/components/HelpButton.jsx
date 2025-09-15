@@ -4,6 +4,7 @@ import logoImage from '../assets/daggerheart-logo.svg'
 
 const HelpButton = () => {
   const [helpFlyoutOpen, setHelpFlyoutOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -13,6 +14,18 @@ const HelpButton = () => {
     }
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
+
+  // Mobile detection using CSS media query (zoom-independent)
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 800px)')
+    const handleMediaChange = (e) => setIsMobile(e.matches)
+    
+    // Set initial value
+    setIsMobile(mediaQuery.matches)
+    
+    mediaQuery.addEventListener('change', handleMediaChange)
+    return () => mediaQuery.removeEventListener('change', handleMediaChange)
   }, [])
 
   return (
@@ -61,9 +74,9 @@ const HelpButton = () => {
       <div style={{
         position: 'absolute',
         bottom: '100%',
-        left: window.innerWidth <= 800 ? 'auto' : '50%',
-        right: window.innerWidth <= 800 ? '0' : 'auto',
-        transform: window.innerWidth <= 800 ? 'none' : (helpFlyoutOpen ? 'translateX(-50%)' : 'translateX(-50%)'),
+        left: isMobile ? 'auto' : '50%',
+        right: isMobile ? '0' : 'auto',
+        transform: isMobile ? 'none' : (helpFlyoutOpen ? 'translateX(-50%)' : 'translateX(-50%)'),
         background: 'var(--bg-primary)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)',
@@ -74,8 +87,8 @@ const HelpButton = () => {
         transition: 'opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease',
         pointerEvents: helpFlyoutOpen ? 'auto' : 'none',
         minWidth: '280px',
-        maxWidth: window.innerWidth <= 800 ? 'calc(100vw - 2rem)' : '320px',
-        marginBottom: window.innerWidth <= 800 ? '0.5rem' : '0'
+        maxWidth: isMobile ? 'calc(100vw - 2rem)' : '320px',
+        marginBottom: isMobile ? '0.5rem' : '0'
       }}>
         {/* DPCGL Attribution */}
         <div style={{

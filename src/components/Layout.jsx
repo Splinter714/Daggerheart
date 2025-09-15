@@ -284,11 +284,14 @@ const LayoutContent = () => {
 
 
 
-  // Mobile detection
+  // Mobile detection using CSS media query instead of window.innerWidth
+  // This prevents zoom from triggering mobile view
   useEffect(() => {
     const checkMobile = () => {
       const wasMobile = isMobile
-      const nowMobile = window.innerWidth <= 800
+      // Use CSS media query to detect mobile - this is zoom-independent
+      const mediaQuery = window.matchMedia('(max-width: 800px)')
+      const nowMobile = mediaQuery.matches
       
       setIsMobile(nowMobile)
       
@@ -306,8 +309,13 @@ const LayoutContent = () => {
     }
     
     checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    
+    // Use the media query listener instead of resize event for better zoom handling
+    const mediaQuery = window.matchMedia('(max-width: 800px)')
+    const handleMediaChange = () => checkMobile()
+    
+    mediaQuery.addEventListener('change', handleMediaChange)
+    return () => mediaQuery.removeEventListener('change', handleMediaChange)
   }, [isMobile, rightColumnMode, mobileDrawerOpen])
 
   // Prevent background scrolling when any drawer is open
