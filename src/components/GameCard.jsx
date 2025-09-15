@@ -825,7 +825,8 @@ const GameCard = ({
       cardStyle = cardStyleWithoutMargin
     }
     
-    if (isHovered) {
+    // Disable hover effects for expanded cards
+    if (isHovered && mode !== 'expanded') {
       cardStyle = { ...cardStyle, ...styles.cardHover }
     }
     
@@ -843,7 +844,8 @@ const GameCard = ({
   const getCardClassName = () => {
     let className = 'border rounded-lg'
     
-    if (isHovered) {
+    // Disable border hover effect for expanded cards
+    if (isHovered && mode !== 'expanded') {
       className += ' border-hover'
     }
     
@@ -1252,7 +1254,7 @@ const GameCard = ({
           minHeight: '400px',
           opacity: isDead ? 0.7 : 1,
           backgroundColor: isDead ? 'var(--gray-900)' : getCardStyle(true).backgroundColor,
-          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isHovered ? 'var(--border-hover)' : 'var(--border)'),
+          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isHovered && mode !== 'expanded' ? 'var(--border-hover)' : 'var(--border)'),
           display: 'flex',
           flexDirection: 'column',
           position: 'relative'
@@ -1260,8 +1262,10 @@ const GameCard = ({
         {...dragAttributes}
         {...dragListeners}
         onClick={onClick}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        {...(mode !== 'expanded' && {
+          onMouseEnter: handleMouseEnter,
+          onMouseLeave: handleMouseLeave
+        })}
       >
         {/* DEFEATED overlay */}
         {isDead && (
@@ -1869,13 +1873,15 @@ const GameCard = ({
           ...getCardStyle(),
           opacity: isDead ? 0.7 : 1,
           backgroundColor: isDead ? 'var(--gray-900)' : getCardStyle().backgroundColor,
-          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isHovered ? 'var(--border-hover)' : 'var(--border)'),
+          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isHovered && mode !== 'expanded' ? 'var(--border-hover)' : 'var(--border)'),
           paddingLeft: showDrag ? '2.25rem' : '0.75rem',
           position: 'relative'
         }}
         onClick={onClick}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        {...(mode !== 'expanded' && {
+          onMouseEnter: handleMouseEnter,
+          onMouseLeave: handleMouseLeave
+        })}
         {...dragAttributes}
         {...dragListeners}
       >

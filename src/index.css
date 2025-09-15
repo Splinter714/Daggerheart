@@ -580,4 +580,172 @@ input[type="number"] {
   color: var(--gray-dark);
 }
 
+/* ========================================
+   MOBILE DRAWER STYLES
+   ======================================== */
+
+@media (max-width: 800px) {
+  .mobile-drawer {
+    position: fixed;
+    top: 49px; /* Start below fear header */
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1100; /* Higher than bottom bar and flyouts */
+    pointer-events: none;
+  }
+  
+  .mobile-drawer.open {
+    pointer-events: auto;
+  }
+  
+  .drawer-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent; /* No background shadow */
+    opacity: 0;
+    pointer-events: none; /* Prevent backdrop from receiving events when hidden */
+    visibility: hidden; /* Ensure backdrop is completely hidden when not open */
+  }
+  
+  .mobile-drawer.open .drawer-backdrop {
+    opacity: 1;
+    pointer-events: auto; /* Allow backdrop events only when drawer is open */
+    visibility: visible; /* Make backdrop visible when drawer is open */
+  }
+  
+  .drawer-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    height: 100%; /* Use full height of container */
+    overflow: hidden;
+    pointer-events: none; /* Prevent content from receiving events when hidden */
+    visibility: hidden; /* Ensure content is completely hidden when not open */
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: none !important; /* Prevent all touch gestures to stop pull-to-refresh */
+    will-change: transform; /* Optimize for transform animations */
+  }
+  
+  .drawer-body {
+    padding: 0;
+    height: calc(100% - 60px); /* Adjusted for actual header height */
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Allow scrolling on drawer body */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: pan-y !important; /* Allow vertical scrolling and taps */
+  }
+  
+  .mobile-drawer.open .drawer-content {
+    pointer-events: auto; /* Allow content events only when drawer is open */
+    visibility: visible; /* Make content visible when drawer is open */
+    overscroll-behavior: none !important; /* Ensure PTR prevention when open */
+    overscroll-behavior-y: none !important; /* Ensure vertical PTR prevention when open */
+    touch-action: pan-y !important; /* Allow vertical scrolling and taps when open */
+  }
+  
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0; /* Increased padding for larger swipe area */
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: none !important; /* Prevent all touch gestures to stop pull-to-refresh */
+    cursor: pointer; /* Make it clear the header is clickable */
+    min-height: 60px; /* Ensure adequate touch target */
+  }
+  
+  .drawer-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    margin: 0.5rem auto; /* Add vertical margin for better touch target */
+    overscroll-behavior: none; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none; /* Prevent vertical pull-to-refresh */
+    touch-action: none; /* Prevent all touch actions except our custom handling */
+  }
+  
+  /* Mobile drawer browser specific styles */
+  .drawer-body .browser-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* BROWSER/CREATOR DRAWER: Let entire browser content scroll */
+  .drawer-body .browser-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: pan-y !important; /* Allow vertical scrolling only */
+  }
+  
+  /* BROWSER/CREATOR DRAWER: Prevent pull-to-refresh in header */
+  .drawer-body .browser-header {
+    overscroll-behavior: none !important; /* Prevent pull-to-refresh */
+    overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */
+    touch-action: none !important; /* Block PTR in header area; taps still work */
+  }
+  
+  /* EXPANDED CARD DRAWER: Avoid nested scrollers; drawer-body scrolls */
+  .drawer-body .expanded-card,
+  .drawer-body .expanded-content {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  
+  /* Prevent PTR on table header area inside drawer */
+  .drawer-body .browser-content thead,
+  .drawer-body .browser-content th {
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    touch-action: none !important;
+  }
+  
+  /* Ensure pull-to-refresh is disabled even when drawer content isn't scrollable */
+  .mobile-drawer .drawer-content,
+  .mobile-drawer .drawer-body {
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+  }
+  
+  .mobile-drawer .drawer-content {
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    touch-action: pan-y !important; /* Allow vertical scrolling and taps */
+  }
+  
+  .mobile-drawer .drawer-header {
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    touch-action: none !important; /* Prevent PTR; taps still work */
+  }
+  
+  .mobile-drawer .drawer-handle {
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    touch-action: none !important; /* Prevent PTR on handle drag */
+  }
+}
+
 /* Specialized styles */
