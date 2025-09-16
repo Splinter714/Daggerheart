@@ -28,7 +28,7 @@ const loadData = async () => {
 // Custom hook for browser functionality - all logic inline
 const useBrowser = (type) => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [sortFields, setSortFields] = useState([{ field: 'name', direction: 'asc' }])
+  const [sortFields, setSortFields] = useState([{ field: 'tier', direction: 'asc' }, { field: 'name', direction: 'asc' }])
   const [expandedCard, setExpandedCard] = useState(null)
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
@@ -738,7 +738,7 @@ const styles = {
     boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)'
   },
   tableHeader: {
-    background: 'var(--gray-800)',
+    background: 'var(--bg-secondary)',
     borderBottom: '1px solid var(--border)',
     boxShadow: '0 1px 0 var(--border)',
     position: 'sticky',
@@ -746,7 +746,7 @@ const styles = {
     zIndex: 10
   },
   tableHeaderCell: {
-    backgroundColor: 'var(--gray-800)',
+    backgroundColor: 'var(--bg-secondary)',
     fontWeight: '700',
     borderBottom: '1px solid var(--border)',
     cursor: 'pointer',
@@ -779,10 +779,11 @@ const styles = {
     height: '35px',
     borderBottom: '1px solid var(--border)',
     transition: 'background-color 0.2s ease',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    backgroundColor: 'var(--bg-primary)'
   },
   rowHover: {
-    backgroundColor: 'var(--bg-hover)'
+    backgroundColor: 'var(--bg-secondary)'
   },
   expandedRow: {
     backgroundColor: 'var(--bg-secondary)'

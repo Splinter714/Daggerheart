@@ -25,6 +25,7 @@ const Bar = ({
     flexDirection: isTop ? 'column' : 'row',
     justifyContent: isTop ? 'stretch' : 'center',
     alignItems: isTop ? 'stretch' : 'center',
+    gap: isTop ? '0' : '1rem',
     height: isTop ? 'auto' : '100%',
     ...style
   }

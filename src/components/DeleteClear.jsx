@@ -40,9 +40,9 @@ const DeleteClear = ({
   }
 
   const buttonStyle = {
-    background: 'none',
+    background: deleteFlyoutOpen ? 'var(--red)' : 'none',
     border: 'none',
-    color: hasAnyItems ? 'var(--text-primary)' : 'var(--text-secondary)',
+    color: deleteFlyoutOpen ? 'white' : (hasAnyItems ? 'var(--text-primary)' : 'var(--text-secondary)'),
     cursor: hasAnyItems ? 'pointer' : 'not-allowed',
     padding: '0.5rem',
     borderRadius: 'var(--radius-sm)',
