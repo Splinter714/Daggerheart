@@ -699,7 +699,7 @@ const styles = {
     alignItems: 'center',
     padding: '16px',
     borderBottom: '1px solid var(--border)',
-    backgroundColor: 'var(--bg-secondary)',
+    backgroundColor: 'var(--gray-900)',
     flexShrink: 0, // Prevent header from shrinking
     position: 'sticky',
     top: 0,
@@ -738,7 +738,7 @@ const styles = {
     boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)'
   },
   tableHeader: {
-    background: 'var(--gray-800)',
+    background: 'var(--gray-900)',
     borderBottom: '1px solid var(--border)',
     boxShadow: '0 1px 0 var(--border)',
     position: 'sticky',
@@ -746,7 +746,7 @@ const styles = {
     zIndex: 10
   },
   tableHeaderCell: {
-    backgroundColor: 'var(--gray-800)',
+    backgroundColor: 'var(--gray-900)',
     fontWeight: '700',
     borderBottom: '1px solid var(--border)',
     cursor: 'pointer',
