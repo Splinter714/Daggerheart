@@ -1423,7 +1423,7 @@ const GameCard = ({
                 }}
                 containerStyle={{
                   cursor: 'pointer',
-                  padding: '0.5rem 0.25rem', // Expanded padding for generous tap target
+                  padding: '0.5rem 0.5rem 0.5rem 0.25rem', // More padding on right side
                   borderRadius: '0.125rem',
                   transition: 'all 0.2s ease'
                 }}
@@ -2681,7 +2681,7 @@ const GameCard = ({
                 }}
                 containerStyle={{
                   cursor: 'pointer',
-                  padding: '0.5rem 0.25rem', // Expanded padding for generous tap target
+                  padding: '0.5rem 0.5rem 0.5rem 0.25rem', // More padding on right side
                   borderRadius: '0.125rem',
                   transition: 'all 0.2s ease'
                 }}
