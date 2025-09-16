@@ -47,12 +47,12 @@ const HelpButton = () => {
       }}
       onMouseEnter={(e) => {
         if (!helpFlyoutOpen) {
-          e.target.style.backgroundColor = 'var(--bg-secondary)'
+          e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
         }
       }}
       onMouseLeave={(e) => {
         if (!helpFlyoutOpen) {
-          e.target.style.backgroundColor = 'transparent'
+          e.currentTarget.style.backgroundColor = 'transparent'
         }
       }}
       onClick={(e) => {
@@ -68,7 +68,9 @@ const HelpButton = () => {
         alignItems: 'center',
         justifyContent: 'center',
         color: 'inherit',
-        backgroundColor: 'transparent'
+        backgroundColor: 'transparent',
+        border: 'none',
+        outline: 'none'
       }}>
         <HelpCircle size={20} />
       </div>
