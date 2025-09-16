@@ -651,6 +651,20 @@ const useAdversaryLogic = (item, onApplyDamage, onApplyHealing, onApplyStressCha
   const [showDamageInput, setShowDamageInput] = useState(false)
   const [damageValue, setDamageValue] = useState('')
 
+  // Close damage input when clicking outside
+  useEffect(() => {
+    if (showDamageInput) {
+      const handleClickOutside = (event) => {
+        if (!event.target.closest('.damage-input-popup')) {
+          setShowDamageInput(false)
+          setDamageValue('')
+        }
+      }
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [showDamageInput])
+
   const handleHpClick = (e) => {
     e.stopPropagation()
     e.preventDefault()
@@ -1121,6 +1135,7 @@ const GameCard = ({
 
     return (
       <div 
+        className="damage-input-popup"
         style={styles.damageInputPopup}
         onClick={(e) => {
           e.stopPropagation()
