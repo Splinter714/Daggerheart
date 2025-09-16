@@ -2633,7 +2633,8 @@ const GameCard = ({
             alignItems: 'center',
             gap: '0.5rem',
             flex: '0 0 auto',
-            minWidth: 'fit-content'
+            minWidth: '200px', // Fixed minimum width for consistent spacing
+            justifyContent: 'flex-end' // Align content to the right edge
           }}>
             {/* Control Buttons Group - HP and Stress stacked vertically */}
             <div style={{
