@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { Droplet, Activity, CheckCircle, X, Plus, Minus, Shield, Hexagon } from 'lucide-react'
 import Pips from './Pips'
 

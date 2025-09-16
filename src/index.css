@@ -396,6 +396,13 @@ input[type="number"] {
   order: 2; /* Ensure main content appears after top bar */
 }
 
+@media (max-width: 800px) {
+  .main-content {
+    height: calc(100vh - 60px); /* Mobile: only subtract bottom bar (60px) */
+    height: calc(100dvh - 60px); /* Use dynamic viewport height */
+  }
+}
+
 /* Bottom Bar Container */
 .bottom-bar-container {
   order: 3; /* Ensure bottom bar appears after main content */
