@@ -12,6 +12,9 @@ const DeleteClear = ({
   setIsClearMode
 }) => {
   const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
+  
+  const hasAnyItems = (adversaries?.length || 0) > 0 || (environments?.length || 0) > 0 || (countdowns?.length || 0) > 0
+  const hasDeadAdversaries = (adversaries || []).some(adv => (adv.hp || 0) >= (adv.hpMax || 1))
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -34,9 +37,6 @@ const DeleteClear = ({
       setDeleteFlyoutOpen(false)
     }
   }, [isClearMode, hasAnyItems, setIsClearMode])
-
-  const hasAnyItems = (adversaries?.length || 0) > 0 || (environments?.length || 0) > 0 || (countdowns?.length || 0) > 0
-  const hasDeadAdversaries = (adversaries || []).some(adv => (adv.hp || 0) >= (adv.hpMax || 1))
 
   const flyoutStyle = {
     position: 'absolute',
