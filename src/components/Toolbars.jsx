@@ -9,12 +9,17 @@ const Bar = ({
 }) => {
   const isTop = position === 'top'
   
+  // Detect if running as PWA
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                 window.navigator.standalone === true ||
+                 document.referrer.includes('android-app://')
+  
   const baseStyle = {
     background: 'var(--bg-primary)',
     borderTop: isTop ? 'none' : '1px solid var(--border)',
     borderBottom: isTop ? '1px solid var(--border)' : 'none',
     padding: isTop ? '0.25rem 0' : '0.5rem',
-    paddingBottom: isTop ? '0.25rem' : 'calc(0.5rem + env(safe-area-inset-bottom) + 1rem)',
+    paddingBottom: isTop ? '0.25rem' : (isPWA ? 'calc(0.5rem + env(safe-area-inset-bottom) + 1rem)' : 'calc(0.5rem + env(safe-area-inset-bottom))'),
     position: 'sticky',
     [isTop ? 'top' : 'bottom']: 0,
     zIndex: isTop ? 10 : 100,
