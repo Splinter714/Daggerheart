@@ -86,11 +86,13 @@ const DeleteClear = ({
           e.stopPropagation()
           if (hasAnyItems) {
             if (isClearMode) {
-              // If already in clear mode, toggle the flyout
-              setDeleteFlyoutOpen(!deleteFlyoutOpen)
+              // If already in clear mode, exit clear mode
+              setIsClearMode(false)
+              setDeleteFlyoutOpen(false)
             } else {
-              // Enter clear mode
+              // Enter clear mode and show flyout
               setIsClearMode(true)
+              setDeleteFlyoutOpen(true)
             }
           }
         }}
