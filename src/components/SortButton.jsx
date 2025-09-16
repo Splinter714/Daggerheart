@@ -21,14 +21,13 @@ const SortButton = ({ adversaries, onSortAdversaries }) => {
         'Ranged': 6,
         'Support': 7,
         'Standard': 8,
-        'Other': 9,
-        'Minion': 10,
-        'Social': 11
+        'Minion': 9,
+        'Social': 10
       }
       
       // Primary sort by type priority
-      const priorityA = typePriority[a.type] || 9 // Default to 'Other' priority
-      const priorityB = typePriority[b.type] || 9 // Default to 'Other' priority
+      const priorityA = typePriority[a.type] || 999 // Unknown types go to end
+      const priorityB = typePriority[b.type] || 999 // Unknown types go to end
       
       if (priorityA !== priorityB) {
         return priorityA - priorityB
