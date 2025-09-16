@@ -14,13 +14,13 @@ const SortButton = ({ adversaries, onSortAdversaries }) => {
       // Define type priority order
       const typePriority = {
         'Solo': 1,
-        'Leader': 2,
-        'Bruiser': 3,
+        'Bruiser': 2,
+        'Leader': 3,
         'Horde': 4,
-        'Skulk': 5,
+        'Standard': 5,
         'Ranged': 6,
-        'Support': 7,
-        'Standard': 8,
+        'Skulk': 7,
+        'Support': 8,
         'Minion': 9,
         'Social': 10
       }
