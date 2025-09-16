@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { MoreHorizontal, X } from 'lucide-react'
 import HelpButton from './HelpButton'
 import DeleteClear from './DeleteClear'
+import SortButton from './SortButton'
 
 const FloatingMenu = ({
   adversaries,
@@ -11,7 +12,8 @@ const FloatingMenu = ({
   deleteEnvironment,
   deleteCountdown,
   isClearMode,
-  setIsClearMode
+  setIsClearMode,
+  sortAdversaries
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showHelpFlyout, setShowHelpFlyout] = useState(false)
@@ -137,6 +139,12 @@ const FloatingMenu = ({
             onFlyoutChange={handleHelpFlyoutChange}
           />
         </div>
+        
+        {/* Sort Button */}
+        <SortButton
+          adversaries={adversaries}
+          onSortAdversaries={sortAdversaries}
+        />
         
         {/* Clear Button */}
         <div style={menuItemStyle}>
