@@ -14,6 +14,7 @@ const Bar = ({
     borderTop: isTop ? 'none' : '1px solid var(--border)',
     borderBottom: isTop ? '1px solid var(--border)' : 'none',
     padding: isTop ? '0.25rem 0' : '0.5rem',
+    paddingBottom: isTop ? '0.25rem' : 'calc(0.5rem + env(safe-area-inset-bottom))',
     position: 'sticky',
     [isTop ? 'top' : 'bottom']: 0,
     zIndex: isTop ? 10 : 100,
