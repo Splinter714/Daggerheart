@@ -2544,6 +2544,8 @@ const GameCard = ({
           backgroundColor: isDead ? 'var(--gray-900)' : getCardStyle().backgroundColor,
           borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isSelected ? 'var(--purple)' : (isHovered && mode !== 'expanded' ? 'var(--border-hover)' : 'var(--border)')),
           paddingLeft: showDrag ? '2.25rem' : '0.75rem',
+          paddingTop: 0, // Remove top padding
+          paddingBottom: 0, // Remove bottom padding
           position: 'relative'
         }}
         onClick={onClick}
@@ -2840,6 +2842,8 @@ const GameCard = ({
         style={{
           ...getCardStyle(),
           paddingLeft: showDrag ? '2.25rem' : '0.75rem',
+          paddingTop: 0, // Remove top padding
+          paddingBottom: 0, // Remove bottom padding
           position: 'relative'
         }}
         onClick={onClick}
