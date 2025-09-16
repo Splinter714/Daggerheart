@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MoreHorizontal, HelpCircle, Trash2 } from 'lucide-react'
+import { MoreHorizontal, X } from 'lucide-react'
 import HelpButton from './HelpButton'
 import DeleteClear from './DeleteClear'
 
@@ -53,8 +53,7 @@ const FloatingMenu = ({
     justifyContent: 'center',
     cursor: 'pointer',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-    transition: 'all 0.3s ease',
-    transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)'
+    transition: 'all 0.3s ease'
   }
 
   const menuItemsStyle = {
@@ -117,7 +116,7 @@ const FloatingMenu = ({
         }}
         title={isOpen ? 'Close Menu' : 'Open Menu'}
       >
-        <MoreHorizontal size={24} />
+        {isOpen ? <X size={24} /> : <MoreHorizontal size={24} />}
       </button>
     </div>
   )

@@ -41,8 +41,8 @@ const DeleteClear = ({
   const flyoutStyle = {
     position: 'absolute',
     bottom: '100%',
-    left: '50%',
-    transform: 'translateX(-50%)',
+    right: '0',
+    left: 'auto',
     backgroundColor: 'var(--bg-secondary)',
     border: '1px solid var(--border)',
     borderRadius: 'var(--radius-md)',
@@ -59,12 +59,14 @@ const DeleteClear = ({
     color: isClearMode ? 'white' : (deleteFlyoutOpen ? 'white' : (hasAnyItems ? 'var(--text-primary)' : 'var(--text-secondary)')),
     cursor: hasAnyItems ? 'pointer' : 'not-allowed',
     padding: '0.5rem',
-    borderRadius: 'var(--radius-sm)',
+    borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.2s',
-    opacity: hasAnyItems ? 1 : 0.5
+    opacity: hasAnyItems ? 1 : 0.5,
+    minWidth: '44px',
+    minHeight: '44px'
   }
 
   const flyoutItemStyle = {
