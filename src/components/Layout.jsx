@@ -353,13 +353,23 @@ const LayoutContent = () => {
 
   // Sort adversaries by type then by name (including duplicate numbers)
   const sortAdversaries = useCallback((sortedAdversaries) => {
-    // Update each adversary to maintain the new order
-    sortedAdversaries.forEach((adversary, index) => {
-      // We can use a simple approach: update each adversary with a sortOrder field
-      // or we can rely on the order in the array
-      updateAdversary(adversary.id, { sortOrder: index })
+    // Create a mapping of old index to new index for reordering
+    const currentAdversaries = adversaries
+    const reorderOperations = []
+    
+    // Find the reorder operations needed
+    sortedAdversaries.forEach((sortedAdv, newIndex) => {
+      const oldIndex = currentAdversaries.findIndex(adv => adv.id === sortedAdv.id)
+      if (oldIndex !== newIndex) {
+        reorderOperations.push([oldIndex, newIndex])
+      }
     })
-  }, [updateAdversary])
+    
+    // Apply reorder operations in reverse order to maintain indices
+    reorderOperations.reverse().forEach(([oldIndex, newIndex]) => {
+      reorderAdversaries([oldIndex, newIndex])
+    })
+  }, [adversaries, reorderAdversaries])
   
   // Toggle visibility handlers
   const handleToggleVisibility = (id, type, currentVisibility) => {
