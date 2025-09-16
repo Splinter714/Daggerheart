@@ -414,17 +414,19 @@ const LayoutContent = () => {
           setIsClearMode={setIsClearMode}
         />
         
-        {/* Fear Bar - Center of bottom bar */}
-        <Pips 
-          type="fear"
-          value={fear?.value || 0}
-          maxValue={12}
-          onChange={updateFear}
-          showTooltip={false}
-          enableBoundaryClick={true}
-          clickContainerWidth="100%"
-          centerPips={true}
-        />
+        {/* Fear Bar - Center of bottom bar (mobile only) */}
+        {isMobile && (
+          <Pips 
+            type="fear"
+            value={fear?.value || 0}
+            maxValue={12}
+            onChange={updateFear}
+            showTooltip={false}
+            enableBoundaryClick={true}
+            clickContainerWidth="100%"
+            centerPips={true}
+          />
+        )}
         
         <HelpButton />
       </Bar>
