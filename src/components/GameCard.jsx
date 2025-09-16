@@ -602,7 +602,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'row',
     gap: '8px',
-    minWidth: '300px',
+    minWidth: '200px',
     alignItems: 'center'
   },
   damageInput: {
@@ -614,7 +614,7 @@ const styles = {
     padding: '4px 6px',
     color: 'var(--text-primary)',
     fontSize: '12px',
-    width: '60px',
+    width: '80px',
     textAlign: 'center'
   },
   damageIndicators: {
@@ -630,15 +630,20 @@ const styles = {
     transition: 'color 0.1s ease'
   },
   applyButton: {
-    backgroundColor: 'var(--success)',
-    color: 'var(--text-primary)',
+    backgroundColor: 'var(--red)',
+    color: 'white',
     borderWidth: '0',
     borderStyle: 'none',
     borderRadius: '4px',
     padding: '4px 8px',
     fontSize: '14px',
     cursor: 'pointer',
-    transition: 'background-color 0.1s ease'
+    transition: 'background-color 0.1s ease',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '32px',
+    minHeight: '32px'
   }
 }
 
@@ -1159,7 +1164,7 @@ const GameCard = ({
             type="number"
             inputMode="numeric"
             enterKeyHint="done"
-            placeholder="Damage"
+            placeholder="dmg"
             min={item.type === 'Minion' ? "1" : "0"}
             value={(type === 'adversary' || type === 'adversaries') ? adversaryLogic.damageValue : ''}
             onChange={(e) => {
@@ -1243,7 +1248,7 @@ const GameCard = ({
             <button
               style={{
                 ...styles.applyButton,
-                backgroundColor: (!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? 'var(--gray-600)' : 'var(--success)'
+                backgroundColor: (!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? 'var(--gray-600)' : 'var(--red)'
               }}
               onClick={(e) => {
                 e.stopPropagation()
