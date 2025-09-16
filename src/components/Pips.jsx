@@ -135,7 +135,7 @@ const PIP_TYPES = {
     containerStyle: {
       display: 'flex',
       flexWrap: 'wrap',
-      gap: '2px',
+      gap: '1px',
       justifyContent: 'center',
       alignItems: 'center',
       maxWidth: '120px'
@@ -168,7 +168,7 @@ const PIP_TYPES = {
     containerStyle: {
       display: 'flex',
       flexWrap: 'wrap',
-      gap: '2px',
+      gap: '1px',
       justifyContent: 'center',
       alignItems: 'center',
       maxWidth: '120px'
@@ -202,10 +202,10 @@ const PIP_TYPES = {
     maxValue: 20,
     containerStyle: {
       display: 'flex',
-      gap: '0.125rem',
+      gap: '0px',
       flexWrap: 'wrap',
       alignContent: 'flex-start',
-      rowGap: '0.125rem',
+      rowGap: '0.03125rem',
       maxWidth: '100%'
     },
     pipStyle: {
@@ -233,10 +233,10 @@ const PIP_TYPES = {
     maxValue: 12,
     containerStyle: {
       display: 'flex',
-      gap: '0.125rem',
+      gap: '0px',
       flexWrap: 'wrap',
       alignContent: 'flex-start',
-      rowGap: '0.125rem',
+      rowGap: '0.03125rem',
       maxWidth: '100%'
     },
     pipStyle: {
