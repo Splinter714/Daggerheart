@@ -247,7 +247,7 @@ const useBrowser = (type) => {
     return {
       position: 'fixed',
       top: rect.bottom + 4,
-      left: rect.left,
+      left: rect.left - 100, // Align with left side of column instead of button
       zIndex: 99999
     }
   }
@@ -541,7 +541,7 @@ const BrowserRow = ({ item, isExpanded, onToggleExpanded, onAdd, type }) => {
               handleAdd()
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'var(--gray-700)'
+              e.target.style.background = 'var(--bg-secondary)'
             }}
             onMouseLeave={(e) => {
               e.target.style.background = 'var(--purple)'
@@ -683,7 +683,7 @@ const styles = {
     position: 'sticky',
     top: 0,
     zIndex: 15,
-    backgroundColor: 'var(--gray-800)'
+    backgroundColor: 'var(--bg-secondary)'
   },
   browserTable: {
     width: '100%',
@@ -773,7 +773,7 @@ const styles = {
     flex: 1,
     overflowY: 'auto',
     padding: '8px',
-    backgroundColor: 'var(--gray-800)'
+    backgroundColor: 'var(--bg-primary)'
   },
   row: {
     height: '35px',
@@ -828,7 +828,7 @@ const styles = {
     fontWeight: '500'
   },
   expandedContent: {
-    padding: '16px',
+    padding: '0',
     backgroundColor: 'var(--bg-secondary)',
     borderBottom: '1px solid var(--border)'
   },

@@ -193,6 +193,7 @@ const LayoutContent = () => {
   const [databaseType, setDatabaseType] = useState('unified')
   const [isMobile, setIsMobile] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
+  const [isClearMode, setIsClearMode] = useState(false)
   const [mobileView] = useState('left') // 'left' or 'right'
   const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
   const [showMockup, setShowMockup] = useState(false)
@@ -404,6 +405,7 @@ const LayoutContent = () => {
           <GlobalEdit 
             isEditMode={isEditMode}
             setIsEditMode={setIsEditMode}
+            disabled={isClearMode}
           />
           <DeleteClear
             adversaries={adversaries}
@@ -412,6 +414,8 @@ const LayoutContent = () => {
             deleteAdversary={deleteAdversary}
             deleteEnvironment={deleteEnvironment}
             deleteCountdown={deleteCountdown}
+            isClearMode={isClearMode}
+            setIsClearMode={setIsClearMode}
           />
           <HelpButton />
         </Bar>
@@ -432,6 +436,7 @@ const LayoutContent = () => {
             onOpenDatabase={handleOpenDatabase}
             isEditMode={isEditMode}
             onEditModeChange={setIsEditMode}
+            isClearMode={isClearMode}
             showLongTermCountdowns={showLongTermCountdowns}
             fear={fear}
             updateFear={updateFear}

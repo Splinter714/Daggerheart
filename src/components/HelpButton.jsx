@@ -74,9 +74,9 @@ const HelpButton = () => {
       <div style={{
         position: 'absolute',
         bottom: '100%',
-        left: isMobile ? 'auto' : '50%',
-        right: isMobile ? '0' : 'auto',
-        transform: isMobile ? 'none' : (helpFlyoutOpen ? 'translateX(-50%)' : 'translateX(-50%)'),
+        left: '50%',
+        right: 'auto',
+        transform: 'translateX(-50%)',
         background: 'var(--bg-primary)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)',
