@@ -47,7 +47,7 @@ const FloatingMenu = ({
     position: 'fixed',
     bottom: isPWA ? 'calc(60px + env(safe-area-inset-bottom) + 2rem)' : 'calc(60px + env(safe-area-inset-bottom) + 1rem)',
     right: '1rem',
-    zIndex: 1000,
+    zIndex: 1100,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
