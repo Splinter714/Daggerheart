@@ -394,20 +394,10 @@ const LayoutContent = () => {
       }}
     >
       
-      {/* Top Bar: Fear Tracker - Desktop only */}
-      {!isMobile && (
-        <Bar 
-          position="top" 
-          style={{ 
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: 'var(--topbar-height)',
-            touchAction: 'manipulation',
-            userSelect: 'none'
-          }}
-        >
-          <Pips 
+        {/* Bottom Bar */}
+        <Bar position="bottom">
+          {/* Fear Bar - Always in bottom bar */}
+          <Pips
             type="fear"
             value={fear?.value || 0}
             maxValue={12}
@@ -418,24 +408,6 @@ const LayoutContent = () => {
             centerPips={true}
           />
         </Bar>
-      )}
-
-      {/* Bottom Bar */}
-      <Bar position="bottom">
-        {/* Fear Bar - Center of bottom bar (mobile only) */}
-        {isMobile && (
-          <Pips 
-            type="fear"
-            value={fear?.value || 0}
-            maxValue={12}
-            onChange={updateFear}
-            showTooltip={false}
-            enableBoundaryClick={true}
-            clickContainerWidth="100%"
-            centerPips={true}
-          />
-        )}
-      </Bar>
 
       {/* Floating Menu */}
       <FloatingMenu
