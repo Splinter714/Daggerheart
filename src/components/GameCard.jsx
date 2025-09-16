@@ -600,9 +600,10 @@ const styles = {
     borderRadius: '8px',
     padding: '8px',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     gap: '8px',
-    minWidth: '120px'
+    minWidth: '200px',
+    alignItems: 'center'
   },
   damageInput: {
     backgroundColor: 'var(--gray-900)',
