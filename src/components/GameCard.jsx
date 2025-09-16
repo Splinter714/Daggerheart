@@ -1423,7 +1423,7 @@ const GameCard = ({
                 }}
                 containerStyle={{
                   cursor: 'pointer',
-                  padding: '0.5rem 0.25rem 0.5rem 0.25rem', // Symmetrical padding with extra tap area
+                  padding: '0.25rem', // Reduced padding to make compact cards shorter
                   borderRadius: '0.125rem',
                   transition: 'all 0.2s ease'
                 }}
@@ -1447,7 +1447,7 @@ const GameCard = ({
                   }}
                   containerStyle={{
                     cursor: 'pointer',
-                    padding: '0.5rem 0.25rem 0.5rem 0.25rem', // Symmetrical padding with extra tap area
+                    padding: '0.25rem', // Reduced padding to make compact cards shorter
                     borderRadius: '0.125rem',
                     transition: 'all 0.2s ease'
                   }}
@@ -2681,7 +2681,7 @@ const GameCard = ({
                 }}
                 containerStyle={{
                   cursor: 'pointer',
-                  padding: '0.5rem 0.25rem 0.5rem 0.25rem', // Symmetrical padding with extra tap area
+                  padding: '0.25rem', // Reduced padding to make compact cards shorter
                   borderRadius: '0.125rem',
                   transition: 'all 0.2s ease'
                 }}
@@ -2705,7 +2705,7 @@ const GameCard = ({
                   }}
                   containerStyle={{
                     cursor: 'pointer',
-                    padding: '0.5rem 0.25rem 0.5rem 0.25rem', // Symmetrical padding with extra tap area
+                    padding: '0.25rem', // Reduced padding to make compact cards shorter
                     borderRadius: '0.125rem',
                     transition: 'all 0.2s ease'
                   }}

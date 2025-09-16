@@ -353,21 +353,30 @@ const LayoutContent = () => {
 
   // Sort adversaries by type then by name (including duplicate numbers)
   const sortAdversaries = useCallback((sortedAdversaries) => {
-    // Create a mapping of old index to new index for reordering
-    const currentAdversaries = adversaries
-    const reorderOperations = []
+    // Create a mapping of adversary ID to new position
+    const newPositions = {}
+    sortedAdversaries.forEach((adv, index) => {
+      newPositions[adv.id] = index
+    })
     
-    // Find the reorder operations needed
-    sortedAdversaries.forEach((sortedAdv, newIndex) => {
-      const oldIndex = currentAdversaries.findIndex(adv => adv.id === sortedAdv.id)
-      if (oldIndex !== newIndex) {
-        reorderOperations.push([oldIndex, newIndex])
+    // Get current adversaries and sort them to match the new order
+    const currentAdversaries = [...adversaries]
+    const reorderedAdversaries = []
+    
+    // Add adversaries in the new order
+    sortedAdversaries.forEach(sortedAdv => {
+      const currentAdv = currentAdversaries.find(adv => adv.id === sortedAdv.id)
+      if (currentAdv) {
+        reorderedAdversaries.push(currentAdv)
       }
     })
     
-    // Apply reorder operations in reverse order to maintain indices
-    reorderOperations.reverse().forEach(([oldIndex, newIndex]) => {
-      reorderAdversaries([oldIndex, newIndex])
+    // Apply reordering by moving each adversary to its new position
+    reorderedAdversaries.forEach((adv, newIndex) => {
+      const oldIndex = currentAdversaries.findIndex(a => a.id === adv.id)
+      if (oldIndex !== newIndex && oldIndex !== -1) {
+        reorderAdversaries([oldIndex, newIndex])
+      }
     })
   }, [adversaries, reorderAdversaries])
   
