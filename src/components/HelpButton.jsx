@@ -67,7 +67,8 @@ const HelpButton = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'inherit'
+        color: 'inherit',
+        backgroundColor: 'transparent'
       }}>
         <HelpCircle size={20} />
       </div>
