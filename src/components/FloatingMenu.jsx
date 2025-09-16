@@ -52,7 +52,7 @@ const FloatingMenu = ({
     height: '56px',
     borderRadius: '50%',
     background: isOpen ? 'var(--red)' : 'var(--bg-secondary)',
-    border: '1px solid var(--border)',
+    border: '2px solid var(--border)',
     color: isOpen ? 'white' : 'var(--text-primary)',
     display: 'flex',
     alignItems: 'center',
