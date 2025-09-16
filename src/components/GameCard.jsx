@@ -602,7 +602,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'row',
     gap: '8px',
-    minWidth: '200px',
+    minWidth: '300px',
     alignItems: 'center'
   },
   damageInput: {
