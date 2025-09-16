@@ -43,7 +43,8 @@ const FloatingMenu = ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '0.5rem'
+    gap: '0.5rem',
+    pointerEvents: 'none'
   }
 
   const mainButtonStyle = {
@@ -58,7 +59,8 @@ const FloatingMenu = ({
     justifyContent: 'center',
     cursor: 'pointer',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.3s ease',
+    pointerEvents: 'auto'
   }
 
   const menuItemsStyle = {
@@ -85,7 +87,8 @@ const FloatingMenu = ({
     cursor: 'pointer',
     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
     transition: 'all 0.2s ease',
-    position: 'relative'
+    position: 'relative',
+    pointerEvents: 'auto'
   }
 
   return (
