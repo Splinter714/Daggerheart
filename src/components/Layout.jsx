@@ -176,6 +176,7 @@ const LayoutContent = () => {
     createAdversary,
     updateAdversary,
     deleteAdversary,
+    reorderAdversaries,
     createEnvironment,
     updateEnvironment,
     deleteEnvironment,
