@@ -47,7 +47,7 @@ const HelpButton = () => {
       }}
       onMouseEnter={(e) => {
         if (!helpFlyoutOpen) {
-          e.target.style.backgroundColor = 'var(--gray-dark)'
+          e.target.style.backgroundColor = 'var(--bg-secondary)'
         }
       }}
       onMouseLeave={(e) => {
