@@ -27,6 +27,14 @@ const DeleteClear = ({
     return () => document.removeEventListener('click', handleClickOutside)
   }, [isClearMode])
 
+  // Auto-exit clear mode when no items remain
+  useEffect(() => {
+    if (isClearMode && !hasAnyItems) {
+      setIsClearMode(false)
+      setDeleteFlyoutOpen(false)
+    }
+  }, [isClearMode, hasAnyItems, setIsClearMode])
+
   const hasAnyItems = (adversaries?.length || 0) > 0 || (environments?.length || 0) > 0 || (countdowns?.length || 0) > 0
   const hasDeadAdversaries = (adversaries || []).some(adv => (adv.hp || 0) >= (adv.hpMax || 1))
 
