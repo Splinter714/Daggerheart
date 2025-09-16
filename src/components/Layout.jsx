@@ -402,50 +402,32 @@ const LayoutContent = () => {
       )}
 
       {/* Bottom Bar */}
-      <div className="bottom-bar-container">
-        {/* Fear Bar - Mobile only */}
-        {isMobile && (
-          <Bar 
-            position="top" 
-            style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: 'var(--topbar-height)',
-              touchAction: 'manipulation',
-              userSelect: 'none',
-              order: 1,
-              backgroundColor: 'var(--bg-primary)',
-              borderBottom: '1px solid var(--border)'
-            }}
-          >
-            <Pips 
-              type="fear"
-              value={fear?.value || 0}
-              maxValue={12}
-              onChange={updateFear}
-              showTooltip={false}
-              enableBoundaryClick={true}
-              clickContainerWidth="100%"
-              centerPips={true}
-            />
-          </Bar>
-        )}
+      <Bar position="bottom">
+        <DeleteClear
+          adversaries={adversaries}
+          environments={environments}
+          countdowns={countdowns}
+          deleteAdversary={deleteAdversary}
+          deleteEnvironment={deleteEnvironment}
+          deleteCountdown={deleteCountdown}
+          isClearMode={isClearMode}
+          setIsClearMode={setIsClearMode}
+        />
         
-        <Bar position="bottom" style={{ order: 2 }}>
-          <DeleteClear
-            adversaries={adversaries}
-            environments={environments}
-            countdowns={countdowns}
-            deleteAdversary={deleteAdversary}
-            deleteEnvironment={deleteEnvironment}
-            deleteCountdown={deleteCountdown}
-            isClearMode={isClearMode}
-            setIsClearMode={setIsClearMode}
-          />
-          <HelpButton />
-        </Bar>
-      </div>
+        {/* Fear Bar - Center of bottom bar */}
+        <Pips 
+          type="fear"
+          value={fear?.value || 0}
+          maxValue={12}
+          onChange={updateFear}
+          showTooltip={false}
+          enableBoundaryClick={true}
+          clickContainerWidth="100%"
+          centerPips={true}
+        />
+        
+        <HelpButton />
+      </Bar>
 
       {/* Main Content Area */}
       <div className="main-content" key={`mobile-${isMobile}`}>
