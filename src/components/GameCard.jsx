@@ -1473,7 +1473,9 @@ const GameCard = ({
                   color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
                   letterSpacing: '0.5px',
                   textAlign: 'center',
-                  lineHeight: 1
+                  lineHeight: 1,
+                  width: '40px', // Fixed width to prevent variable spacing
+                  display: 'block'
                 }}>
                   {item.type}
                 </span>
@@ -2712,7 +2714,9 @@ const GameCard = ({
                   color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
                   letterSpacing: '0.5px',
                   textAlign: 'center',
-                  lineHeight: 1
+                  lineHeight: 1,
+                  width: '40px', // Fixed width to prevent variable spacing
+                  display: 'block'
                 }}>
                   {item.type}
                 </span>
@@ -2915,7 +2919,9 @@ const GameCard = ({
                   color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
                   letterSpacing: '0.5px',
                   textAlign: 'center',
-                  lineHeight: 1
+                  lineHeight: 1,
+                  width: '40px', // Fixed width to prevent variable spacing
+                  display: 'block'
                 }}>
                   {item.type}
                 </span>
