@@ -211,7 +211,7 @@ const PIP_TYPES = {
     pipStyle: {
       fontSize: 'var(--text-sm)',
       fontWeight: 600,
-      transition: 'color 0.3s ease',
+      transition: 'none', // Remove transition to prevent flashing
       cursor: 'pointer',
       width: '1rem',
       height: '1rem',
@@ -242,7 +242,7 @@ const PIP_TYPES = {
     pipStyle: {
       fontSize: 'var(--text-sm)',
       fontWeight: 600,
-      transition: 'color 0.3s ease',
+      transition: 'none', // Remove transition to prevent flashing
       cursor: 'pointer',
       width: '1rem',
       height: '1rem',
