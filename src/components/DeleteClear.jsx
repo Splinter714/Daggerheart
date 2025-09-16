@@ -9,9 +9,15 @@ const DeleteClear = ({
   deleteEnvironment,
   deleteCountdown,
   isClearMode,
-  setIsClearMode
+  setIsClearMode,
+  showFlyout,
+  onFlyoutChange
 }) => {
   const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
+  
+  // Use external state if provided, otherwise use internal state
+  const isFlyoutOpen = showFlyout !== undefined ? showFlyout : deleteFlyoutOpen
+  const setFlyoutOpen = onFlyoutChange || setDeleteFlyoutOpen
   
   const hasAnyItems = (adversaries?.length || 0) > 0 || (environments?.length || 0) > 0 || (countdowns?.length || 0) > 0
   const hasDeadAdversaries = (adversaries || []).some(adv => (adv.hp || 0) >= (adv.hpMax || 1))
@@ -19,7 +25,7 @@ const DeleteClear = ({
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.delete-clear-container')) {
-        setDeleteFlyoutOpen(false)
+        setFlyoutOpen(false)
         // Also exit clear mode when clicking outside
         if (isClearMode) {
           setIsClearMode(false)
@@ -28,15 +34,15 @@ const DeleteClear = ({
     }
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
-  }, [isClearMode])
+  }, [isClearMode, setFlyoutOpen])
 
   // Auto-exit clear mode when no items remain
   useEffect(() => {
     if (isClearMode && !hasAnyItems) {
       setIsClearMode(false)
-      setDeleteFlyoutOpen(false)
+      setFlyoutOpen(false)
     }
-  }, [isClearMode, hasAnyItems, setIsClearMode])
+  }, [isClearMode, hasAnyItems, setIsClearMode, setFlyoutOpen])
 
   const flyoutStyle = {
     position: 'absolute',
@@ -51,14 +57,14 @@ const DeleteClear = ({
     minWidth: '200px',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
     zIndex: 1000,
-    display: deleteFlyoutOpen ? 'block' : 'none',
+    display: isFlyoutOpen ? 'block' : 'none',
     marginRight: '0.5rem'
   }
 
   const buttonStyle = {
-    background: isClearMode ? 'var(--red)' : (deleteFlyoutOpen ? 'var(--red)' : 'none'),
+    background: isClearMode ? 'var(--red)' : (isFlyoutOpen ? 'var(--red)' : 'none'),
     border: 'none',
-    color: isClearMode ? 'white' : (deleteFlyoutOpen ? 'white' : (hasAnyItems ? 'var(--text-primary)' : 'var(--text-secondary)')),
+    color: isClearMode ? 'white' : (isFlyoutOpen ? 'white' : (hasAnyItems ? 'var(--text-primary)' : 'var(--text-secondary)')),
     cursor: hasAnyItems ? 'pointer' : 'not-allowed',
     padding: '0.5rem',
     borderRadius: '50%',
@@ -98,13 +104,12 @@ const DeleteClear = ({
           e.stopPropagation()
           if (hasAnyItems) {
             if (isClearMode) {
-              // If already in clear mode, exit clear mode
-              setIsClearMode(false)
-              setDeleteFlyoutOpen(false)
+              // If already in clear mode, toggle the flyout
+              setFlyoutOpen(!isFlyoutOpen)
             } else {
               // Enter clear mode and show flyout
               setIsClearMode(true)
-              setDeleteFlyoutOpen(true)
+              setFlyoutOpen(true)
             }
           }
         }}

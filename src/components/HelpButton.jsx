@@ -2,19 +2,23 @@ import React, { useEffect, useState } from 'react'
 import { HelpCircle } from 'lucide-react'
 import logoImage from '../assets/daggerheart-logo.svg'
 
-const HelpButton = () => {
+const HelpButton = ({ showFlyout, onFlyoutChange }) => {
   const [helpFlyoutOpen, setHelpFlyoutOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+
+  // Use external state if provided, otherwise use internal state
+  const isFlyoutOpen = showFlyout !== undefined ? showFlyout : helpFlyoutOpen
+  const setFlyoutOpen = onFlyoutChange || setHelpFlyoutOpen
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.help-button')) {
-        setHelpFlyoutOpen(false)
+        setFlyoutOpen(false)
       }
     }
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
-  }, [])
+  }, [setFlyoutOpen])
 
   // Mobile detection using CSS media query (zoom-independent)
   useEffect(() => {
@@ -37,27 +41,27 @@ const HelpButton = () => {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '0.5rem',
-        color: helpFlyoutOpen ? 'white' : 'var(--text-primary)',
+        color: isFlyoutOpen ? 'white' : 'var(--text-primary)',
         borderRadius: '50%',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
         minWidth: '44px',
         minHeight: '44px',
-        backgroundColor: helpFlyoutOpen ? 'var(--purple)' : 'transparent'
+        backgroundColor: isFlyoutOpen ? 'var(--purple)' : 'transparent'
       }}
       onMouseEnter={(e) => {
-        if (!helpFlyoutOpen) {
+        if (!isFlyoutOpen) {
           e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
         }
       }}
       onMouseLeave={(e) => {
-        if (!helpFlyoutOpen) {
+        if (!isFlyoutOpen) {
           e.currentTarget.style.backgroundColor = 'transparent'
         }
       }}
       onClick={(e) => {
         e.stopPropagation()
-        setHelpFlyoutOpen(!helpFlyoutOpen)
+        setFlyoutOpen(!isFlyoutOpen)
       }}
       title="Help & Info"
     >
@@ -85,10 +89,10 @@ const HelpButton = () => {
         borderRadius: 'var(--radius-md)',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
         zIndex: 1000,
-        opacity: helpFlyoutOpen ? 1 : 0,
-        visibility: helpFlyoutOpen ? 'visible' : 'hidden',
+        opacity: isFlyoutOpen ? 1 : 0,
+        visibility: isFlyoutOpen ? 'visible' : 'hidden',
         transition: 'opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease',
-        pointerEvents: helpFlyoutOpen ? 'auto' : 'none',
+        pointerEvents: isFlyoutOpen ? 'auto' : 'none',
         minWidth: '280px',
         maxWidth: isMobile ? 'calc(100vw - 2rem)' : '320px',
         marginRight: '0.5rem'
@@ -163,7 +167,7 @@ const HelpButton = () => {
           }}
           onClick={(e) => { 
             e.stopPropagation(); 
-            setHelpFlyoutOpen(false); 
+            setFlyoutOpen(false); 
             window.open('https://github.com/Splinter714/Daggerheart', '_blank')
           }}
         >
