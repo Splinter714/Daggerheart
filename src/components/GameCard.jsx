@@ -1402,7 +1402,9 @@ const GameCard = ({
               display: 'flex',
               flexDirection: 'column',
               gap: '0.125rem',
-              alignItems: 'flex-end'
+              alignItems: 'flex-end',
+              padding: '0.25rem', // Add padding to cover the gap between HP and stress
+              margin: '-0.25rem' // Negative margin to offset visual padding
             }}>
               {/* HP Pips */}
               <Pips
@@ -1467,7 +1469,8 @@ const GameCard = ({
                 alignItems: 'center',
                 gap: '0.25rem',
                 cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
-                padding: '0.5rem', // Generous tap target
+                padding: '0.5rem', // Generous tap target but invisible
+                margin: '-0.5rem', // Negative margin to offset visual padding
                 borderRadius: '0.25rem',
                 transition: 'background-color 0.2s ease'
               }}
@@ -2657,7 +2660,9 @@ const GameCard = ({
               display: 'flex',
               flexDirection: 'column',
               gap: '0.125rem',
-              alignItems: 'flex-end'
+              alignItems: 'flex-end',
+              padding: '0.25rem', // Add padding to cover the gap between HP and stress
+              margin: '-0.25rem' // Negative margin to offset visual padding
             }}>
               {/* HP Pips */}
               <Pips
@@ -2722,7 +2727,8 @@ const GameCard = ({
                 alignItems: 'center',
                 gap: '0.25rem',
                 cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
-                padding: '0.5rem', // Generous tap target
+                padding: '0.5rem', // Generous tap target but invisible
+                margin: '-0.5rem', // Negative margin to offset visual padding
                 borderRadius: '0.25rem',
                 transition: 'background-color 0.2s ease'
               }}
