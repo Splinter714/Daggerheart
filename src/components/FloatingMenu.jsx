@@ -144,24 +144,8 @@ const FloatingMenu = ({
         height: '56px',
         pointerEvents: 'none'
       }}>
-        {/* Help Button */}
-        <div style={getRadialItemStyle(0, 3)}>
-          <HelpButton 
-            showFlyout={showHelpFlyout}
-            onFlyoutChange={handleHelpFlyoutChange}
-          />
-        </div>
-        
-        {/* Sort Button */}
-        <div style={getRadialItemStyle(1, 3)}>
-          <SortButton
-            adversaries={adversaries}
-            onSortAdversaries={sortAdversaries}
-          />
-        </div>
-        
         {/* Clear Button */}
-        <div style={getRadialItemStyle(2, 3)}>
+        <div style={getRadialItemStyle(0, 3)}>
           <DeleteClear
             adversaries={adversaries}
             environments={environments}
@@ -173,6 +157,22 @@ const FloatingMenu = ({
             setIsClearMode={setIsClearMode}
             showFlyout={showDeleteFlyout}
             onFlyoutChange={handleDeleteFlyoutChange}
+          />
+        </div>
+        
+        {/* Sort Button */}
+        <div style={getRadialItemStyle(1, 3)}>
+          <SortButton
+            adversaries={adversaries}
+            onSortAdversaries={sortAdversaries}
+          />
+        </div>
+        
+        {/* Help Button */}
+        <div style={getRadialItemStyle(2, 3)}>
+          <HelpButton 
+            showFlyout={showHelpFlyout}
+            onFlyoutChange={handleHelpFlyoutChange}
           />
         </div>
       </div>
