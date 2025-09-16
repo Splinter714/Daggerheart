@@ -80,8 +80,10 @@ const FloatingMenu = ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '0.5rem',
-    pointerEvents: 'none'
+    justifyContent: 'center',
+    pointerEvents: 'none',
+    width: '56px', // Fixed width to match button
+    height: '56px' // Fixed height to match button
   }
 
   const mainButtonStyle = {
@@ -104,7 +106,7 @@ const FloatingMenu = ({
   const getRadialItemStyle = (index, totalItems) => {
     // Spread from 180° (left) to 270° (down) - left to down direction
     const angle = 180 + (index * 90) / (totalItems - 1) // 180° to 270°
-    const radius = 60 // Distance from center
+    const radius = 70 // Increased from 60 to 70 for better spacing
     const radians = (angle * Math.PI) / 180
     
     const x = Math.cos(radians) * radius // Use cos for x (horizontal)
@@ -134,7 +136,14 @@ const FloatingMenu = ({
   return (
     <div className="floating-menu-container" style={containerStyle}>
       {/* Radial Menu Items */}
-      <div style={{ position: 'relative', width: '56px', height: '56px' }}>
+      <div style={{ 
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        width: '56px',
+        height: '56px',
+        pointerEvents: 'none'
+      }}>
         {/* Help Button */}
         <div style={getRadialItemStyle(0, 3)}>
           <HelpButton 
