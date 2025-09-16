@@ -473,7 +473,7 @@ const styles = {
   },
   cardActions: {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     gap: '12px'
   },
