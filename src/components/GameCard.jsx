@@ -2634,7 +2634,7 @@ const GameCard = ({
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
+            gap: '0.25rem', // Reduced from 0.5rem to 0.25rem
             flex: '0 0 auto',
             minWidth: '200px', // Fixed minimum width for consistent spacing
             justifyContent: 'flex-end' // Align content to the right edge
