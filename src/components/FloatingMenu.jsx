@@ -30,9 +30,14 @@ const FloatingMenu = ({
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
+  // Detect if running as PWA
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                 window.navigator.standalone === true ||
+                 document.referrer.includes('android-app://')
+
   const containerStyle = {
     position: 'fixed',
-    bottom: 'calc(60px + env(safe-area-inset-bottom) + 2rem)',
+    bottom: isPWA ? 'calc(60px + env(safe-area-inset-bottom) + 2rem)' : 'calc(60px + env(safe-area-inset-bottom) + 1rem)',
     right: '1rem',
     zIndex: 1000,
     display: 'flex',
