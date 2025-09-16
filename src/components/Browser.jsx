@@ -541,7 +541,7 @@ const BrowserRow = ({ item, isExpanded, onToggleExpanded, onAdd, type }) => {
               handleAdd()
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'var(--gray-dark)'
+              e.target.style.background = 'var(--gray-700)'
             }}
             onMouseLeave={(e) => {
               e.target.style.background = 'var(--purple)'
@@ -734,7 +734,7 @@ const styles = {
   },
   searchInputFocus: {
     outline: 'none',
-    borderColor: '#8b5cf6',
+    borderColor: 'var(--purple)',
     boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)'
   },
   tableHeader: {
@@ -767,7 +767,7 @@ const styles = {
   },
   sortIndicator: {
     fontSize: '12px',
-    color: '#4a90e2'
+    color: 'var(--text-secondary)'
   },
   tableBody: {
     flex: 1,
@@ -877,7 +877,7 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     height: '200px',
-    color: '#fff',
+    color: 'var(--text-primary)',
     fontSize: '16px'
   },
   // Mobile responsive styles

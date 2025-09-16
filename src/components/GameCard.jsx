@@ -436,7 +436,6 @@ const styles = {
     backgroundColor: 'var(--bg-card)',
     borderRadius: '8px',
     padding: '12px',
-    marginTop: '0.5rem',
     cursor: 'pointer',
     transition: 'all 0.1s ease',
     position: 'relative'
@@ -787,6 +786,8 @@ const GameCard = ({
   dragAttributes,
   dragListeners,
   adversaries = [], // All adversaries for duplicate checking
+  isSelected = false, // Whether this card is currently selected
+  isEditMode = false, // Whether the app is in edit mode
 }) => {
   // Get type-specific logic - always call hooks to maintain consistent hook order
   const adversaryLogic = useAdversaryLogic(item, onApplyDamage, onApplyHealing, onApplyStressChange)
@@ -799,6 +800,8 @@ const GameCard = ({
 
   // Hover state management
   const [isHovered, setIsHovered] = useState(false)
+  
+  // Debug logging removed - selection styling working correctly
 
   // Transition management with different speeds for hover in/out
   const handleMouseEnter = () => {
@@ -817,7 +820,12 @@ const GameCard = ({
     let cardStyle = { ...styles.card }
     
     // Use appropriate transition speed based on hover state
-    cardStyle.transition = isHovered ? styles.transitions.hoverIn : styles.transitions.hoverOut
+    // Selection changes should be instant, hover changes should be smooth
+    if (isSelected) {
+      cardStyle.transition = 'none' // Instant for selection
+    } else {
+      cardStyle.transition = isHovered ? styles.transitions.hoverIn : styles.transitions.hoverOut
+    }
     
     // Remove top margin for expanded cards
     if (isExpanded) {
@@ -825,8 +833,8 @@ const GameCard = ({
       cardStyle = cardStyleWithoutMargin
     }
     
-    // Disable hover effects for expanded cards
-    if (isHovered && mode !== 'expanded') {
+    // Apply hover effects for expanded cards or when selected
+    if ((isHovered && mode !== 'expanded') || isSelected) {
       cardStyle = { ...cardStyle, ...styles.cardHover }
     }
     
@@ -844,8 +852,8 @@ const GameCard = ({
   const getCardClassName = () => {
     let className = 'border rounded-lg'
     
-    // Disable border hover effect for expanded cards
-    if (isHovered && mode !== 'expanded') {
+    // Apply border hover effect for hovered cards or when selected
+    if ((isHovered && mode !== 'expanded') || isSelected) {
       className += ' border-hover'
     }
     
@@ -1013,7 +1021,8 @@ const GameCard = ({
 
       {/* Delete Button */}
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        {dragAttributes && dragListeners && (
+        {/* Temporarily disabled drag handles */}
+        {false && dragAttributes && dragListeners && (
           <button
             style={{
               background: 'var(--gray-800)',
@@ -1240,7 +1249,7 @@ const GameCard = ({
   // ============================================================================
 
   const renderExpandedAdversary = () => {
-    const showDrag = !!(dragAttributes && dragListeners)
+    const showDrag = false // Temporarily disabled drag handles
     const isDead = (item.hp || 0) >= (item.hpMax || 1)
     const isEditMode = mode === 'edit'
     
@@ -1254,7 +1263,8 @@ const GameCard = ({
           minHeight: '400px',
           opacity: isDead ? 0.7 : 1,
           backgroundColor: isDead ? 'var(--gray-900)' : getCardStyle(true).backgroundColor,
-          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isHovered && mode !== 'expanded' ? 'var(--border-hover)' : 'var(--border)'),
+          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isSelected ? 'var(--purple)' : (isHovered && mode !== 'expanded' ? 'var(--border-hover)' : 'var(--border)')),
+          borderWidth: isSelected ? '2px' : '2px',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative'
@@ -1312,70 +1322,48 @@ const GameCard = ({
         )}
         {/* Fixed Header Section - Identical to Compact View */}
         <div className="border-b" style={{
-          padding: '1rem',
+          padding: '12px',
           flexShrink: 0,
           backgroundColor: 'var(--bg-card)',
           borderRadius: '8px 8px 0 0',
           position: 'relative',
-          zIndex: isDead ? 1 : 'auto'
+          zIndex: isDead ? 1 : 'auto',
+          borderBottomColor: isSelected ? 'var(--purple)' : 'var(--border)'
         }}>
+          {/* Main Row - Name/Type on left, HP/Stress/Difficulty on right */}
           <div style={{
             display: 'flex',
-            justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: '0.5rem',
+            position: 'relative',
+            zIndex: isDead ? 1 : 'auto'
           }}>
-          {/* Left side - Name and Type */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            gap: '0.25rem'
-          }}>
-            <h2 style={{
-              fontSize: '1rem',
-              fontWeight: 600,
-              color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-primary)',
-              margin: 0
+            {/* Left side - Name and Type (takes remaining space) */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: '0.25rem',
+              flex: '1 1 0%',
+              minWidth: 0
             }}>
-              {renderTitle()}
-            </h2>
-            {(item.tier || item.type) && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem'
+              <h4 style={{
+                ...styles.rowTitle,
+                color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color
               }}>
-                {item.tier && (
-                  <span style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                    color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
-                    letterSpacing: '0.5px'
-                  }}>
-                    Tier {item.tier}
-                  </span>
-                )}
-                {item.type && (
-                  <span style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                    color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
-                    letterSpacing: '0.5px'
-                  }}>
-                    {item.type}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
+                {renderTitle()}
+              </h4>
+              {/* Type badge removed for compact adversary view */}
+            </div>
 
-          {/* Right side - HP pips, Stress pips, Difficulty, Delete */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}>
+            {/* Right side - HP pips, Stress pips, Difficulty, Delete (fixed minimum width) */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              flex: '0 0 auto',
+              minWidth: 'fit-content'
+            }}>
             {/* Control Buttons Group - HP and Stress stacked vertically */}
             <div style={{
               display: 'flex',
@@ -1437,45 +1425,68 @@ const GameCard = ({
               )}
             </div>
 
-            {/* Difficulty Badge */}
-            {item.difficulty && (
-              <div 
-                onClick={handleDifficultyClick}
-                style={{
-                  cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative'
-                }}
-                title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
-              >
-                <Hexagon 
-                  size={32} 
-                  strokeWidth={1}
-                  style={{
-                    color: 'var(--text-secondary)'
-                  }}
-                />
+            {/* Difficulty and Type Badge Group */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem'
+            }}>
+              {/* Type Badge */}
+              {item.type && (
                 <span style={{
-                  position: 'absolute',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
-                  pointerEvents: 'none'
+                  fontSize: '0.625rem',
+                  fontWeight: 500,
+                  color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
+                  letterSpacing: '0.5px',
+                  textAlign: 'center',
+                  lineHeight: 1
                 }}>
-                  {item.difficulty}
+                  {item.type}
                 </span>
-              </div>
-            )}
+              )}
+
+              {/* Difficulty Badge */}
+              {item.difficulty && (
+                <div 
+                  onClick={adversaryLogic.handleDifficultyClick}
+                  style={{
+                    cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}
+                  title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
+                >
+                  <Hexagon 
+                    size={32} 
+                    strokeWidth={1}
+                    style={{
+                      color: 'var(--text-secondary)',
+                      transform: 'rotate(30deg)'
+                    }}
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: 'white',
+                    pointerEvents: 'none'
+                  }}>
+                    {item.difficulty}
+                  </span>
+                </div>
+              )}
+            </div>
 
             {/* Delete Button */}
             {showDrag && (
               <button
                 className="border rounded-md"
                 style={{
-                  background: 'var(--gray-800)',
-                  borderColor: 'var(--border)',
+                  background: 'var(--red)',
+                  borderColor: 'var(--red)',
                   padding: '0.25rem',
                   minWidth: '1.5rem',
                   height: '1.5rem',
@@ -1484,7 +1495,7 @@ const GameCard = ({
                   justifyContent: 'center',
                   cursor: 'pointer',
                   transition: 'all 0.1s ease',
-                  color: 'var(--text-primary)',
+                  color: 'white',
                   fontSize: '1rem'
                 }}
                 onClick={(e) => {
@@ -1492,8 +1503,8 @@ const GameCard = ({
                   e.preventDefault()
                   onDelete && onDelete(item.id)
                 }}
-                onMouseEnter={(e) => e.target.style.background = 'var(--gray-700)'}
-                onMouseLeave={(e) => e.target.style.background = 'var(--gray-800)'}
+                onMouseEnter={(e) => e.target.style.background = 'var(--red-dark)'}
+                onMouseLeave={(e) => e.target.style.background = 'var(--red)'}
                 title="Delete item"
               >
                 ×
@@ -1507,11 +1518,55 @@ const GameCard = ({
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '1rem',
+          padding: '12px',
           borderRadius: '0 0 8px 8px',
           position: 'relative',
           zIndex: isDead ? 1 : 'auto'
         }}>
+          {/* Tier and Type Information */}
+          {(item.tier || item.type) && (
+            <div style={{
+              marginBottom: '1rem',
+              paddingBottom: '0.75rem',
+              borderBottom: '1px solid var(--border)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                {item.tier && (
+                  <span style={{
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
+                    letterSpacing: '0.5px',
+                    padding: '0.25rem 0.5rem',
+                    backgroundColor: 'var(--gray-800)',
+                    borderRadius: '0.25rem',
+                    border: '1px solid var(--border)'
+                  }}>
+                    Tier {item.tier}
+                  </span>
+                )}
+                {item.type && (
+                  <span style={{
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
+                    letterSpacing: '0.5px',
+                    padding: '0.25rem 0.5rem',
+                    backgroundColor: 'var(--gray-800)',
+                    borderRadius: '0.25rem',
+                    border: '1px solid var(--border)'
+                  }}>
+                    {item.type}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Description Section */}
         {item.description && (
           <div style={{
@@ -1536,7 +1591,7 @@ const GameCard = ({
                   border: '1px solid var(--border)',
                   borderRadius: '0.5rem',
                   backgroundColor: 'var(--bg-secondary)',
-                  color: 'var(--text-primary)',
+                  color: 'white',
                   fontSize: '0.875rem',
                   lineHeight: 1.5,
                   resize: 'vertical',
@@ -1586,7 +1641,7 @@ const GameCard = ({
                   border: '1px solid var(--border)',
                   borderRadius: '0.5rem',
                   backgroundColor: 'var(--bg-secondary)',
-                  color: 'var(--text-primary)',
+                  color: 'white',
                   fontSize: '0.875rem',
                   lineHeight: 1.5,
                   resize: 'vertical',
@@ -1684,7 +1739,7 @@ const GameCard = ({
                   <h4 style={{
                     fontSize: '0.875rem',
                     fontWeight: 600,
-                    color: 'var(--text-primary)',
+                    color: 'white',
                     margin: 0,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -1736,7 +1791,7 @@ const GameCard = ({
                   <h4 style={{
                     fontSize: '0.875rem',
                     fontWeight: 600,
-                    color: 'var(--text-primary)',
+                    color: 'white',
                     margin: 0,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -1788,7 +1843,7 @@ const GameCard = ({
                   <h4 style={{
                     fontSize: '0.875rem',
                     fontWeight: 600,
-                    color: 'var(--text-primary)',
+                    color: 'white',
                     margin: 0,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -1842,7 +1897,7 @@ const GameCard = ({
   // ============================================================================
 
   const renderExpandedEnvironment = () => {
-    const showDrag = !!(dragAttributes && dragListeners)
+    const showDrag = false // Temporarily disabled drag handles
     const isEditMode = mode === 'edit'
 
     return (
@@ -1866,7 +1921,7 @@ const GameCard = ({
       >
         {/* Fixed Header Section - Similar to Adversary View */}
         <div className="border-b" style={{
-          padding: '1rem',
+          padding: '12px',
           flexShrink: 0,
           backgroundColor: 'var(--bg-card)',
           borderRadius: '8px 8px 0 0',
@@ -1949,7 +2004,7 @@ const GameCard = ({
                     transform: 'translate(-50%, -50%)',
                     fontSize: '0.75rem',
                     fontWeight: 700,
-                    color: 'var(--text-primary)',
+                    color: 'white',
                     pointerEvents: 'none'
                   }}>
                     {item.difficulty}
@@ -1962,8 +2017,8 @@ const GameCard = ({
                 <button
                   className="border rounded-md"
                   style={{
-                    background: 'var(--gray-800)',
-                    borderColor: 'var(--border)',
+                    background: 'var(--red)',
+                    borderColor: 'var(--red)',
                     padding: '0.25rem',
                     minWidth: '1.5rem',
                     height: '1.5rem',
@@ -1972,7 +2027,7 @@ const GameCard = ({
                     justifyContent: 'center',
                     cursor: 'pointer',
                     transition: 'all 0.1s ease',
-                    color: 'var(--text-primary)',
+                    color: 'white',
                     fontSize: '1rem'
                   }}
                   onClick={(e) => {
@@ -1980,8 +2035,8 @@ const GameCard = ({
                     e.preventDefault()
                     onDelete && onDelete(item.id)
                   }}
-                  onMouseEnter={(e) => e.target.style.background = 'var(--gray-700)'}
-                  onMouseLeave={(e) => e.target.style.background = 'var(--gray-800)'}
+                  onMouseEnter={(e) => e.target.style.background = 'var(--red-dark)'}
+                  onMouseLeave={(e) => e.target.style.background = 'var(--red)'}
                   title="Delete environment"
                 >
                   ×
@@ -1995,7 +2050,7 @@ const GameCard = ({
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '1rem',
+          padding: '12px',
           borderRadius: '0 0 8px 8px'
         }}>
           {/* Description Section */}
@@ -2022,7 +2077,7 @@ const GameCard = ({
                     border: '1px solid var(--border)',
                     borderRadius: '0.5rem',
                     backgroundColor: 'var(--bg-secondary)',
-                    color: 'var(--text-primary)',
+                    color: 'white',
                     fontSize: '0.875rem',
                     lineHeight: 1.5,
                     resize: 'vertical',
@@ -2146,7 +2201,7 @@ const GameCard = ({
                     <h4 style={{
                       fontSize: '0.875rem',
                       fontWeight: 600,
-                      color: 'var(--text-primary)',
+                      color: 'white',
                       margin: 0,
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
@@ -2173,7 +2228,7 @@ const GameCard = ({
                       }}>
                         <div style={{ 
                           fontWeight: 600, 
-                          color: 'var(--text-primary)',
+                          color: 'white',
                           marginBottom: '0.25rem'
                         }}>
                           {feature.name}
@@ -2229,7 +2284,7 @@ const GameCard = ({
                     <h4 style={{
                       fontSize: '0.875rem',
                       fontWeight: 600,
-                      color: 'var(--text-primary)',
+                      color: 'white',
                       margin: 0,
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
@@ -2256,7 +2311,7 @@ const GameCard = ({
                       }}>
                         <div style={{ 
                           fontWeight: 600, 
-                          color: 'var(--text-primary)',
+                          color: 'white',
                           marginBottom: '0.25rem'
                         }}>
                           {feature.name}
@@ -2312,7 +2367,7 @@ const GameCard = ({
                     <h4 style={{
                       fontSize: '0.875rem',
                       fontWeight: 600,
-                      color: 'var(--text-primary)',
+                      color: 'white',
                       margin: 0,
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
@@ -2339,7 +2394,7 @@ const GameCard = ({
                       }}>
                         <div style={{ 
                           fontWeight: 600, 
-                          color: 'var(--text-primary)',
+                          color: 'white',
                           marginBottom: '0.25rem'
                         }}>
                           {feature.name}
@@ -2425,7 +2480,7 @@ const GameCard = ({
 
   // For adversaries, use the improved compact layout
   if (type === 'adversary' || type === 'adversaries') {
-    const showDrag = !!(dragAttributes && dragListeners)
+    const showDrag = false // Temporarily disabled drag handles
     const isDead = (item.hp || 0) >= (item.hpMax || 1)
     
     return (
@@ -2435,7 +2490,7 @@ const GameCard = ({
           ...getCardStyle(),
           opacity: isDead ? 0.7 : 1,
           backgroundColor: isDead ? 'var(--gray-900)' : getCardStyle().backgroundColor,
-          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isHovered && mode !== 'expanded' ? 'var(--border-hover)' : 'var(--border)'),
+          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isSelected ? 'var(--purple)' : (isHovered && mode !== 'expanded' ? 'var(--border-hover)' : 'var(--border)')),
           paddingLeft: showDrag ? '2.25rem' : '0.75rem',
           position: 'relative'
         }}
@@ -2503,7 +2558,8 @@ const GameCard = ({
               lineHeight: 1,
               padding: '0.25rem',
               borderRadius: '0.5rem',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              zIndex: 10
             }}
             {...dragAttributes} 
             {...dragListeners}
@@ -2515,18 +2571,19 @@ const GameCard = ({
         {/* Main Row - Name/Type on left, HP/Stress/Difficulty on right */}
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
           gap: '0.5rem',
           position: 'relative',
           zIndex: isDead ? 1 : 'auto'
         }}>
-          {/* Left side - Name and Type */}
+          {/* Left side - Name and Type (takes remaining space) */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'flex-start',
-            gap: '0.25rem'
+            gap: '0.25rem',
+            flex: '1 1 0%',
+            minWidth: 0
           }}>
             <h4 style={{
               ...styles.rowTitle,
@@ -2537,11 +2594,13 @@ const GameCard = ({
             {/* Type badge removed for compact adversary view */}
           </div>
 
-          {/* Right side - HP pips, Stress pips, Difficulty, Delete */}
+          {/* Right side - HP pips, Stress pips, Difficulty, Delete (fixed minimum width) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: '0.5rem',
+            flex: '0 0 auto',
+            minWidth: 'fit-content'
           }}>
             {/* Control Buttons Group - HP and Stress stacked vertically */}
             <div style={{
@@ -2604,45 +2663,69 @@ const GameCard = ({
               )}
             </div>
 
-            {/* Difficulty Badge */}
-            {item.difficulty && (
-              <div 
-                onClick={handleDifficultyClick}
-                style={{
-                  cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative'
-                }}
-                title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
-              >
-                <Hexagon 
-                  size={32} 
-                  strokeWidth={1}
-                  style={{
-                    color: 'var(--text-secondary)'
-                  }}
-                />
+            {/* Difficulty and Type Badge Group */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem'
+            }}>
+              {/* Type Badge */}
+              {item.type && (
                 <span style={{
-                  position: 'absolute',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
-                  pointerEvents: 'none'
+                  fontSize: '0.625rem',
+                  fontWeight: 500,
+                  color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
+                  letterSpacing: '0.5px',
+                  textAlign: 'center',
+                  lineHeight: 1
                 }}>
-                  {item.difficulty}
+                  {item.type}
                 </span>
-              </div>
-            )}
+              )}
+
+              {/* Difficulty Badge */}
+              {item.difficulty && (
+                <div 
+                  onClick={adversaryLogic.handleDifficultyClick}
+                  style={{
+                    cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}
+                  title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
+                >
+                  <Hexagon 
+                    size={32} 
+                    strokeWidth={1}
+                    style={{
+                      color: 'var(--text-secondary)',
+                      transform: 'rotate(30deg)'
+                    }}
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: 'white',
+                    pointerEvents: 'none'
+                  }}>
+                    {item.difficulty}
+                  </span>
+                </div>
+              )}
+            </div>
 
             {/* Delete Button */}
-            {dragAttributes && dragListeners && (
+            {console.log('Delete button check:', { onDelete: !!onDelete, isEditMode, shouldShow: onDelete && isEditMode })}
+            {onDelete && isEditMode && (
               <button
                 className="border rounded-md"
                 style={{
-                  background: 'var(--gray-800)',
-                  borderColor: 'var(--border)',
+                  background: 'var(--red)',
+                  borderColor: 'var(--red)',
                   padding: '0.25rem',
                   minWidth: '1.5rem',
                   height: '1.5rem',
@@ -2651,7 +2734,7 @@ const GameCard = ({
                   justifyContent: 'center',
                   cursor: 'pointer',
                   transition: 'all 0.1s ease',
-                  color: 'var(--text-primary)',
+                  color: 'white',
                   fontSize: '1rem'
                 }}
                 onClick={(e) => {
@@ -2659,8 +2742,8 @@ const GameCard = ({
                   e.preventDefault()
                   onDelete && onDelete(item.id)
                 }}
-                onMouseEnter={(e) => e.target.style.background = 'var(--gray-700)'}
-                onMouseLeave={(e) => e.target.style.background = 'var(--gray-800)'}
+                onMouseEnter={(e) => e.target.style.background = 'var(--red-dark)'}
+                onMouseLeave={(e) => e.target.style.background = 'var(--red)'}
                 title="Delete item"
               >
                 ×
@@ -2677,7 +2760,7 @@ const GameCard = ({
 
   // For environments, use a custom compact layout similar to adversaries
   if (type === 'environment' || type === 'environments') {
-    const showDrag = !!(dragAttributes && dragListeners)
+    const showDrag = false // Temporarily disabled drag handles
     
     return (
       <div
@@ -2708,7 +2791,8 @@ const GameCard = ({
               lineHeight: 1,
               padding: '0.25rem',
               borderRadius: '0.5rem',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              zIndex: 10
             }}
             {...dragAttributes} 
             {...dragListeners}
@@ -2775,7 +2859,7 @@ const GameCard = ({
                   transform: 'translate(-50%, -50%)',
                   fontSize: '0.75rem',
                   fontWeight: 700,
-                  color: 'var(--text-primary)',
+                  color: 'white',
                   pointerEvents: 'none'
                 }}>
                   {item.difficulty}
@@ -2783,13 +2867,35 @@ const GameCard = ({
               </div>
             )}
 
+            {/* Type Badge */}
+            {item.type && (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.125rem'
+              }}>
+                <span style={{
+                  fontSize: '0.625rem',
+                  fontWeight: 500,
+                  color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
+                  letterSpacing: '0.5px',
+                  textAlign: 'center',
+                  lineHeight: 1
+                }}>
+                  {item.type}
+                </span>
+              </div>
+            )}
+
             {/* Delete Button */}
-            {dragAttributes && dragListeners && (
+            {console.log('Delete button check:', { onDelete: !!onDelete, isEditMode, shouldShow: onDelete && isEditMode })}
+            {onDelete && isEditMode && (
               <button
                 className="border rounded-md"
                 style={{
-                  background: 'var(--gray-800)',
-                  borderColor: 'var(--border)',
+                  background: 'var(--red)',
+                  borderColor: 'var(--red)',
                   padding: '0.25rem',
                   minWidth: '1.5rem',
                   height: '1.5rem',
@@ -2798,7 +2904,7 @@ const GameCard = ({
                   justifyContent: 'center',
                   cursor: 'pointer',
                   transition: 'all 0.1s ease',
-                  color: 'var(--text-primary)',
+                  color: 'white',
                   fontSize: '1rem'
                 }}
                 onClick={(e) => {
@@ -2806,8 +2912,8 @@ const GameCard = ({
                   e.preventDefault()
                   onDelete && onDelete(item.id)
                 }}
-                onMouseEnter={(e) => e.target.style.background = 'var(--gray-700)'}
-                onMouseLeave={(e) => e.target.style.background = 'var(--gray-800)'}
+                onMouseEnter={(e) => e.target.style.background = 'var(--red-dark)'}
+                onMouseLeave={(e) => e.target.style.background = 'var(--red)'}
                 title="Delete environment"
               >
                 ×
@@ -2850,7 +2956,8 @@ const GameCard = ({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {dragAttributes && dragListeners && (
+          {/* Temporarily disabled drag handles */}
+        {false && dragAttributes && dragListeners && (
             <button
               style={styles.button}
               onClick={(e) => {
