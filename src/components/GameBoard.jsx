@@ -19,6 +19,7 @@ const ElementList = ({
   onIncrement, 
   onDecrement, 
   isEditMode,
+  isClearMode,
   elementType,
   adversaries = [] // Pass adversaries for duplicate checking
 }) => {
@@ -40,7 +41,7 @@ const ElementList = ({
       item,
       mode: 'compact',
       onClick: () => onItemSelect(item, elementType),
-      onDelete: onDelete,
+      onDelete: isClearMode ? onDelete : undefined,
       dragAttributes: isEditMode ? { draggable: true } : null,
       dragListeners: isEditMode ? {
         onDragStart: (e) => {
@@ -49,7 +50,7 @@ const ElementList = ({
       } : null,
       adversaries, // Pass adversaries for duplicate checking
       isSelected, // Pass selection state
-      isEditMode // Pass edit mode state
+      isEditMode: isEditMode || isClearMode // Pass edit mode state
     }
 
     switch (elementType) {
@@ -119,6 +120,7 @@ const GameBoardElementSection = ({
   selectedItem,
   selectedType,
   isEditMode,
+  isClearMode,
   
   // Element-specific props (optional)
   onApplyDamage,
@@ -251,6 +253,7 @@ const GameBoardElementSection = ({
           onIncrement={onIncrement}
           onDecrement={onDecrement}
           isEditMode={isEditMode}
+          isClearMode={isClearMode}
           elementType={elementType}
           adversaries={adversaries}
         />
@@ -292,6 +295,7 @@ const GameBoardElementSection = ({
             onIncrement={onIncrement}
             onDecrement={onDecrement}
             isEditMode={isEditMode}
+            isClearMode={isClearMode}
             elementType={elementType}
           />
         </>
@@ -306,6 +310,7 @@ const GameBoard = ({
   selectedType,
   onOpenDatabase,
   isEditMode,
+  isClearMode,
   showLongTermCountdowns,
   fear,
   updateFear,
@@ -520,6 +525,7 @@ const GameBoard = ({
               }
             }}
             isEditMode={isEditMode}
+            isClearMode={isClearMode}
             elementType="adversaries"
             adversaries={adversaries}
           />

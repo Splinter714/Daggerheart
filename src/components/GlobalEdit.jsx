@@ -4,6 +4,7 @@ import { Pencil } from 'lucide-react'
 const GlobalEdit = ({ 
   isEditMode, 
   setIsEditMode,
+  disabled = false,
   style = {}
 }) => {
   const baseStyle = {
@@ -11,21 +12,24 @@ const GlobalEdit = ({
     border: 'none',
     borderRadius: 'var(--radius-md)',
     padding: '0.75rem',
-    cursor: 'pointer',
+    cursor: disabled ? 'not-allowed' : 'pointer',
     transition: 'all 0.2s ease',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '0.5rem',
-    color: isEditMode ? '#fff' : 'var(--text-primary)',
+    color: isEditMode ? '#fff' : (disabled ? 'var(--text-secondary)' : 'var(--text-primary)'),
     fontSize: '0.875rem',
     fontWeight: 600,
     minWidth: '40px',
+    opacity: disabled ? 0.5 : 1,
     ...style
   }
 
   const handleClick = () => {
-    setIsEditMode(!isEditMode)
+    if (!disabled) {
+      setIsEditMode(!isEditMode)
+    }
   }
 
   return (
@@ -34,12 +38,12 @@ const GlobalEdit = ({
       onClick={handleClick}
       title={isEditMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
       onMouseEnter={(e) => {
-        if (!isEditMode) {
+        if (!isEditMode && !disabled) {
           e.target.style.backgroundColor = 'var(--bg-secondary)'
         }
       }}
       onMouseLeave={(e) => {
-        if (!isEditMode) {
+        if (!isEditMode && !disabled) {
           e.target.style.backgroundColor = 'transparent'
         }
       }}

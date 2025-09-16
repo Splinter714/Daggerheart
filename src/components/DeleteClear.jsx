@@ -7,7 +7,9 @@ const DeleteClear = ({
   countdowns,
   deleteAdversary,
   deleteEnvironment,
-  deleteCountdown
+  deleteCountdown,
+  isClearMode,
+  setIsClearMode
 }) => {
   const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false)
 
@@ -40,9 +42,9 @@ const DeleteClear = ({
   }
 
   const buttonStyle = {
-    background: deleteFlyoutOpen ? 'var(--red)' : 'none',
+    background: isClearMode ? 'var(--red)' : (deleteFlyoutOpen ? 'var(--red)' : 'none'),
     border: 'none',
-    color: deleteFlyoutOpen ? 'white' : (hasAnyItems ? 'var(--text-primary)' : 'var(--text-secondary)'),
+    color: isClearMode ? 'white' : (deleteFlyoutOpen ? 'white' : (hasAnyItems ? 'var(--text-primary)' : 'var(--text-secondary)')),
     cursor: hasAnyItems ? 'pointer' : 'not-allowed',
     padding: '0.5rem',
     borderRadius: 'var(--radius-sm)',
@@ -79,15 +81,36 @@ const DeleteClear = ({
         onClick={(e) => {
           e.stopPropagation()
           if (hasAnyItems) {
-            setDeleteFlyoutOpen(!deleteFlyoutOpen)
+            if (isClearMode) {
+              // If already in clear mode, toggle the flyout
+              setDeleteFlyoutOpen(!deleteFlyoutOpen)
+            } else {
+              // Enter clear mode
+              setIsClearMode(true)
+            }
           }
         }}
-        title={!hasAnyItems ? 'Nothing to clear' : 'Clear Items'}
+        title={!hasAnyItems ? 'Nothing to clear' : (isClearMode ? 'Clear Items' : 'Enter Clear Mode')}
       >
         <Trash2 size={20} />
       </button>
       
       <div style={flyoutStyle}>
+        {isClearMode && (
+          <button 
+            style={flyoutItemStyle}
+            onMouseEnter={(e) => Object.assign(e.target.style, flyoutItemHoverStyle)}
+            onMouseLeave={(e) => Object.assign(e.target.style, flyoutItemStyle)}
+            onClick={(e) => { 
+              e.stopPropagation()
+              setIsClearMode(false)
+              setDeleteFlyoutOpen(false)
+            }}
+          >
+            <span>✓</span>
+            <span>Exit Clear Mode</span>
+          </button>
+        )}
         {(adversaries && adversaries.length > 0) && (
           <button 
             style={flyoutItemStyle}

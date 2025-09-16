@@ -17,7 +17,7 @@ const Panel = ({
     display: isLeft ? 'block' : 'flex',
     flexDirection: isLeft ? 'initial' : 'column',
     height: '100%',
-    padding: '1rem', // Symmetrical padding on all sides
+    padding: isLeft ? '1rem 0 1rem 1rem' : '1rem 1rem 1rem 0', // Zero left/right padding on mobile
     ...style
   }
 
