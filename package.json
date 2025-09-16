@@ -1,6 +1,6 @@
 {
   "name": "daggerheart-gm-dashboard",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Static GM Dashboard for Daggerheart RPG",
   "scripts": {
     "dev": "vite",
