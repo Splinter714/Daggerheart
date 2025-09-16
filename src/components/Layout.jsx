@@ -375,39 +375,62 @@ const LayoutContent = () => {
       }}
     >
       
-      {/* Top Bar: Fear Tracker */}
-      <Bar 
-        position="top" 
-        style={{ 
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 'var(--topbar-height)',
-          touchAction: 'manipulation',
-          userSelect: 'none'
-        }}
-      >
-        <Pips 
-          type="fear"
-          value={fear?.value || 0}
-          maxValue={12}
-          onChange={updateFear}
-          showTooltip={false}
-          enableBoundaryClick={true}
-          clickContainerWidth="100%"
-          centerPips={true}
-        />
-      </Bar>
+      {/* Top Bar: Fear Tracker - Desktop only */}
+      {!isMobile && (
+        <Bar 
+          position="top" 
+          style={{ 
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 'var(--topbar-height)',
+            touchAction: 'manipulation',
+            userSelect: 'none'
+          }}
+        >
+          <Pips 
+            type="fear"
+            value={fear?.value || 0}
+            maxValue={12}
+            onChange={updateFear}
+            showTooltip={false}
+            enableBoundaryClick={true}
+            clickContainerWidth="100%"
+            centerPips={true}
+          />
+        </Bar>
+      )}
 
       {/* Bottom Bar */}
       <div className="bottom-bar-container">
-        <Bar position="bottom">
-          {!isClearMode && (
-            <GlobalEdit 
-              isEditMode={isEditMode}
-              setIsEditMode={setIsEditMode}
+        {/* Fear Bar - Mobile only */}
+        {isMobile && (
+          <Bar 
+            position="top" 
+            style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: 'var(--topbar-height)',
+              touchAction: 'manipulation',
+              userSelect: 'none',
+              order: 1
+            }}
+          >
+            <Pips 
+              type="fear"
+              value={fear?.value || 0}
+              maxValue={12}
+              onChange={updateFear}
+              showTooltip={false}
+              enableBoundaryClick={true}
+              clickContainerWidth="100%"
+              centerPips={true}
             />
-          )}
+          </Bar>
+        )}
+        
+        <Bar position="bottom">
           <DeleteClear
             adversaries={adversaries}
             environments={environments}

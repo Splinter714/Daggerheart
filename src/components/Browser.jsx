@@ -738,7 +738,7 @@ const styles = {
     boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)'
   },
   tableHeader: {
-    background: 'var(--bg-secondary)',
+    background: 'var(--gray-800)',
     borderBottom: '1px solid var(--border)',
     boxShadow: '0 1px 0 var(--border)',
     position: 'sticky',
