@@ -40,7 +40,7 @@
   --text-primary: var(--white);
   --text-secondary: var(--gray-400);
   --border: var(--gray-800);
-  --border-hover: var(--purple);
+  --border-hover: var(--gray-600);
   
   /* Spacing */
   --space-xs: 0.25rem;
@@ -187,11 +187,11 @@ div[style*="color: rgb(255, 255, 255)"],
 .bg-secondary { background: var(--bg-secondary); }
 
 /* Border utilities */
-.border { border: 1px solid var(--border); }
-.border-t { border-top: 1px solid var(--border); }
-.border-b { border-bottom: 1px solid var(--border); }
-.border-l { border-left: 1px solid var(--border); }
-.border-r { border-right: 1px solid var(--border); }
+.border { border: 2px solid var(--border); }
+.border-t { border-top: 2px solid var(--border); }
+.border-b { border-bottom: 2px solid var(--border); }
+.border-l { border-left: 2px solid var(--border); }
+.border-r { border-right: 2px solid var(--border); }
 
 /* Border hover utilities */
 .border-hover { border-color: var(--border-hover); }
@@ -492,7 +492,7 @@ input[type="number"] {
 /* Panel content styles */
 .panel-header {
   padding: 0.5rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
   background: var(--bg-primary);
 }
 
@@ -519,7 +519,7 @@ input[type="number"] {
 
 .panel-footer {
   padding: 1rem;
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--border);
   background: var(--bg-primary);
 }
 
@@ -528,7 +528,7 @@ input[type="number"] {
 .btn-icon {
   width: 1.5rem;
   height: 1.5rem;
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -623,7 +623,7 @@ input[type="number"] {
     left: 0;
     right: 0;
     background: var(--bg-primary);
-    border-top: 1px solid var(--border);
+    border-top: 2px solid var(--border);
     border-radius: 16px 16px 0 0;
     height: 100%; /* Use full height of container */
     overflow: hidden;
@@ -660,7 +660,7 @@ input[type="number"] {
     align-items: center;
     justify-content: center;
     padding: 1rem 0; /* Increased padding for larger swipe area */
-    border-bottom: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
     position: relative;
     overscroll-behavior: none !important; /* Prevent pull-to-refresh */
     overscroll-behavior-y: none !important; /* Prevent vertical pull-to-refresh */

@@ -427,6 +427,8 @@ const LayoutContent = () => {
         >
           <GameBoard
             onItemSelect={handleItemSelect}
+            selectedItem={selectedItem}
+            selectedType={selectedType}
             onOpenDatabase={handleOpenDatabase}
             isEditMode={isEditMode}
             onEditModeChange={setIsEditMode}

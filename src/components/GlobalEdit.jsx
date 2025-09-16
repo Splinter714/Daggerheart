@@ -7,8 +7,8 @@ const GlobalEdit = ({
   style = {}
 }) => {
   const baseStyle = {
-    backgroundColor: isEditMode ? 'var(--purple)' : 'var(--bg-secondary)',
-    border: '1px solid var(--border)',
+    backgroundColor: isEditMode ? 'var(--purple)' : 'transparent',
+    border: isEditMode ? '1px solid var(--purple)' : '1px solid transparent',
     borderRadius: 'var(--radius-md)',
     padding: '0.75rem',
     cursor: 'pointer',
@@ -20,7 +20,7 @@ const GlobalEdit = ({
     color: isEditMode ? '#fff' : 'var(--text-primary)',
     fontSize: '0.875rem',
     fontWeight: 600,
-    minWidth: '120px',
+    minWidth: '40px',
     ...style
   }
 
@@ -35,17 +35,18 @@ const GlobalEdit = ({
       title={isEditMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
       onMouseEnter={(e) => {
         if (!isEditMode) {
-          e.target.style.backgroundColor = 'var(--bg-tertiary)'
+          e.target.style.backgroundColor = 'var(--bg-secondary)'
+          e.target.style.borderColor = 'var(--border)'
         }
       }}
       onMouseLeave={(e) => {
         if (!isEditMode) {
-          e.target.style.backgroundColor = 'var(--bg-secondary)'
+          e.target.style.backgroundColor = 'transparent'
+          e.target.style.borderColor = 'transparent'
         }
       }}
     >
       <Pencil size={16} />
-      {isEditMode ? 'Exit Edit' : 'Edit Mode'}
     </button>
   )
 }
