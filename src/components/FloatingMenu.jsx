@@ -37,7 +37,7 @@ const FloatingMenu = ({
     zIndex: 1000,
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     gap: '0.5rem'
   }
 
