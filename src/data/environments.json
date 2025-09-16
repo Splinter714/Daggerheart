@@ -44,7 +44,7 @@
       "tier": 1,
       "type": "Exploration",
       "description": "A former druidic grove lying fallow and fully reclaimed by nature.",
-      "impulses": ["Draw in the curious", "Echo the past"],
+      "impulses": "Draw in the curious, Echo the past",
       "difficulty": 11,
       "potentialAdversaries": [
         "Beasts (Bear, Dire Wolf, Glass Snake)",
@@ -101,9 +101,11 @@
       "tier": 1,
       "type": "Event",
       "description": "An ambush is set to catch an unsuspecting party off-guard.",
-      "impulses": ["Overwhelm", "scatter", "surround"],
+      "impulses": "Overwhelm, scatter, surround",
       "difficulty": "~",
-      "potentialAdversaries": ["Any"],
+      "potentialAdversaries": [
+        "Any"
+      ],
       "features": [
         {
           "name": "Relative Strength",
@@ -131,9 +133,11 @@
       "tier": 1,
       "type": "Event",
       "description": "An ambush is set by the PCs to catch unsuspecting adversaries off-guard.",
-      "impulses": ["Escape", "group up", "protect the most vulnerable"],
+      "impulses": "Escape, group up, protect the most vulnerable",
       "difficulty": "~",
-      "potentialAdversaries": ["Any"],
+      "potentialAdversaries": [
+        "Any"
+      ],
       "features": [
         {
           "name": "Relative Strength",
@@ -161,7 +165,7 @@
       "tier": 1,
       "type": "Social",
       "description": "The economic heart of the settlement, with local artisans, traveling merchants, and patrons across social classes.",
-      "impulses": ["Buy low and sell high", "tempt and tantalize with wares from near and far"],
+      "impulses": "Buy low and sell high, tempt and tantalize with wares from near and far",
       "difficulty": 10,
       "potentialAdversaries": [
         "Guards (Bladed Guard, Head Guard)",
@@ -212,7 +216,7 @@
       "tier": 1,
       "type": "Traversal",
       "description": "A steep, rocky cliff side tall enough to make traversal dangerous.",
-      "impulses": ["Cast the unready down to a rocky doom", "draw people in with promise of what lies at the top"],
+      "impulses": "Cast the unready down to a rocky doom, draw people in with promise of what lies at the top",
       "difficulty": 12,
       "potentialAdversaries": [
         "Construct",
@@ -256,7 +260,7 @@
       "tier": 1,
       "type": "Social",
       "description": "A lively tavern that serves as the social hub for its town.",
-      "impulses": ["Provide opportunities for adventurers", "nurture community"],
+      "impulses": "Provide opportunities for adventurers, nurture community",
       "difficulty": 10,
       "potentialAdversaries": [
         "Guards (Bladed Guard, Head Guard)",
@@ -325,7 +329,7 @@
       "tier": 1,
       "type": "Social",
       "description": "A small town on the outskirts of a nation or region, close to a dungeon, tombs, or other adventuring destinations.",
-      "impulses": ["Drive the desperate to certain doom", "profit off of ragged hope"],
+      "impulses": "Drive the desperate to certain doom, profit off of ragged hope",
       "difficulty": 12,
       "potentialAdversaries": [
         "Jagged Knife Bandits (Hexer, Kneebreaker, Lackey, Lieutenant, Shadow, Sniper)",
@@ -383,7 +387,7 @@
       "tier": 1,
       "type": "Traversal",
       "description": "A swift-moving river without a bridge crossing, deep enough to sweep away most people.",
-      "impulses": ["Bar crossing", "carry away the unready", "divide the land"],
+      "impulses": "Bar crossing, carry away the unready, divide the land",
       "difficulty": 10,
       "potentialAdversaries": [
         "Beasts (Bear, Glass Snake)",
@@ -425,7 +429,7 @@
       "tier": 2,
       "type": "Event",
       "description": "A Fallen cult assembles around a sigil of the defeated gods and a bonfire that burns a sickly shade of green.",
-      "impulses": ["Profane the land", "unite the Mortal Realm with the Circles Below"],
+      "impulses": "Profane the land, unite the Mortal Realm with the Circles Below",
       "difficulty": 14,
       "potentialAdversaries": [
         "Cult of the Fallen (Cult Adept, Cult Fang, Cult Initiate, Secret-Keeper)"
@@ -474,7 +478,7 @@
       "tier": 2,
       "type": "Social",
       "description": "A bustling but well-kept temple that provides healing and hosts regular services, overseen by a priest or seraph.",
-      "impulses": ["Connect the Mortal Realm with the Hallows Above", "display the power of the divine", "provide aid and succor to the faithful"],
+      "impulses": "Connect the Mortal Realm with the Hallows Above, display the power of the divine, provide aid and succor to the faithful",
       "difficulty": 13,
       "potentialAdversaries": [
         "Guards (Archer Guard, Bladed Guard, Head Guard)"
@@ -523,7 +527,7 @@
       "tier": 2,
       "type": "Exploration",
       "description": "An abandoned city populated by the restless spirits of eras past.",
-      "impulses": ["Misdirect and disorient", "replay apocalypses both public and personal"],
+      "impulses": "Misdirect and disorient, replay apocalypses both public and personal",
       "difficulty": 14,
       "potentialAdversaries": [
         "Ghosts (Spectral Archer, Spectral Captain, Spectral Guardian)",
@@ -575,7 +579,7 @@
       "tier": 2,
       "type": "Traversal",
       "description": "Stony peaks that pierce the clouds, with a twisting path winding its way up and over through many switchbacks.",
-      "impulses": ["Exact a chilling toll in supplies and stamina", "reveal magical tampering", "slow down travel"],
+      "impulses": "Exact a chilling toll in supplies and stamina, reveal magical tampering, slow down travel",
       "difficulty": 15,
       "potentialAdversaries": [
         "Beasts (Bear, Giant Eagle, Glass Snake)",
@@ -629,7 +633,7 @@
       "tier": 3,
       "type": "Exploration",
       "description": "A vast repository of forgotten knowledge, with towering shelves and ancient tomes.",
-      "impulses": ["Reveal hidden truths", "tempt with forbidden knowledge"],
+      "impulses": "Reveal hidden truths, tempt with forbidden knowledge",
       "difficulty": 17,
       "potentialAdversaries": [
         "Constructs (Guardian Golem, Knowledge Keeper)",
@@ -671,7 +675,7 @@
       "tier": 3,
       "type": "Exploration",
       "description": "A corrupted woodland where nature has been twisted by dark magic.",
-      "impulses": ["Corrupt the pure", "spread blight"],
+      "impulses": "Corrupt the pure, spread blight",
       "difficulty": 16,
       "potentialAdversaries": [
         "Corrupted Beasts (Blight Wolf, Twisted Bear)",
@@ -713,7 +717,7 @@
       "tier": 3,
       "type": "Exploration",
       "description": "A network of caves filled with luminescent crystals that pulse with magical energy.",
-      "impulses": ["Amplify magic", "drain the unwary"],
+      "impulses": "Amplify magic, drain the unwary",
       "difficulty": 18,
       "potentialAdversaries": [
         "Elementals (Crystal Golem, Energy Wisp)",
@@ -755,7 +759,7 @@
       "tier": 3,
       "type": "Traversal",
       "description": "A series of islands suspended in the sky, connected by precarious bridges and magical currents.",
-      "impulses": ["Separate the party", "test balance and courage"],
+      "impulses": "Separate the party, test balance and courage",
       "difficulty": 17,
       "potentialAdversaries": [
         "Flying Creatures (Harpy, Wyvern)",
@@ -797,7 +801,7 @@
       "tier": 4,
       "type": "Exploration",
       "description": "A plane of pure light and divine energy, where the laws of reality bend to celestial will.",
-      "impulses": ["Purify the impure", "test mortal worth"],
+      "impulses": "Purify the impure, test mortal worth",
       "difficulty": 20,
       "potentialAdversaries": [
         "Celestials (Solar, Seraphim)",
@@ -839,7 +843,7 @@
       "tier": 4,
       "type": "Event",
       "description": "A gateway to the Abyss, spewing forth demonic energy and corrupting all it touches.",
-      "impulses": ["Corrupt and destroy", "spread chaos"],
+      "impulses": "Corrupt and destroy, spread chaos",
       "difficulty": 19,
       "potentialAdversaries": [
         "Demons (Balor, Marilith)",
@@ -881,7 +885,7 @@
       "tier": 4,
       "type": "Event",
       "description": "A region where time flows differently, creating temporal anomalies and paradoxes.",
-      "impulses": ["Manipulate time", "create paradoxes"],
+      "impulses": "Manipulate time, create paradoxes",
       "difficulty": 20,
       "potentialAdversaries": [
         "Temporal Entities (Time Elemental, Paradox Walker)",
@@ -923,7 +927,7 @@
       "tier": 4,
       "type": "Exploration",
       "description": "A tear in reality leading to the void between worlds, where nothingness consumes all.",
-      "impulses": ["Consume existence", "spread void"],
+      "impulses": "Consume existence, spread void",
       "difficulty": 20,
       "potentialAdversaries": [
         "Void Entities (Void Walker, Nothingness)",

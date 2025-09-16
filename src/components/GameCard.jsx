@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { Droplet, Activity, CheckCircle, X, Plus, Minus, Shield } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Plus, Minus, Shield, Hexagon } from 'lucide-react'
 import Pips from './Pips'
 
 // ============================================================================
@@ -1450,7 +1450,7 @@ const GameCard = ({
                 }}
                 title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
               >
-                <Shield 
+                <Hexagon 
                   size={32} 
                   strokeWidth={1}
                   style={{
@@ -1838,6 +1838,558 @@ const GameCard = ({
   }
 
   // ============================================================================
+  // EXPANDED ENVIRONMENT RENDERER
+  // ============================================================================
+
+  const renderExpandedEnvironment = () => {
+    const showDrag = !!(dragAttributes && dragListeners)
+    const isEditMode = mode === 'edit'
+
+    return (
+      <div 
+        className={getCardClassName()}
+        style={{
+          ...getCardStyle(true),
+          padding: 0,
+          minHeight: '400px',
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative'
+        }}
+        {...dragAttributes}
+        {...dragListeners}
+        onClick={onClick}
+        {...(mode !== 'expanded' && {
+          onMouseEnter: handleMouseEnter,
+          onMouseLeave: handleMouseLeave
+        })}
+      >
+        {/* Fixed Header Section - Similar to Adversary View */}
+        <div className="border-b" style={{
+          padding: '1rem',
+          flexShrink: 0,
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: '8px 8px 0 0',
+          position: 'relative'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            {/* Left side - Name, Type, and Tier */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: '0.25rem'
+            }}>
+              <h2 style={{
+                fontSize: '1rem',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                margin: 0
+              }}>
+                {item.name}
+              </h2>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem'
+              }}>
+                {item.tier && (
+                  <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    color: 'var(--text-secondary)',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Tier {item.tier}
+                  </span>
+                )}
+                {item.type && (
+                  <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    color: 'var(--text-secondary)',
+                    letterSpacing: '0.5px'
+                  }}>
+                    {item.type}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Right side - Difficulty and Delete */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              {/* Difficulty Badge */}
+              {item.difficulty && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
+                }}>
+                  <Hexagon 
+                    size={32}
+                    strokeWidth={1}
+                    style={{
+                      color: 'var(--text-secondary)'
+                    }}
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: 'var(--text-primary)',
+                    pointerEvents: 'none'
+                  }}>
+                    {item.difficulty}
+                  </span>
+                </div>
+              )}
+
+              {/* Delete Button */}
+              {showDrag && (
+                <button
+                  className="border rounded-md"
+                  style={{
+                    background: 'var(--gray-800)',
+                    borderColor: 'var(--border)',
+                    padding: '0.25rem',
+                    minWidth: '1.5rem',
+                    height: '1.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.1s ease',
+                    color: 'var(--text-primary)',
+                    fontSize: '1rem'
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                    onDelete && onDelete(item.id)
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = 'var(--gray-700)'}
+                  onMouseLeave={(e) => e.target.style.background = 'var(--gray-800)'}
+                  title="Delete environment"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Scrollable Content Area */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '1rem',
+          borderRadius: '0 0 8px 8px'
+        }}>
+          {/* Description Section */}
+          {item.description && (
+            <div style={{
+              marginBottom: '1rem',
+              paddingBottom: '0.75rem',
+              borderBottom: '1px solid var(--border)'
+            }}>
+              <h3 style={{
+                fontSize: '1rem',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                margin: '0 0 0.5rem 0'
+              }}>
+                Description
+              </h3>
+              {isEditMode ? (
+                <textarea
+                  style={{
+                    width: '100%',
+                    minHeight: '100px',
+                    padding: '0.5rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: '0.5rem',
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.875rem',
+                    lineHeight: 1.5,
+                    resize: 'vertical',
+                    fontFamily: 'inherit'
+                  }}
+                  value={item.description}
+                  onChange={(e) => {
+                    onUpdate && onUpdate(item.id, { description: e.target.value })
+                  }}
+                  placeholder="Enter environment description..."
+                />
+              ) : (
+                <p style={{
+                  fontSize: '0.875rem',
+                  lineHeight: 1.5,
+                  color: 'var(--text-secondary)',
+                  margin: 0,
+                  whiteSpace: 'pre-wrap'
+                }}>
+                  {item.description}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Impulses Section */}
+          {item.impulses && (
+            <div style={{
+              marginBottom: '1rem',
+              paddingBottom: '0.75rem',
+              borderBottom: '1px solid var(--border)'
+            }}>
+              <h3 style={{
+                fontSize: '1rem',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                margin: '0 0 0.5rem 0'
+              }}>
+                Impulses
+              </h3>
+              <p style={{
+                fontSize: '0.875rem',
+                lineHeight: 1.5,
+                color: 'var(--text-secondary)',
+                margin: 0,
+                whiteSpace: 'pre-wrap'
+              }}>
+                {item.impulses}
+              </p>
+            </div>
+          )}
+
+          {/* Core Stats Section */}
+          <div style={{
+            marginBottom: '1rem',
+            paddingBottom: '0.75rem',
+            borderBottom: '1px solid var(--border)'
+          }}>
+            <h3 style={{
+              fontSize: '1rem',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              margin: '0 0 0.5rem 0'
+            }}>
+              Core Stats
+            </h3>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              fontSize: '0.875rem'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                flexWrap: 'wrap'
+              }}>
+                <span><strong>Difficulty:</strong> {item.difficulty || '~'}</span>
+                <span><strong>Type:</strong> {item.type}</span>
+                <span><strong>Tier:</strong> {item.tier}</span>
+              </div>
+              {item.potentialAdversaries && item.potentialAdversaries.length > 0 && (
+                <div>
+                  <strong>Potential Adversaries:</strong>
+                  <div style={{
+                    marginTop: '0.25rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.125rem'
+                  }}>
+                    {item.potentialAdversaries.map((adversary, index) => (
+                      <div key={index} style={{
+                        fontSize: '0.75rem',
+                        color: 'var(--text-secondary)',
+                        marginLeft: '0.5rem'
+                      }}>
+                        • {adversary}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Features Section - Organized by Type */}
+          {item.features && item.features.length > 0 && (
+            <div style={{
+              marginBottom: '1rem'
+            }}>
+              {/* Passives */}
+              {item.features.filter(f => f.type === 'Passive').length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    marginBottom: '0.75rem'
+                  }}>
+                    <h4 style={{
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      margin: 0,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      Passives
+                    </h4>
+                    <hr style={{
+                      flex: 1,
+                      border: 'none',
+                      borderTop: '1px solid var(--border)',
+                      margin: 0
+                    }} />
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
+                  }}>
+                    {item.features.filter(f => f.type === 'Passive').map((feature, index) => (
+                      <div key={index} style={{
+                        fontSize: '0.875rem',
+                        lineHeight: 1.4,
+                        color: 'var(--text-secondary)'
+                      }}>
+                        <div style={{ 
+                          fontWeight: 600, 
+                          color: 'var(--text-primary)',
+                          marginBottom: '0.25rem'
+                        }}>
+                          {feature.name}
+                        </div>
+                        <div style={{ marginBottom: '0.25rem' }}>
+                          {feature.description}
+                        </div>
+                        {feature.details && feature.details.length > 0 && (
+                          <div style={{ marginLeft: '0.5rem' }}>
+                            <strong>Details:</strong>
+                            <ul style={{ 
+                              margin: '0.25rem 0 0 0', 
+                              paddingLeft: '1rem',
+                              fontSize: '0.75rem'
+                            }}>
+                              {feature.details.map((detail, detailIndex) => (
+                                <li key={detailIndex}>{detail}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {feature.prompts && feature.prompts.length > 0 && (
+                          <div style={{ marginLeft: '0.5rem' }}>
+                            <strong>Prompts:</strong>
+                            <ul style={{ 
+                              margin: '0.25rem 0 0 0', 
+                              paddingLeft: '1rem',
+                              fontSize: '0.75rem'
+                            }}>
+                              {feature.prompts.map((prompt, promptIndex) => (
+                                <li key={promptIndex} style={{ fontStyle: 'italic' }}>
+                                  "{prompt}"
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              {item.features.filter(f => f.type === 'Action').length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    marginBottom: '0.75rem'
+                  }}>
+                    <h4 style={{
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      margin: 0,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      Actions
+                    </h4>
+                    <hr style={{
+                      flex: 1,
+                      border: 'none',
+                      borderTop: '1px solid var(--border)',
+                      margin: 0
+                    }} />
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
+                  }}>
+                    {item.features.filter(f => f.type === 'Action').map((feature, index) => (
+                      <div key={index} style={{
+                        fontSize: '0.875rem',
+                        lineHeight: 1.4,
+                        color: 'var(--text-secondary)'
+                      }}>
+                        <div style={{ 
+                          fontWeight: 600, 
+                          color: 'var(--text-primary)',
+                          marginBottom: '0.25rem'
+                        }}>
+                          {feature.name}
+                        </div>
+                        <div style={{ marginBottom: '0.25rem' }}>
+                          {feature.description}
+                        </div>
+                        {feature.details && feature.details.length > 0 && (
+                          <div style={{ marginLeft: '0.5rem' }}>
+                            <strong>Details:</strong>
+                            <ul style={{ 
+                              margin: '0.25rem 0 0 0', 
+                              paddingLeft: '1rem',
+                              fontSize: '0.75rem'
+                            }}>
+                              {feature.details.map((detail, detailIndex) => (
+                                <li key={detailIndex}>{detail}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {feature.prompts && feature.prompts.length > 0 && (
+                          <div style={{ marginLeft: '0.5rem' }}>
+                            <strong>Prompts:</strong>
+                            <ul style={{ 
+                              margin: '0.25rem 0 0 0', 
+                              paddingLeft: '1rem',
+                              fontSize: '0.75rem'
+                            }}>
+                              {feature.prompts.map((prompt, promptIndex) => (
+                                <li key={promptIndex} style={{ fontStyle: 'italic' }}>
+                                  "{prompt}"
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Reactions */}
+              {item.features.filter(f => f.type === 'Reaction').length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    marginBottom: '0.75rem'
+                  }}>
+                    <h4 style={{
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      margin: 0,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      Reactions
+                    </h4>
+                    <hr style={{
+                      flex: 1,
+                      border: 'none',
+                      borderTop: '1px solid var(--border)',
+                      margin: 0
+                    }} />
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
+                  }}>
+                    {item.features.filter(f => f.type === 'Reaction').map((feature, index) => (
+                      <div key={index} style={{
+                        fontSize: '0.875rem',
+                        lineHeight: 1.4,
+                        color: 'var(--text-secondary)'
+                      }}>
+                        <div style={{ 
+                          fontWeight: 600, 
+                          color: 'var(--text-primary)',
+                          marginBottom: '0.25rem'
+                        }}>
+                          {feature.name}
+                        </div>
+                        <div style={{ marginBottom: '0.25rem' }}>
+                          {feature.description}
+                        </div>
+                        {feature.details && feature.details.length > 0 && (
+                          <div style={{ marginLeft: '0.5rem' }}>
+                            <strong>Details:</strong>
+                            <ul style={{ 
+                              margin: '0.25rem 0 0 0', 
+                              paddingLeft: '1rem',
+                              fontSize: '0.75rem'
+                            }}>
+                              {feature.details.map((detail, detailIndex) => (
+                                <li key={detailIndex}>{detail}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {feature.prompts && feature.prompts.length > 0 && (
+                          <div style={{ marginLeft: '0.5rem' }}>
+                            <strong>Prompts:</strong>
+                            <ul style={{ 
+                              margin: '0.25rem 0 0 0', 
+                              paddingLeft: '1rem',
+                              fontSize: '0.75rem'
+                            }}>
+                              {feature.prompts.map((prompt, promptIndex) => (
+                                <li key={promptIndex} style={{ fontStyle: 'italic' }}>
+                                  "{prompt}"
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
   // MAIN RENDER
   // ============================================================================
 
@@ -1846,19 +2398,29 @@ const GameCard = ({
     return renderExpandedAdversary()
   }
 
-  // For other modes, only support compact mode
+  // Render expanded view for environments
+  if ((mode === 'expanded' || mode === 'edit') && (type === 'environment' || type === 'environments')) {
+    return renderExpandedEnvironment()
+  }
+
+  // For other modes, show coming soon message for unsupported types
   if (mode !== 'compact') {
-    return (
-      <div className={getCardClassName()} style={getCardStyle(true)}>
-        <div style={styles.rowMain}>
-          <h4 style={styles.rowTitle}>{renderTitle()}</h4>
-          <div style={styles.rowMeta}>{renderMeta()}</div>
+    // Check if we have an expanded renderer for this type
+    const hasExpandedRenderer = (type === 'adversary' || type === 'adversaries' || type === 'environment' || type === 'environments')
+    
+    if (!hasExpandedRenderer) {
+      return (
+        <div className={getCardClassName()} style={getCardStyle(true)}>
+          <div style={styles.rowMain}>
+            <h4 style={styles.rowTitle}>{renderTitle()}</h4>
+            <div style={styles.rowMeta}>{renderMeta()}</div>
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
+            Expanded view coming soon for {type}
+          </p>
         </div>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
-          Expanded view coming soon for {type}
-        </p>
-      </div>
-    )
+      )
+    }
   }
 
   // For adversaries, use the improved compact layout
@@ -1972,16 +2534,7 @@ const GameCard = ({
             }}>
               {renderTitle()}
             </h4>
-            {item.type && (
-              <span style={{
-                fontSize: '0.75rem',
-                fontWeight: 500,
-                color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
-                letterSpacing: '0.5px'
-              }}>
-                {item.type}
-              </span>
-            )}
+            {/* Type badge removed for compact adversary view */}
           </div>
 
           {/* Right side - HP pips, Stress pips, Difficulty, Delete */}
@@ -2064,7 +2617,7 @@ const GameCard = ({
                 }}
                 title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
               >
-                <Shield 
+                <Hexagon 
                   size={32} 
                   strokeWidth={1}
                   style={{
@@ -2118,6 +2671,150 @@ const GameCard = ({
         
         {/* Damage Input Popup for Adversaries */}
         {renderDamageInput()}
+      </div>
+    )
+  }
+
+  // For environments, use a custom compact layout similar to adversaries
+  if (type === 'environment' || type === 'environments') {
+    const showDrag = !!(dragAttributes && dragListeners)
+    
+    return (
+      <div
+        className={getCardClassName()}
+        style={{
+          ...getCardStyle(),
+          paddingLeft: showDrag ? '2.25rem' : '0.75rem',
+          position: 'relative'
+        }}
+        onClick={onClick}
+        {...(mode !== 'expanded' && {
+          onMouseEnter: handleMouseEnter,
+          onMouseLeave: handleMouseLeave
+        })}
+        {...dragAttributes}
+        {...dragListeners}
+      >
+        {showDrag && (
+          <div 
+            style={{
+              position: 'absolute',
+              left: '0.5rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'var(--text-secondary)',
+              cursor: 'grab',
+              fontSize: '0.875rem',
+              lineHeight: 1,
+              padding: '0.25rem',
+              borderRadius: '0.5rem',
+              transition: 'all 0.2s ease'
+            }}
+            {...dragAttributes} 
+            {...dragListeners}
+          >
+            ⋮⋮
+          </div>
+        )}
+        
+        {/* Main Row - Name/Type/Tier on left, Delete on right */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '0.5rem',
+          position: 'relative'
+        }}>
+          {/* Left side - Name, Tier, and Type */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '0.25rem'
+          }}>
+            <h4 style={styles.rowTitle}>
+              {renderTitle()}
+            </h4>
+            {item.type && (
+              <span style={{
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                color: 'var(--text-secondary)',
+                letterSpacing: '0.5px'
+              }}>
+                {item.type}
+              </span>
+            )}
+          </div>
+
+          {/* Right side - Difficulty and Delete */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            {/* Difficulty Badge */}
+            {item.difficulty && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative'
+              }}>
+                <Hexagon 
+                  size={32}
+                  strokeWidth={1}
+                  style={{
+                    color: 'var(--text-secondary)'
+                  }}
+                />
+                <span style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: 'var(--text-primary)',
+                  pointerEvents: 'none'
+                }}>
+                  {item.difficulty}
+                </span>
+              </div>
+            )}
+
+            {/* Delete Button */}
+            {dragAttributes && dragListeners && (
+              <button
+                className="border rounded-md"
+                style={{
+                  background: 'var(--gray-800)',
+                  borderColor: 'var(--border)',
+                  padding: '0.25rem',
+                  minWidth: '1.5rem',
+                  height: '1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.1s ease',
+                  color: 'var(--text-primary)',
+                  fontSize: '1rem'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  onDelete && onDelete(item.id)
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'var(--gray-700)'}
+                onMouseLeave={(e) => e.target.style.background = 'var(--gray-800)'}
+                title="Delete environment"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     )
   }
