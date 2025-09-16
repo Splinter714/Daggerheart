@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback, startTransition } from 'react'
 import { GameStateProvider, useGameState } from '../state/state'
 import Pips from './Pips'
-import HelpButton from './HelpButton'
-import DeleteClear from './DeleteClear'
-import GlobalEdit from './GlobalEdit'
+import FloatingMenu from './FloatingMenu'
 import Bar from './Toolbars'
 import Panel from './Panels'
 import GameBoard from './GameBoard'
@@ -403,17 +401,6 @@ const LayoutContent = () => {
 
       {/* Bottom Bar */}
       <Bar position="bottom">
-        <DeleteClear
-          adversaries={adversaries}
-          environments={environments}
-          countdowns={countdowns}
-          deleteAdversary={deleteAdversary}
-          deleteEnvironment={deleteEnvironment}
-          deleteCountdown={deleteCountdown}
-          isClearMode={isClearMode}
-          setIsClearMode={setIsClearMode}
-        />
-        
         {/* Fear Bar - Center of bottom bar (mobile only) */}
         {isMobile && (
           <Pips 
@@ -427,9 +414,19 @@ const LayoutContent = () => {
             centerPips={true}
           />
         )}
-        
-        <HelpButton />
       </Bar>
+
+      {/* Floating Menu */}
+      <FloatingMenu
+        adversaries={adversaries}
+        environments={environments}
+        countdowns={countdowns}
+        deleteAdversary={deleteAdversary}
+        deleteEnvironment={deleteEnvironment}
+        deleteCountdown={deleteCountdown}
+        isClearMode={isClearMode}
+        setIsClearMode={setIsClearMode}
+      />
 
       {/* Main Content Area */}
       <div className="main-content" key={`mobile-${isMobile}`}>
