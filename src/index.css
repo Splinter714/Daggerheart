@@ -587,7 +587,7 @@ input[type="number"] {
 @media (max-width: 800px) {
   .mobile-drawer {
     position: fixed;
-    top: 0; /* Start from top since fear bar is now at bottom */
+    top: 0;
     bottom: 0;
     left: 0;
     right: 0;
