@@ -8,7 +8,7 @@ const GlobalEdit = ({
 }) => {
   const baseStyle = {
     backgroundColor: isEditMode ? 'var(--purple)' : 'transparent',
-    border: isEditMode ? '1px solid var(--purple)' : '1px solid transparent',
+    border: 'none',
     borderRadius: 'var(--radius-md)',
     padding: '0.75rem',
     cursor: 'pointer',
@@ -36,13 +36,11 @@ const GlobalEdit = ({
       onMouseEnter={(e) => {
         if (!isEditMode) {
           e.target.style.backgroundColor = 'var(--bg-secondary)'
-          e.target.style.borderColor = 'var(--border)'
         }
       }}
       onMouseLeave={(e) => {
         if (!isEditMode) {
           e.target.style.backgroundColor = 'transparent'
-          e.target.style.borderColor = 'transparent'
         }
       }}
     >

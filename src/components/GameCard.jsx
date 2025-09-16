@@ -598,11 +598,11 @@ const styles = {
     borderStyle: 'solid',
     borderColor: 'var(--border)',
     borderRadius: '8px',
-    padding: '16px',
+    padding: '8px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
-    minWidth: '200px'
+    gap: '8px',
+    minWidth: '120px'
   },
   damageInput: {
     backgroundColor: 'var(--gray-900)',
@@ -610,9 +610,11 @@ const styles = {
     borderStyle: 'solid',
     borderColor: 'var(--border)',
     borderRadius: '4px',
-    padding: '8px',
+    padding: '4px 6px',
     color: 'var(--text-primary)',
-    fontSize: '14px'
+    fontSize: '12px',
+    width: '60px',
+    textAlign: 'center'
   },
   damageIndicators: {
     display: 'flex',
@@ -994,7 +996,7 @@ const GameCard = ({
               }}
               title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
             >
-              <div className="border rounded-md" style={{
+              <div className="border rounded-sm" style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.25rem',
@@ -1483,7 +1485,7 @@ const GameCard = ({
             {/* Delete Button */}
             {showDrag && (
               <button
-                className="border rounded-md"
+                className="border rounded-sm"
                 style={{
                   background: 'var(--red)',
                   borderColor: 'var(--red)',
@@ -2015,7 +2017,7 @@ const GameCard = ({
               {/* Delete Button */}
               {showDrag && (
                 <button
-                  className="border rounded-md"
+                  className="border rounded-sm"
                   style={{
                     background: 'var(--red)',
                     borderColor: 'var(--red)',
@@ -2722,7 +2724,7 @@ const GameCard = ({
             {console.log('Delete button check:', { onDelete: !!onDelete, isEditMode, shouldShow: onDelete && isEditMode })}
             {onDelete && isEditMode && (
               <button
-                className="border rounded-md"
+                className="border rounded-sm"
                 style={{
                   background: 'var(--red)',
                   borderColor: 'var(--red)',
@@ -2892,7 +2894,7 @@ const GameCard = ({
             {console.log('Delete button check:', { onDelete: !!onDelete, isEditMode, shouldShow: onDelete && isEditMode })}
             {onDelete && isEditMode && (
               <button
-                className="border rounded-md"
+                className="border rounded-sm"
                 style={{
                   background: 'var(--red)',
                   borderColor: 'var(--red)',
