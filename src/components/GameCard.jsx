@@ -1248,18 +1248,24 @@ const GameCard = ({
             <button
               style={{
                 ...styles.applyButton,
-                backgroundColor: (!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? 'var(--gray-600)' : 'var(--gray-600)'
+                backgroundColor: 'var(--gray-600)'
               }}
               onClick={(e) => {
                 e.stopPropagation()
                 if (type === 'adversary' || type === 'adversaries') {
-                  adversaryLogic.applyDamage()
+                  if (!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) {
+                    // Close damage input if no damage entered
+                    adversaryLogic.setShowDamageInput(false)
+                    adversaryLogic.setDamageValue('')
+                  } else {
+                    // Apply damage if damage entered
+                    adversaryLogic.applyDamage()
+                  }
                 }
               }}
-              title="Apply damage"
-              disabled={!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1}
+              title={(!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? 'Close damage input' : 'Apply damage'}
             >
-              <CheckCircle size={16} />
+              {(!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? <X size={16} /> : <CheckCircle size={16} />}
             </button>
           </div>
         </div>
