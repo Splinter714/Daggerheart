@@ -1421,7 +1421,7 @@ const GameCard = ({
                 }}
                 containerStyle={{
                   cursor: 'pointer',
-                  padding: '0.0625rem',
+                  padding: '0.5rem 0.25rem', // Expanded padding for generous tap target
                   borderRadius: '0.125rem',
                   transition: 'all 0.2s ease'
                 }}
@@ -1459,12 +1459,28 @@ const GameCard = ({
             </div>
 
             {/* Difficulty and Type Badge Group */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.25rem'
-            }}>
+            <div 
+              onClick={adversaryLogic.handleDifficultyClick}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.25rem',
+                cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
+                padding: '0.5rem', // Generous tap target
+                borderRadius: '0.25rem',
+                transition: 'background-color 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                if ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') {
+                  e.target.style.backgroundColor = 'var(--gray-800)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'transparent'
+              }}
+              title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
+            >
               {/* Type Badge */}
               {item.type && (
                 <span style={{
@@ -1485,15 +1501,12 @@ const GameCard = ({
               {/* Difficulty Badge */}
               {item.difficulty && (
                 <div 
-                  onClick={adversaryLogic.handleDifficultyClick}
                   style={{
-                    cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative'
                   }}
-                  title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
                 >
                   <Hexagon 
                     size={32} 
@@ -2663,7 +2676,7 @@ const GameCard = ({
                 }}
                 containerStyle={{
                   cursor: 'pointer',
-                  padding: '0.0625rem',
+                  padding: '0.5rem 0.25rem', // Expanded padding for generous tap target
                   borderRadius: '0.125rem',
                   transition: 'all 0.2s ease'
                 }}
@@ -2701,12 +2714,28 @@ const GameCard = ({
             </div>
 
             {/* Difficulty and Type Badge Group */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.25rem'
-            }}>
+            <div 
+              onClick={adversaryLogic.handleDifficultyClick}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.25rem',
+                cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
+                padding: '0.5rem', // Generous tap target
+                borderRadius: '0.25rem',
+                transition: 'background-color 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                if ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') {
+                  e.target.style.backgroundColor = 'var(--gray-800)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'transparent'
+              }}
+              title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
+            >
               {/* Type Badge */}
               {item.type && (
                 <span style={{
@@ -2727,15 +2756,12 @@ const GameCard = ({
               {/* Difficulty Badge */}
               {item.difficulty && (
                 <div 
-                  onClick={adversaryLogic.handleDifficultyClick}
                   style={{
-                    cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative'
                   }}
-                  title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
                 >
                   <Hexagon 
                     size={32} 

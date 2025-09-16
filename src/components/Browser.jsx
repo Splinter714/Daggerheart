@@ -813,8 +813,8 @@ const styles = {
     borderBottom: '1px solid var(--border)'
   },
   addButton: {
-    width: '1.5rem', // 24px - matches GameBoard purple button
-    height: '1.5rem', // 24px - matches GameBoard purple button
+    width: '2rem', // Increased from 1.5rem to 2rem (32px) for better tap target
+    height: '2rem', // Increased from 1.5rem to 2rem (32px) for better tap target
     border: '1px solid var(--purple)',
     borderRadius: 'var(--radius-sm)',
     background: 'var(--purple)',
@@ -824,7 +824,7 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '14px',
+    fontSize: '16px', // Increased from 14px to 16px
     fontWeight: '500'
   },
   expandedContent: {
@@ -860,7 +860,7 @@ const styles = {
     textOverflow: 'unset' // No ellipsis for text
   },
   columnAction: {
-    width: '24px', // Add button column - just enough for the 24px button
+    width: '32px', // Add button column - increased to accommodate 32px button
     minWidth: '24px',
     maxWidth: '24px',
     textAlign: 'center',
