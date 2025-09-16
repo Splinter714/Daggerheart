@@ -746,7 +746,7 @@ const styles = {
     zIndex: 10
   },
   tableHeaderCell: {
-    backgroundColor: 'var(--bg-secondary)',
+    backgroundColor: 'var(--gray-800)',
     fontWeight: '700',
     borderBottom: '1px solid var(--border)',
     cursor: 'pointer',
@@ -780,7 +780,7 @@ const styles = {
     borderBottom: '1px solid var(--border)',
     transition: 'background-color 0.2s ease',
     cursor: 'pointer',
-    backgroundColor: 'var(--bg-primary)'
+    backgroundColor: 'var(--gray-900)'
   },
   rowHover: {
     backgroundColor: 'var(--bg-secondary)'
