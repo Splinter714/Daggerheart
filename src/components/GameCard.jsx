@@ -630,7 +630,7 @@ const styles = {
     transition: 'color 0.1s ease'
   },
   applyButton: {
-    backgroundColor: 'var(--red)',
+    backgroundColor: 'var(--gray-600)',
     color: 'white',
     borderWidth: '0',
     borderStyle: 'none',
@@ -1165,7 +1165,7 @@ const GameCard = ({
             inputMode="numeric"
             enterKeyHint="done"
             placeholder="dmg"
-            min={item.type === 'Minion' ? "1" : "0"}
+            min={item.type === 'Minion' ? "0" : "0"}
             value={(type === 'adversary' || type === 'adversaries') ? adversaryLogic.damageValue : ''}
             onChange={(e) => {
               if (type === 'adversary' || type === 'adversaries') {
@@ -1193,7 +1193,7 @@ const GameCard = ({
                     <span 
                       style={{
                         ...styles.damageDrop,
-                        color: 'var(--success)'
+                        color: 'var(--red)'
                       }}
                       title={`${damage} damage can defeat ${additionalMinions + 1} minion${additionalMinions + 1 !== 1 ? 's' : ''} (1 + ${additionalMinions} additional)`}
                     >
@@ -1248,7 +1248,7 @@ const GameCard = ({
             <button
               style={{
                 ...styles.applyButton,
-                backgroundColor: (!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? 'var(--gray-600)' : 'var(--red)'
+                backgroundColor: (!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? 'var(--gray-600)' : 'var(--gray-600)'
               }}
               onClick={(e) => {
                 e.stopPropagation()
