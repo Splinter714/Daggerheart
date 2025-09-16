@@ -74,9 +74,10 @@ const HelpButton = () => {
       </div>
       <div style={{
         position: 'absolute',
-        bottom: '100%',
-        right: '0',
+        top: '50%',
+        right: '100%',
         left: 'auto',
+        transform: 'translateY(-50%)',
         background: 'var(--bg-primary)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)',
@@ -88,7 +89,7 @@ const HelpButton = () => {
         pointerEvents: helpFlyoutOpen ? 'auto' : 'none',
         minWidth: '280px',
         maxWidth: isMobile ? 'calc(100vw - 2rem)' : '320px',
-        marginBottom: isMobile ? '0.5rem' : '0'
+        marginRight: '0.5rem'
       }}>
         {/* DPCGL Attribution */}
         <div style={{

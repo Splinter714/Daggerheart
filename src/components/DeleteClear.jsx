@@ -40,9 +40,10 @@ const DeleteClear = ({
 
   const flyoutStyle = {
     position: 'absolute',
-    bottom: '100%',
-    right: '0',
+    top: '50%',
+    right: '100%',
     left: 'auto',
+    transform: 'translateY(-50%)',
     backgroundColor: 'var(--bg-secondary)',
     border: '1px solid var(--border)',
     borderRadius: 'var(--radius-md)',
@@ -50,7 +51,8 @@ const DeleteClear = ({
     minWidth: '200px',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
     zIndex: 1000,
-    display: deleteFlyoutOpen ? 'block' : 'none'
+    display: deleteFlyoutOpen ? 'block' : 'none',
+    marginRight: '0.5rem'
   }
 
   const buttonStyle = {
