@@ -1474,8 +1474,9 @@ const GameCard = ({
                   letterSpacing: '0.5px',
                   textAlign: 'center',
                   lineHeight: 1,
-                  width: '40px', // Fixed width to prevent variable spacing
-                  display: 'block'
+                  width: '50px', // Increased width to accommodate "Standard" (8 chars)
+                  display: 'block',
+                  paddingLeft: 0 // Remove any left padding
                 }}>
                   {item.type}
                 </span>
@@ -2715,8 +2716,9 @@ const GameCard = ({
                   letterSpacing: '0.5px',
                   textAlign: 'center',
                   lineHeight: 1,
-                  width: '40px', // Fixed width to prevent variable spacing
-                  display: 'block'
+                  width: '50px', // Increased width to accommodate "Standard" (8 chars)
+                  display: 'block',
+                  paddingLeft: 0 // Remove any left padding
                 }}>
                   {item.type}
                 </span>
@@ -2920,8 +2922,9 @@ const GameCard = ({
                   letterSpacing: '0.5px',
                   textAlign: 'center',
                   lineHeight: 1,
-                  width: '40px', // Fixed width to prevent variable spacing
-                  display: 'block'
+                  width: '50px', // Increased width to accommodate "Standard" (8 chars)
+                  display: 'block',
+                  paddingLeft: 0 // Remove any left padding
                 }}>
                   {item.type}
                 </span>
