@@ -402,11 +402,12 @@ const LayoutContent = () => {
       {/* Bottom Bar */}
       <div className="bottom-bar-container">
         <Bar position="bottom">
-          <GlobalEdit 
-            isEditMode={isEditMode}
-            setIsEditMode={setIsEditMode}
-            disabled={isClearMode}
-          />
+          {!isClearMode && (
+            <GlobalEdit 
+              isEditMode={isEditMode}
+              setIsEditMode={setIsEditMode}
+            />
+          )}
           <DeleteClear
             adversaries={adversaries}
             environments={environments}

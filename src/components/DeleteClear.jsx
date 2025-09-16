@@ -17,11 +17,15 @@ const DeleteClear = ({
     const handleClickOutside = (event) => {
       if (!event.target.closest('.delete-clear-container')) {
         setDeleteFlyoutOpen(false)
+        // Also exit clear mode when clicking outside
+        if (isClearMode) {
+          setIsClearMode(false)
+        }
       }
     }
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
-  }, [])
+  }, [isClearMode])
 
   const hasAnyItems = (adversaries?.length || 0) > 0 || (environments?.length || 0) > 0 || (countdowns?.length || 0) > 0
   const hasDeadAdversaries = (adversaries || []).some(adv => (adv.hp || 0) >= (adv.hpMax || 1))
@@ -82,8 +86,9 @@ const DeleteClear = ({
           e.stopPropagation()
           if (hasAnyItems) {
             if (isClearMode) {
-              // If already in clear mode, toggle the flyout
-              setDeleteFlyoutOpen(!deleteFlyoutOpen)
+              // If already in clear mode, exit clear mode
+              setIsClearMode(false)
+              setDeleteFlyoutOpen(false)
             } else {
               // Enter clear mode
               setIsClearMode(true)
@@ -96,21 +101,6 @@ const DeleteClear = ({
       </button>
       
       <div style={flyoutStyle}>
-        {isClearMode && (
-          <button 
-            style={flyoutItemStyle}
-            onMouseEnter={(e) => Object.assign(e.target.style, flyoutItemHoverStyle)}
-            onMouseLeave={(e) => Object.assign(e.target.style, flyoutItemStyle)}
-            onClick={(e) => { 
-              e.stopPropagation()
-              setIsClearMode(false)
-              setDeleteFlyoutOpen(false)
-            }}
-          >
-            <span>✓</span>
-            <span>Exit Clear Mode</span>
-          </button>
-        )}
         {(adversaries && adversaries.length > 0) && (
           <button 
             style={flyoutItemStyle}
