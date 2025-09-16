@@ -1170,6 +1170,7 @@ const GameCard = ({
             enterKeyHint="done"
             placeholder="dmg"
             min={item.type === 'Minion' ? "0" : "0"}
+            defaultValue=""
             value={(type === 'adversary' || type === 'adversaries') ? adversaryLogic.damageValue : ''}
             onChange={(e) => {
               if (type === 'adversary' || type === 'adversaries') {
