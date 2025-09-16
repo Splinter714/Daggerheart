@@ -177,6 +177,7 @@ const LayoutContent = () => {
     updateAdversary,
     deleteAdversary,
     reorderAdversaries,
+    bulkReorderAdversaries,
     createEnvironment,
     updateEnvironment,
     deleteEnvironment,
@@ -353,32 +354,9 @@ const LayoutContent = () => {
 
   // Sort adversaries by type then by name (including duplicate numbers)
   const sortAdversaries = useCallback((sortedAdversaries) => {
-    // Create a mapping of adversary ID to new position
-    const newPositions = {}
-    sortedAdversaries.forEach((adv, index) => {
-      newPositions[adv.id] = index
-    })
-    
-    // Get current adversaries and sort them to match the new order
-    const currentAdversaries = [...adversaries]
-    const reorderedAdversaries = []
-    
-    // Add adversaries in the new order
-    sortedAdversaries.forEach(sortedAdv => {
-      const currentAdv = currentAdversaries.find(adv => adv.id === sortedAdv.id)
-      if (currentAdv) {
-        reorderedAdversaries.push(currentAdv)
-      }
-    })
-    
-    // Apply reordering by moving each adversary to its new position
-    reorderedAdversaries.forEach((adv, newIndex) => {
-      const oldIndex = currentAdversaries.findIndex(a => a.id === adv.id)
-      if (oldIndex !== newIndex && oldIndex !== -1) {
-        reorderAdversaries([oldIndex, newIndex])
-      }
-    })
-  }, [adversaries, reorderAdversaries])
+    // Simple approach: directly update the adversaries array
+    bulkReorderAdversaries(sortedAdversaries)
+  }, [bulkReorderAdversaries])
   
   // Toggle visibility handlers
   const handleToggleVisibility = (id, type, currentVisibility) => {

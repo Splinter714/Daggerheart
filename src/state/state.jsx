@@ -89,7 +89,8 @@ export const GameStateProvider = ({ children }) => {
     createAdversary,
     updateAdversary,
     deleteAdversary,
-    reorderAdversaries
+    reorderAdversaries,
+    bulkReorderAdversaries
   } = adversaryActions
 
   const {
@@ -117,6 +118,7 @@ export const GameStateProvider = ({ children }) => {
     updateAdversary,
     deleteAdversary,
     reorderAdversaries,
+    bulkReorderAdversaries,
     // Environment actions
     createEnvironment,
     updateEnvironment,

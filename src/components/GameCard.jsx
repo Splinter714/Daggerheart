@@ -84,7 +84,14 @@ export const buildAdversaryActions = (getGameState, setGameState) => {
     })
   }
 
-  return { createAdversary, updateAdversary, deleteAdversary, reorderAdversaries }
+  const bulkReorderAdversaries = (newOrder) => {
+    setGameState(prev => ({
+      ...prev,
+      adversaries: newOrder
+    }))
+  }
+
+  return { createAdversary, updateAdversary, deleteAdversary, reorderAdversaries, bulkReorderAdversaries }
 }
 
 export const buildCountdownActions = (setGameState) => {
