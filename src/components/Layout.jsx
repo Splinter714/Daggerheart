@@ -414,7 +414,9 @@ const LayoutContent = () => {
               height: 'var(--topbar-height)',
               touchAction: 'manipulation',
               userSelect: 'none',
-              order: 1
+              order: 1,
+              backgroundColor: 'var(--bg-primary)',
+              borderBottom: '1px solid var(--border)'
             }}
           >
             <Pips 
@@ -430,7 +432,7 @@ const LayoutContent = () => {
           </Bar>
         )}
         
-        <Bar position="bottom">
+        <Bar position="bottom" style={{ order: 2 }}>
           <DeleteClear
             adversaries={adversaries}
             environments={environments}
