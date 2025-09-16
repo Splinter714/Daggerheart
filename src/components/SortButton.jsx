@@ -13,18 +13,22 @@ const SortButton = ({ adversaries, onSortAdversaries }) => {
     const sortedAdversaries = [...adversaries].sort((a, b) => {
       // Define type priority order
       const typePriority = {
-        'Leader': 1,
-        'Bruiser': 2,
-        'Horde': 3,
-        'Ranged': 4,
-        'Standard': 5,
-        'Other': 6,
-        'Minion': 7
+        'Solo': 1,
+        'Leader': 2,
+        'Bruiser': 3,
+        'Horde': 4,
+        'Skulk': 5,
+        'Ranged': 6,
+        'Support': 7,
+        'Standard': 8,
+        'Other': 9,
+        'Minion': 10,
+        'Social': 11
       }
       
       // Primary sort by type priority
-      const priorityA = typePriority[a.type] || 6 // Default to 'Other' priority
-      const priorityB = typePriority[b.type] || 6 // Default to 'Other' priority
+      const priorityA = typePriority[a.type] || 9 // Default to 'Other' priority
+      const priorityB = typePriority[b.type] || 9 // Default to 'Other' priority
       
       if (priorityA !== priorityB) {
         return priorityA - priorityB
