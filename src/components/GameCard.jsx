@@ -1432,7 +1432,7 @@ const GameCard = ({
                   cursor: 'pointer',
                   padding: '0.5rem 0.25rem 0.25rem 0.25rem', // More top padding for HP pips
                   borderRadius: '0.125rem',
-                  transition: 'all 0.2s ease'
+                  transition: 'none' // Remove transition to prevent flashing
                 }}
                 pipStyle={{
                   fontSize: '0.75rem'
@@ -1456,7 +1456,7 @@ const GameCard = ({
                     cursor: 'pointer',
                     padding: '0.25rem 0.25rem 0.5rem 0.25rem', // More bottom padding for stress pips
                     borderRadius: '0.125rem',
-                    transition: 'all 0.2s ease'
+                    transition: 'none' // Remove transition to prevent flashing
                   }}
                   pipStyle={{
                     fontSize: '0.75rem'
@@ -2692,7 +2692,7 @@ const GameCard = ({
                   cursor: 'pointer',
                   padding: '0.5rem 0.25rem 0.25rem 0.25rem', // More top padding for HP pips
                   borderRadius: '0.125rem',
-                  transition: 'all 0.2s ease'
+                  transition: 'none' // Remove transition to prevent flashing
                 }}
                 pipStyle={{
                   fontSize: '0.75rem'
@@ -2716,7 +2716,7 @@ const GameCard = ({
                     cursor: 'pointer',
                     padding: '0.25rem 0.25rem 0.5rem 0.25rem', // More bottom padding for stress pips
                     borderRadius: '0.125rem',
-                    transition: 'all 0.2s ease'
+                    transition: 'none' // Remove transition to prevent flashing
                   }}
                   pipStyle={{
                     fontSize: '0.75rem'
