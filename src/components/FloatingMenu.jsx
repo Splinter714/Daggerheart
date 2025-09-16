@@ -32,7 +32,7 @@ const FloatingMenu = ({
 
   const containerStyle = {
     position: 'fixed',
-    bottom: 'calc(60px + env(safe-area-inset-bottom) + 1rem)',
+    bottom: 'calc(60px + env(safe-area-inset-bottom) + 2rem)',
     right: '1rem',
     zIndex: 1000,
     display: 'flex',
