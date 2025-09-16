@@ -38,6 +38,21 @@ const FloatingMenu = ({
     }
   }, [isOpen])
 
+  // Ensure only one popup is open at a time
+  const handleHelpFlyoutChange = (isOpen) => {
+    setShowHelpFlyout(isOpen)
+    if (isOpen) {
+      setShowDeleteFlyout(false) // Close delete flyout if help opens
+    }
+  }
+
+  const handleDeleteFlyoutChange = (isOpen) => {
+    setShowDeleteFlyout(isOpen)
+    if (isOpen) {
+      setShowHelpFlyout(false) // Close help flyout if delete opens
+    }
+  }
+
   // Detect if running as PWA
   const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
                  window.navigator.standalone === true ||
@@ -105,7 +120,10 @@ const FloatingMenu = ({
       <div style={menuItemsStyle}>
         {/* Help Button */}
         <div style={menuItemStyle}>
-          <HelpButton />
+          <HelpButton 
+            showFlyout={showHelpFlyout}
+            onFlyoutChange={handleHelpFlyoutChange}
+          />
         </div>
         
         {/* Clear Button */}
@@ -119,6 +137,8 @@ const FloatingMenu = ({
             deleteCountdown={deleteCountdown}
             isClearMode={isClearMode}
             setIsClearMode={setIsClearMode}
+            showFlyout={showDeleteFlyout}
+            onFlyoutChange={handleDeleteFlyoutChange}
           />
         </div>
       </div>
