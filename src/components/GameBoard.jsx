@@ -482,7 +482,7 @@ const GameBoard = ({
         /> */}
 
         {/* Adversaries section - no header, just cards and add button */}
-        <div style={{marginBottom: '0.75rem'}}>
+        <div>
           {/* Always show adversaries list */}
           <ElementList
             items={adversaries}
