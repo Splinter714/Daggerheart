@@ -24,25 +24,37 @@ const FloatingMenu = ({
         setIsOpen(false)
         setShowHelpFlyout(false)
         setShowDeleteFlyout(false)
+        // Exit clear mode when clicking outside
+        if (isClearMode) {
+          setIsClearMode(false)
+        }
       }
     }
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
-  }, [])
+  }, [isClearMode, setIsClearMode])
 
   // Close popups when menu closes
   useEffect(() => {
     if (!isOpen) {
       setShowHelpFlyout(false)
       setShowDeleteFlyout(false)
+      // Exit clear mode when menu closes
+      if (isClearMode) {
+        setIsClearMode(false)
+      }
     }
-  }, [isOpen])
+  }, [isOpen, isClearMode, setIsClearMode])
 
   // Ensure only one popup is open at a time
   const handleHelpFlyoutChange = (isOpen) => {
     setShowHelpFlyout(isOpen)
     if (isOpen) {
       setShowDeleteFlyout(false) // Close delete flyout if help opens
+      // Exit clear mode when switching to help
+      if (isClearMode) {
+        setIsClearMode(false)
+      }
     }
   }
 
