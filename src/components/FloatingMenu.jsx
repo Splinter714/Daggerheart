@@ -30,6 +30,14 @@ const FloatingMenu = ({
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
+  // Close popups when menu closes
+  useEffect(() => {
+    if (!isOpen) {
+      setShowHelpFlyout(false)
+      setShowDeleteFlyout(false)
+    }
+  }, [isOpen])
+
   // Detect if running as PWA
   const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
                  window.navigator.standalone === true ||
@@ -52,7 +60,7 @@ const FloatingMenu = ({
     height: '56px',
     borderRadius: '50%',
     background: isOpen ? 'var(--red)' : 'var(--bg-secondary)',
-    border: '2px solid var(--border)',
+    border: isOpen ? '2px solid var(--text-primary)' : '2px solid var(--border)',
     color: isOpen ? 'white' : 'var(--text-primary)',
     display: 'flex',
     alignItems: 'center',

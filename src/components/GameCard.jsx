@@ -603,7 +603,11 @@ const styles = {
     flexDirection: 'row',
     gap: '8px',
     minWidth: '200px',
-    alignItems: 'center'
+    alignItems: 'center',
+    position: 'absolute',
+    right: '1rem',
+    top: '50%',
+    transform: 'translateY(-50%)'
   },
   damageInput: {
     backgroundColor: 'var(--gray-900)',
