@@ -26,7 +26,7 @@ const Bar = ({
     justifyContent: isTop ? 'stretch' : 'center',
     alignItems: isTop ? 'stretch' : 'center',
     gap: isTop ? '0' : '1rem',
-    height: isTop ? 'auto' : '100%',
+    height: isTop ? 'auto' : '60px',
     ...style
   }
 
