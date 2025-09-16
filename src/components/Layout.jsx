@@ -349,6 +349,16 @@ const LayoutContent = () => {
 
   // Adversary handlers
   const { handleAdversaryDamage, handleAdversaryHealing, handleAdversaryStressChange } = useAdversaryHandlers({ adversaries, updateAdversary, deleteAdversary, selectedItem, setSelectedItem })
+
+  // Sort adversaries by type then by name (including duplicate numbers)
+  const sortAdversaries = useCallback((sortedAdversaries) => {
+    // Update each adversary to maintain the new order
+    sortedAdversaries.forEach((adversary, index) => {
+      // We can use a simple approach: update each adversary with a sortOrder field
+      // or we can rely on the order in the array
+      updateAdversary(adversary.id, { sortOrder: index })
+    })
+  }, [updateAdversary])
   
   // Toggle visibility handlers
   const handleToggleVisibility = (id, type, currentVisibility) => {
@@ -426,6 +436,7 @@ const LayoutContent = () => {
         deleteCountdown={deleteCountdown}
         isClearMode={isClearMode}
         setIsClearMode={setIsClearMode}
+        sortAdversaries={sortAdversaries}
       />
 
       {/* Main Content Area */}
