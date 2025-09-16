@@ -100,40 +100,42 @@ const FloatingMenu = ({
     pointerEvents: 'auto'
   }
 
-  const menuItemsStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-    opacity: isOpen ? 1 : 0,
-    visibility: isOpen ? 'visible' : 'hidden',
-    transform: isOpen ? 'translateY(0)' : 'translateY(10px)',
-    transition: 'all 0.3s ease',
-    pointerEvents: isOpen ? 'auto' : 'none'
-  }
-
-  const menuItemStyle = {
-    width: '48px',
-    height: '48px',
-    borderRadius: '50%',
-    background: 'var(--bg-secondary)',
-    border: '1px solid var(--border)',
-    color: 'var(--text-primary)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-    transition: 'all 0.2s ease',
-    position: 'relative',
-    pointerEvents: 'auto'
+  // Radial positioning for menu items
+  const getRadialItemStyle = (index, totalItems) => {
+    const angle = (index * 90) / (totalItems - 1) - 45 // Spread from -45° to +45°
+    const radius = 80 // Distance from center
+    const radians = (angle * Math.PI) / 180
+    
+    const x = Math.sin(radians) * radius
+    const y = -Math.cos(radians) * radius
+    
+    return {
+      width: '48px',
+      height: '48px',
+      borderRadius: '50%',
+      background: 'var(--bg-secondary)',
+      border: '1px solid var(--border)',
+      color: 'var(--text-primary)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+      transition: 'all 0.3s ease',
+      position: 'absolute',
+      pointerEvents: 'auto',
+      transform: isOpen ? `translate(${x}px, ${y}px)` : 'translate(0px, 0px)',
+      opacity: isOpen ? 1 : 0,
+      visibility: isOpen ? 'visible' : 'hidden'
+    }
   }
 
   return (
     <div className="floating-menu-container" style={containerStyle}>
-      {/* Menu Items */}
-      <div style={menuItemsStyle}>
+      {/* Radial Menu Items */}
+      <div style={{ position: 'relative', width: '56px', height: '56px' }}>
         {/* Help Button */}
-        <div style={menuItemStyle}>
+        <div style={getRadialItemStyle(0, 3)}>
           <HelpButton 
             showFlyout={showHelpFlyout}
             onFlyoutChange={handleHelpFlyoutChange}
@@ -141,13 +143,15 @@ const FloatingMenu = ({
         </div>
         
         {/* Sort Button */}
-        <SortButton
-          adversaries={adversaries}
-          onSortAdversaries={sortAdversaries}
-        />
+        <div style={getRadialItemStyle(1, 3)}>
+          <SortButton
+            adversaries={adversaries}
+            onSortAdversaries={sortAdversaries}
+          />
+        </div>
         
         {/* Clear Button */}
-        <div style={menuItemStyle}>
+        <div style={getRadialItemStyle(2, 3)}>
           <DeleteClear
             adversaries={adversaries}
             environments={environments}

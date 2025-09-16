@@ -9,21 +9,47 @@ const SortButton = ({ adversaries, onSortAdversaries }) => {
     
     setIsSorting(true)
     
-    // Sort by type first, then by name (including duplicate numbers)
+    // Sort by type priority first, then by name (including duplicate numbers)
     const sortedAdversaries = [...adversaries].sort((a, b) => {
-      // First sort by type
-      const typeA = a.type || ''
-      const typeB = b.type || ''
-      
-      if (typeA !== typeB) {
-        return typeA.localeCompare(typeB)
+      // Define type priority order
+      const typePriority = {
+        'Leader': 1,
+        'Bruiser': 2,
+        'Horde': 3,
+        'Ranged': 4,
+        'Standard': 5,
+        'Other': 6,
+        'Minion': 7
       }
       
-      // If types are the same, sort by name (including duplicate numbers)
+      // Primary sort by type priority
+      const priorityA = typePriority[a.type] || 6 // Default to 'Other' priority
+      const priorityB = typePriority[b.type] || 6 // Default to 'Other' priority
+      
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB
+      }
+      
+      // Secondary sort by name (including duplicate numbers)
       const nameA = a.name || ''
       const nameB = b.name || ''
       
-      return nameA.localeCompare(nameB)
+      // Extract base name and duplicate number for robust sorting
+      const parseName = (name) => {
+        const match = name.match(/^(.*)\s\((\d+)\)$/)
+        if (match) {
+          return { base: match[1], num: parseInt(match[2]) }
+        }
+        return { base: name, num: 0 } // Assume 0 for non-duplicated names
+      }
+
+      const parsedA = parseName(nameA)
+      const parsedB = parseName(nameB)
+
+      if (parsedA.base < parsedB.base) return -1
+      if (parsedA.base > parsedB.base) return 1
+
+      return parsedA.num - parsedB.num
     })
     
     // Apply the sorted order
