@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, startTransition } from 'react'
+import { Clock } from 'lucide-react'
 import { GameStateProvider, useGameState } from '../state/state'
 import Pips from './Pips'
 import FloatingMenu from './FloatingMenu'
@@ -13,6 +14,7 @@ import GameCard, {
 import Drawer from './Drawer'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import Browser from './Browser'
+import PlayerView from './PlayerView'
 
 /**
  * Hook to sync right panel state with selected items
@@ -172,7 +174,10 @@ const LayoutContent = () => {
     environments,
     countdowns,
     fear,
+    gameState,
+    playerView,
     updateFear,
+    togglePlayerView,
     createAdversary,
     updateAdversary,
     deleteAdversary,
@@ -183,7 +188,9 @@ const LayoutContent = () => {
     deleteEnvironment,
     createCountdown,
     deleteCountdown,
-    advanceCountdown
+    advanceCountdown,
+    incrementCountdown,
+    decrementCountdown
   } = useGameState()
   
   // Right column state
@@ -199,6 +206,10 @@ const LayoutContent = () => {
   const [showMockup, setShowMockup] = useState(false)
   const [lastAddedItemType, setLastAddedItemType] = useState(null)
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+  
+  // Modal state for browser popup
+  const [browserModalOpen, setBrowserModalOpen] = useState(false)
+  const [browserModalType, setBrowserModalType] = useState('unified')
   
   // Touch gesture handling is now managed by the Drawer component itself
   
@@ -231,25 +242,11 @@ const LayoutContent = () => {
       browserType = 'environment'
     }
     
-    // If browser is already open for the same type, close it
-    if (rightColumnMode === 'database' && databaseType === browserType) {
-      startTransition(() => {
-        setRightColumnMode(null)
-        setDatabaseType('unified')
-        if (isMobile) {
-          setMobileDrawerOpen(false)
-        }
-      })
-    } else {
-      // Open database in right panel
-      startTransition(() => {
-        setDatabaseType(browserType)
-        setRightColumnMode('database')
-        if (isMobile) {
-          setMobileDrawerOpen(true)
-        }
-      })
-    }
+    // Open browser in modal popup
+    startTransition(() => {
+      setBrowserModalType(browserType)
+      setBrowserModalOpen(true)
+    })
   }
 
 
@@ -282,6 +279,11 @@ const LayoutContent = () => {
       setMobileDrawerOpen(false)
     }
   }, [isMobile])
+
+  const handleCloseBrowserModal = useCallback(() => {
+    setBrowserModalOpen(false)
+    setBrowserModalType('unified')
+  }, [])
 
 
 
@@ -381,20 +383,22 @@ const LayoutContent = () => {
       }}
     >
       
-        {/* Bottom Bar */}
-        <Bar position="bottom">
-          {/* Fear Bar - Always in bottom bar */}
-          <Pips
-            type="fear"
-            value={fear?.value || 0}
-            maxValue={12}
-            onChange={updateFear}
-            showTooltip={false}
-            enableBoundaryClick={true}
-            clickContainerWidth="100%"
-            centerPips={true}
-          />
-        </Bar>
+        {/* Bottom Bar - Hidden in player view */}
+        {!playerView && (
+          <Bar position="bottom">
+            {/* Fear Bar - Always in bottom bar */}
+            <Pips
+              type="fear"
+              value={fear?.value || 0}
+              maxValue={12}
+              onChange={updateFear}
+              showTooltip={false}
+              enableBoundaryClick={true}
+              clickContainerWidth="100%"
+              centerPips={true}
+            />
+          </Bar>
+        )}
 
       {/* Floating Menu */}
       <FloatingMenu
@@ -407,76 +411,320 @@ const LayoutContent = () => {
         isClearMode={isClearMode}
         setIsClearMode={setIsClearMode}
         sortAdversaries={sortAdversaries}
+        togglePlayerView={togglePlayerView}
+        playerView={playerView}
       />
 
       {/* Main Content Area */}
       <div className="main-content" key={`mobile-${isMobile}`}>
-        {/* Unified Layout - Reuse desktop structure for mobile */}
-        {/* Left Panel: Browser/Expanded View */}
-        <Panel 
-          side="left" 
-          className={`${isMobile && mobileView === 'right' ? 'mobile-hidden' : ''}`}
-          style={rightColumnMode === 'database' ? { overflowY: 'hidden' } : {}}
-        >
-          {rightColumnMode === 'database' && (
-            <div className="database-display">
-              <Browser
-                type={databaseType}
-                onAddItem={(itemData) => {
-                  if (databaseType === 'adversary') {
-                    createAdversary(itemData)
-                    setLastAddedItemType('adversary')
-                  } else if (databaseType === 'environment') {
-                    createEnvironment(itemData)
-                    setLastAddedItemType('environment')
+        {/* Player View - Only Fear and Countdowns */}
+        {playerView ? (
+          <PlayerView 
+            fear={fear}
+            countdowns={countdowns}
+            adversaries={adversaries}
+          />
+        ) : (
+          /* Three Column Layout using Panel components */
+          <div style={{
+            display: 'flex',
+            height: '100%',
+            width: '100%',
+            gap: '1rem'
+          }}>
+          {/* Left Panel: Environments */}
+          <Panel side="left" style={{ flex: '1', minWidth: '300px' }}>
+            <div style={{
+              padding: '1rem',
+              borderBottom: '1px solid var(--border)',
+              backgroundColor: 'var(--bg-card)',
+              marginBottom: '1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h3 style={{
+                margin: 0,
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: 'var(--text-primary)'
+              }}>
+                Environments
+              </h3>
+              <button
+                onClick={() => {
+                  // Check if environment countdown already exists
+                  const existingEnvironmentCountdown = countdowns.find(c => c.source === 'environment')
+                  if (existingEnvironmentCountdown) {
+                    return // Don't create if one already exists
+                  }
+                  
+                  const countdownData = {
+                    name: 'Environment Countdown',
+                    max: 6,
+                    type: 'standard',
+                    loop: 'none',
+                    source: 'environment'
+                  }
+                  createCountdown(countdownData)
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: countdowns.find(c => c.source === 'environment') ? 'var(--text-disabled)' : 'var(--text-secondary)',
+                  cursor: countdowns.find(c => c.source === 'environment') ? 'not-allowed' : 'pointer',
+                  padding: '0.5rem',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                  opacity: countdowns.find(c => c.source === 'environment') ? 0.5 : 1
+                }}
+                onMouseEnter={(e) => {
+                  if (!countdowns.find(c => c.source === 'environment')) {
+                    e.target.style.backgroundColor = 'var(--gray-dark)'
+                    e.target.style.color = 'var(--text-primary)'
                   }
                 }}
-                onCancel={handleCloseRightColumn}
-              />
+                onMouseLeave={(e) => {
+                  if (!countdowns.find(c => c.source === 'environment')) {
+                    e.target.style.backgroundColor = 'transparent'
+                    e.target.style.color = 'var(--text-secondary)'
+                  }
+                }}
+                title={countdowns.find(c => c.source === 'environment') ? 'Environment countdown already exists' : 'Add Environment Countdown'}
+                disabled={!!countdowns.find(c => c.source === 'environment')}
+              >
+                <Clock size={18} />
+              </button>
             </div>
-          )}
-          {rightColumnMode === 'item' && selectedItem && (
-            <GameCard
-              type={selectedType}
-              item={selectedItem}
-              mode={isEditMode ? "edit" : "expanded"}
-              onApplyDamage={handleAdversaryDamage}
-              onApplyHealing={handleAdversaryHealing}
-              onApplyStressChange={handleAdversaryStressChange}
-              onUpdate={selectedType === 'adversaries' ? updateAdversary : selectedType === 'environments' ? updateEnvironment : updateCountdown}
-              adversaries={adversaries}
+            <GameBoard
+              onItemSelect={handleItemSelect}
+              selectedItem={selectedItem}
+              selectedType={selectedType}
+              onOpenDatabase={handleOpenDatabase}
+              isEditMode={isEditMode}
+              onEditModeChange={setIsEditMode}
+              isClearMode={isClearMode}
+              showLongTermCountdowns={showLongTermCountdowns}
+              fear={fear}
+              updateFear={updateFear}
+              handleRollOutcome={handleRollOutcome}
+              handleActionRoll={handleActionRoll}
+              setShowLongTermCountdowns={setShowLongTermCountdowns}
+              lastAddedItemType={lastAddedItemType}
+              showOnlyEnvironments={true}
+              onIncrement={incrementCountdown}
+              onDecrement={decrementCountdown}
             />
-          )}
-          {!rightColumnMode && (
-            <div>
-              {/* Left panel content - to be implemented */}
-            </div>
-          )}
-        </Panel>
+          </Panel>
 
-        {/* Right Panel: Adversary List */}
-        <Panel 
-          side="right" 
-          className={`${isMobile && mobileView === 'left' ? 'mobile-hidden' : ''}`}
-        >
-          <GameBoard
-            onItemSelect={handleItemSelect}
-            selectedItem={selectedItem}
-            selectedType={selectedType}
-            onOpenDatabase={handleOpenDatabase}
-            isEditMode={isEditMode}
-            onEditModeChange={setIsEditMode}
-            isClearMode={isClearMode}
-            showLongTermCountdowns={showLongTermCountdowns}
-            fear={fear}
-            updateFear={updateFear}
-            handleRollOutcome={handleRollOutcome}
-            handleActionRoll={handleActionRoll}
-            setShowLongTermCountdowns={setShowLongTermCountdowns}
-            lastAddedItemType={lastAddedItemType}
-          />
-        </Panel>
+          {/* Middle Panel: Browser or Expanded Selected Adversary */}
+          <Panel side="left" style={{ flex: '1', minWidth: '300px' }}>
+            {browserModalOpen ? (
+              <>
+                <div style={{
+                  padding: '1rem',
+                  borderBottom: '1px solid var(--border)',
+                  backgroundColor: 'var(--bg-card)',
+                  marginBottom: '1rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <h3 style={{
+                    margin: 0,
+                    fontSize: '1.125rem',
+                    fontWeight: '600',
+                    color: 'var(--text-primary)'
+                  }}>
+                    Browse {browserModalType === 'adversary' ? 'Adversaries' : browserModalType === 'environment' ? 'Environments' : 'Database'}
+                  </h3>
+                  <button
+                    onClick={handleCloseBrowserModal}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      padding: '0.5rem',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'var(--gray-dark)'
+                      e.target.style.color = 'var(--text-primary)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent'
+                      e.target.style.color = 'var(--text-secondary)'
+                    }}
+                    title="Close Browser"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div style={{ padding: '1rem', height: 'calc(100% - 80px)', overflow: 'auto' }}>
+                  <Browser
+                    type={browserModalType}
+                    onAddItem={(itemData) => {
+                      if (browserModalType === 'adversary') {
+                        createAdversary(itemData)
+                        setLastAddedItemType('adversary')
+                        // Don't close browser for adversaries - let user close manually
+                      } else if (browserModalType === 'environment') {
+                        createEnvironment(itemData)
+                        setLastAddedItemType('environment')
+                        // Close browser automatically for environments
+                        handleCloseBrowserModal()
+                      }
+                    }}
+                    onCancel={handleCloseBrowserModal}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{
+                  padding: '1rem',
+                  borderBottom: '1px solid var(--border)',
+                  backgroundColor: 'var(--bg-card)',
+                  marginBottom: '1rem'
+                }}>
+                  <h3 style={{
+                    margin: 0,
+                    fontSize: '1.125rem',
+                    fontWeight: '600',
+                    color: 'var(--text-primary)'
+                  }}>
+                    {selectedItem && (selectedType === 'adversary' || selectedType === 'adversaries') ? selectedItem.name : 'Selected Adversary'}
+                  </h3>
+                </div>
+                <div style={{ padding: '1rem' }}>
+                  {selectedItem && (selectedType === 'adversary' || selectedType === 'adversaries') ? (
+                    <GameCard
+                      type="adversary"
+                      item={selectedItem}
+                      mode="expanded"
+                      onApplyDamage={handleAdversaryDamage}
+                      onApplyHealing={handleAdversaryHealing}
+                      onApplyStressChange={handleAdversaryStressChange}
+                      onUpdate={updateAdversary}
+                      adversaries={adversaries}
+                    />
+                  ) : (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '200px',
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.875rem',
+                      textAlign: 'center'
+                    }}>
+                      Select an adversary to view details
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </Panel>
+
+          {/* Right Panel: Adversaries */}
+          <Panel side="right" style={{ flex: '1', minWidth: '300px' }}>
+            <div style={{
+              padding: '1rem',
+              borderBottom: '1px solid var(--border)',
+              backgroundColor: 'var(--bg-card)',
+              marginBottom: '1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h3 style={{
+                margin: 0,
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: 'var(--text-primary)'
+              }}>
+                Adversaries
+              </h3>
+              <button
+                onClick={() => {
+                  // Check if adversary countdown already exists
+                  const existingAdversaryCountdown = countdowns.find(c => c.source === 'adversary')
+                  if (existingAdversaryCountdown) {
+                    return // Don't create if one already exists
+                  }
+                  
+                  const countdownData = {
+                    name: 'Adversary Countdown',
+                    max: 6,
+                    type: 'standard',
+                    loop: 'none',
+                    source: 'adversary'
+                  }
+                  createCountdown(countdownData)
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: countdowns.find(c => c.source === 'adversary') ? 'var(--text-disabled)' : 'var(--text-secondary)',
+                  cursor: countdowns.find(c => c.source === 'adversary') ? 'not-allowed' : 'pointer',
+                  padding: '0.5rem',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                  opacity: countdowns.find(c => c.source === 'adversary') ? 0.5 : 1
+                }}
+                onMouseEnter={(e) => {
+                  if (!countdowns.find(c => c.source === 'adversary')) {
+                    e.target.style.backgroundColor = 'var(--gray-dark)'
+                    e.target.style.color = 'var(--text-primary)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!countdowns.find(c => c.source === 'adversary')) {
+                    e.target.style.backgroundColor = 'transparent'
+                    e.target.style.color = 'var(--text-secondary)'
+                  }
+                }}
+                title={countdowns.find(c => c.source === 'adversary') ? 'Adversary countdown already exists' : 'Add Adversary Countdown'}
+                disabled={!!countdowns.find(c => c.source === 'adversary')}
+              >
+                <Clock size={18} />
+              </button>
+            </div>
+            <GameBoard
+              onItemSelect={handleItemSelect}
+              selectedItem={selectedItem}
+              selectedType={selectedType}
+              onOpenDatabase={handleOpenDatabase}
+              isEditMode={isEditMode}
+              onEditModeChange={setIsEditMode}
+              isClearMode={isClearMode}
+              showLongTermCountdowns={showLongTermCountdowns}
+              fear={fear}
+              updateFear={updateFear}
+              handleRollOutcome={handleRollOutcome}
+              handleActionRoll={handleActionRoll}
+              setShowLongTermCountdowns={setShowLongTermCountdowns}
+              lastAddedItemType={lastAddedItemType}
+              showOnlyAdversaries={true}
+              onIncrement={incrementCountdown}
+              onDecrement={decrementCountdown}
+            />
+          </Panel>
+        </div>
+        )}
       </div>
+
 
       {/* Mobile Drawer for Browser, Creator, and Expanded Cards */}
       {isMobile && (
