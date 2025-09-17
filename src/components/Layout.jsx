@@ -17,6 +17,19 @@ import PWAInstallPrompt from './PWAInstallPrompt'
 import Browser from './Browser'
 import PlayerView from './PlayerView'
 
+// Debounce utility to prevent rapid clicking issues
+const debounce = (func, wait) => {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
 /**
  * Hook to sync right panel state with selected items
  * Handles cleanup when items are deleted or modified
@@ -177,6 +190,10 @@ const LayoutContent = () => {
     fear,
     gameState,
     playerView,
+    currentSessionId,
+    sessionRole,
+    isConnected,
+    handleSessionChange,
     updateFear,
     togglePlayerView,
     createAdversary,
@@ -211,6 +228,17 @@ const LayoutContent = () => {
   const [showCountdownCreator, setShowCountdownCreator] = useState(false)
   const [countdownCreatorSource, setCountdownCreatorSource] = useState(null)
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+  
+  // Debounced increment/decrement to prevent rapid clicking issues
+  const debouncedIncrementCountdown = useCallback(
+    debounce((id) => incrementCountdown(id), 100),
+    [incrementCountdown]
+  );
+  
+  const debouncedDecrementCountdown = useCallback(
+    debounce((id) => decrementCountdown(id), 100),
+    [decrementCountdown]
+  );
   
   // Modal state for browser popup
   const [browserModalOpen, setBrowserModalOpen] = useState(false)
@@ -421,26 +449,33 @@ const LayoutContent = () => {
                     }}>
                       {countdown.name}
                     </div>
-                    <div style={{
+                    <div                     style={{
                       display: 'flex',
                       gap: '0.25rem',
                       alignItems: 'center',
                       cursor: 'pointer',
                       padding: '0.25rem',
                       borderRadius: '4px',
-                      transition: 'background-color 0.2s ease'
+                      transition: 'background-color 0.2s ease',
+                      userSelect: 'none',
+                      WebkitUserSelect: 'none',
+                      MozUserSelect: 'none',
+                      msUserSelect: 'none'
                     }}
                     onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      
                       const rect = e.currentTarget.getBoundingClientRect()
                       const clickX = e.clientX - rect.left
                       const midPoint = rect.width / 2
                       
                       if (clickX < midPoint) {
                         // Click left side - decrement
-                        decrementCountdown(countdown.id)
+                        debouncedDecrementCountdown(countdown.id)
                       } else {
                         // Click right side - increment
-                        incrementCountdown(countdown.id)
+                        debouncedIncrementCountdown(countdown.id)
                       }
                     }}
                     onMouseEnter={(e) => {
@@ -501,26 +536,33 @@ const LayoutContent = () => {
                     }}>
                       {countdown.name}
                     </div>
-                    <div style={{
+                    <div                     style={{
                       display: 'flex',
                       gap: '0.25rem',
                       alignItems: 'center',
                       cursor: 'pointer',
                       padding: '0.25rem',
                       borderRadius: '4px',
-                      transition: 'background-color 0.2s ease'
+                      transition: 'background-color 0.2s ease',
+                      userSelect: 'none',
+                      WebkitUserSelect: 'none',
+                      MozUserSelect: 'none',
+                      msUserSelect: 'none'
                     }}
                     onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      
                       const rect = e.currentTarget.getBoundingClientRect()
                       const clickX = e.clientX - rect.left
                       const midPoint = rect.width / 2
                       
                       if (clickX < midPoint) {
                         // Click left side - decrement
-                        decrementCountdown(countdown.id)
+                        debouncedDecrementCountdown(countdown.id)
                       } else {
                         // Click right side - increment
-                        incrementCountdown(countdown.id)
+                        debouncedIncrementCountdown(countdown.id)
                       }
                     }}
                     onMouseEnter={(e) => {
@@ -595,6 +637,10 @@ const LayoutContent = () => {
         sortAdversaries={sortAdversaries}
         togglePlayerView={togglePlayerView}
         playerView={playerView}
+        gameState={gameState}
+        handleSessionChange={handleSessionChange}
+        currentSessionId={currentSessionId}
+        isConnected={isConnected}
       />
 
       {/* Main Content Area */}
@@ -605,6 +651,7 @@ const LayoutContent = () => {
             fear={fear}
             countdowns={countdowns}
             adversaries={adversaries}
+            onSessionChange={handleSessionChange}
           />
         ) : (
           /* Three Column Layout using Panel components */
@@ -1119,7 +1166,7 @@ const LayoutContent = () => {
             />
           </Panel>
             </div>
-          )}
+        )}
       </div>
 
 
