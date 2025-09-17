@@ -3,6 +3,8 @@ import { MoreHorizontal, X } from 'lucide-react'
 import HelpButton from './HelpButton'
 import DeleteClear from './DeleteClear'
 import SortButton from './SortButton'
+import QRCodeDisplay from './QRCodeDisplay'
+import { createSession } from '../firebase/sessionService'
 
 const FloatingMenu = ({
   adversaries,
@@ -15,11 +17,55 @@ const FloatingMenu = ({
   setIsClearMode,
   sortAdversaries,
   togglePlayerView,
-  playerView
+  playerView,
+  gameState,
+  handleSessionChange,
+  currentSessionId,
+  isConnected
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showHelpFlyout, setShowHelpFlyout] = useState(false)
   const [showDeleteFlyout, setShowDeleteFlyout] = useState(false)
+  const [showQRCode, setShowQRCode] = useState(false)
+  const [isCreatingSession, setIsCreatingSession] = useState(false)
+
+  // Handle session creation
+  const handleCreateSession = async () => {
+    // Only sync countdowns and fear for player view
+    const playerViewState = {
+      countdowns: gameState.countdowns,
+      fear: gameState.fear
+    };
+    
+    console.log('Creating session with player view state:', playerViewState)
+    setIsCreatingSession(true)
+    try {
+      const sessionId = await createSession(playerViewState)
+      console.log('Session created with ID:', sessionId)
+      handleSessionChange(sessionId, 'gm')
+      setShowQRCode(true)
+      setIsOpen(false)
+    } catch (error) {
+      console.error('Failed to create session:', error)
+      
+      // Fallback: Create a simple URL-based session
+      const fallbackSessionId = Math.random().toString(36).substring(2, 8).toUpperCase()
+      console.log('Using fallback session ID:', fallbackSessionId)
+      
+      // Set up the GM session properly
+      handleSessionChange(fallbackSessionId, 'gm')
+      
+      // Create a simple URL for players to join
+      const playerUrl = `${window.location.origin}${window.location.pathname}?sessionId=${fallbackSessionId}&playerView=true`
+      
+      alert(`Firebase not configured. Using fallback mode.\n\nSession ID: ${fallbackSessionId}\n\nShare this URL with players:\n${playerUrl}\n\nOr scan QR code at:\nhttps://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(playerUrl)}`)
+      
+      setShowQRCode(true)
+      setIsOpen(false)
+    } finally {
+      setIsCreatingSession(false)
+    }
+  }
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -141,7 +187,8 @@ const FloatingMenu = ({
   }
 
   return (
-    <div className="floating-menu-container" style={containerStyle}>
+    <>
+      <div className="floating-menu-container" style={containerStyle}>
       {/* Radial Menu Items */}
       <div style={{ 
         position: 'absolute',
@@ -151,81 +198,44 @@ const FloatingMenu = ({
         height: '56px',
         pointerEvents: 'none'
       }}>
-            {/* Player View Button */}
+            {/* Session/Player Button */}
             <div style={getRadialItemStyle(0, 4)}>
               <button
                 onClick={(e) => {
                   e.stopPropagation()
                   
-                  // Check if we should show QR code instead
-                  if (e.shiftKey) {
-                    // Shift+click: Show QR code for mobile access
-                    const playerUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'playerView=true'
-                    alert(`Player View URL for mobile devices:\n\n${playerUrl}\n\nShare this URL with players or scan QR code at:\nhttps://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(playerUrl)}`)
+                  console.log('QR button clicked:', { isConnected, currentSessionId, showQRCode });
+                  
+                  if (isConnected && currentSessionId) {
+                    // If already connected, show QR code
+                    console.log('Showing existing QR code for session:', currentSessionId);
+                    setShowQRCode(true)
                     setIsOpen(false)
-                    return
+                  } else {
+                    // If not connected, create session and show QR code
+                    console.log('Creating new session');
+                    handleCreateSession()
                   }
-                  
-                  // Open new window in player view using URL parameter
-                  const playerUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'playerView=true'
-                  
-                  // More flexible approach for iPad second monitor
-                  const playerWindow = window.open(
-                    playerUrl, 
-                    'playerView', // Use named window for consistency
-                    'width=1200,height=800,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no'
-                  )
-                  
-                  if (playerWindow) {
-                    // Focus the new window
-                    playerWindow.focus()
-                    
-                    // Try to maximize after a short delay
-                    setTimeout(() => {
-                      try {
-                        // Try different approaches for different devices
-                        if (playerWindow.screen && playerWindow.screen.availWidth) {
-                          // Try to resize to screen size
-                          playerWindow.resizeTo(playerWindow.screen.availWidth, playerWindow.screen.availHeight)
-                        }
-                        
-                        // Try fullscreen after resize
-                        setTimeout(() => {
-                          try {
-                            if (playerWindow.document.documentElement.requestFullscreen) {
-                              playerWindow.document.documentElement.requestFullscreen()
-                            } else if (playerWindow.document.documentElement.webkitRequestFullscreen) {
-                              playerWindow.document.documentElement.webkitRequestFullscreen()
-                            }
-                          } catch (fullscreenError) {
-                            console.log('Fullscreen not available, but window should be large:', fullscreenError)
-                          }
-                        }, 500)
-                      } catch (resizeError) {
-                        console.log('Resize not available:', resizeError)
-                      }
-                    }, 1000)
-                  }
-                  
-                  setIsOpen(false)
                 }}
+                disabled={isCreatingSession}
                 style={{
                   width: '100%',
                   height: '100%',
                   borderRadius: '50%',
-                  background: 'var(--purple)',
+                  background: isConnected ? 'var(--green)' : 'var(--purple)',
                   border: 'none',
                   color: 'white',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  cursor: 'pointer',
+                  cursor: isCreatingSession ? 'not-allowed' : 'pointer',
                   fontSize: '0.75rem',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  opacity: isCreatingSession ? 0.5 : 1
                 }}
-                title="Open Player View Window (iPad Compatible)\nShift+Click: Show QR Code for Mobile"
+                title={isConnected ? "Show QR Code for Players" : "Create Session & Show QR Code"}
               >
-                Player
+                {isCreatingSession ? '...' : (isConnected ? 'QR' : 'Session')}
               </button>
             </div>
 
@@ -274,6 +284,16 @@ const FloatingMenu = ({
         {isOpen ? <X size={24} /> : <MoreHorizontal size={24} />}
       </button>
     </div>
+    
+    {/* QR Code Display - Outside container to avoid pointer-events issues */}
+    <QRCodeDisplay 
+      sessionId={currentSessionId}
+      isVisible={showQRCode}
+      onClose={() => {
+        setShowQRCode(false);
+      }}
+    />
+  </>
   )
 }
 
