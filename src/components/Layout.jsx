@@ -194,7 +194,7 @@ const LayoutContent = () => {
   const [isMobile, setIsMobile] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [isClearMode, setIsClearMode] = useState(false)
-  const [mobileView] = useState('left') // 'left' or 'right'
+  const [mobileView] = useState('right') // 'left' or 'right' - now defaults to 'right' to show adversary list
   const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
   const [showMockup, setShowMockup] = useState(false)
   const [lastAddedItemType, setLastAddedItemType] = useState(null)
@@ -412,33 +412,10 @@ const LayoutContent = () => {
       {/* Main Content Area */}
       <div className="main-content" key={`mobile-${isMobile}`}>
         {/* Unified Layout - Reuse desktop structure for mobile */}
-        {/* Left Panel: Game Board */}
+        {/* Left Panel: Browser/Expanded View */}
         <Panel 
           side="left" 
           className={`${isMobile && mobileView === 'right' ? 'mobile-hidden' : ''}`}
-        >
-          <GameBoard
-            onItemSelect={handleItemSelect}
-            selectedItem={selectedItem}
-            selectedType={selectedType}
-            onOpenDatabase={handleOpenDatabase}
-            isEditMode={isEditMode}
-            onEditModeChange={setIsEditMode}
-            isClearMode={isClearMode}
-            showLongTermCountdowns={showLongTermCountdowns}
-            fear={fear}
-            updateFear={updateFear}
-            handleRollOutcome={handleRollOutcome}
-            handleActionRoll={handleActionRoll}
-            setShowLongTermCountdowns={setShowLongTermCountdowns}
-            lastAddedItemType={lastAddedItemType}
-          />
-        </Panel>
-
-        {/* Right Panel: Details, Database, Creator, or Preview */}
-        <Panel 
-          side="right" 
-          className={`${isMobile && mobileView === 'left' ? 'mobile-hidden' : ''}`}
           style={rightColumnMode === 'database' ? { overflowY: 'hidden' } : {}}
         >
           {rightColumnMode === 'database' && (
@@ -472,9 +449,32 @@ const LayoutContent = () => {
           )}
           {!rightColumnMode && (
             <div>
-              {/* Right panel content - to be implemented */}
+              {/* Left panel content - to be implemented */}
             </div>
           )}
+        </Panel>
+
+        {/* Right Panel: Adversary List */}
+        <Panel 
+          side="right" 
+          className={`${isMobile && mobileView === 'left' ? 'mobile-hidden' : ''}`}
+        >
+          <GameBoard
+            onItemSelect={handleItemSelect}
+            selectedItem={selectedItem}
+            selectedType={selectedType}
+            onOpenDatabase={handleOpenDatabase}
+            isEditMode={isEditMode}
+            onEditModeChange={setIsEditMode}
+            isClearMode={isClearMode}
+            showLongTermCountdowns={showLongTermCountdowns}
+            fear={fear}
+            updateFear={updateFear}
+            handleRollOutcome={handleRollOutcome}
+            handleActionRoll={handleActionRoll}
+            setShowLongTermCountdowns={setShowLongTermCountdowns}
+            lastAddedItemType={lastAddedItemType}
+          />
         </Panel>
       </div>
 
