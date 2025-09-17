@@ -453,24 +453,6 @@ const GameBoard = ({
       {/* Adversaries Section */}
       {showOnlyAdversaries && (
         <div>
-          {/* Adversary Countdown */}
-          {countdowns.filter(c => c.source === 'adversary').map((countdown) => (
-            <div key={countdown.id} style={{ marginBottom: '1rem' }}>
-              <GameCard
-                type="countdown"
-                item={countdown}
-                mode="compact"
-                onClick={() => onItemSelect(countdown, 'countdown')}
-                onDelete={isClearMode ? (id) => handleDeleteItem(id, 'countdown') : undefined}
-                onEdit={(item) => handleEditItem(item, 'countdown')}
-                onIncrement={onIncrement}
-                onDecrement={onDecrement}
-                isSelected={selectedItem && selectedItem.id === countdown.id && selectedType === 'countdown'}
-                adversaries={adversaries}
-              />
-            </div>
-          ))}
-
           <ElementList
             items={adversaries}
             onDelete={(id) => handleDeleteItem(id, 'adversary')}
@@ -519,98 +501,12 @@ const GameBoard = ({
             onInlineExpansion={null}
           />
 
-          {/* Add Adversary Button */}
-          <div 
-            style={{
-              marginTop: '1rem',
-              padding: '1rem',
-              border: '1px dashed var(--border)',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              backgroundColor: 'var(--bg-card)'
-            }}
-            onClick={() => handleOpenDatabase('adversary')}
-            onMouseEnter={(e) => {
-              e.target.style.borderColor = 'var(--border-hover)'
-              e.target.style.backgroundColor = 'var(--gray-dark)'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.borderColor = 'var(--border)'
-              e.target.style.backgroundColor = 'var(--bg-card)'
-            }}
-          >
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: '0.5rem',
-              position: 'relative'
-            }}>
-              {/* Left side - Add text */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: '0.25rem'
-              }}>
-                <h4 style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: 'var(--text-secondary)',
-                  margin: 0
-                }}>
-                  Add Adversary
-                </h4>
-                <span style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                  color: 'var(--text-secondary)',
-                  letterSpacing: '0.5px'
-                }}>
-                  Click to browse
-                </span>
-              </div>
-
-              {/* Right side - Plus icon */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                border: '1px dashed var(--text-secondary)',
-                color: 'var(--text-secondary)'
-              }}>
-                <Plus size={16} />
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
       {/* Environments Section - Always Expanded */}
       {showOnlyEnvironments && (
         <div>
-          {/* Environment Countdown */}
-          {countdowns.filter(c => c.source === 'environment').map((countdown) => (
-            <div key={countdown.id} style={{ marginBottom: '1rem' }}>
-              <GameCard
-                type="countdown"
-                item={countdown}
-                mode="compact"
-                onClick={() => onItemSelect(countdown, 'countdown')}
-                onDelete={isClearMode ? (id) => handleDeleteItem(id, 'countdown') : undefined}
-                onEdit={(item) => handleEditItem(item, 'countdown')}
-                onIncrement={onIncrement}
-                onDecrement={onDecrement}
-                isSelected={selectedItem && selectedItem.id === countdown.id && selectedType === 'countdown'}
-                adversaries={adversaries}
-              />
-            </div>
-          ))}
-
           {/* Render environments in expanded mode */}
           {environments.map((environment) => (
             <div key={environment.id} style={{ marginBottom: '1rem' }}>
@@ -627,76 +523,6 @@ const GameBoard = ({
             </div>
           ))}
 
-          {/* Add Environment Button - Only show if no environments exist */}
-          {environments.length === 0 && (
-            <div 
-              style={{
-                marginTop: '1rem',
-                padding: '1rem',
-                border: '1px dashed var(--border)',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                backgroundColor: 'var(--bg-card)'
-              }}
-              onClick={() => handleOpenDatabase('environment')}
-              onMouseEnter={(e) => {
-                e.target.style.borderColor = 'var(--border-hover)'
-                e.target.style.backgroundColor = 'var(--gray-dark)'
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.borderColor = 'var(--border)'
-                e.target.style.backgroundColor = 'var(--bg-card)'
-              }}
-            >
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: '0.5rem',
-                position: 'relative'
-              }}>
-                {/* Left side - Add text */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: '0.25rem'
-                }}>
-                  <h4 style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: 'var(--text-secondary)',
-                    margin: 0
-                  }}>
-                    Add Environment
-                  </h4>
-                  <span style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                    color: 'var(--text-secondary)',
-                    letterSpacing: '0.5px'
-                  }}>
-                    Click to browse
-                  </span>
-                </div>
-
-                {/* Right side - Plus icon */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  border: '1px dashed var(--text-secondary)',
-                  color: 'var(--text-secondary)'
-                }}>
-                  <Plus size={16} />
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
