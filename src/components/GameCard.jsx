@@ -442,7 +442,7 @@ const styles = {
   card: {
     backgroundColor: 'var(--bg-card)',
     borderRadius: '8px',
-    padding: '12px',
+    padding: 0,
     cursor: 'pointer',
     transition: 'all 0.1s ease',
     position: 'relative'
@@ -1579,7 +1579,7 @@ const GameCard = ({
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '12px',
+          padding: 0,
           borderRadius: '0 0 8px 8px',
           position: 'relative',
           zIndex: isDead ? 1 : 'auto'
@@ -1982,7 +1982,7 @@ const GameCard = ({
       >
         {/* Fixed Header Section - Similar to Adversary View */}
         <div className="border-b" style={{
-          padding: '12px',
+          padding: 0,
           flexShrink: 0,
           backgroundColor: 'var(--bg-card)',
           borderRadius: '8px 8px 0 0',
@@ -2111,7 +2111,7 @@ const GameCard = ({
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '12px',
+          padding: 0,
           borderRadius: '0 0 8px 8px'
         }}>
           {/* Description Section */}
