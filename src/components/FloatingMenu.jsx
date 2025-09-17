@@ -13,7 +13,9 @@ const FloatingMenu = ({
   deleteCountdown,
   isClearMode,
   setIsClearMode,
-  sortAdversaries
+  sortAdversaries,
+  togglePlayerView,
+  playerView
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showHelpFlyout, setShowHelpFlyout] = useState(false)
@@ -133,6 +135,11 @@ const FloatingMenu = ({
     }
   }
 
+  // Don't render floating menu in player view
+  if (playerView) {
+    return null
+  }
+
   return (
     <div className="floating-menu-container" style={containerStyle}>
       {/* Radial Menu Items */}
@@ -144,8 +151,86 @@ const FloatingMenu = ({
         height: '56px',
         pointerEvents: 'none'
       }}>
+            {/* Player View Button */}
+            <div style={getRadialItemStyle(0, 4)}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  
+                  // Check if we should show QR code instead
+                  if (e.shiftKey) {
+                    // Shift+click: Show QR code for mobile access
+                    const playerUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'playerView=true'
+                    alert(`Player View URL for mobile devices:\n\n${playerUrl}\n\nShare this URL with players or scan QR code at:\nhttps://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(playerUrl)}`)
+                    setIsOpen(false)
+                    return
+                  }
+                  
+                  // Open new window in player view using URL parameter
+                  const playerUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'playerView=true'
+                  
+                  // More flexible approach for iPad second monitor
+                  const playerWindow = window.open(
+                    playerUrl, 
+                    'playerView', // Use named window for consistency
+                    'width=1200,height=800,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no'
+                  )
+                  
+                  if (playerWindow) {
+                    // Focus the new window
+                    playerWindow.focus()
+                    
+                    // Try to maximize after a short delay
+                    setTimeout(() => {
+                      try {
+                        // Try different approaches for different devices
+                        if (playerWindow.screen && playerWindow.screen.availWidth) {
+                          // Try to resize to screen size
+                          playerWindow.resizeTo(playerWindow.screen.availWidth, playerWindow.screen.availHeight)
+                        }
+                        
+                        // Try fullscreen after resize
+                        setTimeout(() => {
+                          try {
+                            if (playerWindow.document.documentElement.requestFullscreen) {
+                              playerWindow.document.documentElement.requestFullscreen()
+                            } else if (playerWindow.document.documentElement.webkitRequestFullscreen) {
+                              playerWindow.document.documentElement.webkitRequestFullscreen()
+                            }
+                          } catch (fullscreenError) {
+                            console.log('Fullscreen not available, but window should be large:', fullscreenError)
+                          }
+                        }, 500)
+                      } catch (resizeError) {
+                        console.log('Resize not available:', resizeError)
+                      }
+                    }, 1000)
+                  }
+                  
+                  setIsOpen(false)
+                }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  background: 'var(--purple)',
+                  border: 'none',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: '0.75rem',
+                  fontWeight: '500'
+                }}
+                title="Open Player View Window (iPad Compatible)\nShift+Click: Show QR Code for Mobile"
+              >
+                Player
+              </button>
+            </div>
+
         {/* Clear Button */}
-        <div style={getRadialItemStyle(0, 3)}>
+        <div style={getRadialItemStyle(1, 4)}>
           <DeleteClear
             adversaries={adversaries}
             environments={environments}
@@ -161,7 +246,7 @@ const FloatingMenu = ({
         </div>
         
         {/* Sort Button */}
-        <div style={getRadialItemStyle(1, 3)}>
+        <div style={getRadialItemStyle(2, 4)}>
           <SortButton
             adversaries={adversaries}
             onSortAdversaries={sortAdversaries}
@@ -169,7 +254,7 @@ const FloatingMenu = ({
         </div>
         
         {/* Help Button */}
-        <div style={getRadialItemStyle(2, 3)}>
+        <div style={getRadialItemStyle(3, 4)}>
           <HelpButton 
             showFlyout={showHelpFlyout}
             onFlyoutChange={handleHelpFlyoutChange}
