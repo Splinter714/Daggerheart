@@ -1307,7 +1307,8 @@ const GameCard = ({
           borderWidth: isSelected ? '2px' : '2px',
           display: 'flex',
           flexDirection: 'column',
-          position: 'relative'
+          position: 'relative',
+          borderRadius: '8px'
         }}
         {...dragAttributes}
         {...dragListeners}
@@ -1361,14 +1362,15 @@ const GameCard = ({
           </>
         )}
         {/* Fixed Header Section - Identical to Compact View */}
-        <div className="border-b" style={{
-          padding: '12px',
+        <div style={{
+          paddingLeft: showDrag ? '2.25rem' : '0.75rem',
+          paddingTop: 0,
+          paddingBottom: 0,
+          paddingRight: '0.75rem',
           flexShrink: 0,
           backgroundColor: 'var(--bg-card)',
-          borderRadius: '8px 8px 0 0',
           position: 'relative',
-          zIndex: isDead ? 1 : 'auto',
-          borderBottomColor: isSelected ? 'var(--purple)' : 'var(--border)'
+          zIndex: isDead ? 1 : 'auto'
         }}>
           {/* Main Row - Name/Type on left, HP/Stress/Difficulty on right */}
           <div style={{
