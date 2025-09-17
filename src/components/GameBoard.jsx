@@ -21,7 +21,9 @@ const ElementList = ({
   isEditMode,
   isClearMode,
   elementType,
-  adversaries = [] // Pass adversaries for duplicate checking
+  adversaries = [], // Pass adversaries for duplicate checking
+  expandedCardId = null, // ID of currently expanded card
+  onInlineExpansion = null // Handler for inline expansion
 }) => {
   // Don't render anything for empty sections
   if (!items || items.length === 0) {
@@ -30,17 +32,19 @@ const ElementList = ({
 
   const renderCard = (item) => {
     const isSelected = selectedItem && selectedItem.id === item.id && selectedType === elementType
+    const isExpanded = expandedCardId === item.id
     console.log('Card selection check:', { 
       itemId: item.id, 
       selectedItemId: selectedItem?.id, 
       selectedType, 
       elementType, 
-      isSelected 
+      isSelected,
+      isExpanded
     })
     const commonProps = {
       item,
-      mode: 'compact',
-      onClick: () => onItemSelect(item, elementType),
+      mode: isExpanded ? 'expanded' : 'compact',
+      onClick: onInlineExpansion ? () => onInlineExpansion(item, elementType) : () => onItemSelect(item, elementType),
       onDelete: isClearMode ? onDelete : undefined,
       dragAttributes: isEditMode ? { draggable: true } : null,
       dragListeners: isEditMode ? {
@@ -49,7 +53,7 @@ const ElementList = ({
         }
       } : null,
       adversaries, // Pass adversaries for duplicate checking
-      isSelected, // Pass selection state
+      isSelected: isExpanded, // Use expansion state for purple border highlighting
       isEditMode: isEditMode || isClearMode // Pass edit mode state
     }
 
@@ -338,6 +342,9 @@ const GameBoard = ({
     decrementCountdown
   } = useGameState()
 
+  // State for inline expansion - only one card can be expanded at a time
+  const [expandedCardId, setExpandedCardId] = useState(null)
+
   // State for inline countdown creator
   const [showInlineCreator, setShowInlineCreator] = useState({
     adversary: false,
@@ -419,6 +426,17 @@ const GameBoard = ({
 
   const handleRestTrigger = (restType) => {
     // This will be implemented when we have the countdown engine
+  }
+
+  // Handle inline card expansion - only one card can be expanded at a time
+  const handleInlineExpansion = (item, elementType) => {
+    if (expandedCardId === item.id) {
+      // If clicking the same card, collapse it
+      setExpandedCardId(null)
+    } else {
+      // Expand the clicked card and collapse any other expanded card
+      setExpandedCardId(item.id)
+    }
   }
 
   return (
@@ -528,6 +546,8 @@ const GameBoard = ({
             isClearMode={isClearMode}
             elementType="adversaries"
             adversaries={adversaries}
+            expandedCardId={expandedCardId}
+            onInlineExpansion={handleInlineExpansion}
           />
           
           {/* Add Adversary Button - styled like a translucent card, positioned below all adversaries */}
