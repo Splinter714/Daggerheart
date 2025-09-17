@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { buildCountdownActions, buildAdversaryActions, buildEnvironmentActions } from '../components/GameCard'
+import { updateSession } from '../firebase/sessionService'
 
 const GameStateContext = createContext();
 
@@ -31,11 +32,56 @@ export const GameStateProvider = ({ children }) => {
     environments: []
   });
 
+  // Session management state
+  const [currentSessionId, setCurrentSessionId] = useState(() => {
+    // Check URL parameter for session ID first
+    const urlParams = new URLSearchParams(window.location.search)
+    const urlSessionId = urlParams.get('sessionId')
+
+    if (urlSessionId) {
+      return urlSessionId
+    }
+
+    // Fallback to localStorage
+    const savedSession = readFromStorage('daggerheart-session')
+    return savedSession?.sessionId || null
+  });
+  const [sessionRole, setSessionRole] = useState(() => {
+    // Check URL parameter for player view to determine role
+    const urlParams = new URLSearchParams(window.location.search)
+    const urlPlayerView = urlParams.get('playerView')
+    const urlSessionId = urlParams.get('sessionId')
+    
+    if (urlPlayerView === 'true') {
+      return 'player'
+    }
+    
+    // If there's a session ID in URL but no playerView=true, assume GM
+    if (urlSessionId) {
+      // Clean up localStorage to prevent conflicts
+      const savedSession = readFromStorage('daggerheart-session')
+      if (savedSession && savedSession.role === 'player') {
+        writeToStorage('daggerheart-session', { sessionId: urlSessionId, role: 'gm' });
+      }
+      return 'gm'
+    }
+
+    // Fallback to localStorage only if no URL parameters
+    const savedSession = readFromStorage('daggerheart-session')
+    return savedSession?.role || null
+  });
+  const [isConnected, setIsConnected] = useState(false);
+  
+  // Track if we've loaded from localStorage to prevent overwriting on initial mount
+  const hasLoadedFromStorage = useRef(false);
+
   // Player view state - local to each tab, not synced
   const [playerView, setPlayerView] = useState(() => {
     // Check URL parameter for player view
     const urlParams = new URLSearchParams(window.location.search)
-    return urlParams.get('playerView') === 'true'
+    const urlPlayerView = urlParams.get('playerView')
+    const isPlayerView = urlPlayerView === 'true'
+    return isPlayerView
   });
 
   // Load state from localStorage on mount
@@ -88,6 +134,28 @@ export const GameStateProvider = ({ children }) => {
     writeToStorage('daggerheart-game-state', gameState);
   }, [gameState]);
 
+  // Sync GM state changes to Firebase when connected as GM (with debounce)
+  useEffect(() => {
+    if (isConnected && currentSessionId && sessionRole === 'gm') {
+      // Only sync countdowns and fear for player view
+      const playerViewState = {
+        countdowns: gameState.countdowns,
+        fear: gameState.fear
+      };
+      
+      console.log('GM syncing to Firebase:', currentSessionId, playerViewState);
+      
+      // Debounce Firebase updates to prevent too frequent calls
+      const timeoutId = setTimeout(() => {
+        updateSession(currentSessionId, playerViewState).catch(error => {
+          console.error('Failed to sync GM state to Firebase:', error);
+        });
+      }, 500); // 500ms debounce
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [gameState.countdowns, gameState.fear, isConnected, currentSessionId, sessionRole]);
+
   // Fear management
   const updateFear = (value) => {
     setGameState(prev => ({
@@ -106,6 +174,34 @@ export const GameStateProvider = ({ children }) => {
   const togglePlayerView = () => {
     setPlayerView(prev => !prev);
   };
+
+  // Load state from localStorage on mount (GM should always load local state)
+  useEffect(() => {
+    const savedState = readFromStorage('daggerheart-game-state');
+    
+    if (savedState) {
+      try {
+        // GM should always load local state, regardless of connection status
+        // Only skip if we're a player connected to a session
+        if (sessionRole !== 'player' || !isConnected) {
+          hasLoadedFromStorage.current = true; // Set ref BEFORE state update
+          setGameState(savedState);
+        }
+      } catch (error) {
+        console.error('Failed to load saved state:', error);
+      }
+    } else {
+      hasLoadedFromStorage.current = true; // Mark as loaded even if empty
+    }
+  }, [isConnected, sessionRole]);
+
+  // Save game state to localStorage whenever it changes
+  useEffect(() => {
+    // Don't save on initial mount - only save after state has been loaded
+    if (hasLoadedFromStorage.current) {
+      writeToStorage('daggerheart-game-state', gameState);
+    }
+  }, [gameState]);
 
   // Build action groups from modular files
   const gameStateRef = useRef(gameState)
@@ -141,9 +237,54 @@ export const GameStateProvider = ({ children }) => {
     reorderEnvironments
   } = environmentActions
 
+  // Session management functions
+  const handleSessionChange = (sessionId, role, externalGameState = null) => {
+    setCurrentSessionId(sessionId);
+    setSessionRole(role);
+    setIsConnected(!!sessionId);
+    
+    // Update URL with session information
+    const url = new URL(window.location);
+    if (sessionId) {
+      url.searchParams.set('sessionId', sessionId);
+      if (role === 'player') {
+        url.searchParams.set('playerView', 'true');
+      } else {
+        url.searchParams.delete('playerView');
+      }
+    } else {
+      url.searchParams.delete('sessionId');
+      url.searchParams.delete('playerView');
+    }
+    window.history.replaceState({}, '', url);
+    
+    // Save session info to localStorage
+    if (sessionId) {
+      writeToStorage('daggerheart-session', { sessionId, role });
+    } else {
+      writeToStorage('daggerheart-session', null);
+    }
+    
+    if (externalGameState && role === 'player') {
+      // Player: Update local state from Firebase
+      // Only update countdowns and fear from Firebase
+      // Preserve local adversaries and environments (not synced)
+      setGameState(prevState => ({
+        ...prevState, // Keep existing adversaries and environments
+        fear: externalGameState.fear || { value: 0, visible: false },
+        countdowns: externalGameState.countdowns || []
+      }));
+    }
+  };
+
   const value = {
     gameState,
     playerView,
+    // Session management
+    currentSessionId,
+    sessionRole,
+    isConnected,
+    handleSessionChange,
     // Fear actions
     updateFear,
     toggleFearVisibility,
