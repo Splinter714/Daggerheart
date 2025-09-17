@@ -327,8 +327,6 @@ const GameBoard = ({
   onIncrement,
   onDecrement
 }) => {
-  console.log('GameBoard received props:', { selectedItem, selectedType })
-  
   const { 
     adversaries, 
     environments,
