@@ -6,6 +6,7 @@ import FloatingMenu from './FloatingMenu'
 import Bar from './Toolbars'
 import Panel from './Panels'
 import GameBoard from './GameBoard'
+import InlineCountdownCreator from './InlineCountdownCreator'
 import GameCard, { 
   useAdversaryHandlers,
   getAdvancementForOutcome,
@@ -207,6 +208,8 @@ const LayoutContent = () => {
   const [lastAddedItemType, setLastAddedItemType] = useState(null)
   const [environmentDeleteConfirm, setEnvironmentDeleteConfirm] = useState(false)
   const [adversaryDeleteConfirm, setAdversaryDeleteConfirm] = useState(false)
+  const [showCountdownCreator, setShowCountdownCreator] = useState(false)
+  const [countdownCreatorSource, setCountdownCreatorSource] = useState(null)
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
   
   // Modal state for browser popup
@@ -401,17 +404,67 @@ const LayoutContent = () => {
             height: '100%'
           }}>
             {/* Left Side - Environment Countdown */}
-            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-start' }}>
+            <div style={{ flex: '2', display: 'flex', justifyContent: 'flex-start' }}>
               {countdowns.filter(c => c.source === 'environment').map(countdown => (
                 <div key={countdown.id} style={{ marginRight: '1rem' }}>
-                  <GameCard
-                    type="countdown"
-                    item={countdown}
-                    mode="compact"
-                    onIncrement={incrementCountdown}
-                    onDecrement={decrementCountdown}
-                    adversaries={adversaries}
-                  />
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.25rem'
+                  }}>
+                    <div style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      color: 'var(--text-primary)',
+                      textAlign: 'center'
+                    }}>
+                      {countdown.name}
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      gap: '0.25rem',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      padding: '0.25rem',
+                      borderRadius: '4px',
+                      transition: 'background-color 0.2s ease'
+                    }}
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      const clickX = e.clientX - rect.left
+                      const midPoint = rect.width / 2
+                      
+                      if (clickX < midPoint) {
+                        // Click left side - decrement
+                        decrementCountdown(countdown.id)
+                      } else {
+                        // Click right side - increment
+                        incrementCountdown(countdown.id)
+                      }
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--gray-dark)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                    title="Click left to decrease, right to increase"
+                    >
+                      {Array.from({ length: countdown.max || 6 }, (_, i) => (
+                        <span
+                          key={i}
+                          style={{
+                            fontSize: '1rem',
+                            color: i < (countdown.value || 0) ? 'var(--red)' : 'var(--text-secondary)',
+                            transition: 'color 0.2s ease'
+                          }}
+                        >
+                          {i < (countdown.value || 0) ? '●' : '○'}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -431,22 +484,102 @@ const LayoutContent = () => {
             </div>
 
             {/* Right Side - Adversary Countdown */}
-            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ flex: '2', display: 'flex', justifyContent: 'flex-end' }}>
               {countdowns.filter(c => c.source === 'adversary').map(countdown => (
                 <div key={countdown.id} style={{ marginLeft: '1rem' }}>
-                  <GameCard
-                    type="countdown"
-                    item={countdown}
-                    mode="compact"
-                    onIncrement={incrementCountdown}
-                    onDecrement={decrementCountdown}
-                    adversaries={adversaries}
-                  />
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.25rem'
+                  }}>
+                    <div style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      color: 'var(--text-primary)',
+                      textAlign: 'center'
+                    }}>
+                      {countdown.name}
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      gap: '0.25rem',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      padding: '0.25rem',
+                      borderRadius: '4px',
+                      transition: 'background-color 0.2s ease'
+                    }}
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      const clickX = e.clientX - rect.left
+                      const midPoint = rect.width / 2
+                      
+                      if (clickX < midPoint) {
+                        // Click left side - decrement
+                        decrementCountdown(countdown.id)
+                      } else {
+                        // Click right side - increment
+                        incrementCountdown(countdown.id)
+                      }
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--gray-dark)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                    title="Click left to decrease, right to increase"
+                    >
+                      {Array.from({ length: countdown.max || 6 }, (_, i) => (
+                        <span
+                          key={i}
+                          style={{
+                            fontSize: '1rem',
+                            color: i < (countdown.value || 0) ? 'var(--red)' : 'var(--text-secondary)',
+                            transition: 'color 0.2s ease'
+                          }}
+                        >
+                          {i < (countdown.value || 0) ? '●' : '○'}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </Bar>
+      )}
+
+      {/* Inline Countdown Creator */}
+      {showCountdownCreator && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 1000,
+          backgroundColor: 'var(--bg-primary)',
+          borderRadius: '8px',
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+          minWidth: '400px',
+          maxWidth: '90vw'
+        }}>
+          <InlineCountdownCreator
+            source={countdownCreatorSource}
+            onCreateCountdown={(countdownData) => {
+              createCountdown(countdownData)
+              setLastAddedItemType('countdown')
+              setShowCountdownCreator(false)
+              setCountdownCreatorSource(null)
+            }}
+            onCancel={() => {
+              setShowCountdownCreator(false)
+              setCountdownCreatorSource(null)
+            }}
+          />
+        </div>
       )}
 
       {/* Floating Menu */}
@@ -580,14 +713,9 @@ const LayoutContent = () => {
                       return // Don't create if one already exists
                     }
                     
-                    const countdownData = {
-                      name: 'Environment Countdown',
-                      max: 6,
-                      type: 'standard',
-                      loop: 'none',
-                      source: 'environment'
-                    }
-                    createCountdown(countdownData)
+                    // Show countdown creator instead of creating directly
+                    setCountdownCreatorSource('environment')
+                    setShowCountdownCreator(true)
                   }}
                   style={{
                     background: 'none',
@@ -700,27 +828,15 @@ const LayoutContent = () => {
           <Panel side="left" style={{ flex: '1', minWidth: '300px' }}>
             {browserModalOpen ? (
               <>
-            <div style={{
-              borderBottom: '1px solid var(--border)',
-              backgroundColor: 'var(--bg-card)',
-              marginBottom: '1rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <h3 style={{
-                margin: 0,
-                fontSize: '1.125rem',
-                fontWeight: '600',
-                color: 'var(--text-primary)'
-              }}>
-                Browse {browserModalType === 'adversary' ? 'Adversaries' : browserModalType === 'environment' ? 'Environments' : 'Database'}
-              </h3>
+                <div style={{ height: '100%', overflow: 'auto', position: 'relative' }}>
                   <button
                     onClick={handleCloseBrowserModal}
                     style={{
-                      background: 'none',
-                      border: 'none',
+                      position: 'absolute',
+                      top: '0.5rem',
+                      right: '0.5rem',
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border)',
                       color: 'var(--text-secondary)',
                       cursor: 'pointer',
                       padding: '0.5rem',
@@ -728,22 +844,21 @@ const LayoutContent = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      transition: 'all 0.2s ease'
+                      transition: 'all 0.2s ease',
+                      zIndex: 10
                     }}
                     onMouseEnter={(e) => {
                       e.target.style.backgroundColor = 'var(--gray-dark)'
                       e.target.style.color = 'var(--text-primary)'
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'transparent'
+                      e.target.style.backgroundColor = 'var(--bg-card)'
                       e.target.style.color = 'var(--text-secondary)'
                     }}
                     title="Close Browser"
                   >
                     ×
                   </button>
-                </div>
-                <div style={{ height: 'calc(100% - 80px)', overflow: 'auto' }}>
               <Browser
                     type={browserModalType}
                 onAddItem={(itemData) => {
@@ -764,25 +879,12 @@ const LayoutContent = () => {
               </>
             ) : (
               <>
-            <div style={{
-              borderBottom: '1px solid var(--border)',
-              backgroundColor: 'var(--bg-card)',
-              marginBottom: '1rem'
-            }}>
-                  <h3 style={{
-                    margin: 0,
-                    fontSize: '1.125rem',
-                    fontWeight: '600',
-                    color: 'var(--text-primary)'
-                  }}>
-                    {selectedItem && (selectedType === 'adversary' || selectedType === 'adversaries') ? selectedItem.name : 'Selected Adversary'}
-                  </h3>
-                </div>
                 <div style={{ 
                   padding: '0.5rem',
                   backgroundColor: 'var(--bg-primary)',
                   borderRadius: '8px',
-                  overflow: 'hidden'
+                  overflow: 'hidden',
+                  height: '100%'
                 }}>
                   {selectedItem && (selectedType === 'adversary' || selectedType === 'adversaries') ? (
             <GameCard
@@ -808,10 +910,10 @@ const LayoutContent = () => {
                       Select an adversary to view details
                     </div>
                   )}
-                </div>
+            </div>
               </>
-            )}
-          </Panel>
+          )}
+        </Panel>
 
           {/* Right Panel: Adversaries */}
           <Panel side="right" style={{ flex: '1', minWidth: '300px' }}>
@@ -906,14 +1008,9 @@ const LayoutContent = () => {
                       return // Don't create if one already exists
                     }
                     
-                    const countdownData = {
-                      name: 'Adversary Countdown',
-                      max: 6,
-                      type: 'standard',
-                      loop: 'none',
-                      source: 'adversary'
-                    }
-                    createCountdown(countdownData)
+                    // Show countdown creator instead of creating directly
+                    setCountdownCreatorSource('adversary')
+                    setShowCountdownCreator(true)
                   }}
                   style={{
                     background: 'none',
