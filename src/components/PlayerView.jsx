@@ -1,7 +1,6 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSkull } from '@fortawesome/free-solid-svg-icons'
-import GameCard from './GameCard'
 
 const PlayerView = ({ fear, countdowns, adversaries }) => {
   return (
@@ -66,16 +65,63 @@ const PlayerView = ({ fear, countdowns, adversaries }) => {
               padding: '1rem',
               backgroundColor: 'var(--bg-card)',
               borderRadius: '8px',
-              border: '1px solid var(--border)'
+              border: '1px solid var(--border)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.5rem'
             }}>
-              <GameCard
-                type="countdown"
-                item={countdown}
-                mode="compact"
-                onIncrement={null}
-                onDecrement={null}
-                adversaries={adversaries}
-              />
+              {/* Countdown Title */}
+              <h3 style={{
+                margin: 0,
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: 'var(--text-primary)',
+                textAlign: 'center'
+              }}>
+                {countdown.name}
+              </h3>
+              
+              {/* Countdown Pips - Same style as GM view */}
+              <div style={{
+                display: 'flex',
+                gap: '4px',
+                alignItems: 'center',
+                padding: '2px'
+              }}>
+                {(() => {
+                  const totalPips = countdown.max || 6
+                  const pipGroups = []
+                  for (let i = 0; i < totalPips; i += 5) {
+                    const groupSize = Math.min(5, totalPips - i)
+                    pipGroups.push(groupSize)
+                  }
+                  
+                  return pipGroups.map((groupSize, groupIndex) => (
+                    <div key={groupIndex} style={{
+                      display: 'flex',
+                      gap: '4px',
+                      marginBottom: '4px'
+                    }}>
+                      {Array.from({ length: groupSize }, (_, i) => {
+                        const pipIndex = groupIndex * 5 + i
+                        return (
+                          <span 
+                            key={pipIndex} 
+                            style={{
+                              fontSize: '16px',
+                              transition: 'color 0.1s ease',
+                              color: pipIndex < (countdown.value || 0) ? 'var(--red)' : 'var(--text-secondary)'
+                            }}
+                          >
+                            {pipIndex < (countdown.value || 0) ? '●' : '○'}
+                          </span>
+                        )
+                      })}
+                    </div>
+                  ))
+                })()}
+              </div>
             </div>
           ))}
         </div>
