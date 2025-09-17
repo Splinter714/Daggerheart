@@ -31,6 +31,13 @@ export const GameStateProvider = ({ children }) => {
     environments: []
   });
 
+  // Player view state - local to each tab, not synced
+  const [playerView, setPlayerView] = useState(() => {
+    // Check URL parameter for player view
+    const urlParams = new URLSearchParams(window.location.search)
+    return urlParams.get('playerView') === 'true'
+  });
+
   // Load state from localStorage on mount
   useEffect(() => {
     const savedState = readFromStorage('daggerheart-game-state');
@@ -44,6 +51,36 @@ export const GameStateProvider = ({ children }) => {
         console.error('Failed to load saved state:', error);
       }
     }
+  }, []);
+
+  // Cross-tab synchronization using storage events
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      // Only respond to changes from other tabs (not our own changes)
+      if (e.key === 'daggerheart-game-state' && e.newValue && e.storageArea === localStorage) {
+        try {
+          const newState = JSON.parse(e.newValue);
+          // Only update if the new state is different from current state
+          setGameState(prevState => {
+            if (JSON.stringify(prevState) !== JSON.stringify(newState)) {
+              console.log('Syncing state from other tab:', newState);
+              return newState;
+            }
+            return prevState;
+          });
+        } catch (error) {
+          console.error('Failed to sync state from other tab:', error);
+        }
+      }
+    };
+
+    // Listen for storage changes from other tabs
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup listener on unmount
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Save state to localStorage whenever it changes
@@ -64,6 +101,10 @@ export const GameStateProvider = ({ children }) => {
       ...prev,
       fear: { ...prev.fear, visible: !prev.fear.visible }
     }));
+  };
+
+  const togglePlayerView = () => {
+    setPlayerView(prev => !prev);
   };
 
   // Build action groups from modular files
@@ -102,9 +143,12 @@ export const GameStateProvider = ({ children }) => {
 
   const value = {
     gameState,
+    playerView,
     // Fear actions
     updateFear,
     toggleFearVisibility,
+    // Player view toggle
+    togglePlayerView,
     // Countdown actions
     createCountdown,
     updateCountdown,
