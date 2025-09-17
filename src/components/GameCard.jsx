@@ -2844,6 +2844,7 @@ const GameCard = ({
   // For environments, use a custom compact layout similar to adversaries
   if (type === 'environment' || type === 'environments') {
     const showDrag = false // Temporarily disabled drag handles
+    const isDead = false // Environments don't have HP, so they're never "dead"
     
     return (
       <div
