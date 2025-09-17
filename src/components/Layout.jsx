@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, startTransition } from 'react'
-import { Clock } from 'lucide-react'
+import { Clock, Search, Plus, Trash2 } from 'lucide-react'
 import { GameStateProvider, useGameState } from '../state/state'
 import Pips from './Pips'
 import FloatingMenu from './FloatingMenu'
@@ -205,6 +205,8 @@ const LayoutContent = () => {
   const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
   const [showMockup, setShowMockup] = useState(false)
   const [lastAddedItemType, setLastAddedItemType] = useState(null)
+  const [environmentDeleteConfirm, setEnvironmentDeleteConfirm] = useState(false)
+  const [adversaryDeleteConfirm, setAdversaryDeleteConfirm] = useState(false)
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
   
   // Modal state for browser popup
@@ -217,6 +219,12 @@ const LayoutContent = () => {
   // Right column handlers
   const handleItemSelect = (item, type) => {
     startTransition(() => {
+      // Close any open browser when selecting an item
+      if (browserModalOpen) {
+        setBrowserModalOpen(false)
+        setBrowserModalType('unified')
+      }
+      
       // If clicking the same item that's already selected, close the expanded view
       if (selectedItem && selectedItem.id === item.id && selectedType === type && rightColumnMode === 'item') {
         setSelectedItem(null)
@@ -243,7 +251,7 @@ const LayoutContent = () => {
     }
     
     // Open browser in modal popup
-    startTransition(() => {
+      startTransition(() => {
       setBrowserModalType(browserType)
       setBrowserModalOpen(true)
     })
@@ -382,23 +390,64 @@ const LayoutContent = () => {
         }
       }}
     >
-      
-        {/* Bottom Bar - Hidden in player view */}
-        {!playerView && (
-          <Bar position="bottom">
-            {/* Fear Bar - Always in bottom bar */}
-            <Pips
-              type="fear"
-              value={fear?.value || 0}
-              maxValue={12}
-              onChange={updateFear}
-              showTooltip={false}
-              enableBoundaryClick={true}
-              clickContainerWidth="100%"
-              centerPips={true}
-            />
-          </Bar>
-        )}
+      {/* Top Bar - Fear Display with Countdowns - Hidden in player view */}
+      {!playerView && (
+        <Bar position="top">
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
+            height: '100%'
+          }}>
+            {/* Left Side - Environment Countdown */}
+            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-start' }}>
+              {countdowns.filter(c => c.source === 'environment').map(countdown => (
+                <div key={countdown.id} style={{ marginRight: '1rem' }}>
+                  <GameCard
+                    type="countdown"
+                    item={countdown}
+                    mode="compact"
+                    onIncrement={incrementCountdown}
+                    onDecrement={decrementCountdown}
+                    adversaries={adversaries}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Center - Fear Display */}
+            <div style={{ flex: '2', display: 'flex', justifyContent: 'center' }}>
+          <Pips
+            type="fear"
+            value={fear?.value || 0}
+            maxValue={12}
+            onChange={updateFear}
+            showTooltip={false}
+            enableBoundaryClick={true}
+            clickContainerWidth="100%"
+            centerPips={true}
+          />
+            </div>
+
+            {/* Right Side - Adversary Countdown */}
+            <div style={{ flex: '1', display: 'flex', justifyContent: 'flex-end' }}>
+              {countdowns.filter(c => c.source === 'adversary').map(countdown => (
+                <div key={countdown.id} style={{ marginLeft: '1rem' }}>
+                  <GameCard
+                    type="countdown"
+                    item={countdown}
+                    mode="compact"
+                    onIncrement={incrementCountdown}
+                    onDecrement={decrementCountdown}
+                    adversaries={adversaries}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </Bar>
+      )}
 
       {/* Floating Menu */}
       <FloatingMenu
@@ -429,13 +478,11 @@ const LayoutContent = () => {
           <div style={{
             display: 'flex',
             height: '100%',
-            width: '100%',
-            gap: '1rem'
+            width: '100%'
           }}>
           {/* Left Panel: Environments */}
           <Panel side="left" style={{ flex: '1', minWidth: '300px' }}>
             <div style={{
-              padding: '1rem',
               borderBottom: '1px solid var(--border)',
               backgroundColor: 'var(--bg-card)',
               marginBottom: '1rem',
@@ -451,96 +498,224 @@ const LayoutContent = () => {
               }}>
                 Environments
               </h3>
-              <button
-                onClick={() => {
-                  // Check if environment countdown already exists
-                  const existingEnvironmentCountdown = countdowns.find(c => c.source === 'environment')
-                  if (existingEnvironmentCountdown) {
-                    return // Don't create if one already exists
-                  }
-                  
-                  const countdownData = {
-                    name: 'Environment Countdown',
-                    max: 6,
-                    type: 'standard',
-                    loop: 'none',
-                    source: 'environment'
-                  }
-                  createCountdown(countdownData)
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: countdowns.find(c => c.source === 'environment') ? 'var(--text-disabled)' : 'var(--text-secondary)',
-                  cursor: countdowns.find(c => c.source === 'environment') ? 'not-allowed' : 'pointer',
-                  padding: '0.5rem',
-                  borderRadius: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                  opacity: countdowns.find(c => c.source === 'environment') ? 0.5 : 1
-                }}
-                onMouseEnter={(e) => {
-                  if (!countdowns.find(c => c.source === 'environment')) {
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button
+                  onClick={() => handleOpenDatabase('environment')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
                     e.target.style.backgroundColor = 'var(--gray-dark)'
                     e.target.style.color = 'var(--text-primary)'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!countdowns.find(c => c.source === 'environment')) {
+                  }}
+                  onMouseLeave={(e) => {
                     e.target.style.backgroundColor = 'transparent'
                     e.target.style.color = 'var(--text-secondary)'
-                  }
-                }}
-                title={countdowns.find(c => c.source === 'environment') ? 'Environment countdown already exists' : 'Add Environment Countdown'}
-                disabled={!!countdowns.find(c => c.source === 'environment')}
-              >
-                <Clock size={18} />
-              </button>
+                  }}
+                  title="Browse Environments"
+                >
+                  <Search size={18} />
+                </button>
+                <button
+                  onClick={() => {
+                    // Check if environment already exists
+                    if (environments.length > 0) {
+                      return // Don't create if one already exists
+                    }
+                    
+                    // Create empty environment for editing
+                    const emptyEnvironment = {
+                      name: 'New Environment',
+                      description: '',
+                      effects: [],
+                      isVisible: true
+                    }
+                    createEnvironment(emptyEnvironment)
+                    setLastAddedItemType('environment')
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: environments.length > 0 ? 'var(--text-disabled)' : 'var(--text-secondary)',
+                    cursor: environments.length > 0 ? 'not-allowed' : 'pointer',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease',
+                    opacity: environments.length > 0 ? 0.5 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (environments.length === 0) {
+                      e.target.style.backgroundColor = 'var(--gray-dark)'
+                      e.target.style.color = 'var(--text-primary)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (environments.length === 0) {
+                      e.target.style.backgroundColor = 'transparent'
+                      e.target.style.color = 'var(--text-secondary)'
+                    }
+                  }}
+                  title={environments.length > 0 ? 'Environment already exists' : 'Create New Environment'}
+                  disabled={environments.length > 0}
+                >
+                  <Plus size={18} />
+                </button>
+                <button
+                  onClick={() => {
+                    // Check if environment countdown already exists
+                    const existingEnvironmentCountdown = countdowns.find(c => c.source === 'environment')
+                    if (existingEnvironmentCountdown) {
+                      return // Don't create if one already exists
+                    }
+                    
+                    const countdownData = {
+                      name: 'Environment Countdown',
+                      max: 6,
+                      type: 'standard',
+                      loop: 'none',
+                      source: 'environment'
+                    }
+                    createCountdown(countdownData)
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: countdowns.find(c => c.source === 'environment') ? 'var(--text-disabled)' : 'var(--text-secondary)',
+                    cursor: countdowns.find(c => c.source === 'environment') ? 'not-allowed' : 'pointer',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease',
+                    opacity: countdowns.find(c => c.source === 'environment') ? 0.5 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!countdowns.find(c => c.source === 'environment')) {
+                      e.target.style.backgroundColor = 'var(--gray-dark)'
+                      e.target.style.color = 'var(--text-primary)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!countdowns.find(c => c.source === 'environment')) {
+                      e.target.style.backgroundColor = 'transparent'
+                      e.target.style.color = 'var(--text-secondary)'
+                    }
+                  }}
+                  title={countdowns.find(c => c.source === 'environment') ? 'Environment countdown already exists' : 'Add Environment Countdown'}
+                  disabled={!!countdowns.find(c => c.source === 'environment')}
+                >
+                  <Clock size={18} />
+                </button>
+                <button
+                  onClick={() => {
+                    if (!environmentDeleteConfirm) {
+                      // First click - show confirmation state
+                      setEnvironmentDeleteConfirm(true)
+                      // Reset confirmation after 3 seconds
+                      setTimeout(() => setEnvironmentDeleteConfirm(false), 3000)
+                    } else {
+                      // Second click - actually delete
+                      // Delete all environments
+                      environments.forEach(env => deleteEnvironment(env.id))
+                      
+                      // Delete environment countdowns
+                      const environmentCountdowns = countdowns.filter(c => c.source === 'environment')
+                      environmentCountdowns.forEach(countdown => deleteCountdown(countdown.id))
+                      
+                      // Clear selection if it was an environment
+                      if (selectedType === 'environment' || selectedType === 'environments') {
+                        setSelectedItem(null)
+                        setSelectedType(null)
+                      }
+                      
+                      // Reset confirmation state
+                      setEnvironmentDeleteConfirm(false)
+                    }
+                  }}
+                  style={{
+                    background: environmentDeleteConfirm ? 'var(--red)' : 'none',
+                    border: 'none',
+                    color: environmentDeleteConfirm ? 'white' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!environmentDeleteConfirm) {
+                      e.target.style.backgroundColor = 'var(--gray-dark)'
+                      e.target.style.color = 'var(--text-primary)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!environmentDeleteConfirm) {
+                      e.target.style.backgroundColor = 'transparent'
+                      e.target.style.color = 'var(--text-secondary)'
+                    }
+                  }}
+                  title={environmentDeleteConfirm ? "Click again to confirm deletion" : "Clear All Environments and Environment Countdowns"}
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
             </div>
-            <GameBoard
-              onItemSelect={handleItemSelect}
-              selectedItem={selectedItem}
-              selectedType={selectedType}
-              onOpenDatabase={handleOpenDatabase}
-              isEditMode={isEditMode}
-              onEditModeChange={setIsEditMode}
-              isClearMode={isClearMode}
-              showLongTermCountdowns={showLongTermCountdowns}
-              fear={fear}
-              updateFear={updateFear}
-              handleRollOutcome={handleRollOutcome}
-              handleActionRoll={handleActionRoll}
-              setShowLongTermCountdowns={setShowLongTermCountdowns}
-              lastAddedItemType={lastAddedItemType}
+          <GameBoard
+            onItemSelect={handleItemSelect}
+            selectedItem={selectedItem}
+            selectedType={selectedType}
+            onOpenDatabase={handleOpenDatabase}
+            isEditMode={isEditMode}
+            onEditModeChange={setIsEditMode}
+            isClearMode={isClearMode}
+            showLongTermCountdowns={showLongTermCountdowns}
+            fear={fear}
+            updateFear={updateFear}
+            handleRollOutcome={handleRollOutcome}
+            handleActionRoll={handleActionRoll}
+            setShowLongTermCountdowns={setShowLongTermCountdowns}
+            lastAddedItemType={lastAddedItemType}
               showOnlyEnvironments={true}
               onIncrement={incrementCountdown}
               onDecrement={decrementCountdown}
-            />
-          </Panel>
+          />
+        </Panel>
 
           {/* Middle Panel: Browser or Expanded Selected Adversary */}
           <Panel side="left" style={{ flex: '1', minWidth: '300px' }}>
             {browserModalOpen ? (
               <>
-                <div style={{
-                  padding: '1rem',
-                  borderBottom: '1px solid var(--border)',
-                  backgroundColor: 'var(--bg-card)',
-                  marginBottom: '1rem',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <h3 style={{
-                    margin: 0,
-                    fontSize: '1.125rem',
-                    fontWeight: '600',
-                    color: 'var(--text-primary)'
-                  }}>
-                    Browse {browserModalType === 'adversary' ? 'Adversaries' : browserModalType === 'environment' ? 'Environments' : 'Database'}
-                  </h3>
+            <div style={{
+              borderBottom: '1px solid var(--border)',
+              backgroundColor: 'var(--bg-card)',
+              marginBottom: '1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h3 style={{
+                margin: 0,
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: 'var(--text-primary)'
+              }}>
+                Browse {browserModalType === 'adversary' ? 'Adversaries' : browserModalType === 'environment' ? 'Environments' : 'Database'}
+              </h3>
                   <button
                     onClick={handleCloseBrowserModal}
                     style={{
@@ -568,33 +743,32 @@ const LayoutContent = () => {
                     ×
                   </button>
                 </div>
-                <div style={{ padding: '1rem', height: 'calc(100% - 80px)', overflow: 'auto' }}>
-                  <Browser
+                <div style={{ height: 'calc(100% - 80px)', overflow: 'auto' }}>
+              <Browser
                     type={browserModalType}
-                    onAddItem={(itemData) => {
+                onAddItem={(itemData) => {
                       if (browserModalType === 'adversary') {
-                        createAdversary(itemData)
-                        setLastAddedItemType('adversary')
+                    createAdversary(itemData)
+                    setLastAddedItemType('adversary')
                         // Don't close browser for adversaries - let user close manually
                       } else if (browserModalType === 'environment') {
-                        createEnvironment(itemData)
-                        setLastAddedItemType('environment')
+                    createEnvironment(itemData)
+                    setLastAddedItemType('environment')
                         // Close browser automatically for environments
                         handleCloseBrowserModal()
-                      }
-                    }}
+                  }
+                }}
                     onCancel={handleCloseBrowserModal}
-                  />
-                </div>
+              />
+            </div>
               </>
             ) : (
               <>
-                <div style={{
-                  padding: '1rem',
-                  borderBottom: '1px solid var(--border)',
-                  backgroundColor: 'var(--bg-card)',
-                  marginBottom: '1rem'
-                }}>
+            <div style={{
+              borderBottom: '1px solid var(--border)',
+              backgroundColor: 'var(--bg-card)',
+              marginBottom: '1rem'
+            }}>
                   <h3 style={{
                     margin: 0,
                     fontSize: '1.125rem',
@@ -604,18 +778,23 @@ const LayoutContent = () => {
                     {selectedItem && (selectedType === 'adversary' || selectedType === 'adversaries') ? selectedItem.name : 'Selected Adversary'}
                   </h3>
                 </div>
-                <div style={{ padding: '1rem' }}>
+                <div style={{ 
+                  padding: '0.5rem',
+                  backgroundColor: 'var(--bg-primary)',
+                  borderRadius: '8px',
+                  overflow: 'hidden'
+                }}>
                   {selectedItem && (selectedType === 'adversary' || selectedType === 'adversaries') ? (
-                    <GameCard
+            <GameCard
                       type="adversary"
-                      item={selectedItem}
+              item={selectedItem}
                       mode="expanded"
-                      onApplyDamage={handleAdversaryDamage}
-                      onApplyHealing={handleAdversaryHealing}
-                      onApplyStressChange={handleAdversaryStressChange}
+              onApplyDamage={handleAdversaryDamage}
+              onApplyHealing={handleAdversaryHealing}
+              onApplyStressChange={handleAdversaryStressChange}
                       onUpdate={updateAdversary}
-                      adversaries={adversaries}
-                    />
+              adversaries={adversaries}
+            />
                   ) : (
                     <div style={{
                       display: 'flex',
@@ -637,7 +816,6 @@ const LayoutContent = () => {
           {/* Right Panel: Adversaries */}
           <Panel side="right" style={{ flex: '1', minWidth: '300px' }}>
             <div style={{
-              padding: '1rem',
               borderBottom: '1px solid var(--border)',
               backgroundColor: 'var(--bg-card)',
               marginBottom: '1rem',
@@ -653,53 +831,175 @@ const LayoutContent = () => {
               }}>
                 Adversaries
               </h3>
-              <button
-                onClick={() => {
-                  // Check if adversary countdown already exists
-                  const existingAdversaryCountdown = countdowns.find(c => c.source === 'adversary')
-                  if (existingAdversaryCountdown) {
-                    return // Don't create if one already exists
-                  }
-                  
-                  const countdownData = {
-                    name: 'Adversary Countdown',
-                    max: 6,
-                    type: 'standard',
-                    loop: 'none',
-                    source: 'adversary'
-                  }
-                  createCountdown(countdownData)
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: countdowns.find(c => c.source === 'adversary') ? 'var(--text-disabled)' : 'var(--text-secondary)',
-                  cursor: countdowns.find(c => c.source === 'adversary') ? 'not-allowed' : 'pointer',
-                  padding: '0.5rem',
-                  borderRadius: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                  opacity: countdowns.find(c => c.source === 'adversary') ? 0.5 : 1
-                }}
-                onMouseEnter={(e) => {
-                  if (!countdowns.find(c => c.source === 'adversary')) {
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button
+                  onClick={() => handleOpenDatabase('adversary')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
                     e.target.style.backgroundColor = 'var(--gray-dark)'
                     e.target.style.color = 'var(--text-primary)'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!countdowns.find(c => c.source === 'adversary')) {
+                  }}
+                  onMouseLeave={(e) => {
                     e.target.style.backgroundColor = 'transparent'
                     e.target.style.color = 'var(--text-secondary)'
-                  }
-                }}
-                title={countdowns.find(c => c.source === 'adversary') ? 'Adversary countdown already exists' : 'Add Adversary Countdown'}
-                disabled={!!countdowns.find(c => c.source === 'adversary')}
-              >
-                <Clock size={18} />
-              </button>
+                  }}
+                  title="Browse Adversaries"
+                >
+                  <Search size={18} />
+                </button>
+                <button
+                  onClick={() => {
+                    // Create empty adversary for editing
+                    const emptyAdversary = {
+                      name: 'New Adversary',
+                      description: '',
+                      hp: 10,
+                      hpMax: 10,
+                      stress: 0,
+                      stressMax: 6,
+                      features: [],
+                      isVisible: true
+                    }
+                    createAdversary(emptyAdversary)
+                    setLastAddedItemType('adversary')
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'var(--gray-dark)'
+                    e.target.style.color = 'var(--text-primary)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent'
+                    e.target.style.color = 'var(--text-secondary)'
+                  }}
+                  title="Create New Adversary"
+                >
+                  <Plus size={18} />
+                </button>
+                <button
+                  onClick={() => {
+                    // Check if adversary countdown already exists
+                    const existingAdversaryCountdown = countdowns.find(c => c.source === 'adversary')
+                    if (existingAdversaryCountdown) {
+                      return // Don't create if one already exists
+                    }
+                    
+                    const countdownData = {
+                      name: 'Adversary Countdown',
+                      max: 6,
+                      type: 'standard',
+                      loop: 'none',
+                      source: 'adversary'
+                    }
+                    createCountdown(countdownData)
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: countdowns.find(c => c.source === 'adversary') ? 'var(--text-disabled)' : 'var(--text-secondary)',
+                    cursor: countdowns.find(c => c.source === 'adversary') ? 'not-allowed' : 'pointer',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease',
+                    opacity: countdowns.find(c => c.source === 'adversary') ? 0.5 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!countdowns.find(c => c.source === 'adversary')) {
+                      e.target.style.backgroundColor = 'var(--gray-dark)'
+                      e.target.style.color = 'var(--text-primary)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!countdowns.find(c => c.source === 'adversary')) {
+                      e.target.style.backgroundColor = 'transparent'
+                      e.target.style.color = 'var(--text-secondary)'
+                    }
+                  }}
+                  title={countdowns.find(c => c.source === 'adversary') ? 'Adversary countdown already exists' : 'Add Adversary Countdown'}
+                  disabled={!!countdowns.find(c => c.source === 'adversary')}
+                >
+                  <Clock size={18} />
+                </button>
+                <button
+                  onClick={() => {
+                    if (!adversaryDeleteConfirm) {
+                      // First click - show confirmation state
+                      setAdversaryDeleteConfirm(true)
+                      // Reset confirmation after 3 seconds
+                      setTimeout(() => setAdversaryDeleteConfirm(false), 3000)
+                    } else {
+                      // Second click - actually delete
+                      // Delete all adversaries
+                      adversaries.forEach(adv => deleteAdversary(adv.id))
+                      
+                      // Delete adversary countdowns
+                      const adversaryCountdowns = countdowns.filter(c => c.source === 'adversary')
+                      adversaryCountdowns.forEach(countdown => deleteCountdown(countdown.id))
+                      
+                      // Clear selection if it was an adversary
+                      if (selectedType === 'adversary' || selectedType === 'adversaries') {
+                        setSelectedItem(null)
+                        setSelectedType(null)
+                      }
+                      
+                      // Reset confirmation state
+                      setAdversaryDeleteConfirm(false)
+                    }
+                  }}
+                  style={{
+                    background: adversaryDeleteConfirm ? 'var(--red)' : 'none',
+                    border: 'none',
+                    color: adversaryDeleteConfirm ? 'white' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!adversaryDeleteConfirm) {
+                      e.target.style.backgroundColor = 'var(--gray-dark)'
+                      e.target.style.color = 'var(--text-primary)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!adversaryDeleteConfirm) {
+                      e.target.style.backgroundColor = 'transparent'
+                      e.target.style.color = 'var(--text-secondary)'
+                    }
+                  }}
+                  title={adversaryDeleteConfirm ? "Click again to confirm deletion" : "Clear All Adversaries and Adversary Countdowns"}
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
             </div>
             <GameBoard
               onItemSelect={handleItemSelect}
@@ -721,8 +1021,8 @@ const LayoutContent = () => {
               onDecrement={decrementCountdown}
             />
           </Panel>
-        </div>
-        )}
+            </div>
+          )}
       </div>
 
 
