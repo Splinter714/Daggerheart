@@ -321,7 +321,11 @@ const GameBoard = ({
   handleRollOutcome,
   handleActionRoll,
   setShowLongTermCountdowns,
-  lastAddedItemType
+  lastAddedItemType,
+  showOnlyAdversaries = false,
+  showOnlyEnvironments = false,
+  onIncrement,
+  onDecrement
 }) => {
   console.log('GameBoard received props:', { selectedItem, selectedType })
   
@@ -444,64 +448,29 @@ const GameBoard = ({
       flex: 1,
       overflowY: 'auto'
     }}>
-      {/* Temporarily disabled countdowns section */}
-      {/* <GameBoardElementSection
-        elementType="countdowns"
-        title="Countdowns"
-        sectionKey="countdowns"
-        items={countdowns}
-        sectionVisibility={sectionVisibility}
-        toggleSection={toggleSection}
-        adversaries={adversaries}
-          showInlineCreator={showInlineCreator}
-          onToggleInlineCreator={handleToggleInlineCreator}
-          onCreateCountdown={handleCreateCountdown}
-          fear={fear}
-          updateFear={updateFear}
-          handleRollOutcome={handleRollOutcome}
-          handleActionRoll={handleActionRoll}
-          showLongTermCountdowns={showLongTermCountdowns}
-          setShowLongTermCountdowns={setShowLongTermCountdowns}
-          onDeleteItem={handleDeleteItem}
-          onEditItem={handleEditItem}
-          onReorder={reorderCountdowns}
-          onItemSelect={onItemSelect}
-          selectedItem={selectedItem}
-          selectedType={selectedType}
-          onIncrement={incrementCountdown}
-          onDecrement={decrementCountdown}
-          isEditMode={isEditMode}
-          onRestTrigger={handleRestTrigger}
-        /> */}
-
-        {/* Temporarily disabled environments section */}
-        {/* <GameBoardElementSection
-          elementType="environments"
-          title="Environments"
-          sectionKey="environments"
-          items={environments}
-          sectionVisibility={sectionVisibility}
-          toggleSection={toggleSection}
-          adversaries={adversaries}
-          onOpenDatabase={handleOpenDatabase}
-          onDeleteItem={handleDeleteItem}
-          onEditItem={handleEditItem}
-          onToggleVisibility={(id) => {
-            const env = environments.find(e => e.id === id)
-            if (env) {
-              updateEnvironment(id, { isVisible: !env.isVisible })
-            }
-          }}
-          onReorder={reorderEnvironments}
-          onItemSelect={onItemSelect}
-          selectedItem={selectedItem}
-          selectedType={selectedType}
-          isEditMode={isEditMode}
-        /> */}
-
-        {/* Adversaries section - no header, just cards and add button */}
+      {/* Conditionally render sections based on props */}
+      
+      {/* Adversaries Section */}
+      {showOnlyAdversaries && (
         <div>
-          {/* Always show adversaries list */}
+          {/* Adversary Countdown */}
+          {countdowns.filter(c => c.source === 'adversary').map((countdown) => (
+            <div key={countdown.id} style={{ marginBottom: '1rem' }}>
+              <GameCard
+                type="countdown"
+                item={countdown}
+                mode="compact"
+                onClick={() => onItemSelect(countdown, 'countdown')}
+                onDelete={isClearMode ? (id) => handleDeleteItem(id, 'countdown') : undefined}
+                onEdit={(item) => handleEditItem(item, 'countdown')}
+                onIncrement={onIncrement}
+                onDecrement={onDecrement}
+                isSelected={selectedItem && selectedItem.id === countdown.id && selectedType === 'countdown'}
+                adversaries={adversaries}
+              />
+            </div>
+          ))}
+
           <ElementList
             items={adversaries}
             onDelete={(id) => handleDeleteItem(id, 'adversary')}
@@ -546,33 +515,29 @@ const GameBoard = ({
             isClearMode={isClearMode}
             elementType="adversaries"
             adversaries={adversaries}
-            expandedCardId={expandedCardId}
-            onInlineExpansion={handleInlineExpansion}
+            expandedCardId={null}
+            onInlineExpansion={null}
           />
-          
-          {/* Add Adversary Button - styled like a translucent card, positioned below all adversaries */}
-          <div
-            className="border rounded-lg"
+
+          {/* Add Adversary Button */}
+          <div 
             style={{
-              backgroundColor: 'var(--bg-card)',
+              marginTop: '1rem',
+              padding: '1rem',
+              border: '1px dashed var(--border)',
               borderRadius: '8px',
-              padding: '12px',
-              marginTop: '0.5rem',
               cursor: 'pointer',
-              transition: 'all 0.1s ease',
-              position: 'relative',
-              border: '2px dashed var(--border)',
-              opacity: 0.8,
-              background: 'var(--bg-card)'
+              transition: 'all 0.2s ease',
+              backgroundColor: 'var(--bg-card)'
             }}
-            onClick={() => onOpenDatabase('adversaries')}
+            onClick={() => handleOpenDatabase('adversary')}
             onMouseEnter={(e) => {
-              e.target.style.opacity = '1'
               e.target.style.borderColor = 'var(--border-hover)'
+              e.target.style.backgroundColor = 'var(--gray-dark)'
             }}
             onMouseLeave={(e) => {
-              e.target.style.opacity = '0.8'
               e.target.style.borderColor = 'var(--border)'
+              e.target.style.backgroundColor = 'var(--bg-card)'
             }}
           >
             <div style={{
@@ -623,6 +588,117 @@ const GameBoard = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Environments Section - Always Expanded */}
+      {showOnlyEnvironments && (
+        <div>
+          {/* Environment Countdown */}
+          {countdowns.filter(c => c.source === 'environment').map((countdown) => (
+            <div key={countdown.id} style={{ marginBottom: '1rem' }}>
+              <GameCard
+                type="countdown"
+                item={countdown}
+                mode="compact"
+                onClick={() => onItemSelect(countdown, 'countdown')}
+                onDelete={isClearMode ? (id) => handleDeleteItem(id, 'countdown') : undefined}
+                onEdit={(item) => handleEditItem(item, 'countdown')}
+                onIncrement={onIncrement}
+                onDecrement={onDecrement}
+                isSelected={selectedItem && selectedItem.id === countdown.id && selectedType === 'countdown'}
+                adversaries={adversaries}
+              />
+            </div>
+          ))}
+
+          {/* Render environments in expanded mode */}
+          {environments.map((environment) => (
+            <div key={environment.id} style={{ marginBottom: '1rem' }}>
+              <GameCard
+                type="environment"
+                item={environment}
+                mode="expanded"
+                onClick={() => onItemSelect(environment, 'environment')}
+                onDelete={isClearMode ? (id) => handleDeleteItem(id, 'environment') : undefined}
+                onEdit={(item) => handleEditItem(item, 'environment')}
+                isSelected={selectedItem && selectedItem.id === environment.id && selectedType === 'environment'}
+                adversaries={adversaries}
+              />
+            </div>
+          ))}
+
+          {/* Add Environment Button - Only show if no environments exist */}
+          {environments.length === 0 && (
+            <div 
+              style={{
+                marginTop: '1rem',
+                padding: '1rem',
+                border: '1px dashed var(--border)',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                backgroundColor: 'var(--bg-card)'
+              }}
+              onClick={() => handleOpenDatabase('environment')}
+              onMouseEnter={(e) => {
+                e.target.style.borderColor = 'var(--border-hover)'
+                e.target.style.backgroundColor = 'var(--gray-dark)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.borderColor = 'var(--border)'
+                e.target.style.backgroundColor = 'var(--bg-card)'
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '0.5rem',
+                position: 'relative'
+              }}>
+                {/* Left side - Add text */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  gap: '0.25rem'
+                }}>
+                  <h4 style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: 'var(--text-secondary)',
+                    margin: 0
+                  }}>
+                    Add Environment
+                  </h4>
+                  <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    color: 'var(--text-secondary)',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Click to browse
+                  </span>
+                </div>
+
+                {/* Right side - Plus icon */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  border: '1px dashed var(--text-secondary)',
+                  color: 'var(--text-secondary)'
+                }}>
+                  <Plus size={16} />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
