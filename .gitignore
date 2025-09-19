@@ -89,3 +89,14 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
+
+# Firebase and API keys
+firebase-config.js
+firebase-config.json
+src/firebase/config.js
+src/firebase/sessionService.js
+**/firebase/**
+**/*firebase*
+**/*api-key*
+**/*secret*
+**/*credential*
