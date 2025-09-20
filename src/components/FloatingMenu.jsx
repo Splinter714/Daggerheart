@@ -148,7 +148,7 @@ const FloatingMenu = ({
         pointerEvents: 'none'
       }}>
         {/* Add Adversary Button */}
-        <div style={getRadialItemStyle(0, 5)}>
+        <div style={getRadialItemStyle(0, 4)}>
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -173,7 +173,7 @@ const FloatingMenu = ({
         </div>
         
         {/* Add Environment Button */}
-        <div style={getRadialItemStyle(1, 5)}>
+        <div style={getRadialItemStyle(1, 4)}>
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -198,7 +198,7 @@ const FloatingMenu = ({
         </div>
         
         {/* Clear Button */}
-        <div style={getRadialItemStyle(2, 5)}>
+        <div style={getRadialItemStyle(2, 4)}>
           <DeleteClear
             adversaries={adversaries}
             environments={environments}
