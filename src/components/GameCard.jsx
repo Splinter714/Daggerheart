@@ -677,10 +677,10 @@ const GameCard = ({
           zIndex: isDead ? 1 : 'auto',
           borderBottomColor: isSelected ? 'var(--purple)' : 'var(--border)'
         }}>
-          {/* Centered Name Header */}
+          {/* Left-aligned Name Header */}
           <div style={{
             display: 'flex',
-            justifyContent: 'center',
+            justifyContent: 'flex-start',
             alignItems: 'center',
             position: 'relative',
             zIndex: isDead ? 1 : 'auto'
@@ -688,8 +688,9 @@ const GameCard = ({
             <h4 style={{
               ...styles.rowTitle,
               color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
-              textAlign: 'center',
-              margin: 0
+              textAlign: 'left',
+              margin: 0,
+              fontSize: '1.1rem'
             }}>
               {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
             </h4>
