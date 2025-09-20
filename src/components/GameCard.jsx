@@ -698,7 +698,6 @@ const GameCard = ({
 
         {/* Expandable Content Section */}
         <div style={{
-          padding: '12px',
           borderRadius: '0 0 8px 8px'
         }}>
 
@@ -1571,7 +1570,6 @@ const GameCard = ({
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '12px',
           borderRadius: '0 0 8px 8px'
         }}>
           {/* Description Section */}
