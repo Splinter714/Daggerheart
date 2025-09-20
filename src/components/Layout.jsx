@@ -25,10 +25,14 @@ function useRightPanelSync({
   adversaries,
   environments,
   setSelectedItem,
-  handleCloseRightColumn
+  handleCloseRightColumn,
+  browserOpen // Add browserOpen to know when we're in browser mode
 }) {
   useEffect(() => {
     if (!selectedItem || !selectedType) return
+
+    // Don't interfere with browser selections - they're from JSON data, not game state
+    if (browserOpen) return
 
     // Check if the selected item still exists
     let itemExists = false
@@ -45,7 +49,7 @@ function useRightPanelSync({
     if (!itemExists) {
       handleCloseRightColumn()
     }
-  }, [selectedItem, selectedType, countdowns, adversaries, environments, setSelectedItem, handleCloseRightColumn])
+  }, [selectedItem, selectedType, countdowns, adversaries, environments, setSelectedItem, handleCloseRightColumn, browserOpen])
 
   // Update selected item when the underlying data changes
   useEffect(() => {
@@ -182,6 +186,7 @@ const LayoutContent = () => {
     updateEnvironment,
     deleteEnvironment,
     createCountdown,
+    updateCountdown,
     deleteCountdown,
     advanceCountdown
   } = useGameState()
@@ -191,6 +196,10 @@ const LayoutContent = () => {
   const [selectedType, setSelectedType] = useState(null)
   const [rightColumnMode, setRightColumnMode] = useState(null)
   const [databaseType, setDatabaseType] = useState('unified')
+  
+  // Browser state
+  const [browserOpen, setBrowserOpen] = useState(false)
+  const [browserType, setBrowserType] = useState('adversary')
   const [isMobile, setIsMobile] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [isClearMode, setIsClearMode] = useState(false)
@@ -224,27 +233,32 @@ const LayoutContent = () => {
   
   const handleOpenDatabase = (type = 'unified') => {
     // Convert element type to browser type
-    let browserType = type
+    let newBrowserType = type
     if (type === 'adversaries') {
-      browserType = 'adversary'
+      newBrowserType = 'adversary'
     } else if (type === 'environments') {
-      browserType = 'environment'
+      newBrowserType = 'environment'
     }
     
     // If browser is already open for the same type, close it
-    if (rightColumnMode === 'database' && databaseType === browserType) {
+    if (browserOpen && browserType === newBrowserType) {
       startTransition(() => {
+        setBrowserOpen(false)
+        setSelectedItem(null)
+        setSelectedType(null)
         setRightColumnMode(null)
-        setDatabaseType('unified')
         if (isMobile) {
           setMobileDrawerOpen(false)
         }
       })
     } else {
-      // Open database in right panel
+      // Open browser in left panel
       startTransition(() => {
-        setDatabaseType(browserType)
-        setRightColumnMode('database')
+        setBrowserType(newBrowserType)
+        setBrowserOpen(true)
+        setSelectedItem(null)
+        setSelectedType(null)
+        setRightColumnMode(null)
         if (isMobile) {
           setMobileDrawerOpen(true)
         }
@@ -283,6 +297,27 @@ const LayoutContent = () => {
     }
   }, [isMobile])
 
+  // Handler for browser row clicks - show details in right panel
+  const handleBrowserRowClick = useCallback((item, type) => {
+    startTransition(() => {
+      setSelectedItem(item)
+      setSelectedType(type)
+      setRightColumnMode('item')
+      if (isMobile) setMobileDrawerOpen(true)
+    })
+  }, [isMobile])
+
+  // Handler for closing browser
+  const handleCloseBrowser = useCallback(() => {
+    setBrowserOpen(false)
+    setSelectedItem(null)
+    setSelectedType(null)
+    setRightColumnMode(null)
+    if (isMobile) {
+      setMobileDrawerOpen(false)
+    }
+  }, [isMobile])
+
 
 
   // Mobile detection using CSS media query instead of window.innerWidth
@@ -298,7 +333,7 @@ const LayoutContent = () => {
       
       // Transition to mobile: prefer drawers instead of switching panels
       if (!wasMobile && nowMobile) {
-        if (rightColumnMode === 'database' || rightColumnMode === 'creator' || rightColumnMode === 'item') {
+        if (rightColumnMode === 'database' || rightColumnMode === 'creator' || rightColumnMode === 'item' || browserOpen) {
           setMobileDrawerOpen(true)
         }
       }
@@ -317,7 +352,7 @@ const LayoutContent = () => {
     
     mediaQuery.addEventListener('change', handleMediaChange)
     return () => mediaQuery.removeEventListener('change', handleMediaChange)
-  }, [isMobile, rightColumnMode, mobileDrawerOpen])
+  }, [isMobile, rightColumnMode, mobileDrawerOpen, browserOpen])
 
   // Prevent background scrolling when any drawer is open
   useEffect(() => {
@@ -346,7 +381,8 @@ const LayoutContent = () => {
     adversaries,
     environments,
     setSelectedItem,
-    handleCloseRightColumn
+    handleCloseRightColumn,
+    browserOpen
   })
 
   // Adversary handlers
@@ -381,20 +417,20 @@ const LayoutContent = () => {
       }}
     >
       
-        {/* Bottom Bar */}
-        <Bar position="bottom">
-          {/* Fear Bar - Always in bottom bar */}
-          <Pips
-            type="fear"
-            value={fear?.value || 0}
-            maxValue={12}
-            onChange={updateFear}
-            showTooltip={false}
-            enableBoundaryClick={true}
-            clickContainerWidth="100%"
-            centerPips={true}
-          />
-        </Bar>
+      {/* Top Bar */}
+      <Bar position="top">
+        {/* Fear Bar - Moved to top bar */}
+        <Pips
+          type="fear"
+          value={fear?.value || 0}
+          maxValue={12}
+          onChange={updateFear}
+          showTooltip={false}
+          enableBoundaryClick={true}
+          clickContainerWidth="100%"
+          centerPips={true}
+        />
+      </Bar>
 
       {/* Floating Menu */}
       <FloatingMenu
@@ -412,52 +448,89 @@ const LayoutContent = () => {
       {/* Main Content Area */}
       <div className="main-content" key={`mobile-${isMobile}`}>
         {/* Unified Layout - Reuse desktop structure for mobile */}
-        {/* Left Panel: Game Board */}
+        {/* Left Panel: Game Board or Browser */}
         <Panel 
           side="left" 
           className={`${isMobile && mobileView === 'right' ? 'mobile-hidden' : ''}`}
         >
-          <GameBoard
-            onItemSelect={handleItemSelect}
-            selectedItem={selectedItem}
-            selectedType={selectedType}
-            onOpenDatabase={handleOpenDatabase}
-            isEditMode={isEditMode}
-            onEditModeChange={setIsEditMode}
-            isClearMode={isClearMode}
-            showLongTermCountdowns={showLongTermCountdowns}
-            fear={fear}
-            updateFear={updateFear}
-            handleRollOutcome={handleRollOutcome}
-            handleActionRoll={handleActionRoll}
-            setShowLongTermCountdowns={setShowLongTermCountdowns}
-            lastAddedItemType={lastAddedItemType}
-          />
+          {browserOpen ? (
+            <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
+              {/* Browser Header with Close Button */}
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                padding: '1rem', 
+                borderBottom: '1px solid var(--border)',
+                backgroundColor: 'var(--bg-secondary)',
+                flexShrink: 0
+              }}>
+                <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>
+                  Browse {browserType === 'adversary' ? 'Adversaries' : 'Environments'}
+                </h3>
+                <button
+                  onClick={handleCloseBrowser}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-primary)',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
+                    padding: '0.25rem',
+                    borderRadius: 'var(--radius-sm)',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-hover)'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                  title="Close Browser"
+                >
+                  ×
+                </button>
+              </div>
+              
+              {/* Browser Content */}
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <Browser
+                  type={browserType}
+                  onAddItem={(itemData) => {
+                    if (browserType === 'adversary') {
+                      createAdversary(itemData)
+                      setLastAddedItemType('adversary')
+                    } else if (browserType === 'environment') {
+                      createEnvironment(itemData)
+                      setLastAddedItemType('environment')
+                    }
+                  }}
+                  onRowClick={handleBrowserRowClick}
+                  onCancel={handleCloseBrowser}
+                />
+              </div>
+            </div>
+          ) : (
+            <GameBoard
+              onItemSelect={handleItemSelect}
+              selectedItem={selectedItem}
+              selectedType={selectedType}
+              onOpenDatabase={handleOpenDatabase}
+              isEditMode={isEditMode}
+              onEditModeChange={setIsEditMode}
+              isClearMode={isClearMode}
+              showLongTermCountdowns={showLongTermCountdowns}
+              fear={fear}
+              updateFear={updateFear}
+              handleRollOutcome={handleRollOutcome}
+              handleActionRoll={handleActionRoll}
+              setShowLongTermCountdowns={setShowLongTermCountdowns}
+              lastAddedItemType={lastAddedItemType}
+            />
+          )}
         </Panel>
 
-        {/* Right Panel: Details, Database, Creator, or Preview */}
+        {/* Right Panel: Details, Creator, or Plus Button */}
         <Panel 
           side="right" 
           className={`${isMobile && mobileView === 'left' ? 'mobile-hidden' : ''}`}
-          style={rightColumnMode === 'database' ? { overflowY: 'hidden' } : {}}
         >
-          {rightColumnMode === 'database' && (
-            <div className="database-display">
-              <Browser
-                type={databaseType}
-                onAddItem={(itemData) => {
-                  if (databaseType === 'adversary') {
-                    createAdversary(itemData)
-                    setLastAddedItemType('adversary')
-                  } else if (databaseType === 'environment') {
-                    createEnvironment(itemData)
-                    setLastAddedItemType('environment')
-                  }
-                }}
-                onCancel={handleCloseRightColumn}
-              />
-            </div>
-          )}
           {rightColumnMode === 'item' && selectedItem && (
             <GameCard
               type={selectedType}
@@ -470,7 +543,96 @@ const LayoutContent = () => {
               adversaries={adversaries}
             />
           )}
-          {!rightColumnMode && (
+          {browserOpen && !selectedItem && (
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              height: '100%',
+              padding: '2rem',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                width: '120px',
+                height: '120px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--purple)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '3rem',
+                color: 'white',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                marginBottom: '1.5rem',
+                boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+              }}
+              onClick={() => {
+                // Create a new adversary/environment
+                if (browserType === 'adversary') {
+                  const newAdversary = {
+                    id: `adversary-${Date.now()}`,
+                    name: 'New Adversary',
+                    tier: 1,
+                    type: 'Creature',
+                    difficulty: '1',
+                    hp: 10,
+                    hpMax: 10,
+                    stress: 0,
+                    stressMax: 6,
+                    isVisible: true,
+                    features: [],
+                    description: ''
+                  }
+                  createAdversary(newAdversary)
+                  setLastAddedItemType('adversary')
+                } else if (browserType === 'environment') {
+                  const newEnvironment = {
+                    id: `environment-${Date.now()}`,
+                    name: 'New Environment',
+                    tier: 1,
+                    type: 'Location',
+                    difficulty: '1',
+                    isVisible: true,
+                    effects: [],
+                    description: ''
+                  }
+                  createEnvironment(newEnvironment)
+                  setLastAddedItemType('environment')
+                }
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'scale(1.05)'
+                e.target.style.boxShadow = '0 6px 16px rgba(139, 92, 246, 0.4)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'scale(1)'
+                e.target.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)'
+              }}
+              title={`Create New ${browserType === 'adversary' ? 'Adversary' : 'Environment'}`}
+            >
+              +
+            </div>
+            <h3 style={{ 
+              margin: 0, 
+              color: 'var(--text-primary)', 
+              fontSize: '1.5rem',
+              marginBottom: '0.5rem'
+            }}>
+              Create New {browserType === 'adversary' ? 'Adversary' : 'Environment'}
+            </h3>
+            <p style={{ 
+              margin: 0, 
+              color: 'var(--text-secondary)', 
+              fontSize: '1rem',
+              lineHeight: 1.5
+            }}>
+              Click the + button to create a new {browserType === 'adversary' ? 'adversary' : 'environment'} or select an item from the browser to view its details.
+            </p>
+          </div>
+          )}
+          {!browserOpen && !selectedItem && (
             <div>
               {/* Right panel content - to be implemented */}
             </div>
@@ -478,26 +640,58 @@ const LayoutContent = () => {
         </Panel>
       </div>
 
-      {/* Mobile Drawer for Browser, Creator, and Expanded Cards */}
+      {/* Mobile Drawer for Browser and Expanded Cards */}
       {isMobile && (
         <Drawer
           isOpen={mobileDrawerOpen}
           onClose={handleCloseRightColumn}
         >
-          {rightColumnMode === 'database' && (
+          {browserOpen && (
             <div className="browser-container">
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                padding: '1rem', 
+                borderBottom: '1px solid var(--border)',
+                backgroundColor: 'var(--bg-secondary)',
+                flexShrink: 0
+              }}>
+                <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>
+                  Browse {browserType === 'adversary' ? 'Adversaries' : 'Environments'}
+                </h3>
+                <button
+                  onClick={handleCloseBrowser}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-primary)',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
+                    padding: '0.25rem',
+                    borderRadius: 'var(--radius-sm)',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-hover)'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                  title="Close Browser"
+                >
+                  ×
+                </button>
+              </div>
               <Browser
-                type={databaseType}
+                type={browserType}
                 onAddItem={(itemData) => {
-                  if (databaseType === 'adversary') {
+                  if (browserType === 'adversary') {
                     createAdversary(itemData)
                     setLastAddedItemType('adversary')
-                  } else if (databaseType === 'environment') {
+                  } else if (browserType === 'environment') {
                     createEnvironment(itemData)
                     setLastAddedItemType('environment')
                   }
                 }}
-                onCancel={handleCloseRightColumn}
+                onRowClick={handleBrowserRowClick}
+                onCancel={handleCloseBrowser}
               />
             </div>
           )}

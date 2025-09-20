@@ -29,7 +29,6 @@ const loadData = async () => {
 const useBrowser = (type) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortFields, setSortFields] = useState([{ field: 'tier', direction: 'asc' }, { field: 'name', direction: 'asc' }])
-  const [expandedCard, setExpandedCard] = useState(null)
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   
@@ -177,9 +176,6 @@ const useBrowser = (type) => {
     })
   }
 
-  const toggleExpanded = (id) => {
-    setExpandedCard(expandedCard === id ? null : id)
-  }
 
   const handleTierSelect = (tier) => {
     if (tier === 'clear') {
@@ -257,8 +253,6 @@ const useBrowser = (type) => {
     setSearchTerm,
     sortFields,
     handleSort,
-    expandedCard,
-    toggleExpanded,
     filteredAndSortedData,
     loading,
     // Advanced filtering
@@ -478,7 +472,7 @@ const BrowserTableHeader = ({
 }
 
 // Browser Row Component
-const BrowserRow = ({ item, isExpanded, onToggleExpanded, onAdd, type }) => {
+const BrowserRow = ({ item, onAdd, type, onRowClick }) => {
   const [isHovered, setIsHovered] = useState(false)
 
   const handleAdd = () => {
@@ -515,7 +509,7 @@ const BrowserRow = ({ item, isExpanded, onToggleExpanded, onAdd, type }) => {
           ...styles.row,
           ...(isHovered ? styles.rowHover : {})
         }}
-        onClick={() => onToggleExpanded(item.id)}
+        onClick={() => onRowClick && onRowClick(item, type)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -551,33 +545,17 @@ const BrowserRow = ({ item, isExpanded, onToggleExpanded, onAdd, type }) => {
           </button>
         </td>
       </tr>
-      
-      {isExpanded && (
-        <tr style={styles.expandedRow}>
-          <td colSpan="5" style={styles.expandedContent}>
-            <GameCard
-              item={item}
-              type={type}
-              mode="expanded"
-              onClick={() => {}} // No-op since we're already expanded
-              onDelete={() => {}} // No-op in browser
-            />
-          </td>
-        </tr>
-      )}
     </>
   )
 }
 
 // Main Browser Component
-const Browser = ({ type, onAddItem, onCancel }) => {
+const Browser = ({ type, onAddItem, onCancel, onRowClick }) => {
   const {
     searchTerm,
     setSearchTerm,
     sortFields,
     handleSort,
-    expandedCard,
-    toggleExpanded,
     filteredAndSortedData,
     loading,
     // Advanced filtering
@@ -645,10 +623,9 @@ const Browser = ({ type, onAddItem, onCancel }) => {
               <BrowserRow
                 key={item.id}
                 item={item}
-                isExpanded={expandedCard === item.id}
-                onToggleExpanded={toggleExpanded}
                 onAdd={onAddItem}
                 type={type}
+                onRowClick={onRowClick}
               />
             ))}
           </tbody>
