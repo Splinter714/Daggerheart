@@ -290,7 +290,9 @@ const DashboardContent = () => {
             paddingRight: '0',
             paddingTop: `${gap}px`, // Space above each card
             paddingBottom: `${gap}px`, // Space below each card
-            scrollSnapAlign: 'start'
+            scrollSnapAlign: 'start',
+            overflowY: 'hidden',
+            overflowX: 'hidden'
           }}>
             <div style={{ 
               display: 'flex', 
@@ -351,7 +353,9 @@ const DashboardContent = () => {
               paddingRight: '0',
               paddingTop: `${gap}px`, // Space above each card
               paddingBottom: `${gap}px`, // Space below each card
-              scrollSnapAlign: 'start'
+              scrollSnapAlign: 'start',
+              overflowY: 'hidden',
+              overflowX: 'hidden'
             }}
           >
             <GameCard
