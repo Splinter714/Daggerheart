@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Droplet, Activity, CheckCircle, X, Plus, Minus, Shield, Hexagon } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Hexagon } from 'lucide-react'
 import Pips from './Pips'
 
 // ============================================================================
@@ -12,94 +12,6 @@ function generateId(prefix) {
 }
 
 
-// ============================================================================
-// COUNTDOWN ENGINE - Centralized countdown logic
-// ============================================================================
-
-export function getNeededTriggers(countdowns = []) {
-  if (!Array.isArray(countdowns) || countdowns.length === 0) {
-    return {
-      basicRollTriggers: false,
-      simpleFearTriggers: false,
-      simpleHopeTriggers: false,
-      complexRollTriggers: false,
-      restTriggers: false,
-    }
-  }
-
-  const hasDynamicCountdowns = countdowns.some((c) =>
-    c?.type === 'progress' ||
-    c?.type === 'consequence' ||
-    c?.type === 'dynamic-progress' ||
-    c?.type === 'dynamic-consequence'
-  )
-  const hasLongTermCountdowns = countdowns.some((c) => c?.type === 'long-term')
-  const hasSimpleFearCountdowns = countdowns.some((c) => c?.type === 'simple-fear')
-  const hasSimpleHopeCountdowns = countdowns.some((c) => c?.type === 'simple-hope')
-  const hasStandardCountdowns = countdowns.some((c) => c?.type === 'standard' || !c?.type)
-
-  return {
-    basicRollTriggers: hasStandardCountdowns,
-    simpleFearTriggers: hasSimpleFearCountdowns && !hasDynamicCountdowns,
-    simpleHopeTriggers: hasSimpleHopeCountdowns && !hasDynamicCountdowns,
-    complexRollTriggers: hasDynamicCountdowns,
-    restTriggers: hasLongTermCountdowns,
-  }
-}
-
-export function getAdvancementForOutcome(countdown, outcome) {
-  const type = countdown?.type || 'standard'
-
-  if (type === 'standard') {
-    return 1
-  }
-
-  if (type === 'progress' || type === 'dynamic-progress') {
-    switch (outcome) {
-      case 'success-hope':
-        return 2
-      case 'success-fear':
-        return 1
-      case 'critical-success':
-        return 3
-      default:
-        return 0
-    }
-  }
-
-  if (type === 'consequence' || type === 'dynamic-consequence') {
-    switch (outcome) {
-      case 'success-fear':
-        return 1
-      case 'failure-hope':
-        return 2
-      case 'failure-fear':
-        return 3
-      default:
-        return 0
-    }
-  }
-
-  if (type === 'simple-fear') {
-    return outcome === 'simple-fear' || outcome === 'success-fear' || outcome === 'failure-fear' ? 1 : 0
-  }
-
-  if (type === 'simple-hope') {
-    return outcome === 'simple-hope' || outcome === 'success-hope' || outcome === 'failure-hope' || outcome === 'critical-success' ? 1 : 0
-  }
-
-  return 0
-}
-
-export function getAdvancementForActionRoll(countdown) {
-  const type = countdown?.type || 'standard'
-  return type === 'standard' ? 1 : 0
-}
-
-export function getAdvancementForRest(countdown, restType) {
-  if (countdown?.type !== 'long-term') return 0
-  return restType === 'long' ? 2 : 1
-}
 
 
 // ============================================================================
@@ -111,10 +23,6 @@ const styles = {
   transitions: {
     hoverIn: 'all 0.1s ease',        // Fast hover-in
     hoverOut: 'all 0.3s ease',       // Graceful hover-out
-    colorIn: 'color 0.1s ease',
-    colorOut: 'color 0.3s ease',
-    backgroundIn: 'background-color 0.1s ease',
-    backgroundOut: 'background-color 0.3s ease'
   },
 
   // Container styles
@@ -157,35 +65,6 @@ const styles = {
     gap: '8px',
     alignItems: 'center'
   },
-  cardActions: {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    gap: '12px'
-  },
-  controlButtons: {
-    display: 'flex',
-    gap: '8px',
-    alignItems: 'center'
-  },
-
-  // Pip styles
-  pipSymbols: {
-    display: 'flex',
-    gap: '4px',
-    alignItems: 'center',
-    cursor: 'pointer',
-    padding: '2px'
-  },
-  pipSymbol: {
-    fontSize: '16px',
-    transition: 'color 0.1s ease'
-  },
-  pipGroup: {
-    display: 'flex',
-    gap: '4px',
-    marginBottom: '4px'
-  },
 
   // Badge styles
   badge: {
@@ -199,69 +78,9 @@ const styles = {
     backgroundColor: 'var(--purple)',
     color: 'var(--text-primary)'
   },
-  difficultyBadge: {
-    backgroundColor: 'var(--gray-500)',
-    color: 'var(--text-primary)',
-    cursor: 'pointer',
-    transition: 'background-color 0.1s ease'
-  },
   tierBadge: {
     backgroundColor: 'var(--info)',
     color: 'var(--text-primary)'
-  },
-
-  // Base form input styles
-  inputBase: {
-    padding: '8px',
-    borderColor: 'var(--gray-500)',
-    backgroundColor: 'var(--gray-900)',
-    color: 'var(--text-primary)',
-    fontSize: '14px',
-    transition: 'all 0.2s ease'
-  },
-  inputBaseFocus: {
-    outline: 'none',
-    borderColor: 'var(--purple)',
-    boxShadow: '0 0 0 2px rgba(79, 70, 229, 0.1)'
-  },
-  inputBaseDisabled: {
-    opacity: 0.6,
-    cursor: 'not-allowed'
-  },
-
-  // Button styles
-  button: {
-    backgroundColor: 'var(--danger)',
-    color: 'var(--text-primary)',
-    borderWidth: '0',
-    borderStyle: 'none',
-    borderRadius: '4px',
-    padding: '4px 8px',
-    fontSize: '14px',
-    cursor: 'pointer',
-    transition: 'background-color 0.1s ease'
-  },
-  incrementButton: {
-    backgroundColor: 'var(--success)',
-    color: 'var(--text-primary)',
-    borderWidth: '0',
-    borderStyle: 'none',
-    borderRadius: '4px',
-    padding: '4px 8px',
-    fontSize: '14px',
-    cursor: 'pointer',
-    transition: 'background-color 0.1s ease'
-  },
-  decrementButton: {
-    backgroundColor: 'var(--warning)',
-    color: 'var(--text-primary)',
-    borderWidth: '0',
-    borderStyle: 'none',
-    borderRadius: '4px',
-    padding: '4px 8px',
-    fontSize: '14px',
-    cursor: 'pointer',
-    transition: 'background-color 0.1s ease'
   },
 
   // Damage input styles
@@ -843,7 +662,6 @@ const GameCard = ({
           borderRadius: '0 0 8px 8px'
         }}>
 
-        {console.log('DEBUG: Before motives section')}
 
         {/* Motives Section */}
         {item.motives && (
@@ -895,7 +713,6 @@ const GameCard = ({
           </div>
         )}
 
-        {console.log('DEBUG: After motives section')}
 
         {/* Core Stats Section */}
         <div style={{
@@ -952,20 +769,15 @@ const GameCard = ({
           </div>
         </div>
 
-        {console.log('DEBUG: After core stats section')}
 
         {/* Features Section - Organized by Type */}
-        {console.log('DEBUG: About to check features section', item.features)}
         {item.features && item.features.length > 0 && (
           <div style={{
             marginBottom: '1rem'
           }}>
-            {console.log('DEBUG: Inside features section div')}
             {/* Passives */}
-            {console.log('DEBUG: Checking passives filter', item.features.filter(f => f.type === 'Passive'))}
             {item.features.filter(f => f.type === 'Passive').length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
-                {console.log('DEBUG: Inside passives section div')}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1012,13 +824,10 @@ const GameCard = ({
               </div>
             )}
 
-            {console.log('DEBUG: After passives section')}
 
             {/* Actions */}
-            {console.log('DEBUG: Checking actions filter', item.features.filter(f => f.type === 'Action'))}
             {item.features.filter(f => f.type === 'Action').length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
-                {console.log('DEBUG: Inside actions section div')}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1047,9 +856,7 @@ const GameCard = ({
                   flexDirection: 'column',
                   gap: '0.5rem'
                 }}>
-                  {console.log('DEBUG: Inside actions features list div')}
                   {item.features.filter(f => f.type === 'Action').map((feature, index) => {
-                    console.log('DEBUG: Inside actions map function', feature, index);
                     return (
                     <div key={index} style={{
                       fontSize: '0.875rem',
@@ -1065,17 +872,13 @@ const GameCard = ({
                     </div>
                     );
                   })}
-                  {console.log('DEBUG: After actions map function')}
                 </div>
               </div>
             )}
-            {console.log('DEBUG: After actions section, before reactions')}
 
             {/* Reactions */}
-            {console.log('DEBUG: About to check reactions', item.features.filter(f => f.type === 'Reaction'))}
             {item.features.filter(f => f.type === 'Reaction').length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
-                {console.log('DEBUG: Inside reactions conditional, rendering reactions')}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1104,7 +907,6 @@ const GameCard = ({
                   flexDirection: 'column',
                   gap: '0.5rem'
                 }}>
-                  {console.log('DEBUG: About to map reactions', item.features.filter(f => f.type === 'Reaction'))}
                   {item.features.filter(f => f.type === 'Reaction').map((feature, index) => (
                     <div key={index} style={{
                       fontSize: '0.875rem',
@@ -1119,25 +921,19 @@ const GameCard = ({
                       )}
                     </div>
                   ))}
-                  {console.log('DEBUG: After reactions map function')}
                 </div>
               </div>
             )}
-            {console.log('DEBUG: After reactions section closes')}
           </div>
         )}
-        {console.log('DEBUG: About to close features section div')}
         </div>
-        {console.log('DEBUG: After features section closes completely')}
 
         {/* Condensed Cards for All Instances - At Bottom */}
-        {console.log('DEBUG: About to check instances', instances)}
         {instances && instances.length > 0 && (
           <div style={{
             marginTop: '1rem',
             borderTop: '1px solid var(--border)'
           }}>
-            {console.log('DEBUG: Inside instances section, rendering instances')}
             {instances.map((instance, index) => (
               <div key={instance.id}>
                 {index > 0 && (
@@ -1872,21 +1668,15 @@ const GameCard = ({
               )}
             </div>
             )}
-            {console.log('DEBUG: End of actions section')}
 
-            {console.log('DEBUG: After actions section')}
-            {console.log('DEBUG: End of features section completely')}
 
-          {console.log('DEBUG: After features section, before instances section')}
 
           {/* Condensed Cards for All Instances - At Bottom */}
-          {console.log('DEBUG: About to check instances', instances)}
           {instances && instances.length > 0 && (
             <div style={{
               marginTop: '1rem',
               borderTop: '1px solid var(--border)'
             }}>
-              {console.log('DEBUG: Inside instances section, rendering instances')}
               {instances.map((instance, index) => (
                 <div key={instance.id}>
                   {index > 0 && (
@@ -1899,7 +1689,7 @@ const GameCard = ({
                   )}
                   <div
                     key={instance.id}
-                    style={{
+        style={{
                       backgroundColor: 'var(--bg-card)',
                       borderRadius: '4px',
                       padding: '8px',
@@ -1907,66 +1697,66 @@ const GameCard = ({
                       marginBottom: '4px'
                     }}
                   >
-                    <div style={{
-                      display: 'flex',
+        <div style={{
+          display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center',
+          alignItems: 'center',
                       gap: '8px'
-                    }}>
+        }}>
                       {/* Left side - Instance info */}
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
                         gap: '2px',
                         flex: 1
                       }}>
-                        <span style={{
+                <span style={{
                           fontSize: '0.875rem',
-                          fontWeight: 500,
+                  fontWeight: 500,
                           color: 'var(--text-primary)'
                         }}>
                           {instance.name?.replace(/\s+\(\d+\)$/, '')} ({instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})
-                        </span>
+                </span>
                         {instance.type && (
-                          <span style={{
-                            fontSize: '0.75rem',
-                            color: 'var(--text-secondary)',
+                  <span style={{
+                    fontSize: '0.75rem',
+              color: 'var(--text-secondary)',
                             fontWeight: 400
                           }}>
                             {instance.type}
-                          </span>
-                        )}
-                      </div>
+              </span>
+            )}
+          </div>
 
                       {/* Right side - Difficulty */}
                       {instance.difficulty && (
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          position: 'relative'
-                        }}>
-                          <Hexagon 
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative'
+              }}>
+                <Hexagon 
                             size={20} 
-                            strokeWidth={1}
-                            style={{
-                              color: 'var(--text-secondary)'
-                            }}
-                          />
-                          <span style={{
-                            position: 'absolute',
+                  strokeWidth={1}
+                  style={{
+                    color: 'var(--text-secondary)'
+                  }}
+                />
+                <span style={{
+                  position: 'absolute',
                             fontSize: '0.625rem',
                             fontWeight: 600,
-                            color: 'white',
-                            pointerEvents: 'none'
-                          }}>
+                  color: 'white',
+                  pointerEvents: 'none'
+                }}>
                             {instance.difficulty}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                </span>
+              </div>
+            )}
+              </div>
+          </div>
                 </div>
               ))}
             </div>
@@ -2003,8 +1793,8 @@ const GameCard = ({
         <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
           Expanded view coming soon for {type}
         </p>
-      </div>
-    )
+    </div>
+  )
   }
 
   // Default fallback - should not reach here
