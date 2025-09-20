@@ -1423,14 +1423,59 @@ const GameCard = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <span><strong>Tier:</strong></span>
                   {/* Option 1: Triangle */}
-                  <Triangle size={16} />
-                  <span>{item.tier}</span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}>
+                    <Triangle size={20} />
+                    <span style={{
+                      position: 'absolute',
+                      fontSize: '0.625rem',
+                      fontWeight: 600,
+                      color: 'white',
+                      pointerEvents: 'none'
+                    }}>
+                      {item.tier}
+                    </span>
+                  </div>
                   {/* Option 2: Upside down triangle */}
-                  <Triangle size={16} style={{ transform: 'rotate(180deg)' }} />
-                  <span>{item.tier}</span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}>
+                    <Triangle size={20} style={{ transform: 'rotate(180deg)' }} />
+                    <span style={{
+                      position: 'absolute',
+                      fontSize: '0.625rem',
+                      fontWeight: 600,
+                      color: 'white',
+                      pointerEvents: 'none'
+                    }}>
+                      {item.tier}
+                    </span>
+                  </div>
                   {/* Option 3: Gem */}
-                  <Gem size={16} />
-                  <span>{item.tier}</span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}>
+                    <Gem size={20} />
+                    <span style={{
+                      position: 'absolute',
+                      fontSize: '0.625rem',
+                      fontWeight: 600,
+                      color: 'white',
+                      pointerEvents: 'none'
+                    }}>
+                      {item.tier}
+                    </span>
+                  </div>
                 </div>
               </div>
               {item.potentialAdversaries && item.potentialAdversaries.length > 0 && (
