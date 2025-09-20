@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Sword } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate } from 'lucide-react'
 
 // ============================================================================
 // UTILITIES
@@ -682,6 +682,41 @@ const GameCard = ({
               gap: '1rem',
               flexWrap: 'wrap'
             }}>
+              {/* Difficulty Hex Badge */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <div style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',
+                  height: '32px'
+                }}>
+                  <Hexagon 
+                    size={32} 
+                    style={{ 
+                      color: 'var(--text-primary)',
+                      transform: 'rotate(0deg)'
+                    }} 
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: 'var(--text-primary)',
+                    textAlign: 'center'
+                  }}>
+                    {item.difficulty || '~'}
+                  </span>
+                </div>
+                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>
+                  Difficulty
+                </span>
+              </div>
             </div>
             {(item.atk !== undefined || item.weapon || item.damage) && (
               <div style={{
@@ -916,48 +951,39 @@ const GameCard = ({
         )}
         </div>
 
-        {/* Difficulty & Thresholds Section */}
-        <div style={{
-          marginTop: '1rem',
-          paddingTop: '0.75rem',
-          borderTop: '1px solid var(--border)'
-        }}>
+        {/* Difficulty & Thresholds Section - Hidden for Minions */}
+        {item.type !== 'Minion' && (
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            flexWrap: 'wrap',
-            fontSize: '0.875rem'
+            marginTop: '1rem',
+            paddingTop: '0.75rem',
+            borderTop: '1px solid var(--border)'
           }}>
-            {/* Difficulty in Hexagon */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative'
+              gap: '1rem',
+              flexWrap: 'wrap',
+              fontSize: '0.875rem'
             }}>
-              <Hexagon 
-                size={32} 
-                strokeWidth={1}
-                style={{
-                  color: 'var(--text-secondary)'
-                }}
-              />
-              <span style={{
-                position: 'absolute',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                color: 'white',
-                pointerEvents: 'none'
-              }}>
-                {item.difficulty}
-              </span>
+              {/* Thresholds */}
+              {item.thresholds && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  flexWrap: 'wrap'
+                }}>
+                  {item.thresholds.major && (
+                    <span><strong>Major:</strong> {item.thresholds.major}</span>
+                  )}
+                  {item.thresholds.severe && (
+                    <span><strong>Severe:</strong> {item.thresholds.severe}</span>
+                  )}
+                </div>
+              )}
             </div>
-            {item.thresholds && (
-              <span><strong>Thresholds:</strong> {item.thresholds.major}/{item.thresholds.severe}</span>
-            )}
           </div>
-        </div>
+        )}
 
         {/* Condensed Cards for All Instances - At Bottom */}
         {instances && instances.length > 0 && (
@@ -1180,42 +1206,6 @@ const GameCard = ({
                         </div>
                       </div>
                     )}
-                  </div>
-
-                  {/* Right side - Sword button */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <button
-                      style={{
-                        backgroundColor: 'var(--bg-secondary)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '3px',
-                        padding: '4px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.1s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = 'var(--bg-primary)'
-                        e.target.style.borderColor = 'var(--text-primary)'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = 'var(--bg-secondary)'
-                        e.target.style.borderColor = 'var(--border)'
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        // TODO: Add sword button functionality
-                        console.log('Sword button clicked for instance:', instance.id)
-                      }}
-                    >
-                      <Sword size={12} style={{ color: 'var(--text-primary)' }} />
-                    </button>
                   </div>
                 </div>
               </div>
@@ -1592,7 +1582,41 @@ const GameCard = ({
                 flexWrap: 'wrap',
                 fontSize: '0.875rem'
               }}>
-                <span><strong>Difficulty:</strong> {item.difficulty || '~'}</span>
+                {/* Difficulty Hex Badge */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <div style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px'
+                  }}>
+                    <Hexagon 
+                      size={32} 
+                      style={{ 
+                        color: 'var(--text-primary)',
+                        transform: 'rotate(0deg)'
+                      }} 
+                    />
+                    <span style={{
+                      position: 'absolute',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      textAlign: 'center'
+                    }}>
+                      {item.difficulty || '~'}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>
+                    Difficulty
+                  </span>
+                </div>
                 <span><strong>Type:</strong> {item.type}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span><strong>Tier:</strong></span>
@@ -1982,43 +2006,7 @@ const GameCard = ({
                       }}>
                         Instance {index + 1}
                 </span>
-              </div>
-
-                    {/* Right side - Sword button */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-              <button
-                style={{
-                          backgroundColor: 'var(--bg-secondary)',
-                          border: '1px solid var(--border)',
-                          borderRadius: '3px',
-                          padding: '4px',
-                          cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                          transition: 'all 0.1s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = 'var(--bg-primary)'
-                          e.target.style.borderColor = 'var(--text-primary)'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = 'var(--bg-secondary)'
-                          e.target.style.borderColor = 'var(--border)'
-                }}
-                onClick={(e) => {
-                  e.stopPropagation()
-                          // TODO: Add sword button functionality
-                          console.log('Sword button clicked for environment instance:', instance.id)
-                }}
-              >
-                        <Sword size={12} style={{ color: 'var(--text-primary)' }} />
-              </button>
-          </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -2056,8 +2044,8 @@ const GameCard = ({
           <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
             Expanded view coming soon for {type}
           </p>
-    </div>
-  )
+        </div>
+      )
   }
 
   // Default fallback - should not reach here
