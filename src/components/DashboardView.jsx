@@ -266,8 +266,7 @@ const DashboardContent = () => {
       {/* Main Dashboard Content */}
       <div className="main-content" style={{ 
         position: 'relative',
-        width: '100%',
-        paddingTop: `${gap}px` // Add padding above cards
+        width: '100%'
       }}>
         <div className="dashboard-scroll-container" style={{ 
           display: 'flex', 
@@ -289,7 +288,7 @@ const DashboardContent = () => {
             flex: 'none',
             paddingLeft: `${gap}px`, // Space before each card
             paddingRight: '0',
-            paddingTop: '0',
+            paddingTop: `${gap}px`, // Space above each card
             paddingBottom: `${gap}px`, // Space below each card
             scrollSnapAlign: 'start'
           }}>
@@ -350,7 +349,7 @@ const DashboardContent = () => {
               flex: 'none',
               paddingLeft: `${gap}px`, // Space before each card
               paddingRight: '0',
-              paddingTop: '0',
+              paddingTop: `${gap}px`, // Space above each card
               paddingBottom: `${gap}px`, // Space below each card
               scrollSnapAlign: 'start'
             }}
