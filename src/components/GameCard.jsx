@@ -812,7 +812,8 @@ const GameCard = ({
         {/* Features Section - Organized by Type */}
         {item.features && item.features.length > 0 && (
           <div style={{
-            marginBottom: '1rem'
+            marginBottom: '1rem',
+            padding: '0 12px'
           }}>
             {/* Passives */}
             {item.features.filter(f => f.type === 'Passive').length > 0 && (
@@ -1767,7 +1768,8 @@ const GameCard = ({
           {/* Features Section - Organized by Type */}
           {item.features && item.features.length > 0 && (
             <div style={{
-              marginBottom: '1rem'
+              marginBottom: '1rem',
+              padding: '0 12px'
             }}>
               {/* Passives */}
               {item.features.filter(f => f.type === 'Passive').length > 0 && (
