@@ -235,19 +235,6 @@ const DashboardContent = () => {
         }
       }}
     >
-      {/* Top Bar with Fear */}
-      <Bar position="top">
-        <Pips
-          type="fear"
-          value={fear?.value || 0}
-          maxValue={12}
-          onChange={updateFear}
-          showTooltip={false}
-          enableBoundaryClick={true}
-          clickContainerWidth="100%"
-          centerPips={true}
-        />
-      </Bar>
 
       {/* Floating Menu */}
       <FloatingMenu
@@ -392,6 +379,20 @@ const DashboardContent = () => {
         </div>
       </div>
       
+
+      {/* Bottom Bar with Fear */}
+      <Bar position="bottom">
+        <Pips
+          type="fear"
+          value={fear?.value || 0}
+          maxValue={12}
+          onChange={updateFear}
+          showTooltip={false}
+          enableBoundaryClick={true}
+          clickContainerWidth="100%"
+          centerPips={true}
+        />
+      </Bar>
 
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
