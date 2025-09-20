@@ -1121,11 +1121,11 @@ const GameCard = ({
                     </span>
                   </div>
 
-                  {/* Right side - HP and Stress pips */}
+                  {/* Left side - HP and Stress pips */}
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'flex-end',
+                    alignItems: 'flex-start',
                     gap: '2px'
                   }}>
                     {/* HP Row */}
