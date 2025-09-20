@@ -1106,7 +1106,6 @@ const GameCard = ({
                   <div style={{
                     backgroundColor: 'var(--bg-secondary)',
                     borderRadius: '3px',
-                    padding: '2px 6px',
                     border: '1px solid var(--border)',
                     width: '32px',
                     textAlign: 'center',
