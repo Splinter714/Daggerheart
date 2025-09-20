@@ -1088,7 +1088,9 @@ const GameCard = ({
             marginTop: '1rem',
             borderTop: '1px solid var(--border)'
           }}>
-            {instances.map((instance, index) => (
+            {instances.map((instance, index) => {
+              const isInstanceDead = (instance.hp || 0) >= (instance.hpMax || 1)
+              return (
               <div key={instance.id}>
                 <div
                   key={instance.id}
@@ -1101,7 +1103,10 @@ const GameCard = ({
                     display: 'flex',
                     justifyContent: 'flex-start',
                     alignItems: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    opacity: isInstanceDead ? 0.7 : 1,
+                    backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-secondary)',
+                    borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--border)'
                   }}
                 >
                   {/* Number section - Fixed width for double digits */}
@@ -1306,7 +1311,8 @@ const GameCard = ({
                   </div>
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
 
@@ -2055,7 +2061,9 @@ const GameCard = ({
               marginTop: '1rem',
               borderTop: '1px solid var(--border)'
             }}>
-              {instances.map((instance, index) => (
+              {instances.map((instance, index) => {
+                const isInstanceDead = (instance.hp || 0) >= (instance.hpMax || 1)
+                return (
                 <div key={instance.id}>
                   <div
                     key={instance.id}
@@ -2068,7 +2076,10 @@ const GameCard = ({
           display: 'flex',
                       justifyContent: 'space-between',
           alignItems: 'center',
-                      gap: '8px'
+                      gap: '8px',
+                      opacity: isInstanceDead ? 0.7 : 1,
+                      backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-secondary)',
+                      borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--border)'
                     }}
                   >
                     {/* Left side - Number section */}
@@ -2106,7 +2117,8 @@ const GameCard = ({
                     </div>
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

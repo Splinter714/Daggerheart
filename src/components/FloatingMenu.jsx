@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { MoreHorizontal, X, Sword, MapPin } from 'lucide-react'
 import HelpButton from './HelpButton'
 import DeleteClear from './DeleteClear'
-import SortButton from './SortButton'
 
 const FloatingMenu = ({
   adversaries,
@@ -211,16 +210,8 @@ const FloatingMenu = ({
           />
         </div>
         
-        {/* Sort Button */}
-        <div style={getRadialItemStyle(3, 5)}>
-          <SortButton
-            adversaries={adversaries}
-            onSortAdversaries={sortAdversaries}
-          />
-        </div>
-        
         {/* Help Button */}
-        <div style={getRadialItemStyle(4, 5)}>
+        <div style={getRadialItemStyle(3, 4)}>
           <HelpButton 
             showFlyout={showHelpFlyout}
             onFlyoutChange={handleHelpFlyoutChange}
