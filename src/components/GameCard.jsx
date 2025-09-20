@@ -979,25 +979,25 @@ const GameCard = ({
                 <div
                   key={instance.id}
                   style={{
-                    backgroundColor: 'var(--bg-card)',
+                    backgroundColor: 'var(--bg-secondary)',
                     borderRadius: '4px',
                     padding: '8px',
                     border: '1px solid var(--border)',
                     marginBottom: '4px',
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    gap: '8px'
+                    flexDirection: 'column',
+                    gap: '6px'
                   }}
                 >
-                  {/* Left side - Number section */}
+                  {/* Top row - Number section */}
                   <div style={{
-                    backgroundColor: 'var(--bg-secondary)',
+                    backgroundColor: 'var(--bg-primary)',
                     borderRadius: '3px',
                     padding: '4px 8px',
                     border: '1px solid var(--border)',
                     minWidth: '32px',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    alignSelf: 'flex-start'
                   }}>
                     <span style={{
                       fontSize: '0.75rem',
@@ -1006,15 +1006,14 @@ const GameCard = ({
                     }}>
                       {instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'}
                     </span>
-                  </div>
+              </div>
 
-                  {/* Right side - Interactive HP/Stress pips */}
+                  {/* HP Row */}
                   <div style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
+                    justifyContent: 'flex-end',
+                    alignItems: 'center'
                   }}>
-                    {/* HP Pips */}
                     <div style={{
                       display: 'flex',
                       gap: '2px',
@@ -1035,6 +1034,13 @@ const GameCard = ({
                               onApplyDamage(instance.id, 1, instance.hp || 0, instance.hpMax || 1)
                             }
                           }}
+                          onContextMenu={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            if (onApplyHealing && type === 'adversary') {
+                              onApplyHealing(instance.id, 1, instance.hp || 0)
+                            }
+                          }}
                           onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
                           onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                         >
@@ -1042,9 +1048,15 @@ const GameCard = ({
                         </span>
                       ))}
                     </div>
+                  </div>
 
-                    {/* Stress Pips */}
-                    {instance.stressMax > 0 && (
+                  {/* Stress Row */}
+                  {instance.stressMax > 0 && (
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      alignItems: 'center'
+                    }}>
                       <div style={{
                         display: 'flex',
                         gap: '2px',
@@ -1065,6 +1077,13 @@ const GameCard = ({
                                 onApplyStressChange(instance.id, 1)
                               }
                             }}
+                            onContextMenu={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              if (onApplyStressChange && type === 'adversary') {
+                                onApplyStressChange(instance.id, -1)
+                              }
+                            }}
                             onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
                             onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                           >
@@ -1072,8 +1091,8 @@ const GameCard = ({
                           </span>
                         ))}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -1804,25 +1823,25 @@ const GameCard = ({
                   <div
                     key={instance.id}
         style={{
-                      backgroundColor: 'var(--bg-card)',
+                      backgroundColor: 'var(--bg-secondary)',
                       borderRadius: '4px',
                       padding: '8px',
                       border: '1px solid var(--border)',
                       marginBottom: '4px',
                       display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      gap: '8px'
+                      flexDirection: 'column',
+                      gap: '6px'
                     }}
                   >
-                    {/* Left side - Number section */}
+                    {/* Top row - Number section */}
             <div style={{
-                      backgroundColor: 'var(--bg-secondary)',
+                      backgroundColor: 'var(--bg-primary)',
                       borderRadius: '3px',
                       padding: '4px 8px',
                       border: '1px solid var(--border)',
                       minWidth: '32px',
-                      textAlign: 'center'
+                      textAlign: 'center',
+                      alignSelf: 'flex-start'
                     }}>
                       <span style={{
                         fontSize: '0.75rem',
@@ -1833,13 +1852,12 @@ const GameCard = ({
                       </span>
             </div>
 
-                    {/* Right side - Interactive HP/Stress pips */}
+                    {/* HP Row */}
         <div style={{
           display: 'flex',
-          alignItems: 'center',
-                      gap: '8px'
-        }}>
-                      {/* HP Pips */}
+                      justifyContent: 'flex-end',
+                      alignItems: 'center'
+                    }}>
           <div style={{
             display: 'flex',
                         gap: '2px',
@@ -1860,18 +1878,31 @@ const GameCard = ({
                                 onApplyDamage(instance.id, 1, instance.hp || 0, instance.hpMax || 1)
                               }
                             }}
+                            onContextMenu={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              if (onApplyHealing && type === 'environment') {
+                                onApplyHealing(instance.id, 1, instance.hp || 0)
+                              }
+                            }}
                             onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
                             onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                           >
                             <Droplet size={12} />
               </span>
                         ))}
+                      </div>
           </div>
 
-                      {/* Stress Pips */}
-                      {instance.stressMax > 0 && (
+                    {/* Stress Row */}
+                    {instance.stressMax > 0 && (
           <div style={{
             display: 'flex',
+                        justifyContent: 'flex-end',
+                        alignItems: 'center'
+          }}>
+              <div style={{
+                display: 'flex',
                           gap: '2px',
                           alignItems: 'center'
                         }}>
@@ -1890,6 +1921,13 @@ const GameCard = ({
                                   onApplyStressChange(instance.id, 1)
                                 }
                               }}
+                              onContextMenu={(e) => {
+                  e.preventDefault()
+                                e.stopPropagation()
+                                if (onApplyStressChange && type === 'environment') {
+                                  onApplyStressChange(instance.id, -1)
+                                }
+                              }}
                               onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
                               onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                             >
@@ -1897,9 +1935,9 @@ const GameCard = ({
                             </span>
                           ))}
                         </div>
+                      </div>
             )}
           </div>
-                  </div>
                 </div>
               ))}
             </div>
