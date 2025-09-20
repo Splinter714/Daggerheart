@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Sword } from 'lucide-react'
 
 // ============================================================================
 // UTILITIES
@@ -983,11 +983,11 @@ const GameCard = ({
                 >
                   {/* Left side - Number section */}
                   <div style={{
-                    backgroundColor: 'var(--bg-primary)',
+                    backgroundColor: 'var(--bg-secondary)',
                     borderRadius: '3px',
-                    padding: '4px 8px',
+                    padding: '2px 6px',
                     border: '1px solid var(--border)',
-                    minWidth: '32px',
+                    minWidth: '24px',
                     textAlign: 'center'
                   }}>
                     <span style={{
@@ -997,14 +997,15 @@ const GameCard = ({
                     }}>
                       {instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'}
                     </span>
-              </div>
+                  </div>
 
-                  {/* Right side - HP and Stress pips */}
+                  {/* Center - HP and Stress pips */}
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'flex-end',
-                    gap: '2px'
+                    alignItems: 'center',
+                    gap: '2px',
+                    flex: 1
                   }}>
                     {/* HP Row */}
                     <div 
@@ -1179,6 +1180,42 @@ const GameCard = ({
                         </div>
                       </div>
                     )}
+                  </div>
+
+                  {/* Right side - Sword button */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <button
+                      style={{
+                        backgroundColor: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '3px',
+                        padding: '4px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.1s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'var(--bg-primary)'
+                        e.target.style.borderColor = 'var(--text-primary)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'var(--bg-secondary)'
+                        e.target.style.borderColor = 'var(--border)'
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        // TODO: Add sword button functionality
+                        console.log('Sword button clicked for instance:', instance.id)
+                      }}
+                    >
+                      <Sword size={12} style={{ color: 'var(--text-primary)' }} />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1907,44 +1944,81 @@ const GameCard = ({
                       padding: '8px',
                       border: '1px solid var(--border)',
                       marginBottom: '4px',
-                      display: 'flex',
+          display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center',
+          alignItems: 'center',
                       gap: '8px'
                     }}
                   >
                     {/* Left side - Number section */}
-            <div style={{
-                      backgroundColor: 'var(--bg-primary)',
+                    <div style={{
+                      backgroundColor: 'var(--bg-secondary)',
                       borderRadius: '3px',
-                      padding: '4px 8px',
+                      padding: '2px 6px',
                       border: '1px solid var(--border)',
-                      minWidth: '32px',
+                      minWidth: '24px',
                       textAlign: 'center'
                     }}>
-                      <span style={{
-                        fontSize: '0.75rem',
-              fontWeight: 600,
+                  <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
                         color: 'var(--text-primary)'
-                      }}>
+                  }}>
                         {instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'}
-                      </span>
+                  </span>
             </div>
 
-                    {/* Right side - Just the instance number (environments don't have HP/stress) */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'flex-end'
+                    {/* Center - Instance info */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+                      justifyContent: 'center',
+                      flex: 1
                     }}>
-                      <span style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 500,
-                        color: 'var(--text-secondary)'
+              <span style={{
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                    color: 'var(--text-secondary)'
                       }}>
                         Instance {index + 1}
-                      </span>
-                    </div>
+                </span>
+              </div>
+
+                    {/* Right side - Sword button */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+              <button
+                style={{
+                          backgroundColor: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '3px',
+                          padding: '4px',
+                          cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                          transition: 'all 0.1s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = 'var(--bg-primary)'
+                          e.target.style.borderColor = 'var(--text-primary)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'var(--bg-secondary)'
+                          e.target.style.borderColor = 'var(--border)'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                          // TODO: Add sword button functionality
+                          console.log('Sword button clicked for environment instance:', instance.id)
+                }}
+              >
+                        <Sword size={12} style={{ color: 'var(--text-primary)' }} />
+              </button>
+          </div>
                   </div>
                 </div>
               ))}
@@ -1982,8 +2056,8 @@ const GameCard = ({
           <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
             Expanded view coming soon for {type}
           </p>
-        </div>
-      )
+    </div>
+  )
   }
 
   // Default fallback - should not reach here
