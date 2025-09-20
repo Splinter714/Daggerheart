@@ -1098,19 +1098,20 @@ const GameCard = ({
                     border: '1px solid var(--border)',
                     marginBottom: '4px',
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    justifyContent: 'flex-start',
                     alignItems: 'center',
                     gap: '8px'
                   }}
                 >
-                  {/* Left side - Number section */}
+                  {/* Number section - Fixed width for double digits */}
                   <div style={{
                     backgroundColor: 'var(--bg-secondary)',
                     borderRadius: '3px',
                     padding: '2px 6px',
                     border: '1px solid var(--border)',
-                    minWidth: '24px',
-                    textAlign: 'center'
+                    width: '32px',
+                    textAlign: 'center',
+                    flexShrink: 0
                   }}>
                     <span style={{
                       fontSize: '0.75rem',
@@ -1121,7 +1122,7 @@ const GameCard = ({
                     </span>
                   </div>
 
-                  {/* Left side - HP and Stress pips */}
+                  {/* HP and Stress pips - Immediately after number */}
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
