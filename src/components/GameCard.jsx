@@ -983,30 +983,38 @@ const GameCard = ({
                     borderRadius: '4px',
                     padding: '8px',
                     border: '1px solid var(--border)',
-                    marginBottom: '4px'
+                    marginBottom: '4px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '8px'
                   }}
                 >
-                  {/* Centered Header - Name/Number */}
+                  {/* Left side - Number section */}
                   <div style={{
-                    textAlign: 'center',
-                    marginBottom: '8px'
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderRadius: '3px',
+                    padding: '4px 8px',
+                    border: '1px solid var(--border)',
+                    minWidth: '32px',
+                    textAlign: 'center'
                   }}>
                     <span style={{
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
                       color: 'var(--text-primary)'
                     }}>
-                      {instance.name?.replace(/\s+\(\d+\)$/, '')} ({instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})
+                      {instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'}
                     </span>
-              </div>
+                  </div>
 
-                  {/* HP Row */}
+                  {/* Right side - Interactive HP/Stress pips */}
                   <div style={{
                     display: 'flex',
-                    justifyContent: 'center',
                     alignItems: 'center',
-                    marginBottom: '4px'
+                    gap: '8px'
                   }}>
+                    {/* HP Pips */}
                     <div style={{
                       display: 'flex',
                       gap: '2px',
@@ -1017,22 +1025,26 @@ const GameCard = ({
                           key={i}
                           style={{
                             fontSize: '0.75rem',
-                            color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)'
+                            color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            transition: 'all 0.1s ease'
                           }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (onApplyDamage && type === 'adversary') {
+                              onApplyDamage(instance.id, 1, instance.hp || 0, instance.hpMax || 1)
+                            }
+                          }}
+                          onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+                          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                         >
                           <Droplet size={12} />
                         </span>
                       ))}
                     </div>
-                  </div>
 
-                  {/* Stress Row */}
-                  {instance.stressMax > 0 && (
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center'
-                    }}>
+                    {/* Stress Pips */}
+                    {instance.stressMax > 0 && (
                       <div style={{
                         display: 'flex',
                         gap: '2px',
@@ -1043,15 +1055,25 @@ const GameCard = ({
                             key={i}
                             style={{
                               fontSize: '0.75rem',
-                              color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)'
+                              color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)',
+                              cursor: 'pointer',
+                              transition: 'all 0.1s ease'
                             }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (onApplyStressChange && type === 'adversary') {
+                                onApplyStressChange(instance.id, 1)
+                              }
+                            }}
+                            onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+                            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                           >
                             <Activity size={12} />
                           </span>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -1786,32 +1808,40 @@ const GameCard = ({
                       borderRadius: '4px',
                       padding: '8px',
                       border: '1px solid var(--border)',
-                      marginBottom: '4px'
+                      marginBottom: '4px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: '8px'
                     }}
                   >
-                    {/* Centered Header - Name/Number */}
+                    {/* Left side - Number section */}
             <div style={{
-                      textAlign: 'center',
-                      marginBottom: '8px'
+                      backgroundColor: 'var(--bg-secondary)',
+                      borderRadius: '3px',
+                      padding: '4px 8px',
+                      border: '1px solid var(--border)',
+                      minWidth: '32px',
+                      textAlign: 'center'
                     }}>
                       <span style={{
-              fontSize: '0.875rem',
-                        fontWeight: 500,
+                        fontSize: '0.75rem',
+              fontWeight: 600,
                         color: 'var(--text-primary)'
                       }}>
-                        {instance.name?.replace(/\s+\(\d+\)$/, '')} ({instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})
+                        {instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'}
                       </span>
-          </div>
+            </div>
 
-                    {/* HP Row */}
+                    {/* Right side - Interactive HP/Stress pips */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+                      gap: '8px'
+        }}>
+                      {/* HP Pips */}
           <div style={{
             display: 'flex',
-                      justifyContent: 'center',
-            alignItems: 'center',
-                      marginBottom: '4px'
-          }}>
-            <div style={{
-              display: 'flex',
                         gap: '2px',
                         alignItems: 'center'
                       }}>
@@ -1819,23 +1849,27 @@ const GameCard = ({
                           <span
                             key={i}
               style={{
-                              fontSize: '0.75rem',
-                              color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)'
+                    fontSize: '0.75rem',
+                              color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                              transition: 'all 0.1s ease'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                              if (onApplyDamage && type === 'environment') {
+                                onApplyDamage(instance.id, 1, instance.hp || 0, instance.hpMax || 1)
+                              }
                             }}
+                            onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+                            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                           >
                             <Droplet size={12} />
-                </span>
+              </span>
                         ))}
-                </div>
-            </div>
+          </div>
 
-                    {/* Stress Row */}
-                    {instance.stressMax > 0 && (
-        <div style={{
-          display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                      }}>
+                      {/* Stress Pips */}
+                      {instance.stressMax > 0 && (
           <div style={{
             display: 'flex',
                           gap: '2px',
@@ -1846,15 +1880,25 @@ const GameCard = ({
                               key={i}
                   style={{
                   fontSize: '0.75rem',
-                                color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)'
+                                color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                                transition: 'all 0.1s ease'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                                if (onApplyStressChange && type === 'environment') {
+                                  onApplyStressChange(instance.id, 1)
+                                }
                               }}
+                              onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+                              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                             >
                               <Activity size={12} />
                             </span>
                           ))}
                         </div>
-                      </div>
-                    )}
+            )}
+          </div>
                   </div>
                 </div>
               ))}
