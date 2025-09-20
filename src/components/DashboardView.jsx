@@ -68,6 +68,11 @@ const DashboardContent = () => {
   const [isClearMode, setIsClearMode] = useState(false)
   const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
   const [lastAddedItemType, setLastAddedItemType] = useState(null)
+  
+  // Column layout state
+  const [containerWidth, setContainerWidth] = useState(0)
+  const [scrollPosition, setScrollPosition] = useState(0)
+  const [isScrolling, setIsScrolling] = useState(false)
 
   // Mobile detection
   useEffect(() => {
@@ -80,6 +85,30 @@ const DashboardContent = () => {
     const mediaQuery = window.matchMedia('(max-width: 800px)')
     mediaQuery.addEventListener('change', checkMobile)
     return () => mediaQuery.removeEventListener('change', checkMobile)
+  }, [])
+
+  // Column layout calculations
+  const columnWidth = 350
+  const gap = 16
+  
+  const calculateVisibleColumns = (width) => {
+    if (width <= 0) return 1
+    const availableWidth = width - (gap * 2) // Padding
+    const columnsThatFit = Math.floor(availableWidth / (columnWidth + gap))
+    return Math.max(columnsThatFit, 1)
+  }
+  
+  const visibleColumns = calculateVisibleColumns(containerWidth)
+  
+  // Handle container resize
+  useEffect(() => {
+    const handleResize = () => {
+      setContainerWidth(window.innerWidth)
+    }
+    
+    handleResize() // Initial calculation
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
   }, [])
 
   // Browser handlers
@@ -101,6 +130,20 @@ const DashboardContent = () => {
 
   const handleCloseBrowser = useCallback(() => {
     setBrowserOpen(false)
+  }, [])
+
+  // Scroll handling - just track position, let CSS handle snapping
+  const handleScroll = useCallback((e) => {
+    setScrollPosition(e.target.scrollLeft)
+  }, [])
+
+  // Touch gesture handling - simplified
+  const handleTouchStart = useCallback(() => {
+    setIsScrolling(true)
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    setTimeout(() => setIsScrolling(false), 100)
   }, [])
 
   // Group entities by type for dashboard columns
@@ -146,46 +189,9 @@ const DashboardContent = () => {
 
   const entityGroups = getEntityGroups()
 
-  // Render a single entity panel
-  const renderEntityPanel = (group) => {
-    const { type, baseName, instances } = group
-    
-    return (
-      <Panel key={`${type}-${baseName}`} style={{ width: '350px', flexShrink: 0 }}>
-        <GameCard
-          type={type}
-          item={{ 
-            ...instances[0], 
-            name: baseName,
-            // Reset instance-specific state so the expanded card doesn't show defeated state
-            hp: 0,
-            stress: 0,
-            isDead: false
-          }} // Use first instance as template but reset state
-          mode="expanded"
-          instances={instances} // Pass all instances to embed mini-cards
-          onApplyDamage={type === 'adversary' ? (id, damage, currentHp, maxHp) => {
-            const instance = instances.find(i => i.id === id)
-            if (instance) {
-              updateAdversary(id, { hp: Math.min(instance.hpMax || 1, (instance.hp || 0) + damage) })
-            }
-          } : undefined}
-          onApplyHealing={type === 'adversary' ? (id, healing, currentHp) => {
-            const instance = instances.find(i => i.id === id)
-            if (instance) {
-              updateAdversary(id, { hp: Math.max(0, (instance.hp || 0) - healing) })
-            }
-          } : undefined}
-          onApplyStressChange={type === 'adversary' ? (id, stress) => {
-            console.log('DashboardView onApplyStressChange:', { id, stress })
-            updateAdversary(id, { stress: Math.max(0, Math.min(instances.find(i => i.id === id)?.stressMax || 6, (instances.find(i => i.id === id)?.stress || 0) + stress)) })
-          } : undefined}
-          onUpdate={type === 'adversary' ? updateAdversary : type === 'environment' ? updateEnvironment : updateCountdown}
-          adversaries={adversaries}
-        />
-      </Panel>
-    )
-  }
+  // Calculate total width needed for all columns
+  const totalColumns = entityGroups.length
+  const totalWidth = totalColumns * columnWidth + (totalColumns - 1) * gap + (gap * 2)
 
   return (
     <div 
@@ -227,14 +233,33 @@ const DashboardContent = () => {
 
       {/* Main Dashboard Content */}
       <div className="main-content" style={{ 
-        display: 'flex', 
-        flexDirection: 'row', 
-        overflowX: 'auto', 
-        gap: '1rem',
-        padding: '0 1rem'
+        position: 'relative',
+        width: '100%'
       }}>
+        <div className="dashboard-scroll-container" style={{ 
+          display: 'flex', 
+          flexDirection: 'row', 
+          overflowX: 'auto', 
+          overflowY: 'hidden',
+          padding: `0 ${gap}px`,
+          scrollSnapType: 'x mandatory',
+          height: '100%',
+          width: '100%'
+        }}
+        onScroll={handleScroll}
+        >
         {browserOpen ? (
-          <Panel style={{ width: '400px', flexShrink: 0 }}>
+          <Panel style={{ 
+            width: `${columnWidth + gap}px`, // Include padding in width
+            flexShrink: 0,
+            flexGrow: 0,
+            flex: 'none',
+            paddingLeft: `${gap}px`, // Space before each card
+            paddingRight: '0',
+            paddingTop: '0',
+            paddingBottom: '0',
+            scrollSnapAlign: 'start'
+          }}>
             <div style={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
@@ -282,7 +307,64 @@ const DashboardContent = () => {
               />
             </div>
           </Panel>
-        ) : entityGroups.slice(0, 5).map(renderEntityPanel)}
+        ) : entityGroups.map((group, index) => (
+          <Panel 
+            key={`${group.type}-${group.baseName}`}
+            style={{ 
+              width: `${columnWidth + gap}px`, // Include padding in width
+              flexShrink: 0,
+              flexGrow: 0,
+              flex: 'none',
+              paddingLeft: `${gap}px`, // Space before each card
+              paddingRight: '0',
+              paddingTop: '0',
+              paddingBottom: '0',
+              scrollSnapAlign: 'start'
+            }}
+          >
+            <GameCard
+              type={group.type}
+              item={{ 
+                ...group.instances[0], 
+                name: group.baseName,
+                // Reset instance-specific state so the expanded card doesn't show defeated state
+                hp: 0,
+                stress: 0,
+                isDead: false
+              }} // Use first instance as template but reset state
+              mode="expanded"
+              instances={group.instances} // Pass all instances to embed mini-cards
+              onApplyDamage={group.type === 'adversary' ? (id, damage, currentHp, maxHp) => {
+                const instance = group.instances.find(i => i.id === id)
+                if (instance) {
+                  updateAdversary(id, { hp: Math.min(instance.hpMax || 1, (instance.hp || 0) + damage) })
+                }
+              } : undefined}
+              onApplyHealing={group.type === 'adversary' ? (id, healing, currentHp) => {
+                const instance = group.instances.find(i => i.id === id)
+                if (instance) {
+                  updateAdversary(id, { hp: Math.max(0, (instance.hp || 0) - healing) })
+                }
+              } : undefined}
+              onApplyStressChange={group.type === 'adversary' ? (id, stress) => updateAdversary(id, { stress: Math.max(0, Math.min(group.instances.find(i => i.id === id)?.stressMax || 6, (group.instances.find(i => i.id === id)?.stress || 0) + stress)) }) : undefined}
+              onUpdate={group.type === 'adversary' ? updateAdversary : group.type === 'environment' ? updateEnvironment : updateCountdown}
+              adversaries={adversaries}
+            />
+          </Panel>
+        ))}
+        </div>
+        
+        {/* Right-side overlay to hide partial cards */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          height: '100%',
+          width: `${gap}px`,
+          background: 'var(--bg-primary)',
+          pointerEvents: 'none',
+          zIndex: 1
+        }} />
       </div>
       
 
