@@ -736,10 +736,6 @@ const GameCard = ({
               {item.thresholds && (
                 <span><strong>Thresholds:</strong> {item.thresholds.major}/{item.thresholds.severe}</span>
               )}
-              <span><strong>HP:</strong> {item.hpMax}</span>
-              {item.stressMax > 0 && (
-                <span><strong>Stress:</strong> {item.stressMax}</span>
-              )}
             </div>
             {(item.atk !== undefined || item.weapon || item.damage) && (
               <div style={{
