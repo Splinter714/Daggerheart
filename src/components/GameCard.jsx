@@ -916,16 +916,15 @@ const GameCard = ({
               position: 'relative'
             }}>
               <Hexagon 
-                size={20} 
+                size={32} 
                 strokeWidth={1}
                 style={{
-                  color: 'var(--text-secondary)',
-                  transform: 'rotate(30deg)'
+                  color: 'var(--text-secondary)'
                 }}
               />
               <span style={{
                 position: 'absolute',
-                fontSize: '0.625rem',
+                fontSize: '0.875rem',
                 fontWeight: 600,
                 color: 'white',
                 pointerEvents: 'none'
@@ -1040,34 +1039,6 @@ const GameCard = ({
                               <Activity size={12} />
                             </span>
                           ))}
-                        </div>
-                      )}
-
-                      {/* Difficulty */}
-                      {instance.difficulty && (
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          position: 'relative'
-                        }}>
-                          <Hexagon 
-                            size={20} 
-                            strokeWidth={1}
-                            style={{
-                              color: 'var(--text-secondary)',
-                              transform: 'rotate(30deg)'
-                            }}
-                          />
-                          <span style={{
-                            position: 'absolute',
-                            fontSize: '0.625rem',
-                            fontWeight: 600,
-                            color: 'white',
-                            pointerEvents: 'none'
-                          }}>
-                            {instance.difficulty}
-                          </span>
                         </div>
                       )}
                     </div>
@@ -1815,31 +1786,6 @@ const GameCard = ({
           </div>
 
                       {/* Right side - Difficulty */}
-                      {instance.difficulty && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative'
-              }}>
-                <Hexagon 
-                            size={20} 
-                  strokeWidth={1}
-                  style={{
-                    color: 'var(--text-secondary)'
-                  }}
-                />
-                <span style={{
-                  position: 'absolute',
-                            fontSize: '0.625rem',
-                            fontWeight: 600,
-                  color: 'white',
-                  pointerEvents: 'none'
-                }}>
-                            {instance.difficulty}
-                </span>
-              </div>
-            )}
               </div>
           </div>
                 </div>
