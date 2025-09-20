@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate } from 'lucide-react'
 import Pips from './Pips'
 
 // ============================================================================
@@ -692,7 +692,29 @@ const GameCard = ({
                 flexWrap: 'wrap'
               }}>
                 {item.atk !== undefined && (
-                  <span><strong>ATK:</strong> {item.atk >= 0 ? '+' : ''}{item.atk}</span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}>
+                    <Locate 
+                      size={32} 
+                      strokeWidth={1}
+                      style={{
+                        color: 'var(--text-secondary)'
+                      }}
+                    />
+                    <span style={{
+                      position: 'absolute',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: 'white',
+                      pointerEvents: 'none'
+                    }}>
+                      {item.atk >= 0 ? '+' : ''}{item.atk}
+                    </span>
+                  </div>
                 )}
                 {item.weapon && (
                   <span><strong>{item.weapon}:</strong> {item.range || 'Melee'}</span>
@@ -1422,19 +1444,18 @@ const GameCard = ({
                 <span><strong>Type:</strong> {item.type}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span><strong>Tier:</strong></span>
-                  {/* Tier in Upside-down Triangle */}
+                  {/* Tier in Star */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative'
                   }}>
-                    <Triangle 
+                    <Star 
                       size={32} 
                       strokeWidth={1}
                       style={{
-                        color: 'var(--text-secondary)',
-                        transform: 'rotate(180deg)'
+                        color: 'var(--text-secondary)'
                       }}
                     />
                     <span style={{
