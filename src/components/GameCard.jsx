@@ -1,5 +1,46 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag } from 'lucide-react'
+
+// Reusable Threshold Tag Component
+const ThresholdTag = ({ value }) => (
+  <div style={{
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '36px',
+    height: '24px'
+  }}>
+    <svg 
+      width="32" 
+      height="24" 
+      viewBox="0 0 32 24" 
+      fill="none" 
+      stroke="var(--text-secondary)" 
+      strokeWidth="1" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+      style={{
+        position: 'absolute'
+      }}
+    >
+      <path d="M2 2h20l4 10-4 10H2l4-10-4-10z"/>
+    </svg>
+    <span style={{
+      position: 'absolute',
+      fontSize: '0.7rem',
+      fontWeight: 500,
+      color: 'var(--text-primary)',
+      textAlign: 'center',
+      zIndex: 1,
+      left: '45%',
+      top: '50%',
+      transform: 'translate(-50%, -50%)'
+    }}>
+      {value}
+    </span>
+  </div>
+)
 
 // ============================================================================
 // UTILITIES
@@ -951,8 +992,8 @@ const GameCard = ({
         )}
         </div>
 
-        {/* Difficulty & Thresholds Section - Hidden for Minions */}
-        {item.type !== 'Minion' && (
+        {/* Damage Thresholds Section - Hidden for Minions */}
+        {item.type !== 'Minion' && item.thresholds && (
           <div style={{
             marginTop: '1rem',
             paddingTop: '0.75rem',
@@ -961,26 +1002,81 @@ const GameCard = ({
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '1rem',
-              flexWrap: 'wrap',
+              justifyContent: 'center',
+              gap: '0.5rem',
               fontSize: '0.875rem'
             }}>
-              {/* Thresholds */}
-              {item.thresholds && (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  flexWrap: 'wrap'
-                }}>
-                  {item.thresholds.major && (
-                    <span><strong>Major:</strong> {item.thresholds.major}</span>
-                  )}
-                  {item.thresholds.severe && (
-                    <span><strong>Severe:</strong> {item.thresholds.severe}</span>
-                  )}
-                </div>
-              )}
+              {/* HP Pip 1 */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '2px',
+                marginTop: '-3px'
+              }}>
+                <Droplet 
+                  size={16} 
+                  style={{ 
+                    color: 'var(--red)'
+                  }} 
+                />
+              </div>
+
+              {/* Threshold 1 */}
+              <ThresholdTag value={item.thresholds.major || '7'} />
+
+              {/* HP Pip 2 */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '2px',
+                marginTop: '-3px'
+              }}>
+                <Droplet 
+                  size={16} 
+                  style={{ 
+                    color: 'var(--red)'
+                  }} 
+                />
+                <Droplet 
+                  size={16} 
+                  style={{ 
+                    color: 'var(--red)'
+                  }} 
+                />
+              </div>
+
+              {/* Threshold 2 */}
+              <ThresholdTag value={item.thresholds.severe || '14'} />
+
+              {/* HP Pip 3 */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '2px',
+                marginTop: '-3px'
+              }}>
+                <Droplet 
+                  size={16} 
+                  style={{ 
+                    color: 'var(--red)'
+                  }} 
+                />
+                <Droplet 
+                  size={16} 
+                  style={{ 
+                    color: 'var(--red)'
+                  }} 
+                />
+                <Droplet 
+                  size={16} 
+                  style={{ 
+                    color: 'var(--red)'
+                  }} 
+                />
+              </div>
             </div>
           </div>
         )}
