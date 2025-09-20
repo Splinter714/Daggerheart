@@ -274,7 +274,7 @@ const DashboardContent = () => {
           flexDirection: 'row', 
           overflowX: 'auto', 
           overflowY: 'hidden',
-          padding: `0 ${gap}px ${gap}px ${gap}px`,
+          padding: `0 ${gap}px`,
           scrollSnapType: 'x mandatory',
           height: '100%',
           width: '100%'
@@ -290,7 +290,7 @@ const DashboardContent = () => {
             paddingLeft: `${gap}px`, // Space before each card
             paddingRight: '0',
             paddingTop: '0',
-            paddingBottom: '0',
+            paddingBottom: `${gap}px`, // Space below each card
             scrollSnapAlign: 'start'
           }}>
             <div style={{ 
@@ -351,7 +351,7 @@ const DashboardContent = () => {
               paddingLeft: `${gap}px`, // Space before each card
               paddingRight: '0',
               paddingTop: '0',
-              paddingBottom: '0',
+              paddingBottom: `${gap}px`, // Space below each card
               scrollSnapAlign: 'start'
             }}
           >
