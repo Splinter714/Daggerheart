@@ -1106,11 +1106,12 @@ const GameCard = ({
                   {/* Number section - Fixed width for double digits */}
                   <div style={{
                     backgroundColor: 'var(--bg-secondary)',
-                    borderRadius: '3px',
+                    borderRadius: '6px',
                     border: '1px solid var(--border)',
                     width: '32px',
                     textAlign: 'center',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    padding: '2px'
                   }}>
                     <span style={{
                       fontSize: '1rem',
