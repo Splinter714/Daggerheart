@@ -986,85 +986,72 @@ const GameCard = ({
                     marginBottom: '4px'
                   }}
                 >
+                  {/* Centered Header - Name/Number */}
+                  <div style={{
+                    textAlign: 'center',
+                    marginBottom: '8px'
+                  }}>
+                    <span style={{
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      color: 'var(--text-primary)'
+                    }}>
+                      {instance.name?.replace(/\s+\(\d+\)$/, '')} ({instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})
+                    </span>
+              </div>
+
+                  {/* HP Row */}
                   <div style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    justifyContent: 'center',
                     alignItems: 'center',
-                    gap: '8px'
+                    marginBottom: '4px'
                   }}>
-                    {/* Left side - Instance info */}
                     <div style={{
                       display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
                       gap: '2px',
-                      flex: 1
+                      alignItems: 'center'
                     }}>
-                      <span style={{
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                        color: 'var(--text-primary)'
-                      }}>
-                        {instance.name?.replace(/\s+\(\d+\)$/, '')} ({instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})
-                      </span>
-                      {instance.type && (
-                        <span style={{
-                          fontSize: '0.75rem',
-                          color: 'var(--text-secondary)',
-                          fontWeight: 400
-                        }}>
-                          {instance.type}
+                      {Array.from({ length: instance.hpMax || 1 }, (_, i) => (
+                        <span
+                          key={i}
+                          style={{
+                            fontSize: '0.75rem',
+                            color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)'
+                          }}
+                        >
+                          <Droplet size={12} />
                         </span>
-                      )}
+                      ))}
                     </div>
+                  </div>
 
-                    {/* Right side - HP/Stress pips */}
+                  {/* Stress Row */}
+                  {instance.stressMax > 0 && (
                     <div style={{
                       display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
+                      justifyContent: 'center',
+                      alignItems: 'center'
                     }}>
-                      {/* HP Pips */}
                       <div style={{
                         display: 'flex',
                         gap: '2px',
                         alignItems: 'center'
                       }}>
-                        {Array.from({ length: instance.hpMax || 1 }, (_, i) => (
+                        {Array.from({ length: instance.stressMax }, (_, i) => (
                           <span
                             key={i}
                             style={{
                               fontSize: '0.75rem',
-                              color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)'
+                              color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)'
                             }}
                           >
-                            <Droplet size={12} />
+                            <Activity size={12} />
                           </span>
                         ))}
                       </div>
-
-                      {/* Stress Pips */}
-                      {instance.stressMax > 0 && (
-                        <div style={{
-                          display: 'flex',
-                          gap: '2px',
-                          alignItems: 'center'
-                        }}>
-                          {Array.from({ length: instance.stressMax }, (_, i) => (
-                            <span
-                              key={i}
-                              style={{
-                                fontSize: '0.75rem',
-                                color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)'
-                              }}
-                            >
-                              <Activity size={12} />
-                            </span>
-                          ))}
-                        </div>
-                      )}
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -1802,44 +1789,76 @@ const GameCard = ({
                       marginBottom: '4px'
                     }}
                   >
-        <div style={{
-          display: 'flex',
-                      justifyContent: 'space-between',
-          alignItems: 'center',
-                      gap: '8px'
-        }}>
-                      {/* Left side - Instance info */}
+                    {/* Centered Header - Name/Number */}
+            <div style={{
+                      textAlign: 'center',
+                      marginBottom: '8px'
+                    }}>
+                      <span style={{
+              fontSize: '0.875rem',
+                        fontWeight: 500,
+                        color: 'var(--text-primary)'
+                      }}>
+                        {instance.name?.replace(/\s+\(\d+\)$/, '')} ({instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})
+                      </span>
+          </div>
+
+                    {/* HP Row */}
           <div style={{
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
+                      justifyContent: 'center',
+            alignItems: 'center',
+                      marginBottom: '4px'
+          }}>
+            <div style={{
+              display: 'flex',
                         gap: '2px',
-                        flex: 1
+                        alignItems: 'center'
                       }}>
-                <span style={{
-                          fontSize: '0.875rem',
-                  fontWeight: 500,
-                          color: 'var(--text-primary)'
-                        }}>
-                          {instance.name?.replace(/\s+\(\d+\)$/, '')} ({instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})
+                        {Array.from({ length: instance.hpMax || 1 }, (_, i) => (
+                          <span
+                            key={i}
+              style={{
+                              fontSize: '0.75rem',
+                              color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)'
+                            }}
+                          >
+                            <Droplet size={12} />
                 </span>
-                        {instance.type && (
-                  <span style={{
-                    fontSize: '0.75rem',
-              color: 'var(--text-secondary)',
-                            fontWeight: 400
-                  }}>
-                            {instance.type}
-                  </span>
-              )}
+                        ))}
+                </div>
             </div>
 
-                      {/* Right side - Difficulty */}
-          </div>
-        </div>
-      </div>
+                    {/* Stress Row */}
+                    {instance.stressMax > 0 && (
+        <div style={{
+          display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                      }}>
+          <div style={{
+            display: 'flex',
+                          gap: '2px',
+                          alignItems: 'center'
+                        }}>
+                          {Array.from({ length: instance.stressMax }, (_, i) => (
+                            <span
+                              key={i}
+                  style={{
+                  fontSize: '0.75rem',
+                                color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)'
+                              }}
+                            >
+                              <Activity size={12} />
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               ))}
-          </div>
+            </div>
           )}
         </div>
       </div>
