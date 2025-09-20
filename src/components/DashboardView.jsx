@@ -353,18 +353,6 @@ const DashboardContent = () => {
           </Panel>
         ))}
         </div>
-        
-        {/* Right-side overlay to hide partial cards */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          height: '100%',
-          width: `${gap}px`,
-          background: 'var(--bg-primary)',
-          pointerEvents: 'none',
-          zIndex: 1
-        }} />
       </div>
       
 
