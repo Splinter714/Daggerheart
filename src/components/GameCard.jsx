@@ -1106,9 +1106,52 @@ const GameCard = ({
                     gap: '8px',
                     opacity: isInstanceDead ? 0.7 : 1,
                     backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-secondary)',
-                    borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--border)'
+                    borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--border)',
+                    position: 'relative'
                   }}
                 >
+                  {/* DEFEATED overlay for instances */}
+                  {isInstanceDead && (
+                    <>
+                      {/* Diagonal striping pattern */}
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: `repeating-linear-gradient(
+                          45deg,
+                          transparent 0px,
+                          transparent 8px,
+                          var(--gray-600) 9px,
+                          var(--gray-600) 9px
+                        )`,
+                        pointerEvents: 'none',
+                        zIndex: 1,
+                        borderRadius: '4px'
+                      }} />
+                      {/* DEFEATED text */}
+                      <div style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        zIndex: 2,
+                        backgroundColor: 'var(--gray-900)',
+                        padding: '0.125rem 0.25rem',
+                        borderRadius: '0.25rem',
+                        border: '0.5px solid var(--gray-600)'
+                      }}>
+                        DEFEATED
+                      </div>
+                    </>
+                  )}
                   {/* Number section - Fixed width for double digits */}
                   <div style={{
                     backgroundColor: 'var(--bg-secondary)',
@@ -2079,9 +2122,52 @@ const GameCard = ({
                       gap: '8px',
                       opacity: isInstanceDead ? 0.7 : 1,
                       backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-secondary)',
-                      borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--border)'
+                      borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--border)',
+                      position: 'relative'
                     }}
                   >
+                    {/* DEFEATED overlay for instances */}
+                    {isInstanceDead && (
+                      <>
+                        {/* Diagonal striping pattern */}
+                        <div style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: `repeating-linear-gradient(
+                            45deg,
+                            transparent 0px,
+                            transparent 8px,
+                            var(--gray-600) 9px,
+                            var(--gray-600) 9px
+                          )`,
+                          pointerEvents: 'none',
+                          zIndex: 1,
+                          borderRadius: '4px'
+                        }} />
+                        {/* DEFEATED text */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          color: 'var(--text-secondary)',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          zIndex: 2,
+                          backgroundColor: 'var(--gray-900)',
+                          padding: '0.125rem 0.25rem',
+                          borderRadius: '0.25rem',
+                          border: '0.5px solid var(--gray-600)'
+                        }}>
+                          DEFEATED
+                        </div>
+                      </>
+                    )}
                     {/* Left side - Number section */}
                     <div style={{
                       backgroundColor: 'var(--bg-secondary)',
