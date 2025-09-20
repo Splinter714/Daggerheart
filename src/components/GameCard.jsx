@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate } from 'lucide-react'
-import Pips from './Pips'
 
 // ============================================================================
 // UTILITIES
@@ -1009,54 +1008,114 @@ const GameCard = ({
               </div>
 
                   {/* HP Row */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    alignItems: 'center'
-                  }}>
-                    <Pips
-                      type="hp"
-                      value={instance.hp || 0}
-                      maxValue={instance.hpMax || 1}
-                      onChange={(newValue) => {
-                        if (onApplyDamage && type === 'adversary') {
-                          const damage = newValue - (instance.hp || 0)
-                          if (damage !== 0) {
-                            onApplyDamage(instance.id, damage, instance.hp || 0, instance.hpMax || 1)
-                          }
+                  <div 
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      alignItems: 'center',
+                      cursor: 'pointer'
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (!onApplyDamage || type !== 'adversary') return
+                      
+                      const containerRect = e.currentTarget.getBoundingClientRect()
+                      const clickX = e.clientX - containerRect.left
+                      const containerWidth = containerRect.width
+                      const currentHp = instance.hp || 0
+                      const maxHp = instance.hpMax || 1
+                      
+                      // Calculate boundary at the end of the last filled pip
+                      const boundaryRatio = currentHp / maxHp
+                      const boundaryX = containerWidth * boundaryRatio
+                      
+                      if (clickX < boundaryX) {
+                        // Click left of boundary = decrement (heal)
+                        if (currentHp > 0 && onApplyHealing) {
+                          onApplyHealing(instance.id, 1, currentHp)
                         }
-                      }}
-                      enableBoundaryClick={true}
-                      clickContainerWidth="auto"
-                      centerPips={false}
-                      showTooltip={false}
-                    />
+                      } else {
+                        // Click right of boundary = increment (damage)
+                        if (currentHp < maxHp) {
+                          onApplyDamage(instance.id, 1, currentHp, maxHp)
+                        }
+                      }
+                    }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      gap: '2px',
+                      alignItems: 'center'
+                    }}>
+                      {Array.from({ length: instance.hpMax || 1 }, (_, i) => (
+                        <span
+                          key={i}
+                          style={{
+                            fontSize: '0.75rem',
+                            color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)',
+                            transition: 'all 0.1s ease'
+                          }}
+                        >
+                          <Droplet size={12} />
+                        </span>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Stress Row */}
                   {instance.stressMax > 0 && (
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'flex-end',
-                      alignItems: 'center'
-                    }}>
-                      <Pips
-                        type="stress"
-                        value={instance.stress || 0}
-                        maxValue={instance.stressMax}
-                        onChange={(newValue) => {
-                          if (onApplyStressChange && type === 'adversary') {
-                            const stressChange = newValue - (instance.stress || 0)
-                            if (stressChange !== 0) {
-                              onApplyStressChange(instance.id, stressChange)
-                            }
+                    <div 
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        alignItems: 'center',
+                        cursor: 'pointer'
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (!onApplyStressChange || type !== 'adversary') return
+                        
+                        const containerRect = e.currentTarget.getBoundingClientRect()
+                        const clickX = e.clientX - containerRect.left
+                        const containerWidth = containerRect.width
+                        const currentStress = instance.stress || 0
+                        const maxStress = instance.stressMax
+                        
+                        // Calculate boundary at the end of the last filled pip
+                        const boundaryRatio = currentStress / maxStress
+                        const boundaryX = containerWidth * boundaryRatio
+                        
+                        if (clickX < boundaryX) {
+                          // Click left of boundary = decrement
+                          if (currentStress > 0) {
+                            onApplyStressChange(instance.id, -1)
                           }
-                        }}
-                        enableBoundaryClick={true}
-                        clickContainerWidth="auto"
-                        centerPips={false}
-                        showTooltip={false}
-                      />
+                        } else {
+                          // Click right of boundary = increment
+                          if (currentStress < maxStress) {
+                            onApplyStressChange(instance.id, 1)
+                          }
+                        }
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        gap: '2px',
+                        alignItems: 'center'
+                      }}>
+                        {Array.from({ length: instance.stressMax }, (_, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              fontSize: '0.75rem',
+                              color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)',
+                              transition: 'all 0.1s ease'
+                            }}
+                          >
+                            <Activity size={12} />
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1819,60 +1878,120 @@ const GameCard = ({
             </div>
 
                     {/* HP Row */}
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'flex-end',
-                      alignItems: 'center'
-                    }}>
-                      <Pips
-                        type="hp"
-                        value={instance.hp || 0}
-                        maxValue={instance.hpMax || 1}
-                        onChange={(newValue) => {
-                          if (onApplyDamage && type === 'environment') {
-                            const damage = newValue - (instance.hp || 0)
-                            if (damage !== 0) {
-                              onApplyDamage(instance.id, damage, instance.hp || 0, instance.hpMax || 1)
-                            }
+          <div 
+            style={{
+          display: 'flex',
+                        justifyContent: 'flex-end',
+          alignItems: 'center',
+                        cursor: 'pointer'
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (!onApplyDamage || type !== 'environment') return
+                        
+                        const containerRect = e.currentTarget.getBoundingClientRect()
+                        const clickX = e.clientX - containerRect.left
+                        const containerWidth = containerRect.width
+                        const currentHp = instance.hp || 0
+                        const maxHp = instance.hpMax || 1
+                        
+                        // Calculate boundary at the end of the last filled pip
+                        const boundaryRatio = currentHp / maxHp
+                        const boundaryX = containerWidth * boundaryRatio
+                        
+                        if (clickX < boundaryX) {
+                          // Click left of boundary = decrement (heal)
+                          if (currentHp > 0 && onApplyHealing) {
+                            onApplyHealing(instance.id, 1, currentHp)
                           }
-                        }}
-                        enableBoundaryClick={true}
-                        clickContainerWidth="auto"
-                        centerPips={false}
-                        showTooltip={false}
-                      />
-                    </div>
+                        } else {
+                          // Click right of boundary = increment (damage)
+                          if (currentHp < maxHp) {
+                            onApplyDamage(instance.id, 1, currentHp, maxHp)
+                          }
+                        }
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        gap: '2px',
+                        alignItems: 'center'
+                      }}>
+                        {Array.from({ length: instance.hpMax || 1 }, (_, i) => (
+                          <span
+                            key={i}
+                  style={{
+                              fontSize: '0.75rem',
+                              color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)',
+                              transition: 'all 0.1s ease'
+                            }}
+                          >
+                            <Droplet size={12} />
+                  </span>
+                        ))}
+                </div>
+            </div>
 
                     {/* Stress Row */}
                     {instance.stressMax > 0 && (
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        alignItems: 'center'
-                      }}>
-                        <Pips
-                          type="stress"
-                          value={instance.stress || 0}
-                          maxValue={instance.stressMax}
-                          onChange={(newValue) => {
-                            if (onApplyStressChange && type === 'environment') {
-                              const stressChange = newValue - (instance.stress || 0)
-                              if (stressChange !== 0) {
-                                onApplyStressChange(instance.id, stressChange)
-                              }
+                      <div 
+                style={{
+                  display: 'flex',
+                          justifyContent: 'flex-end',
+                  alignItems: 'center',
+                          cursor: 'pointer'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                          if (!onApplyStressChange || type !== 'environment') return
+                          
+                          const containerRect = e.currentTarget.getBoundingClientRect()
+                          const clickX = e.clientX - containerRect.left
+                          const containerWidth = containerRect.width
+                          const currentStress = instance.stress || 0
+                          const maxStress = instance.stressMax
+                          
+                          // Calculate boundary at the end of the last filled pip
+                          const boundaryRatio = currentStress / maxStress
+                          const boundaryX = containerWidth * boundaryRatio
+                          
+                          if (clickX < boundaryX) {
+                            // Click left of boundary = decrement
+                            if (currentStress > 0) {
+                              onApplyStressChange(instance.id, -1)
                             }
-                          }}
-                          enableBoundaryClick={true}
-                          clickContainerWidth="auto"
-                          centerPips={false}
-                          showTooltip={false}
-                        />
-                      </div>
-                    )}
+                          } else {
+                            // Click right of boundary = increment
+                            if (currentStress < maxStress) {
+                              onApplyStressChange(instance.id, 1)
+                            }
+                          }
+                        }}
+                      >
+        <div style={{
+          display: 'flex',
+                          gap: '2px',
+                          alignItems: 'center'
+                        }}>
+                          {Array.from({ length: instance.stressMax }, (_, i) => (
+                            <span
+                              key={i}
+                  style={{
+                  fontSize: '0.75rem',
+                                color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)',
+                                transition: 'all 0.1s ease'
+                              }}
+                            >
+                              <Activity size={12} />
+                </span>
+                          ))}
+              </div>
+              </div>
+            )}
           </div>
-                </div>
+          </div>
               ))}
-            </div>
+        </div>
           )}
         </div>
       </div>
@@ -1897,9 +2016,9 @@ const GameCard = ({
   const hasExpandedRenderer = (type === 'adversary' || type === 'adversaries' || type === 'environment' || type === 'environments')
   
   if (!hasExpandedRenderer) {
-    return (
+  return (
       <div className={getCardClassName()} style={getCardStyle(true)}>
-        <div style={styles.rowMain}>
+      <div style={styles.rowMain}>
           <h4 style={styles.rowTitle}>{renderTitle()}</h4>
           <div style={styles.rowMeta}>{renderMeta()}</div>
         </div>
