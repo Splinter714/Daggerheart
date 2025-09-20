@@ -683,10 +683,6 @@ const GameCard = ({
               gap: '1rem',
               flexWrap: 'wrap'
             }}>
-              <span><strong>Difficulty:</strong> {item.difficulty}</span>
-              {item.thresholds && (
-                <span><strong>Thresholds:</strong> {item.thresholds.major}/{item.thresholds.severe}</span>
-              )}
             </div>
             {(item.atk !== undefined || item.weapon || item.damage) && (
               <div style={{
@@ -897,6 +893,34 @@ const GameCard = ({
             )}
           </div>
         )}
+        </div>
+
+        {/* Difficulty & Thresholds Section */}
+        <div style={{
+          marginTop: '1rem',
+          paddingTop: '0.75rem',
+          borderTop: '1px solid var(--border)'
+        }}>
+          <h3 style={{
+            fontSize: '1rem',
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            margin: '0 0 0.5rem 0'
+          }}>
+            Difficulty & Thresholds
+          </h3>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            flexWrap: 'wrap',
+            fontSize: '0.875rem'
+          }}>
+            <span><strong>Difficulty:</strong> {item.difficulty}</span>
+            {item.thresholds && (
+              <span><strong>Thresholds:</strong> {item.thresholds.major}/{item.thresholds.severe}</span>
+            )}
+          </div>
         </div>
 
         {/* Condensed Cards for All Instances - At Bottom */}
