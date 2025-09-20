@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { buildCountdownActions, buildAdversaryActions, buildEnvironmentActions } from '../components/GameCard'
+
+// Simple ID generator
+function generateId(prefix) {
+  const base = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  return prefix ? `${prefix}-${base}` : base
+}
 
 const GameStateContext = createContext();
 
@@ -71,34 +76,242 @@ export const GameStateProvider = ({ children }) => {
   useEffect(() => { gameStateRef.current = gameState }, [gameState])
   const getGameState = () => gameStateRef.current
 
-  const countdownActions = buildCountdownActions(setGameState)
-  const adversaryActions = buildAdversaryActions(getGameState, setGameState)
-  const environmentActions = buildEnvironmentActions(getGameState, setGameState)
+  // Simple action functions
+  const createCountdown = (countdownData) => {
+    const newCountdown = {
+      id: generateId('countdown'),
+      name: countdownData.name || 'Countdown',
+      max: parseInt(countdownData.max) || 1,
+      value: 0,
+      visible: true,
+      type: countdownData.type || 'standard',
+      loop: countdownData.loop || 'none',
+      source: countdownData.source || 'campaign'
+    }
+    setGameState(prev => ({ ...prev, countdowns: [...prev.countdowns, newCountdown] }))
+  }
 
-  const {
-    createCountdown,
-    updateCountdown,
-    deleteCountdown,
-    advanceCountdown,
-    incrementCountdown,
-    decrementCountdown,
-    reorderCountdowns
-  } = countdownActions
+  const updateCountdown = (id, updates) => {
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(c => c.id === id ? { ...c, ...updates } : c)
+    }))
+  }
 
-  const {
-    createAdversary,
-    updateAdversary,
-    deleteAdversary,
-    reorderAdversaries,
-    bulkReorderAdversaries
-  } = adversaryActions
+  const deleteCountdown = (id) => {
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.filter(c => c.id !== id)
+    }))
+  }
 
-  const {
-    createEnvironment,
-    updateEnvironment,
-    deleteEnvironment,
-    reorderEnvironments
-  } = environmentActions
+  const advanceCountdown = (id, newValue) => {
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(countdown => {
+        if (countdown.id !== id) return countdown
+        let finalValue = newValue
+        if (countdown.loop === 'loop') {
+          if (finalValue > countdown.max) {
+            finalValue = ((finalValue - 1) % countdown.max) + 1
+          } else if (finalValue < 0) {
+            finalValue = countdown.max
+          }
+        } else if (countdown.loop === 'increasing') {
+          if (finalValue > countdown.max) return { ...countdown, max: countdown.max + 1, value: 1 }
+          else if (finalValue < 0) return { ...countdown, max: Math.max(1, countdown.max - 1), value: 1 }
+          finalValue = Math.max(0, finalValue)
+        } else if (countdown.loop === 'decreasing') {
+          if (finalValue > countdown.max) return { ...countdown, max: Math.max(1, countdown.max - 1), value: 1 }
+          else if (finalValue < 0) return { ...countdown, max: countdown.max + 1, value: 1 }
+          finalValue = Math.min(countdown.max, finalValue)
+        } else {
+          finalValue = Math.max(0, Math.min(finalValue, countdown.max))
+        }
+        return { ...countdown, value: finalValue }
+      })
+    }))
+  }
+
+  const incrementCountdown = (id, amount = 1) => {
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(countdown => {
+        if (countdown.id !== id) return countdown
+        let newValue = countdown.value + amount
+        if (countdown.loop === 'loop') {
+          if (newValue > countdown.max) {
+            newValue = ((newValue - 1) % countdown.max) + 1
+          }
+        } else if (countdown.loop === 'increasing') {
+          if (newValue > countdown.max) return { ...countdown, max: countdown.max + 1, value: 1 }
+        } else if (countdown.loop === 'decreasing') {
+          if (newValue > countdown.max) return { ...countdown, max: Math.max(1, countdown.max - 1), value: 1 }
+        } else {
+          newValue = Math.min(newValue, countdown.max)
+        }
+        return { ...countdown, value: newValue }
+      })
+    }))
+  }
+
+  const decrementCountdown = (id) => {
+    setGameState(prev => ({
+      ...prev,
+      countdowns: prev.countdowns.map(countdown => {
+        if (countdown.id !== id) return countdown
+        let newValue = countdown.value - 1
+        if (countdown.loop === 'loop') {
+          if (newValue < 0) newValue = countdown.max
+        } else if (countdown.loop === 'increasing') {
+          if (newValue < 0) return { ...countdown, max: Math.max(1, countdown.max - 1), value: countdown.max }
+          newValue = Math.max(0, newValue)
+        } else if (countdown.loop === 'decreasing') {
+          if (newValue < 0) return { ...countdown, max: countdown.max + 1, value: 1 }
+        } else {
+          newValue = Math.max(0, newValue)
+        }
+        return { ...countdown, value: newValue }
+      })
+    }))
+  }
+
+  const reorderCountdowns = (newOrder) => {
+    setGameState(prev => {
+      const [oldIndex, newIndex] = newOrder
+      const newCountdowns = [...prev.countdowns]
+      const [movedItem] = newCountdowns.splice(oldIndex, 1)
+      newCountdowns.splice(newIndex, 0, movedItem)
+      return { ...prev, countdowns: newCountdowns }
+    })
+  }
+
+  const createAdversary = (adversaryData) => {
+    const uniqueId = generateId('adv')
+    const existingAdversaries = gameState.adversaries || []
+    const baseName = adversaryData.name || 'Unknown'
+    const sameNameAdversaries = existingAdversaries.filter(adv => adv.baseName === baseName)
+    
+    let duplicateNumber = 1
+    if (sameNameAdversaries.length === 0) {
+      duplicateNumber = 1
+    } else {
+      const usedNumbers = sameNameAdversaries.map(adv => adv.duplicateNumber || 1)
+      let next = 1
+      while (usedNumbers.includes(next)) next++
+      duplicateNumber = next
+    }
+
+    const newAdversary = {
+      ...adversaryData,
+      id: uniqueId,
+      baseName: baseName,
+      duplicateNumber: duplicateNumber,
+      name: `${baseName} (${duplicateNumber})`,
+      hp: 0,
+      stress: 0,
+      isVisible: true
+    }
+    setGameState(prev => ({ ...prev, adversaries: [...prev.adversaries, newAdversary] }))
+  }
+
+  const updateAdversary = (id, updates) => {
+    setGameState(prev => ({
+      ...prev,
+      adversaries: prev.adversaries.map(a => {
+        if (a.id === id) {
+          const updated = { ...a, ...updates }
+          if (updates.baseName !== undefined) {
+            const baseName = updates.baseName
+            const duplicateNumber = updated.duplicateNumber || 1
+            updated.name = duplicateNumber === 1 ? baseName : `${baseName} (${duplicateNumber})`
+          }
+          return updated
+        }
+        return a
+      })
+    }))
+  }
+
+  const deleteAdversary = (id) => {
+    setGameState(prev => ({
+      ...prev,
+      adversaries: prev.adversaries.filter(a => a.id !== id)
+    }))
+  }
+
+  const reorderAdversaries = (newOrder) => {
+    setGameState(prev => {
+      const [oldIndex, newIndex] = newOrder
+      const next = [...prev.adversaries]
+      const [moved] = next.splice(oldIndex, 1)
+      next.splice(newIndex, 0, moved)
+      return { ...prev, adversaries: next }
+    })
+  }
+
+  const bulkReorderAdversaries = (newOrder) => {
+    setGameState(prev => ({
+      ...prev,
+      adversaries: newOrder
+    }))
+  }
+
+  const createEnvironment = (environmentData) => {
+    const uniqueId = generateId('env')
+    const existing = gameState.environments || []
+    const same = existing.filter(env => env.name.replace(/\s+\(\d+\)$/, '') === environmentData.name)
+    let displayName = environmentData.name || 'Unknown'
+    if (same.length === 0) {
+      displayName = environmentData.name
+    } else if (same.length === 1) {
+      const first = same[0]
+      const firstBase = first.name.replace(/\s+\(\d+\)$/, '')
+      const updated = gameState.environments.map(env => env.id === first.id ? { ...env, name: `${firstBase} (1)` } : env)
+      setGameState(prev => ({ ...prev, environments: updated }))
+      displayName = `${environmentData.name} (2)`
+    } else {
+      const used = same.map(env => {
+        const match = env.name.match(/\((\d+)\)$/)
+        return match ? parseInt(match[1]) : null
+      }).filter(n => n !== null)
+      let next = 1
+      while (used.includes(next)) next++
+      displayName = `${environmentData.name} (${next})`
+    }
+
+    const newEnv = {
+      ...environmentData,
+      id: uniqueId,
+      name: displayName,
+      isVisible: true
+    }
+    setGameState(prev => ({ ...prev, environments: [...prev.environments, newEnv] }))
+  }
+
+  const updateEnvironment = (id, updates) => {
+    setGameState(prev => ({
+      ...prev,
+      environments: prev.environments.map(e => e.id === id ? { ...e, ...updates } : e)
+    }))
+  }
+
+  const deleteEnvironment = (id) => {
+    setGameState(prev => ({
+      ...prev,
+      environments: prev.environments.filter(e => e.id !== id)
+    }))
+  }
+
+  const reorderEnvironments = (newOrder) => {
+    setGameState(prev => {
+      const [oldIndex, newIndex] = newOrder
+      const next = [...prev.environments]
+      const [moved] = next.splice(oldIndex, 1)
+      next.splice(newIndex, 0, moved)
+      return { ...prev, environments: next }
+    })
+  }
 
   const value = {
     gameState,
