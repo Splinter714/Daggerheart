@@ -698,7 +698,7 @@ const GameCard = ({
 
         {/* Expandable Content Section */}
         <div style={{
-          padding: '0 12px',
+          padding: '12px',
           borderRadius: '0 0 8px 8px'
         }}>
 
