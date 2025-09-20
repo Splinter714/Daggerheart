@@ -274,7 +274,7 @@ const DashboardContent = () => {
           flexDirection: 'row', 
           overflowX: 'auto', 
           overflowY: 'hidden',
-          padding: `0 ${gap}px`,
+          padding: `0 ${gap}px ${gap}px ${gap}px`,
           scrollSnapType: 'x mandatory',
           height: '100%',
           width: '100%'
