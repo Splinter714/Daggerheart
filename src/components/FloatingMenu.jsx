@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MoreHorizontal, X } from 'lucide-react'
+import { MoreHorizontal, X, Sword, MapPin } from 'lucide-react'
 import HelpButton from './HelpButton'
 import DeleteClear from './DeleteClear'
 import SortButton from './SortButton'
@@ -13,7 +13,8 @@ const FloatingMenu = ({
   deleteCountdown,
   isClearMode,
   setIsClearMode,
-  sortAdversaries
+  sortAdversaries,
+  onOpenDatabase
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showHelpFlyout, setShowHelpFlyout] = useState(false)
@@ -104,9 +105,9 @@ const FloatingMenu = ({
 
   // Radial positioning for menu items
   const getRadialItemStyle = (index, totalItems) => {
-    // Spread from 180° (left) to 270° (down) - left to down direction
-    const angle = 180 + (index * 90) / (totalItems - 1) // 180° to 270°
-    const radius = 70 // Increased from 60 to 70 for better spacing
+    // Spread from 135° (top-left) to 270° (down) - wider arc for more buttons
+    const angle = 135 + (index * 135) / (totalItems - 1) // 135° to 270°
+    const radius = 70
     const radians = (angle * Math.PI) / 180
     
     const x = Math.cos(radians) * radius // Use cos for x (horizontal)
@@ -144,8 +145,58 @@ const FloatingMenu = ({
         height: '56px',
         pointerEvents: 'none'
       }}>
+        {/* Add Adversary Button */}
+        <div style={getRadialItemStyle(0, 5)}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onOpenDatabase('adversaries')
+              setIsOpen(false)
+            }}
+            style={{
+              width: '100%',
+              height: '100%',
+              background: 'none',
+              border: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title="Browse Adversaries"
+          >
+            <Sword size={20} />
+          </button>
+        </div>
+        
+        {/* Add Environment Button */}
+        <div style={getRadialItemStyle(1, 5)}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onOpenDatabase('environments')
+              setIsOpen(false)
+            }}
+            style={{
+              width: '100%',
+              height: '100%',
+              background: 'none',
+              border: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title="Browse Environments"
+          >
+            <MapPin size={20} />
+          </button>
+        </div>
+        
         {/* Clear Button */}
-        <div style={getRadialItemStyle(0, 3)}>
+        <div style={getRadialItemStyle(2, 5)}>
           <DeleteClear
             adversaries={adversaries}
             environments={environments}
@@ -161,7 +212,7 @@ const FloatingMenu = ({
         </div>
         
         {/* Sort Button */}
-        <div style={getRadialItemStyle(1, 3)}>
+        <div style={getRadialItemStyle(3, 5)}>
           <SortButton
             adversaries={adversaries}
             onSortAdversaries={sortAdversaries}
@@ -169,7 +220,7 @@ const FloatingMenu = ({
         </div>
         
         {/* Help Button */}
-        <div style={getRadialItemStyle(2, 3)}>
+        <div style={getRadialItemStyle(4, 5)}>
           <HelpButton 
             showFlyout={showHelpFlyout}
             onFlyoutChange={handleHelpFlyoutChange}
