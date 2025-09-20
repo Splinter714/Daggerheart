@@ -172,7 +172,6 @@ const DashboardContent = () => {
           } : undefined}
           onApplyHealing={type === 'adversary' ? (id, healing, currentHp) => {
             const instance = instances.find(i => i.id === id)
-            console.log('DashboardView onApplyHealing:', { id, healing, currentHp, instance })
             if (instance) {
               updateAdversary(id, { hp: Math.max(0, (instance.hp || 0) - healing) })
             }

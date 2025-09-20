@@ -1014,41 +1014,23 @@ const GameCard = ({
                     justifyContent: 'flex-end',
                     alignItems: 'center'
                   }}>
-                    <div style={{
-                      display: 'flex',
-                      gap: '2px',
-                      alignItems: 'center'
-                    }}>
-                      {Array.from({ length: instance.hpMax || 1 }, (_, i) => (
-                        <span
-                          key={i}
-                          style={{
-                            fontSize: '0.75rem',
-                            color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)',
-                            cursor: 'pointer',
-                            transition: 'all 0.1s ease'
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            if (onApplyDamage && type === 'adversary') {
-                              onApplyDamage(instance.id, 1, instance.hp || 0, instance.hpMax || 1)
-                            }
-                          }}
-                          onContextMenu={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            console.log('Right-click HP pip:', { instanceId: instance.id, currentHp: instance.hp })
-                            if (onApplyHealing && type === 'adversary') {
-                              onApplyHealing(instance.id, 1, instance.hp || 0)
-                            }
-                          }}
-                          onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
-                          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                        >
-                          <Droplet size={12} />
-                        </span>
-                      ))}
-                    </div>
+                    <Pips
+                      type="hp"
+                      value={instance.hp || 0}
+                      maxValue={instance.hpMax || 1}
+                      onChange={(newValue) => {
+                        if (onApplyDamage && type === 'adversary') {
+                          const damage = newValue - (instance.hp || 0)
+                          if (damage !== 0) {
+                            onApplyDamage(instance.id, damage, instance.hp || 0, instance.hpMax || 1)
+                          }
+                        }
+                      }}
+                      enableBoundaryClick={true}
+                      clickContainerWidth="auto"
+                      centerPips={false}
+                      showTooltip={false}
+                    />
                   </div>
 
                   {/* Stress Row */}
@@ -1058,41 +1040,23 @@ const GameCard = ({
                       justifyContent: 'flex-end',
                       alignItems: 'center'
                     }}>
-                      <div style={{
-                        display: 'flex',
-                        gap: '2px',
-                        alignItems: 'center'
-                      }}>
-                        {Array.from({ length: instance.stressMax }, (_, i) => (
-                          <span
-                            key={i}
-                            style={{
-                              fontSize: '0.75rem',
-                              color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)',
-                              cursor: 'pointer',
-                              transition: 'all 0.1s ease'
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              if (onApplyStressChange && type === 'adversary') {
-                                onApplyStressChange(instance.id, 1)
-                              }
-                            }}
-                            onContextMenu={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              console.log('Right-click stress pip:', { instanceId: instance.id, currentStress: instance.stress })
-                              if (onApplyStressChange && type === 'adversary') {
-                                onApplyStressChange(instance.id, -1)
-                              }
-                            }}
-                            onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
-                            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                          >
-                            <Activity size={12} />
-                          </span>
-                        ))}
-                      </div>
+                      <Pips
+                        type="stress"
+                        value={instance.stress || 0}
+                        maxValue={instance.stressMax}
+                        onChange={(newValue) => {
+                          if (onApplyStressChange && type === 'adversary') {
+                            const stressChange = newValue - (instance.stress || 0)
+                            if (stressChange !== 0) {
+                              onApplyStressChange(instance.id, stressChange)
+                            }
+                          }
+                        }}
+                        enableBoundaryClick={true}
+                        clickContainerWidth="auto"
+                        centerPips={false}
+                        showTooltip={false}
+                      />
                     </div>
                   )}
                 </div>
@@ -1855,90 +1819,56 @@ const GameCard = ({
             </div>
 
                     {/* HP Row */}
-        <div style={{
-          display: 'flex',
+                    <div style={{
+                      display: 'flex',
                       justifyContent: 'flex-end',
                       alignItems: 'center'
                     }}>
-          <div style={{
-            display: 'flex',
-                        gap: '2px',
-                        alignItems: 'center'
-                      }}>
-                        {Array.from({ length: instance.hpMax || 1 }, (_, i) => (
-                          <span
-                            key={i}
-              style={{
-                    fontSize: '0.75rem',
-                              color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                              transition: 'all 0.1s ease'
-                }}
-                onClick={(e) => {
-                  e.stopPropagation()
-                              if (onApplyDamage && type === 'environment') {
-                                onApplyDamage(instance.id, 1, instance.hp || 0, instance.hpMax || 1)
-                              }
-                            }}
-                            onContextMenu={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              if (onApplyHealing && type === 'environment') {
-                                onApplyHealing(instance.id, 1, instance.hp || 0)
-                              }
-                            }}
-                            onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
-                            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                          >
-                            <Droplet size={12} />
-              </span>
-                        ))}
-                      </div>
-          </div>
+                      <Pips
+                        type="hp"
+                        value={instance.hp || 0}
+                        maxValue={instance.hpMax || 1}
+                        onChange={(newValue) => {
+                          if (onApplyDamage && type === 'environment') {
+                            const damage = newValue - (instance.hp || 0)
+                            if (damage !== 0) {
+                              onApplyDamage(instance.id, damage, instance.hp || 0, instance.hpMax || 1)
+                            }
+                          }
+                        }}
+                        enableBoundaryClick={true}
+                        clickContainerWidth="auto"
+                        centerPips={false}
+                        showTooltip={false}
+                      />
+                    </div>
 
                     {/* Stress Row */}
                     {instance.stressMax > 0 && (
-          <div style={{
-            display: 'flex',
+                      <div style={{
+                        display: 'flex',
                         justifyContent: 'flex-end',
                         alignItems: 'center'
-          }}>
-              <div style={{
-                display: 'flex',
-                          gap: '2px',
-                          alignItems: 'center'
-                        }}>
-                          {Array.from({ length: instance.stressMax }, (_, i) => (
-                            <span
-                              key={i}
-                  style={{
-                  fontSize: '0.75rem',
-                                color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                                transition: 'all 0.1s ease'
-                }}
-                onClick={(e) => {
-                  e.stopPropagation()
-                                if (onApplyStressChange && type === 'environment') {
-                                  onApplyStressChange(instance.id, 1)
-                                }
-                              }}
-                              onContextMenu={(e) => {
-                  e.preventDefault()
-                                e.stopPropagation()
-                                if (onApplyStressChange && type === 'environment') {
-                                  onApplyStressChange(instance.id, -1)
-                                }
-                              }}
-                              onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
-                              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                            >
-                              <Activity size={12} />
-                            </span>
-                          ))}
-                        </div>
+                      }}>
+                        <Pips
+                          type="stress"
+                          value={instance.stress || 0}
+                          maxValue={instance.stressMax}
+                          onChange={(newValue) => {
+                            if (onApplyStressChange && type === 'environment') {
+                              const stressChange = newValue - (instance.stress || 0)
+                              if (stressChange !== 0) {
+                                onApplyStressChange(instance.id, stressChange)
+                              }
+                            }
+                          }}
+                          enableBoundaryClick={true}
+                          clickContainerWidth="auto"
+                          centerPips={false}
+                          showTooltip={false}
+                        />
                       </div>
-            )}
+                    )}
           </div>
                 </div>
               ))}
