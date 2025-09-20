@@ -759,8 +759,6 @@ const GameCard = ({
           flexDirection: 'column',
           position: 'relative'
         }}
-        {...dragAttributes}
-        {...dragListeners}
         onClick={onClick}
         {...(mode !== 'expanded' && {
           onMouseEnter: handleMouseEnter,
@@ -1240,8 +1238,6 @@ const GameCard = ({
           flexDirection: 'column',
           position: 'relative'
         }}
-        {...dragAttributes}
-        {...dragListeners}
         onClick={onClick}
         {...(mode !== 'expanded' && {
           onMouseEnter: handleMouseEnter,
