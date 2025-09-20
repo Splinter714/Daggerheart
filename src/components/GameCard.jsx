@@ -1148,16 +1148,124 @@ const GameCard = ({
                     opacity: 0.5
                   }} />
                 )}
-                <GameCard
+                <div
                   key={instance.id}
-                  item={instance}
-                  mode="compact"
-                  type={type}
-                  isEmbedded={true}
-                  onUpdate={onUpdate}
-                  onDelete={onDelete}
-                  isSelected={false}
-                />
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    borderRadius: '4px',
+                    padding: '8px',
+                    border: '1px solid var(--border)',
+                    marginBottom: '4px'
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    {/* Left side - Instance info */}
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      gap: '2px',
+                      flex: 1
+                    }}>
+                      <span style={{
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        color: 'var(--text-primary)'
+                      }}>
+                        {instance.name?.replace(/\s+\(\d+\)$/, '')} ({instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})
+                      </span>
+                      {instance.type && (
+                        <span style={{
+                          fontSize: '0.75rem',
+                          color: 'var(--text-secondary)',
+                          fontWeight: 400
+                        }}>
+                          {instance.type}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Right side - HP/Stress pips */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      {/* HP Pips */}
+                      <div style={{
+                        display: 'flex',
+                        gap: '2px',
+                        alignItems: 'center'
+                      }}>
+                        {Array.from({ length: instance.hpMax || 1 }, (_, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              fontSize: '0.75rem',
+                              color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)'
+                            }}
+                          >
+                            <Droplet size={12} />
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Stress Pips */}
+                      {instance.stressMax > 0 && (
+                        <div style={{
+                          display: 'flex',
+                          gap: '2px',
+                          alignItems: 'center'
+                        }}>
+                          {Array.from({ length: instance.stressMax }, (_, i) => (
+                            <span
+                              key={i}
+                              style={{
+                                fontSize: '0.75rem',
+                                color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)'
+                              }}
+                            >
+                              <Activity size={12} />
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Difficulty */}
+                      {instance.difficulty && (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          position: 'relative'
+                        }}>
+                          <Hexagon 
+                            size={20} 
+                            strokeWidth={1}
+                            style={{
+                              color: 'var(--text-secondary)',
+                              transform: 'rotate(30deg)'
+                            }}
+                          />
+                          <span style={{
+                            position: 'absolute',
+                            fontSize: '0.625rem',
+                            fontWeight: 600,
+                            color: 'white',
+                            pointerEvents: 'none'
+                          }}>
+                            {instance.difficulty}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -1789,21 +1897,76 @@ const GameCard = ({
                       opacity: 0.5
                     }} />
                   )}
-                  <GameCard
-                    type={type}
-                    item={{ 
-                      ...instance, 
-                      name: `(${instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})`,
-                      baseName: `(${instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})`
+                  <div
+                    key={instance.id}
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      borderRadius: '4px',
+                      padding: '8px',
+                      border: '1px solid var(--border)',
+                      marginBottom: '4px'
                     }}
-                    mode="compact"
-                    isEmbedded={true}
-                    onApplyDamage={onApplyDamage}
-                    onApplyHealing={onApplyHealing}
-                    onApplyStressChange={onApplyStressChange}
-                    onUpdate={onUpdate}
-                    adversaries={adversaries}
-                  />
+                  >
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      {/* Left side - Instance info */}
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        gap: '2px',
+                        flex: 1
+                      }}>
+                        <span style={{
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                          color: 'var(--text-primary)'
+                        }}>
+                          {instance.name?.replace(/\s+\(\d+\)$/, '')} ({instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})
+                        </span>
+                        {instance.type && (
+                          <span style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--text-secondary)',
+                            fontWeight: 400
+                          }}>
+                            {instance.type}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Right side - Difficulty */}
+                      {instance.difficulty && (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          position: 'relative'
+                        }}>
+                          <Hexagon 
+                            size={20} 
+                            strokeWidth={1}
+                            style={{
+                              color: 'var(--text-secondary)'
+                            }}
+                          />
+                          <span style={{
+                            position: 'absolute',
+                            fontSize: '0.625rem',
+                            fontWeight: 600,
+                            color: 'white',
+                            pointerEvents: 'none'
+                          }}>
+                            {instance.difficulty}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
