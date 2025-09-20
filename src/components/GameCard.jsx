@@ -1025,17 +1025,46 @@ const GameCard = ({
                         e.stopPropagation()
                         if (!onApplyDamage || type !== 'adversary') return
                         
-                        const containerRect = e.currentTarget.getBoundingClientRect()
+                        const outerRect = e.currentTarget.getBoundingClientRect()
+                        const containerElement = e.currentTarget.querySelector('.pip-container')
+                        
+                        if (!containerElement) {
+                          return
+                        }
+                        
+                        const containerRect = containerElement.getBoundingClientRect()
                         const clickX = e.clientX - containerRect.left
-                        const containerWidth = containerRect.width
                         const currentHp = instance.hp || 0
                         const maxHp = instance.hpMax || 1
                         
+                        // Handle clicks outside the pip container (relative to pip container)
+                        if (clickX < 0) {
+                          // Click left of all pips = decrement (heal)
+                          if (currentHp > 0 && onApplyHealing) {
+                            onApplyHealing(instance.id, 1, currentHp)
+                          }
+                          return
+                        }
+                        
+                        if (clickX > containerRect.width) {
+                          // Click right of all pips = increment (damage)
+                          if (currentHp < maxHp) {
+                            onApplyDamage(instance.id, 1, currentHp, maxHp)
+                          }
+                          return
+                        }
+                        
+                        // Click within pip container - use boundary logic based on pip container width only
+                        const containerWidth = containerRect.width
+                        const pipPadding = containerWidth * 0.05
+                        const effectiveContainerWidth = containerWidth - (2 * pipPadding)
+                        const clickXWithinContainer = clickX - pipPadding
+                        
                         // Calculate boundary at the end of the last filled pip
                         const boundaryRatio = currentHp / maxHp
-                        const boundaryX = containerWidth * boundaryRatio
+                        const boundaryXWithinContainer = effectiveContainerWidth * boundaryRatio
                         
-                        if (clickX < boundaryX) {
+                        if (clickXWithinContainer < boundaryXWithinContainer) {
                           // Click left of boundary = decrement (heal)
                           if (currentHp > 0 && onApplyHealing) {
                             onApplyHealing(instance.id, 1, currentHp)
@@ -1048,11 +1077,14 @@ const GameCard = ({
                         }
                       }}
                     >
-                      <div style={{
-                        display: 'flex',
-                        gap: '2px',
-                        alignItems: 'center'
-                      }}>
+                      <div 
+                        className="pip-container"
+                        style={{
+                          display: 'flex',
+                          gap: '2px',
+                          alignItems: 'center'
+                        }}
+                      >
                         {Array.from({ length: instance.hpMax || 1 }, (_, i) => (
                           <span
                             key={i}
@@ -1080,17 +1112,46 @@ const GameCard = ({
                           e.stopPropagation()
                           if (!onApplyStressChange || type !== 'adversary') return
                           
-                          const containerRect = e.currentTarget.getBoundingClientRect()
+                          const outerRect = e.currentTarget.getBoundingClientRect()
+                          const containerElement = e.currentTarget.querySelector('.pip-container')
+                          
+                          if (!containerElement) {
+                            return
+                          }
+                          
+                          const containerRect = containerElement.getBoundingClientRect()
                           const clickX = e.clientX - containerRect.left
-                          const containerWidth = containerRect.width
                           const currentStress = instance.stress || 0
                           const maxStress = instance.stressMax
                           
+                          // Handle clicks outside the pip container (relative to pip container)
+                          if (clickX < 0) {
+                            // Click left of all pips = decrement
+                            if (currentStress > 0) {
+                              onApplyStressChange(instance.id, -1)
+                            }
+                            return
+                          }
+                          
+                          if (clickX > containerRect.width) {
+                            // Click right of all pips = increment
+                            if (currentStress < maxStress) {
+                              onApplyStressChange(instance.id, 1)
+                            }
+                            return
+                          }
+                          
+                          // Click within pip container - use boundary logic based on pip container width only
+                          const containerWidth = containerRect.width
+                          const pipPadding = containerWidth * 0.05
+                          const effectiveContainerWidth = containerWidth - (2 * pipPadding)
+                          const clickXWithinContainer = clickX - pipPadding
+                          
                           // Calculate boundary at the end of the last filled pip
                           const boundaryRatio = currentStress / maxStress
-                          const boundaryX = containerWidth * boundaryRatio
+                          const boundaryXWithinContainer = effectiveContainerWidth * boundaryRatio
                           
-                          if (clickX < boundaryX) {
+                          if (clickXWithinContainer < boundaryXWithinContainer) {
                             // Click left of boundary = decrement
                             if (currentStress > 0) {
                               onApplyStressChange(instance.id, -1)
@@ -1103,11 +1164,14 @@ const GameCard = ({
                           }
                         }}
                       >
-                        <div style={{
-                          display: 'flex',
-                          gap: '2px',
-                          alignItems: 'center'
-                        }}>
+                        <div 
+                          className="pip-container"
+                          style={{
+                            display: 'flex',
+                            gap: '2px',
+                            alignItems: 'center'
+                          }}
+                        >
                           {Array.from({ length: instance.stressMax }, (_, i) => (
                             <span
                               key={i}
@@ -1892,26 +1956,55 @@ const GameCard = ({
                     }}>
                       {/* HP Row */}
                       <div 
-              style={{
-                display: 'flex',
-                alignItems: 'center',
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
                           cursor: 'pointer'
                         }}
                         onClick={(e) => {
                           e.stopPropagation()
                           if (!onApplyDamage || type !== 'environment') return
                           
-                          const containerRect = e.currentTarget.getBoundingClientRect()
+                          const outerRect = e.currentTarget.getBoundingClientRect()
+                          const containerElement = e.currentTarget.querySelector('.pip-container')
+                          
+                          if (!containerElement) {
+                            return
+                          }
+                          
+                          const containerRect = containerElement.getBoundingClientRect()
                           const clickX = e.clientX - containerRect.left
-                          const containerWidth = containerRect.width
                           const currentHp = instance.hp || 0
                           const maxHp = instance.hpMax || 1
                           
+                          // Handle clicks outside the pip container (relative to pip container)
+                          if (clickX < 0) {
+                            // Click left of all pips = decrement (heal)
+                            if (currentHp > 0 && onApplyHealing) {
+                              onApplyHealing(instance.id, 1, currentHp)
+                            }
+                            return
+                          }
+                          
+                          if (clickX > containerRect.width) {
+                            // Click right of all pips = increment (damage)
+                            if (currentHp < maxHp) {
+                              onApplyDamage(instance.id, 1, currentHp, maxHp)
+                            }
+                            return
+                          }
+                          
+                          // Click within pip container - use boundary logic based on pip container width only
+                          const containerWidth = containerRect.width
+                          const pipPadding = containerWidth * 0.05
+                          const effectiveContainerWidth = containerWidth - (2 * pipPadding)
+                          const clickXWithinContainer = clickX - pipPadding
+                          
                           // Calculate boundary at the end of the last filled pip
                           const boundaryRatio = currentHp / maxHp
-                          const boundaryX = containerWidth * boundaryRatio
+                          const boundaryXWithinContainer = effectiveContainerWidth * boundaryRatio
                           
-                          if (clickX < boundaryX) {
+                          if (clickXWithinContainer < boundaryXWithinContainer) {
                             // Click left of boundary = decrement (heal)
                             if (currentHp > 0 && onApplyHealing) {
                               onApplyHealing(instance.id, 1, currentHp)
@@ -1924,49 +2017,81 @@ const GameCard = ({
                           }
                         }}
                       >
-                        <div style={{
-                          display: 'flex',
-                          gap: '2px',
-                          alignItems: 'center'
-                        }}>
+                        <div 
+                          className="pip-container"
+                          style={{
+                            display: 'flex',
+                            gap: '2px',
+                            alignItems: 'center'
+                          }}
+                        >
                           {Array.from({ length: instance.hpMax || 1 }, (_, i) => (
                             <span
                               key={i}
-                  style={{
+                              style={{
                                 fontSize: '0.75rem',
                                 color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)',
                                 transition: 'all 0.1s ease'
                               }}
                             >
                               <Droplet size={12} />
-                  </span>
+                            </span>
                           ))}
-                </div>
-            </div>
+                        </div>
+                      </div>
 
                       {/* Stress Row */}
                       {instance.stressMax > 0 && (
                         <div 
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
                             cursor: 'pointer'
-                }}
-                onClick={(e) => {
-                  e.stopPropagation()
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation()
                             if (!onApplyStressChange || type !== 'environment') return
                             
-                            const containerRect = e.currentTarget.getBoundingClientRect()
+                            const outerRect = e.currentTarget.getBoundingClientRect()
+                            const containerElement = e.currentTarget.querySelector('.pip-container')
+                            
+                            if (!containerElement) {
+                              return
+                            }
+                            
+                            const containerRect = containerElement.getBoundingClientRect()
                             const clickX = e.clientX - containerRect.left
-                            const containerWidth = containerRect.width
                             const currentStress = instance.stress || 0
                             const maxStress = instance.stressMax
                             
+                            // Handle clicks outside the pip container (relative to pip container)
+                            if (clickX < 0) {
+                              // Click left of all pips = decrement
+                              if (currentStress > 0) {
+                                onApplyStressChange(instance.id, -1)
+                              }
+                              return
+                            }
+                            
+                            if (clickX > containerRect.width) {
+                              // Click right of all pips = increment
+                              if (currentStress < maxStress) {
+                                onApplyStressChange(instance.id, 1)
+                              }
+                              return
+                            }
+                            
+                            // Click within pip container - use boundary logic based on pip container width only
+                            const containerWidth = containerRect.width
+                            const pipPadding = containerWidth * 0.05
+                            const effectiveContainerWidth = containerWidth - (2 * pipPadding)
+                            const clickXWithinContainer = clickX - pipPadding
+                            
                             // Calculate boundary at the end of the last filled pip
                             const boundaryRatio = currentStress / maxStress
-                            const boundaryX = containerWidth * boundaryRatio
+                            const boundaryXWithinContainer = effectiveContainerWidth * boundaryRatio
                             
-                            if (clickX < boundaryX) {
+                            if (clickXWithinContainer < boundaryXWithinContainer) {
                               // Click left of boundary = decrement
                               if (currentStress > 0) {
                                 onApplyStressChange(instance.id, -1)
@@ -1979,26 +2104,29 @@ const GameCard = ({
                             }
                           }}
                         >
-        <div style={{
-          display: 'flex',
-                            gap: '2px',
-                            alignItems: 'center'
-                          }}>
+                          <div 
+                            className="pip-container"
+                            style={{
+                              display: 'flex',
+                              gap: '2px',
+                              alignItems: 'center'
+                            }}
+                          >
                             {Array.from({ length: instance.stressMax }, (_, i) => (
                               <span
                                 key={i}
-                  style={{
-                  fontSize: '0.75rem',
+                                style={{
+                                  fontSize: '0.75rem',
                                   color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)',
                                   transition: 'all 0.1s ease'
                                 }}
                               >
                                 <Activity size={12} />
-                </span>
+                              </span>
                             ))}
-              </div>
-              </div>
-            )}
+                          </div>
+                        </div>
+                      )}
           </div>
                   </div>
           </div>
