@@ -149,7 +149,6 @@ const DashboardContent = () => {
   // Render a single entity panel
   const renderEntityPanel = (group) => {
     const { type, baseName, instances } = group
-    console.log('Dashboard rendering panel:', { type, baseName, instancesCount: instances?.length, instances })
     
     return (
       <Panel key={`${type}-${baseName}`} style={{ width: '350px', flexShrink: 0 }}>
