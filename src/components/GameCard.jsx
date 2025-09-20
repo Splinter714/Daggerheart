@@ -967,14 +967,6 @@ const GameCard = ({
           }}>
             {instances.map((instance, index) => (
               <div key={instance.id}>
-                {index > 0 && (
-                  <div style={{
-                    height: '1px',
-                    backgroundColor: 'var(--border)',
-                    margin: '0.5rem 0',
-                    opacity: 0.5
-                  }} />
-                )}
                 <div
                   key={instance.id}
                   style={{
@@ -1907,14 +1899,6 @@ const GameCard = ({
             }}>
               {instances.map((instance, index) => (
                 <div key={instance.id}>
-                  {index > 0 && (
-                    <div style={{
-                      height: '1px',
-                      backgroundColor: 'var(--border)',
-                      margin: '0.5rem 0',
-                      opacity: 0.5
-                    }} />
-                  )}
                   <div
                     key={instance.id}
         style={{
