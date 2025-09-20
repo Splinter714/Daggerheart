@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Droplet, Activity, CheckCircle, X, Hexagon } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem } from 'lucide-react'
 import Pips from './Pips'
 
 // ============================================================================
@@ -1415,11 +1415,23 @@ const GameCard = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '1rem',
-                flexWrap: 'wrap'
+                flexWrap: 'wrap',
+                fontSize: '0.875rem'
               }}>
                 <span><strong>Difficulty:</strong> {item.difficulty || '~'}</span>
                 <span><strong>Type:</strong> {item.type}</span>
-                <span><strong>Tier:</strong> {item.tier}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span><strong>Tier:</strong></span>
+                  {/* Option 1: Triangle */}
+                  <Triangle size={16} style={{ color: 'var(--gold)' }} />
+                  <span>{item.tier}</span>
+                  {/* Option 2: Upside down triangle */}
+                  <Triangle size={16} style={{ color: 'var(--purple)', transform: 'rotate(180deg)' }} />
+                  <span>{item.tier}</span>
+                  {/* Option 3: Gem */}
+                  <Gem size={16} style={{ color: 'var(--info)' }} />
+                  <span>{item.tier}</span>
+                </div>
               </div>
               {item.potentialAdversaries && item.potentialAdversaries.length > 0 && (
                 <div>
