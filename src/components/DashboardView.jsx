@@ -172,11 +172,15 @@ const DashboardContent = () => {
           } : undefined}
           onApplyHealing={type === 'adversary' ? (id, healing, currentHp) => {
             const instance = instances.find(i => i.id === id)
+            console.log('DashboardView onApplyHealing:', { id, healing, currentHp, instance })
             if (instance) {
               updateAdversary(id, { hp: Math.max(0, (instance.hp || 0) - healing) })
             }
           } : undefined}
-          onApplyStressChange={type === 'adversary' ? (id, stress) => updateAdversary(id, { stress: Math.max(0, Math.min(instances.find(i => i.id === id)?.stressMax || 6, (instances.find(i => i.id === id)?.stress || 0) + stress)) }) : undefined}
+          onApplyStressChange={type === 'adversary' ? (id, stress) => {
+            console.log('DashboardView onApplyStressChange:', { id, stress })
+            updateAdversary(id, { stress: Math.max(0, Math.min(instances.find(i => i.id === id)?.stressMax || 6, (instances.find(i => i.id === id)?.stress || 0) + stress)) })
+          } : undefined}
           onUpdate={type === 'adversary' ? updateAdversary : type === 'environment' ? updateEnvironment : updateCountdown}
           adversaries={adversaries}
         />

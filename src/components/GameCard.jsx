@@ -1037,6 +1037,7 @@ const GameCard = ({
                           onContextMenu={(e) => {
                             e.preventDefault()
                             e.stopPropagation()
+                            console.log('Right-click HP pip:', { instanceId: instance.id, currentHp: instance.hp })
                             if (onApplyHealing && type === 'adversary') {
                               onApplyHealing(instance.id, 1, instance.hp || 0)
                             }
@@ -1080,6 +1081,7 @@ const GameCard = ({
                             onContextMenu={(e) => {
                               e.preventDefault()
                               e.stopPropagation()
+                              console.log('Right-click stress pip:', { instanceId: instance.id, currentStress: instance.stress })
                               if (onApplyStressChange && type === 'adversary') {
                                 onApplyStressChange(instance.id, -1)
                               }
