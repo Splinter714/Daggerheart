@@ -1423,13 +1423,13 @@ const GameCard = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <span><strong>Tier:</strong></span>
                   {/* Option 1: Triangle */}
-                  <Triangle size={16} style={{ color: 'var(--gold)' }} />
+                  <Triangle size={16} />
                   <span>{item.tier}</span>
                   {/* Option 2: Upside down triangle */}
-                  <Triangle size={16} style={{ color: 'var(--purple)', transform: 'rotate(180deg)' }} />
+                  <Triangle size={16} style={{ transform: 'rotate(180deg)' }} />
                   <span>{item.tier}</span>
                   {/* Option 3: Gem */}
-                  <Gem size={16} style={{ color: 'var(--info)' }} />
+                  <Gem size={16} />
                   <span>{item.tier}</span>
                 </div>
               </div>
