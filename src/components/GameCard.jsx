@@ -708,7 +708,7 @@ const GameCard = ({
         {/* Core Stats Section */}
         <div style={{
           marginBottom: '1rem',
-          paddingBottom: '0.75rem',
+          padding: '0 12px 0.75rem 12px',
           borderBottom: '1px solid var(--border)'
         }}>
           <div style={{
@@ -996,7 +996,7 @@ const GameCard = ({
         {item.type !== 'Minion' && item.thresholds && (
           <div style={{
             marginTop: '1rem',
-            paddingTop: '0.75rem',
+            padding: '0.75rem 12px 0 12px',
             borderTop: '1px solid var(--border)'
           }}>
             <div style={{
@@ -1313,7 +1313,7 @@ const GameCard = ({
         {item.motives && (
           <div style={{
             marginTop: '1rem',
-            paddingTop: '0.75rem',
+            padding: '0.75rem 12px 0 12px',
             borderTop: '1px solid var(--border)'
           }}>
             <h3 style={{
@@ -1363,7 +1363,7 @@ const GameCard = ({
         {item.description && (
           <div style={{
             marginTop: '1rem',
-            paddingTop: '0.75rem',
+            padding: '0.75rem 12px 0 12px',
             borderTop: '1px solid var(--border)'
           }}>
             <h3 style={{
@@ -1578,7 +1578,7 @@ const GameCard = ({
           {item.description && (
             <div style={{
               marginBottom: '1rem',
-              paddingBottom: '0.75rem',
+              padding: '0 12px 0.75rem 12px',
               borderBottom: '1px solid var(--border)'
             }}>
               <h3 style={{
@@ -1628,7 +1628,7 @@ const GameCard = ({
           {item.impulses && (
             <div style={{
               marginBottom: '1rem',
-              paddingBottom: '0.75rem',
+              padding: '0 12px 0.75rem 12px',
               borderBottom: '1px solid var(--border)'
             }}>
               <h3 style={{
@@ -1654,7 +1654,7 @@ const GameCard = ({
           {/* Core Stats Section */}
           <div style={{
             marginBottom: '1rem',
-            paddingBottom: '0.75rem',
+            padding: '0 12px 0.75rem 12px',
             borderBottom: '1px solid var(--border)'
           }}>
             <h3 style={{
