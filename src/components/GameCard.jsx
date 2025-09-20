@@ -1420,55 +1420,26 @@ const GameCard = ({
               }}>
                 <span><strong>Difficulty:</strong> {item.difficulty || '~'}</span>
                 <span><strong>Type:</strong> {item.type}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span><strong>Tier:</strong></span>
-                  {/* Option 1: Triangle */}
+                  {/* Tier in Upside-down Triangle */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative'
                   }}>
-                    <Triangle size={20} />
+                    <Triangle 
+                      size={32} 
+                      strokeWidth={1}
+                      style={{
+                        color: 'var(--text-secondary)',
+                        transform: 'rotate(180deg)'
+                      }}
+                    />
                     <span style={{
                       position: 'absolute',
-                      fontSize: '0.625rem',
-                      fontWeight: 600,
-                      color: 'white',
-                      pointerEvents: 'none'
-                    }}>
-                      {item.tier}
-                    </span>
-                  </div>
-                  {/* Option 2: Upside down triangle */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}>
-                    <Triangle size={20} style={{ transform: 'rotate(180deg)' }} />
-                    <span style={{
-                      position: 'absolute',
-                      fontSize: '0.625rem',
-                      fontWeight: 600,
-                      color: 'white',
-                      pointerEvents: 'none'
-                    }}>
-                      {item.tier}
-                    </span>
-                  </div>
-                  {/* Option 3: Gem */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}>
-                    <Gem size={20} />
-                    <span style={{
-                      position: 'absolute',
-                      fontSize: '0.625rem',
+                      fontSize: '0.875rem',
                       fontWeight: 600,
                       color: 'white',
                       pointerEvents: 'none'
@@ -1836,18 +1807,18 @@ const GameCard = ({
                     fontSize: '0.75rem',
               color: 'var(--text-secondary)',
                             fontWeight: 400
-                          }}>
+                  }}>
                             {instance.type}
-              </span>
-            )}
-          </div>
+                  </span>
+              )}
+            </div>
 
                       {/* Right side - Difficulty */}
-              </div>
           </div>
-                </div>
+        </div>
+      </div>
               ))}
-            </div>
+          </div>
           )}
         </div>
       </div>
