@@ -663,55 +663,6 @@ const GameCard = ({
         }}>
 
 
-        {/* Motives Section */}
-        {item.motives && (
-          <div style={{
-            marginBottom: '1rem',
-            paddingBottom: '0.75rem',
-            borderBottom: '1px solid var(--border)'
-          }}>
-            <h3 style={{
-              fontSize: '1rem',
-              fontWeight: 600,
-              color: 'var(--text-primary)',
-              margin: '0 0 0.5rem 0'
-            }}>
-              Motives
-            </h3>
-            {isEditMode ? (
-              <textarea
-                style={{
-                  width: '100%',
-                  minHeight: '80px',
-                  padding: '0.5rem',
-                  border: '1px solid var(--border)',
-                  borderRadius: '0.5rem',
-                  backgroundColor: 'var(--bg-secondary)',
-                  color: 'white',
-                  fontSize: '0.875rem',
-                  lineHeight: 1.5,
-                  resize: 'vertical',
-                  fontFamily: 'inherit'
-                }}
-                value={item.motives}
-                onChange={(e) => {
-                  onUpdate && onUpdate(item.id, { motives: e.target.value })
-                }}
-                placeholder="Enter adversary motives..."
-              />
-            ) : (
-              <p style={{
-                fontSize: '0.875rem',
-                lineHeight: 1.5,
-                color: 'var(--text-secondary)',
-                margin: 0,
-                whiteSpace: 'pre-wrap'
-              }}>
-                {item.motives}
-              </p>
-            )}
-          </div>
-        )}
 
 
         {/* Core Stats Section */}
@@ -1084,6 +1035,56 @@ const GameCard = ({
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Motives Section */}
+        {item.motives && (
+          <div style={{
+            marginTop: '1rem',
+            paddingTop: '0.75rem',
+            borderTop: '1px solid var(--border)'
+          }}>
+            <h3 style={{
+              fontSize: '1rem',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              margin: '0 0 0.5rem 0'
+            }}>
+              Motives
+            </h3>
+            {isEditMode ? (
+              <textarea
+                style={{
+                  width: '100%',
+                  minHeight: '80px',
+                  padding: '0.5rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.5rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'white',
+                  fontSize: '0.875rem',
+                  lineHeight: 1.5,
+                  resize: 'vertical',
+                  fontFamily: 'inherit'
+                }}
+                value={item.motives}
+                onChange={(e) => {
+                  onUpdate && onUpdate(item.id, { motives: e.target.value })
+                }}
+                placeholder="Enter adversary motives..."
+              />
+            ) : (
+              <p style={{
+                fontSize: '0.875rem',
+                lineHeight: 1.5,
+                color: 'var(--text-secondary)',
+                margin: 0,
+                whiteSpace: 'pre-wrap'
+              }}>
+                {item.motives}
+              </p>
+            )}
           </div>
         )}
 
