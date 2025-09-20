@@ -87,18 +87,50 @@ const DashboardContent = () => {
     return () => mediaQuery.removeEventListener('change', checkMobile)
   }, [])
 
-  // Column layout calculations
-  const columnWidth = 350
+  // Column layout calculations - dynamic sizing to always show full columns
   const gap = 16
+  const minColumnWidth = 250
+  const maxColumnWidth = 500
   
-  const calculateVisibleColumns = (width) => {
-    if (width <= 0) return 1
-    const availableWidth = width - (gap * 2) // Padding
-    const columnsThatFit = Math.floor(availableWidth / (columnWidth + gap))
-    return Math.max(columnsThatFit, 1)
+  const calculateColumnLayout = (width) => {
+    if (width <= 0) return { visibleColumns: 1, columnWidth: minColumnWidth }
+    
+    const padding = gap * 2
+    const availableWidth = width - padding
+    
+    // Try different column counts to find the best fit
+    let bestLayout = { visibleColumns: 1, columnWidth: Math.min(availableWidth, maxColumnWidth) }
+    
+    for (let columns = 1; columns <= 5; columns++) {
+      const totalGapWidth = (columns - 1) * gap
+      const columnWidth = (availableWidth - totalGapWidth) / columns
+      
+      // Check if this column width is within our bounds AND fits perfectly
+      if (columnWidth >= minColumnWidth && columnWidth <= maxColumnWidth) {
+        // Calculate the total width this layout would take
+        const totalWidth = columns * columnWidth + totalGapWidth
+        
+        // Only use this layout if it fits exactly within available width
+        if (totalWidth <= availableWidth) {
+          // Prefer more columns if possible
+          if (columns > bestLayout.visibleColumns) {
+            bestLayout = { visibleColumns: columns, columnWidth }
+          }
+        }
+      }
+    }
+    
+    // Ensure we never exceed the available width
+    const totalWidth = bestLayout.visibleColumns * bestLayout.columnWidth + (bestLayout.visibleColumns - 1) * gap
+    if (totalWidth > availableWidth) {
+      // Fall back to fewer columns
+      bestLayout = { visibleColumns: 1, columnWidth: Math.min(availableWidth, maxColumnWidth) }
+    }
+    
+    return bestLayout
   }
   
-  const visibleColumns = calculateVisibleColumns(containerWidth)
+  const { visibleColumns, columnWidth } = calculateColumnLayout(containerWidth)
   
   // Handle container resize
   useEffect(() => {
@@ -234,7 +266,8 @@ const DashboardContent = () => {
       {/* Main Dashboard Content */}
       <div className="main-content" style={{ 
         position: 'relative',
-        width: '100%'
+        width: '100%',
+        paddingTop: `${gap}px` // Add padding above cards
       }}>
         <div className="dashboard-scroll-container" style={{ 
           display: 'flex', 
