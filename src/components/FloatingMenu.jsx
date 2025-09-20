@@ -104,8 +104,11 @@ const FloatingMenu = ({
 
   // Radial positioning for menu items
   const getRadialItemStyle = (index, totalItems) => {
-    // Spread from 120° (top-left) to 270° (down) - better distribution for 4 items
-    const angle = 120 + (index * 150) / (totalItems - 1) // 120° to 270°
+    // Distribute 4 items evenly in a quarter-circle from 135° to 270°
+    const startAngle = 135
+    const endAngle = 270
+    const angleRange = endAngle - startAngle
+    const angle = startAngle + (index * angleRange) / (totalItems - 1)
     const radius = 70
     const radians = (angle * Math.PI) / 180
     
