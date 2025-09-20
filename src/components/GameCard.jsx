@@ -901,14 +901,6 @@ const GameCard = ({
           paddingTop: '0.75rem',
           borderTop: '1px solid var(--border)'
         }}>
-          <h3 style={{
-            fontSize: '1rem',
-            fontWeight: 600,
-            color: 'var(--text-primary)',
-            margin: '0 0 0.5rem 0'
-          }}>
-            Difficulty & Thresholds
-          </h3>
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -916,7 +908,31 @@ const GameCard = ({
             flexWrap: 'wrap',
             fontSize: '0.875rem'
           }}>
-            <span><strong>Difficulty:</strong> {item.difficulty}</span>
+            {/* Difficulty in Hexagon */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative'
+            }}>
+              <Hexagon 
+                size={20} 
+                strokeWidth={1}
+                style={{
+                  color: 'var(--text-secondary)',
+                  transform: 'rotate(30deg)'
+                }}
+              />
+              <span style={{
+                position: 'absolute',
+                fontSize: '0.625rem',
+                fontWeight: 600,
+                color: 'white',
+                pointerEvents: 'none'
+              }}>
+                {item.difficulty}
+              </span>
+            </div>
             {item.thresholds && (
               <span><strong>Thresholds:</strong> {item.thresholds.major}/{item.thresholds.severe}</span>
             )}
