@@ -821,6 +821,9 @@ const GameCard = ({
   adversaries = [], // All adversaries for duplicate checking
   isSelected = false, // Whether this card is currently selected
   isEditMode = false, // Whether the app is in edit mode
+  isTemplate = false, // Whether this is a template card (hides duplicate info)
+  instances = [], // All instances to embed as mini-cards in expanded view
+  isEmbedded = false, // Whether this is an embedded card (removes border)
 }) => {
   // Get type-specific logic - always call hooks to maintain consistent hook order
   const adversaryLogic = useAdversaryLogic(item, onApplyDamage, onApplyHealing, onApplyStressChange)
@@ -883,6 +886,10 @@ const GameCard = ({
   }
 
   const getCardClassName = () => {
+    if (isEmbedded) {
+      return '' // No border or rounded corners for embedded cards
+    }
+    
     let className = 'border rounded-lg'
     
     // Apply border hover effect for hovered cards or when selected
@@ -1370,311 +1377,32 @@ const GameCard = ({
           zIndex: isDead ? 1 : 'auto',
           borderBottomColor: isSelected ? 'var(--purple)' : 'var(--border)'
         }}>
-          {/* Main Row - Name/Type on left, HP/Stress/Difficulty on right */}
+          {/* Centered Name Header */}
           <div style={{
             display: 'flex',
+            justifyContent: 'center',
             alignItems: 'center',
-            gap: '0.5rem',
             position: 'relative',
             zIndex: isDead ? 1 : 'auto'
           }}>
-            {/* Left side - Name and Type (takes remaining space) */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              gap: '0.25rem',
-              flex: '1 1 0%',
-              minWidth: 0
+            <h4 style={{
+              ...styles.rowTitle,
+              color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
+              textAlign: 'center',
+              margin: 0
             }}>
-              <h4 style={{
-                ...styles.rowTitle,
-                color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color
-              }}>
-                {renderTitle()}
-              </h4>
-              {/* Type badge removed for compact adversary view */}
-            </div>
-
-            {/* Right side - HP pips, Stress pips, Difficulty, Delete (fixed minimum width) */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              flex: '0 0 auto',
-              minWidth: 'fit-content'
-            }}>
-            {/* Control Buttons Group - HP and Stress stacked vertically */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.125rem',
-              alignItems: 'flex-end',
-              padding: '0.25rem', // Add padding to cover the gap between HP and stress
-              margin: '-0.25rem' // Negative margin to offset visual padding
-            }}>
-              {/* HP Pips */}
-              <Pips
-                type="adversaryHP"
-                value={item.hp || 0}
-                maxValue={item.hpMax || 1}
-                onChange={(newValue) => {
-                  const currentHp = item.hp || 0
-                  if (newValue > currentHp) {
-                    // Increase HP = take damage
-                    onApplyDamage && onApplyDamage(item.id, newValue - currentHp, item.hp, item.hpMax)
-                  } else if (newValue < currentHp) {
-                    // Decrease HP = heal
-                    onApplyHealing && onApplyHealing(item.id, currentHp - newValue, item.hp)
-                  }
-                }}
-                containerStyle={{
-                  cursor: 'pointer',
-                  padding: '0.5rem 0.25rem 0.25rem 0.25rem', // More top padding for HP pips
-                  borderRadius: '0.125rem',
-                  transition: 'none' // Remove transition to prevent flashing
-                }}
-                pipStyle={{
-                  fontSize: '0.75rem'
-                }}
-                showTooltip={false}
-                enableBoundaryClick={true}
-              />
-
-              {/* Stress Pips */}
-              {item.stressMax > 0 && (
-                <Pips
-                  type="adversaryStress"
-                  value={item.stress || 0}
-                  maxValue={item.stressMax}
-                  onChange={(newValue) => {
-                    const currentStress = item.stress || 0
-                    const stressChange = newValue - currentStress
-                    onApplyStressChange && onApplyStressChange(item.id, stressChange, item.stress)
-                  }}
-                  containerStyle={{
-                    cursor: 'pointer',
-                    padding: '0.25rem 0.25rem 0.5rem 0.25rem', // More bottom padding for stress pips
-                    borderRadius: '0.125rem',
-                    transition: 'none' // Remove transition to prevent flashing
-                  }}
-                  pipStyle={{
-                    fontSize: '0.75rem'
-                  }}
-                  showTooltip={false}
-                  enableBoundaryClick={true}
-                />
-              )}
-            </div>
-
-            {/* Difficulty and Type Badge Group */}
-            <div 
-              onClick={adversaryLogic.handleDifficultyClick}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '0.25rem',
-                cursor: ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') ? 'pointer' : 'default',
-                padding: '0.5rem', // Generous tap target but invisible
-                margin: '-0.5rem', // Negative margin to offset visual padding
-                borderRadius: '0.25rem',
-                transition: 'background-color 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                if ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') {
-                  e.target.style.backgroundColor = 'var(--gray-800)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent'
-              }}
-              title={(item.thresholds && item.thresholds.major && item.thresholds.severe) ? `Click to enter damage (thresholds: ${item.thresholds.major}/${item.thresholds.severe})` : item.type === 'Minion' ? 'Click to enter damage (minion mechanics)' : ''}
-            >
-              {/* Type Badge */}
-              {item.type && (
-                <span style={{
-                  fontSize: '0.625rem',
-                  fontWeight: 500,
-                  color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
-                  letterSpacing: '0.5px',
-                  textAlign: 'center',
-                  lineHeight: 1,
-                  width: '50px', // Increased width to accommodate "Standard" (8 chars)
-                  display: 'block',
-                  paddingLeft: 0 // Remove any left padding
-                }}>
-                  {item.type}
-                </span>
-              )}
-
-              {/* Difficulty Badge */}
-              {item.difficulty && (
-                <div 
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}
-                >
-                  <Hexagon 
-                    size={32} 
-                    strokeWidth={1}
-                    style={{
-                      color: 'var(--text-secondary)',
-                      transform: 'rotate(30deg)'
-                    }}
-                  />
-                  <span style={{
-                    position: 'absolute',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    color: 'white',
-                    pointerEvents: 'none'
-                  }}>
-                    {item.difficulty}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Delete Button */}
-            {showDrag && (
-              <button
-                className="border rounded-sm"
-                style={{
-                  background: 'var(--red)',
-                  borderColor: 'var(--red)',
-                  padding: '0.25rem',
-                  minWidth: '1.5rem',
-                  height: '1.5rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.1s ease',
-                  color: 'white',
-                  fontSize: '1rem'
-                }}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  e.preventDefault()
-                  onDelete && onDelete(item.id)
-                }}
-                onMouseEnter={(e) => e.target.style.background = 'var(--red-dark)'}
-                onMouseLeave={(e) => e.target.style.background = 'var(--red)'}
-                title="Delete item"
-              >
-                ×
-              </button>
-            )}
+              {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
+            </h4>
           </div>
         </div>
-        </div>
 
-        {/* Scrollable Content Area */}
+        {/* Expandable Content Section */}
         <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '12px',
-          borderRadius: '0 0 8px 8px',
-          position: 'relative',
-          zIndex: isDead ? 1 : 'auto'
+          padding: '0 12px',
+          borderRadius: '0 0 8px 8px'
         }}>
-          {/* Tier and Type Information */}
-          {(item.tier || item.type) && (
-            <div style={{
-              marginBottom: '1rem',
-              paddingBottom: '0.75rem',
-              borderBottom: '1px solid var(--border)'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                {item.tier && (
-                  <span style={{
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
-                    letterSpacing: '0.5px',
-                    padding: '0.25rem 0.5rem',
-                    backgroundColor: 'var(--gray-800)',
-                    borderRadius: '0.25rem',
-                    border: '1px solid var(--border)'
-                  }}>
-                    Tier {item.tier}
-                  </span>
-                )}
-                {item.type && (
-                  <span style={{
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : 'var(--text-secondary)',
-                    letterSpacing: '0.5px',
-                    padding: '0.25rem 0.5rem',
-                    backgroundColor: 'var(--gray-800)',
-                    borderRadius: '0.25rem',
-                    border: '1px solid var(--border)'
-                  }}>
-                    {item.type}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
 
-          {/* Description Section */}
-        {item.description && (
-          <div style={{
-            marginBottom: '1rem',
-            paddingBottom: '0.75rem',
-            borderBottom: '1px solid var(--border)'
-          }}>
-            <h3 style={{
-              fontSize: '1rem',
-              fontWeight: 600,
-              color: 'var(--text-primary)',
-              margin: '0 0 0.5rem 0'
-            }}>
-              Description
-            </h3>
-            {isEditMode ? (
-              <textarea
-                style={{
-                  width: '100%',
-                  minHeight: '100px',
-                  padding: '0.5rem',
-                  border: '1px solid var(--border)',
-                  borderRadius: '0.5rem',
-                  backgroundColor: 'var(--bg-secondary)',
-                  color: 'white',
-                  fontSize: '0.875rem',
-                  lineHeight: 1.5,
-                  resize: 'vertical',
-                  fontFamily: 'inherit'
-                }}
-                value={item.description}
-                onChange={(e) => {
-                  onUpdate && onUpdate(item.id, { description: e.target.value })
-                }}
-                placeholder="Enter adversary description..."
-              />
-            ) : (
-              <p style={{
-                fontSize: '0.875rem',
-                lineHeight: 1.5,
-                color: 'var(--text-secondary)',
-                margin: 0,
-                whiteSpace: 'pre-wrap'
-              }}>
-                {item.description}
-              </p>
-            )}
-          </div>
-        )}
+        {console.log('DEBUG: Before motives section')}
 
         {/* Motives Section */}
         {item.motives && (
@@ -1725,6 +1453,8 @@ const GameCard = ({
             )}
           </div>
         )}
+
+        {console.log('DEBUG: After motives section')}
 
         {/* Core Stats Section */}
         <div style={{
@@ -1781,14 +1511,20 @@ const GameCard = ({
           </div>
         </div>
 
+        {console.log('DEBUG: After core stats section')}
+
         {/* Features Section - Organized by Type */}
+        {console.log('DEBUG: About to check features section', item.features)}
         {item.features && item.features.length > 0 && (
           <div style={{
             marginBottom: '1rem'
           }}>
+            {console.log('DEBUG: Inside features section div')}
             {/* Passives */}
+            {console.log('DEBUG: Checking passives filter', item.features.filter(f => f.type === 'Passive'))}
             {item.features.filter(f => f.type === 'Passive').length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
+                {console.log('DEBUG: Inside passives section div')}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1827,10 +1563,7 @@ const GameCard = ({
                         {feature.name}
                       </span>
                       {feature.description && (
-                        <>
-                          <span> - </span>
-                          <span>{feature.description}</span>
-                        </>
+                        <span> - {feature.description}</span>
                       )}
                     </div>
                   ))}
@@ -1838,9 +1571,13 @@ const GameCard = ({
               </div>
             )}
 
+            {console.log('DEBUG: After passives section')}
+
             {/* Actions */}
+            {console.log('DEBUG: Checking actions filter', item.features.filter(f => f.type === 'Action'))}
             {item.features.filter(f => f.type === 'Action').length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
+                {console.log('DEBUG: Inside actions section div')}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1869,7 +1606,10 @@ const GameCard = ({
                   flexDirection: 'column',
                   gap: '0.5rem'
                 }}>
-                  {item.features.filter(f => f.type === 'Action').map((feature, index) => (
+                  {console.log('DEBUG: Inside actions features list div')}
+                  {item.features.filter(f => f.type === 'Action').map((feature, index) => {
+                    console.log('DEBUG: Inside actions map function', feature, index);
+                    return (
                     <div key={index} style={{
                       fontSize: '0.875rem',
                       lineHeight: 1.4,
@@ -1879,20 +1619,22 @@ const GameCard = ({
                         {feature.name}
                       </span>
                       {feature.description && (
-                        <>
-                          <span> - </span>
-                          <span>{feature.description}</span>
-                        </>
+                        <span> - {feature.description}</span>
                       )}
                     </div>
-                  ))}
+                    );
+                  })}
+                  {console.log('DEBUG: After actions map function')}
                 </div>
               </div>
             )}
+            {console.log('DEBUG: After actions section, before reactions')}
 
             {/* Reactions */}
+            {console.log('DEBUG: About to check reactions', item.features.filter(f => f.type === 'Reaction'))}
             {item.features.filter(f => f.type === 'Reaction').length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
+                {console.log('DEBUG: Inside reactions conditional, rendering reactions')}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1921,6 +1663,7 @@ const GameCard = ({
                   flexDirection: 'column',
                   gap: '0.5rem'
                 }}>
+                  {console.log('DEBUG: About to map reactions', item.features.filter(f => f.type === 'Reaction'))}
                   {item.features.filter(f => f.type === 'Reaction').map((feature, index) => (
                     <div key={index} style={{
                       fontSize: '0.875rem',
@@ -1931,19 +1674,103 @@ const GameCard = ({
                         {feature.name}
                       </span>
                       {feature.description && (
-                        <>
-                          <span> - </span>
-                          <span>{feature.description}</span>
-                        </>
+                        <span> - {feature.description}</span>
                       )}
                     </div>
                   ))}
+                  {console.log('DEBUG: After reactions map function')}
                 </div>
               </div>
             )}
+            {console.log('DEBUG: After reactions section closes')}
           </div>
         )}
+        {console.log('DEBUG: About to close features section div')}
         </div>
+        {console.log('DEBUG: After features section closes completely')}
+
+        {/* Condensed Cards for All Instances - At Bottom */}
+        {console.log('DEBUG: About to check instances', instances)}
+        {instances && instances.length > 0 && (
+          <div style={{
+            marginTop: '1rem',
+            borderTop: '1px solid var(--border)'
+          }}>
+            {console.log('DEBUG: Inside instances section, rendering instances')}
+            {instances.map((instance, index) => (
+              <div key={instance.id}>
+                {index > 0 && (
+                  <div style={{
+                    height: '1px',
+                    backgroundColor: 'var(--border)',
+                    margin: '0.5rem 0',
+                    opacity: 0.5
+                  }} />
+                )}
+                <GameCard
+                  key={instance.id}
+                  item={instance}
+                  mode="compact"
+                  type={type}
+                  isEmbedded={true}
+                  onUpdate={onUpdate}
+                  onDelete={onDelete}
+                  isSelected={false}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Description Section */}
+        {item.description && (
+          <div style={{
+            marginTop: '1rem',
+            paddingTop: '0.75rem',
+            borderTop: '1px solid var(--border)'
+          }}>
+            <h3 style={{
+              fontSize: '1rem',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              margin: '0 0 0.5rem 0'
+            }}>
+              Description
+            </h3>
+            {isEditMode ? (
+              <textarea
+                style={{
+                  width: '100%',
+                  minHeight: '100px',
+                  padding: '0.5rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.5rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'white',
+                  fontSize: '0.875rem',
+                  lineHeight: 1.5,
+                  resize: 'vertical',
+                  fontFamily: 'inherit'
+                }}
+                value={item.description}
+                onChange={(e) => {
+                  onUpdate && onUpdate(item.id, { description: e.target.value })
+                }}
+                placeholder="Enter adversary description..."
+              />
+            ) : (
+              <p style={{
+                fontSize: '0.875rem',
+                lineHeight: 1.5,
+                color: 'var(--text-secondary)',
+                margin: 0,
+                whiteSpace: 'pre-wrap'
+              }}>
+                {item.description}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Damage Input Popup for Adversaries */}
         {renderDamageInput()}
@@ -2497,6 +2324,50 @@ const GameCard = ({
                 </div>
               )}
             </div>
+            )}
+            {console.log('DEBUG: End of actions section')}
+
+            {console.log('DEBUG: After actions section')}
+            {console.log('DEBUG: End of features section completely')}
+
+          {console.log('DEBUG: After features section, before instances section')}
+
+          {/* Condensed Cards for All Instances - At Bottom */}
+          {console.log('DEBUG: About to check instances', instances)}
+          {instances && instances.length > 0 && (
+            <div style={{
+              marginTop: '1rem',
+              borderTop: '1px solid var(--border)'
+            }}>
+              {console.log('DEBUG: Inside instances section, rendering instances')}
+              {instances.map((instance, index) => (
+                <div key={instance.id}>
+                  {index > 0 && (
+                    <div style={{
+                      height: '1px',
+                      backgroundColor: 'var(--border)',
+                      margin: '0.5rem 0',
+                      opacity: 0.5
+                    }} />
+                  )}
+                  <GameCard
+                    type={type}
+                    item={{ 
+                      ...instance, 
+                      name: `(${instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})`,
+                      baseName: `(${instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'})`
+                    }}
+                    mode="compact"
+                    isEmbedded={true}
+                    onApplyDamage={onApplyDamage}
+                    onApplyHealing={onApplyHealing}
+                    onApplyStressChange={onApplyStressChange}
+                    onUpdate={onUpdate}
+                    adversaries={adversaries}
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
@@ -2800,7 +2671,6 @@ const GameCard = ({
             </div>
 
             {/* Delete Button */}
-            {console.log('Delete button check:', { onDelete: !!onDelete, isEditMode, shouldShow: onDelete && isEditMode })}
             {onDelete && isEditMode && (
               <button
                 className="border rounded-sm"
@@ -2975,7 +2845,6 @@ const GameCard = ({
             )}
 
             {/* Delete Button */}
-            {console.log('Delete button check:', { onDelete: !!onDelete, isEditMode, shouldShow: onDelete && isEditMode })}
             {onDelete && isEditMode && (
               <button
                 className="border rounded-sm"
@@ -3066,3 +2935,4 @@ const GameCard = ({
 }
 
 export default GameCard
+
