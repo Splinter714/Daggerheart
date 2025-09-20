@@ -281,7 +281,7 @@ const DashboardContent = () => {
         onScroll={handleScroll}
         >
         {browserOpen ? (
-          <Panel style={{ 
+          <Panel className="invisible-scrollbar" style={{ 
             width: `${columnWidth + gap}px`, // Include padding in width
             flexShrink: 0,
             flexGrow: 0,
@@ -291,7 +291,7 @@ const DashboardContent = () => {
             paddingTop: `${gap}px`, // Space above each card
             paddingBottom: `${gap}px`, // Space below each card
             scrollSnapAlign: 'start',
-            overflowY: 'hidden',
+            overflowY: 'auto',
             overflowX: 'hidden'
           }}>
             <div style={{ 
@@ -344,6 +344,7 @@ const DashboardContent = () => {
         ) : entityGroups.map((group, index) => (
           <Panel 
             key={`${group.type}-${group.baseName}`}
+            className="invisible-scrollbar"
             style={{ 
               width: `${columnWidth + gap}px`, // Include padding in width
               flexShrink: 0,
@@ -354,7 +355,7 @@ const DashboardContent = () => {
               paddingTop: `${gap}px`, // Space above each card
               paddingBottom: `${gap}px`, // Space below each card
               scrollSnapAlign: 'start',
-              overflowY: 'hidden',
+              overflowY: 'auto',
               overflowX: 'hidden'
             }}
           >
