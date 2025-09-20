@@ -1121,13 +1121,12 @@ const GameCard = ({
                     </span>
                   </div>
 
-                  {/* Center - HP and Stress pips */}
+                  {/* Right side - HP and Stress pips */}
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '2px',
-                    flex: 1
+                    alignItems: 'flex-end',
+                    gap: '2px'
                   }}>
                     {/* HP Row */}
                     <div 
@@ -1209,7 +1208,7 @@ const GameCard = ({
                               transition: 'all 0.1s ease'
                             }}
                           >
-                            <Droplet size={12} />
+                            <Droplet size={16} />
                           </span>
                         ))}
                       </div>
@@ -1296,7 +1295,7 @@ const GameCard = ({
                                 transition: 'all 0.1s ease'
                               }}
                             >
-                              <Activity size={12} />
+                              <Activity size={16} />
                             </span>
                           ))}
                         </div>
