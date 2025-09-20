@@ -1107,7 +1107,7 @@ const GameCard = ({
                   <div style={{
                     backgroundColor: 'var(--bg-secondary)',
                     borderRadius: '6px',
-                    border: '1px solid var(--border)',
+                    border: '1px solid var(--border-hover)',
                     width: '32px',
                     textAlign: 'center',
                     flexShrink: 0,
