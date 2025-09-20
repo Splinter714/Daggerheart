@@ -784,13 +784,21 @@ const GameCard = ({
                   gap: '0.75rem',
                   marginBottom: '0.75rem'
                 }}>
+                  <hr style={{
+                    flex: 1,
+                    border: 'none',
+                    borderTop: '1px solid var(--border)',
+                    margin: 0
+                  }} />
                   <h4 style={{
                     fontSize: '0.875rem',
                     fontWeight: 600,
                     color: 'white',
                     margin: 0,
                     textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
+                    letterSpacing: '0.5px',
+                    textAlign: 'center',
+                    minWidth: '80px'
                   }}>
                     Passives
                   </h4>
@@ -834,13 +842,21 @@ const GameCard = ({
                   gap: '0.75rem',
                   marginBottom: '0.75rem'
                 }}>
+                  <hr style={{
+                    flex: 1,
+                    border: 'none',
+                    borderTop: '1px solid var(--border)',
+                    margin: 0
+                  }} />
                   <h4 style={{
                     fontSize: '0.875rem',
                     fontWeight: 600,
                     color: 'white',
                     margin: 0,
                     textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
+                    letterSpacing: '0.5px',
+                    textAlign: 'center',
+                    minWidth: '80px'
                   }}>
                     Actions
                   </h4>
@@ -885,13 +901,21 @@ const GameCard = ({
                   gap: '0.75rem',
                   marginBottom: '0.75rem'
                 }}>
+                  <hr style={{
+                    flex: 1,
+                    border: 'none',
+                    borderTop: '1px solid var(--border)',
+                    margin: 0
+                  }} />
                   <h4 style={{
                     fontSize: '0.875rem',
                     fontWeight: 600,
                     color: 'white',
                     margin: 0,
                     textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
+                    letterSpacing: '0.5px',
+                    textAlign: 'center',
+                    minWidth: '80px'
                   }}>
                     Reactions
                   </h4>
@@ -1427,13 +1451,21 @@ const GameCard = ({
                     gap: '0.75rem',
                     marginBottom: '0.75rem'
                   }}>
+                  <hr style={{
+                    flex: 1,
+                    border: 'none',
+                    borderTop: '1px solid var(--border)',
+                    margin: 0
+                  }} />
                     <h4 style={{
                       fontSize: '0.875rem',
                       fontWeight: 600,
                       color: 'white',
                       margin: 0,
                       textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
+                    letterSpacing: '0.5px',
+                    textAlign: 'center',
+                    minWidth: '80px'
                     }}>
                       Passives
                     </h4>
@@ -1510,13 +1542,21 @@ const GameCard = ({
                     gap: '0.75rem',
                     marginBottom: '0.75rem'
                   }}>
+                    <hr style={{
+                      flex: 1,
+                      border: 'none',
+                      borderTop: '1px solid var(--border)',
+                      margin: 0
+                    }} />
                     <h4 style={{
                       fontSize: '0.875rem',
                       fontWeight: 600,
                       color: 'white',
                       margin: 0,
                       textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
+                      letterSpacing: '0.5px',
+                      textAlign: 'center',
+                      minWidth: '80px'
                     }}>
                       Actions
                     </h4>
@@ -1593,13 +1633,21 @@ const GameCard = ({
                     gap: '0.75rem',
                     marginBottom: '0.75rem'
                   }}>
+                    <hr style={{
+                      flex: 1,
+                      border: 'none',
+                      borderTop: '1px solid var(--border)',
+                      margin: 0
+                    }} />
                     <h4 style={{
                       fontSize: '0.875rem',
                       fontWeight: 600,
                       color: 'white',
                       margin: 0,
                       textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
+                      letterSpacing: '0.5px',
+                      textAlign: 'center',
+                      minWidth: '80px'
                     }}>
                       Reactions
                     </h4>
