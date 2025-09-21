@@ -116,6 +116,48 @@ const useBrowser = (type) => {
         if (field === 'tier') {
           aValue = parseInt(aValue) || 0
           bValue = parseInt(bValue) || 0
+        } else if (field === 'cost') {
+          // Calculate dynamic cost for sorting
+          const calculateDynamicCost = (item) => {
+            if (type !== 'adversary') return 0
+            
+            const baseCost = BATTLE_POINT_COSTS[item.type] || 2
+            let automaticAdjustment = 0
+            
+            // Count current adversaries by type
+            const currentSoloCount = encounterItems.filter(encounterItem => 
+              encounterItem.type === 'adversary' && encounterItem.item.type === 'Solo' && encounterItem.quantity > 0
+            ).reduce((sum, encounterItem) => sum + encounterItem.quantity, 0)
+            
+            const currentMajorThreatCount = encounterItems.filter(encounterItem => 
+              encounterItem.type === 'adversary' && ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(encounterItem.item.type) && encounterItem.quantity > 0
+            ).reduce((sum, encounterItem) => sum + encounterItem.quantity, 0)
+            
+            // Calculate automatic adjustments
+            if (item.type === 'Solo') {
+              // If this would be the 2nd Solo, add 2 BP (penalty for 2+ Solos)
+              if (currentSoloCount === 1) {
+                automaticAdjustment += 2
+              }
+            }
+            
+            if (['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.type)) {
+              // If this is the first Major Threat, add 1 BP (automatic adjustment for lack of Major Threats)
+              if (currentMajorThreatCount === 0) {
+                automaticAdjustment += 1
+              }
+            }
+            
+            // Lower tier adjustment
+            if (item.tier < playerTier) {
+              automaticAdjustment += 1
+            }
+            
+            return baseCost + automaticAdjustment
+          }
+          
+          aValue = calculateDynamicCost(a)
+          bValue = calculateDynamicCost(b)
         } else if (field === 'difficulty') {
           // Handle difficulty sorting - numeric difficulties first, then special cases
           const aNum = parseInt(aValue)
@@ -160,7 +202,7 @@ const useBrowser = (type) => {
     })
 
     return filtered
-  }, [data, searchTerm, sortFields, selectedTiers, selectedTypes])
+  }, [data, searchTerm, sortFields, selectedTiers, selectedTypes, encounterItems, pcCount, playerTier])
 
   const handleSort = (field) => {
     setSortFields(prev => {
