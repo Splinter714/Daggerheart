@@ -189,7 +189,7 @@ export const GameStateProvider = ({ children }) => {
   const createAdversary = (adversaryData) => {
     const uniqueId = generateId('adv')
     const existingAdversaries = gameState.adversaries || []
-    const baseName = adversaryData.name || 'Unknown'
+    const baseName = adversaryData.baseName || adversaryData.name?.replace(/\s+\(\d+\)$/, '') || adversaryData.name || 'Unknown'
     const sameNameAdversaries = existingAdversaries.filter(adv => adv.baseName === baseName)
     
     let duplicateNumber = 1
