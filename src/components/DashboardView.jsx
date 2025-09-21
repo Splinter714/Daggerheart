@@ -210,12 +210,12 @@ const DashboardContent = () => {
 
   const entityGroups = getEntityGroups()
 
-  // Auto-open encounter builder if no entities are loaded
+  // Auto-open encounter builder if no adversaries are loaded
   useEffect(() => {
-    if (entityGroups.length === 0 && !encounterBuilderOpen) {
+    if (adversaries.length === 0 && !encounterBuilderOpen) {
       setEncounterBuilderOpen(true)
     }
-  }, [entityGroups.length, encounterBuilderOpen])
+  }, [adversaries.length, encounterBuilderOpen])
 
   // Calculate total width needed for all columns
   const totalColumns = entityGroups.length
