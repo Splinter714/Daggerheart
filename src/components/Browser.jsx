@@ -3,6 +3,20 @@ import { createPortal } from 'react-dom'
 import { Filter, Square, CheckSquare } from 'lucide-react'
 import GameCard from './GameCard'
 
+// Battle Points costs for different adversary types (from EncounterBuilder)
+const BATTLE_POINT_COSTS = {
+  'Minion': 1, // per group equal to party size
+  'Social': 1,
+  'Support': 1,
+  'Horde': 2,
+  'Ranged': 2,
+  'Skulk': 2,
+  'Standard': 2,
+  'Leader': 3,
+  'Bruiser': 4,
+  'Solo': 5
+}
+
 // Dynamically import JSON data to keep initial bundle smaller
 let adversariesData = { adversaries: [] }
 let environmentsData = { environments: [] }
@@ -320,6 +334,7 @@ const BrowserTableHeader = ({
         { key: 'tier', label: 'Tier', hasFilter: true },
         { key: 'type', label: 'Type', hasFilter: true },
         { key: 'difficulty', label: 'Diff' },
+        { key: 'cost', label: 'Cost' },
         { key: 'action', label: '' } // Empty label for action column
       ]
     } else if (type === 'environment') {
@@ -410,6 +425,7 @@ const BrowserTableHeader = ({
             ...(column.key === 'tier' ? { width: '80px', minWidth: '80px', maxWidth: '80px' } : {}),
             ...(column.key === 'type' ? { width: '100px', minWidth: '100px', maxWidth: '100px' } : {}),
             ...(column.key === 'difficulty' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {}),
+            ...(column.key === 'cost' ? { width: '50px', minWidth: '50px', maxWidth: '50px' } : {}),
             ...(column.key === 'action' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {})
           }}
           onClick={() => onSort(column.key)}
@@ -481,12 +497,14 @@ const BrowserRow = ({ item, onAdd, type, onRowClick }) => {
 
   const renderContent = () => {
     if (type === 'adversary') {
+      const cost = BATTLE_POINT_COSTS[item.type] || 2 // Default to Standard cost
       return (
         <>
           <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left'}}>{item.name}</td>
           <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center'}}>{item.tier}</td>
           <td style={{...styles.rowCell, width: '100px', minWidth: '100px', maxWidth: '100px', textAlign: 'center'}}>{item.type}</td>
           <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center'}}>{item.difficulty}</td>
+          <td style={{...styles.rowCell, width: '50px', minWidth: '50px', maxWidth: '50px', textAlign: 'center'}}>{cost}</td>
         </>
       )
     } else if (type === 'environment') {
