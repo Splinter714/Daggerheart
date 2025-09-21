@@ -72,6 +72,9 @@ const EncounterBuilder = ({
       // Convert to array and set encounter items
       const existingItems = Object.values(groupedAdversaries)
       setEncounterItems(existingItems)
+    } else if (isOpen && adversaries.length === 0) {
+      // Clear encounter items when no adversaries exist
+      setEncounterItems([])
     }
   }, [isOpen, adversaries])
   
