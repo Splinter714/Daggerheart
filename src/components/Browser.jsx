@@ -488,23 +488,72 @@ const BrowserTableHeader = ({
 }
 
 // Browser Row Component
-const BrowserRow = ({ item, onAdd, type, onRowClick }) => {
+const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1 }) => {
   const [isHovered, setIsHovered] = useState(false)
 
   const handleAdd = () => {
     onAdd(item)
   }
 
+  // Calculate dynamic cost including automatic adjustments
+  const calculateDynamicCost = () => {
+    if (type !== 'adversary') return null
+    
+    const baseCost = BATTLE_POINT_COSTS[item.type] || 2
+    let automaticAdjustment = 0
+    
+    // Count current adversaries by type
+    const currentSoloCount = encounterItems.filter(encounterItem => 
+      encounterItem.type === 'adversary' && encounterItem.item.type === 'Solo'
+    ).reduce((sum, encounterItem) => sum + encounterItem.quantity, 0)
+    
+    const currentMajorThreatCount = encounterItems.filter(encounterItem => 
+      encounterItem.type === 'adversary' && ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(encounterItem.item.type)
+    ).reduce((sum, encounterItem) => sum + encounterItem.quantity, 0)
+    
+    // Calculate automatic adjustments
+    if (item.type === 'Solo') {
+      // If this would be the 2nd+ Solo, subtract 2 BP (automatic adjustment)
+      if (currentSoloCount >= 1) {
+        automaticAdjustment -= 2
+      }
+    }
+    
+    if (['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.type)) {
+      // If this is the first Major Threat, add 1 BP (automatic adjustment for lack of Major Threats)
+      if (currentMajorThreatCount === 0) {
+        automaticAdjustment += 1
+      }
+    }
+    
+    // Lower tier adjustment
+    if (item.tier < playerTier) {
+      automaticAdjustment += 1
+    }
+    
+    return baseCost + automaticAdjustment
+  }
+
   const renderContent = () => {
     if (type === 'adversary') {
-      const cost = BATTLE_POINT_COSTS[item.type] || 2 // Default to Standard cost
+      const dynamicCost = calculateDynamicCost()
+      const baseCost = BATTLE_POINT_COSTS[item.type] || 2
+      
       return (
         <>
           <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left'}}>{item.name}</td>
           <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center'}}>{item.tier}</td>
           <td style={{...styles.rowCell, width: '100px', minWidth: '100px', maxWidth: '100px', textAlign: 'center'}}>{item.type}</td>
           <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center'}}>{item.difficulty}</td>
-          <td style={{...styles.rowCell, width: '50px', minWidth: '50px', maxWidth: '50px', textAlign: 'center'}}>{cost}</td>
+          <td style={{...styles.rowCell, width: '50px', minWidth: '50px', maxWidth: '50px', textAlign: 'center'}}>
+            {dynamicCost !== baseCost ? (
+              <span style={{ color: dynamicCost < baseCost ? 'var(--success)' : 'var(--danger)' }}>
+                {dynamicCost}
+              </span>
+            ) : (
+              baseCost
+            )}
+          </td>
         </>
       )
     } else if (type === 'environment') {
@@ -568,7 +617,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick }) => {
 }
 
 // Main Browser Component
-const Browser = ({ type, onAddItem, onCancel, onRowClick }) => {
+const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1 }) => {
   const {
     searchTerm,
     setSearchTerm,
@@ -644,6 +693,9 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick }) => {
                 onAdd={onAddItem}
                 type={type}
                 onRowClick={onRowClick}
+                encounterItems={encounterItems}
+                pcCount={pcCount}
+                playerTier={playerTier}
               />
             ))}
           </tbody>

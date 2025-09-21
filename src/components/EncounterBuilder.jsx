@@ -384,6 +384,9 @@ const EncounterBuilder = ({
                 type={selectedType}
                 onAddItem={(itemData) => handleAddToEncounter(itemData, selectedType)}
                 onCancel={onClose}
+                encounterItems={encounterItems}
+                pcCount={pcCount}
+                playerTier={playerTier}
               />
             </div>
           </div>
