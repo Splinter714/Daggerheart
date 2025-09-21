@@ -7,6 +7,7 @@ import GameCard from './GameCard'
 import Browser from './Browser'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import Panel from './Panels'
+import EncounterBuilder from './EncounterBuilder'
 
 // Simple Error Boundary for debugging
 class ErrorBoundary extends React.Component {
@@ -62,8 +63,7 @@ const DashboardContent = () => {
   
   // Dashboard state
   const [isMobile, setIsMobile] = useState(false)
-  const [browserOpen, setBrowserOpen] = useState(false)
-  const [browserType, setBrowserType] = useState('adversary')
+  const [encounterBuilderOpen, setEncounterBuilderOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [isClearMode, setIsClearMode] = useState(false)
   const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
@@ -143,25 +143,13 @@ const DashboardContent = () => {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Browser handlers
-  const handleOpenDatabase = (type = 'unified') => {
-    let newBrowserType = type
-    if (type === 'adversaries') {
-      newBrowserType = 'adversary'
-    } else if (type === 'environments') {
-      newBrowserType = 'environment'
-    }
-    
-    if (browserOpen && browserType === newBrowserType) {
-      setBrowserOpen(false)
-    } else {
-      setBrowserType(newBrowserType)
-      setBrowserOpen(true)
-    }
+  // Encounter Builder handlers
+  const handleOpenEncounterBuilder = () => {
+    setEncounterBuilderOpen(true)
   }
 
-  const handleCloseBrowser = useCallback(() => {
-    setBrowserOpen(false)
+  const handleCloseEncounterBuilder = useCallback(() => {
+    setEncounterBuilderOpen(false)
   }, [])
 
   // Scroll handling - just track position, let CSS handle snapping
@@ -247,7 +235,7 @@ const DashboardContent = () => {
         isClearMode={isClearMode}
         setIsClearMode={setIsClearMode}
         sortAdversaries={() => {}} // Disabled for dashboard view
-        onOpenDatabase={handleOpenDatabase}
+        onOpenDatabase={handleOpenEncounterBuilder}
       />
 
       {/* Main Dashboard Content */}
@@ -267,68 +255,7 @@ const DashboardContent = () => {
         }}
         onScroll={handleScroll}
         >
-        {browserOpen ? (
-          <Panel className="invisible-scrollbar" style={{ 
-            width: `${columnWidth + gap}px`, // Include padding in width
-            flexShrink: 0,
-            flexGrow: 0,
-            flex: 'none',
-            paddingLeft: `${gap}px`, // Space before each card
-            paddingRight: '0',
-            paddingTop: `${gap}px`, // Space above each card
-            paddingBottom: `${gap}px`, // Space below each card
-            scrollSnapAlign: 'start',
-            overflowY: 'auto',
-            overflowX: 'hidden'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              padding: '0.5rem', 
-              borderBottom: '1px solid var(--border)',
-              backgroundColor: 'var(--bg-secondary)',
-              flexShrink: 0
-            }}>
-              <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>
-                Browse {browserType === 'adversary' ? 'Adversaries' : 'Environments'}
-              </h3>
-              <button
-                onClick={handleCloseBrowser}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--text-primary)',
-                  fontSize: '1.2rem',
-                  cursor: 'pointer',
-                  padding: '0.25rem',
-                  borderRadius: 'var(--radius-sm)',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-hover)'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                title="Close Browser"
-              >
-                ×
-              </button>
-            </div>
-            <div style={{ flex: 1, padding: '8px', overflowY: 'auto' }}>
-              <Browser
-                type={browserType}
-                onAddItem={(itemData) => {
-                  if (browserType === 'adversary') {
-                    createAdversary(itemData)
-                    setLastAddedItemType('adversary')
-                  } else if (browserType === 'environment') {
-                    createEnvironment(itemData)
-                    setLastAddedItemType('environment')
-                  }
-                }}
-                onCancel={handleCloseBrowser}
-              />
-            </div>
-          </Panel>
-        ) : entityGroups.map((group, index) => (
+        {entityGroups.map((group, index) => (
           <Panel 
             key={`${group.type}-${group.baseName}`}
             className="invisible-scrollbar"
@@ -393,6 +320,22 @@ const DashboardContent = () => {
           centerPips={true}
         />
       </Bar>
+
+      {/* Encounter Builder Modal */}
+      <EncounterBuilder
+        isOpen={encounterBuilderOpen}
+        onClose={handleCloseEncounterBuilder}
+        onAddAdversary={(itemData) => {
+          createAdversary(itemData)
+          setLastAddedItemType('adversary')
+        }}
+        onAddEnvironment={(itemData) => {
+          createEnvironment(itemData)
+          setLastAddedItemType('environment')
+        }}
+        adversaries={adversaries}
+        environments={environments}
+      />
 
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
