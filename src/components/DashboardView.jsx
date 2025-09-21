@@ -59,8 +59,7 @@ const DashboardContent = () => {
     createCountdown,
     updateCountdown,
     deleteCountdown,
-    advanceCountdown,
-    isLoaded
+    advanceCountdown
   } = useGameState()
   
   // Dashboard state
@@ -211,12 +210,7 @@ const DashboardContent = () => {
 
   const entityGroups = getEntityGroups()
 
-  // Auto-open encounter builder if no adversaries are loaded (only after state is loaded)
-  useEffect(() => {
-    if (isLoaded && adversaries.length === 0 && !encounterBuilderOpen) {
-      setEncounterBuilderOpen(true)
-    }
-  }, [isLoaded, adversaries.length, encounterBuilderOpen])
+  // Remove auto-open encounter builder logic - replaced with empty state button
 
   // Calculate total width needed for all columns
   const totalColumns = entityGroups.length
@@ -264,7 +258,65 @@ const DashboardContent = () => {
         }}
         onScroll={handleScroll}
         >
-        {entityGroups.map((group, index) => (
+        {entityGroups.length === 0 ? (
+          // Empty state when no entities exist
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            width: '100%',
+            padding: '2rem',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              color: 'var(--text-secondary)',
+              marginBottom: '1rem'
+            }}>
+              No encounters loaded
+            </div>
+            <div style={{
+              fontSize: '1rem',
+              color: 'var(--text-tertiary)',
+              marginBottom: '2rem',
+              maxWidth: '400px'
+            }}>
+              Create your first encounter to get started with your Daggerheart session
+            </div>
+            <button
+              onClick={handleOpenEncounterBuilder}
+              style={{
+                backgroundColor: 'var(--purple)',
+                color: 'var(--text-primary)',
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                padding: '0.75rem 1.5rem',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'var(--purple-hover)'
+                e.target.style.transform = 'translateY(-1px)'
+                e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'var(--purple)'
+                e.target.style.transform = 'translateY(0)'
+                e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'
+              }}
+            >
+              Create Encounter
+            </button>
+          </div>
+        ) : (
+          // Normal entity groups display
+          entityGroups.map((group, index) => (
           <Panel 
             key={`${group.type}-${group.baseName}`}
             className="invisible-scrollbar"
@@ -311,7 +363,8 @@ const DashboardContent = () => {
               adversaries={adversaries}
             />
           </Panel>
-        ))}
+        ))
+        )}
         </div>
       </div>
       
