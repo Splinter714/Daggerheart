@@ -59,7 +59,8 @@ const DashboardContent = () => {
     createCountdown,
     updateCountdown,
     deleteCountdown,
-    advanceCountdown
+    advanceCountdown,
+    isLoaded
   } = useGameState()
   
   // Dashboard state
@@ -210,12 +211,12 @@ const DashboardContent = () => {
 
   const entityGroups = getEntityGroups()
 
-  // Auto-open encounter builder if no adversaries are loaded
+  // Auto-open encounter builder if no adversaries are loaded (only after state is loaded)
   useEffect(() => {
-    if (adversaries.length === 0 && !encounterBuilderOpen) {
+    if (isLoaded && adversaries.length === 0 && !encounterBuilderOpen) {
       setEncounterBuilderOpen(true)
     }
-  }, [adversaries.length, encounterBuilderOpen])
+  }, [isLoaded, adversaries.length, encounterBuilderOpen])
 
   // Calculate total width needed for all columns
   const totalColumns = entityGroups.length

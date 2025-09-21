@@ -35,6 +35,7 @@ export const GameStateProvider = ({ children }) => {
     adversaries: [],
     environments: []
   });
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -49,6 +50,7 @@ export const GameStateProvider = ({ children }) => {
         console.error('Failed to load saved state:', error);
       }
     }
+    setIsLoaded(true);
   }, []);
 
   // Save state to localStorage whenever it changes
@@ -350,6 +352,7 @@ export const GameStateProvider = ({ children }) => {
 
   const value = {
     gameState,
+    isLoaded,
     // Fear actions
     updateFear,
     toggleFearVisibility,
