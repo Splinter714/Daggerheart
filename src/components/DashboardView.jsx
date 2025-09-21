@@ -262,53 +262,32 @@ const DashboardContent = () => {
           // Empty state when no entities exist
           <div style={{
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             height: '100%',
             width: '100%',
-            padding: '2rem',
-            textAlign: 'center'
+            padding: '2rem'
           }}>
-            <div style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: 'var(--text-secondary)',
-              marginBottom: '1rem'
-            }}>
-              No encounters loaded
-            </div>
-            <div style={{
-              fontSize: '1rem',
-              color: 'var(--text-tertiary)',
-              marginBottom: '2rem',
-              maxWidth: '400px'
-            }}>
-              Create your first encounter to get started with your Daggerheart session
-            </div>
             <button
               onClick={handleOpenEncounterBuilder}
               style={{
-                backgroundColor: 'var(--purple)',
-                color: 'var(--text-primary)',
-                border: 'none',
+                backgroundColor: 'transparent',
+                color: 'var(--text-secondary)',
+                border: '2px dashed var(--border)',
                 borderRadius: 'var(--radius-md)',
-                padding: '0.75rem 1.5rem',
+                padding: '1rem 2rem',
                 fontSize: '1rem',
-                fontWeight: '600',
+                fontWeight: '500',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--purple-hover)'
-                e.target.style.transform = 'translateY(-1px)'
-                e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)'
+                e.target.style.borderColor = 'var(--purple)'
+                e.target.style.color = 'var(--purple)'
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'var(--purple)'
-                e.target.style.transform = 'translateY(0)'
-                e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'
+                e.target.style.borderColor = 'var(--border)'
+                e.target.style.color = 'var(--text-secondary)'
               }}
             >
               Create Encounter
