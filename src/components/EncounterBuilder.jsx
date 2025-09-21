@@ -450,7 +450,7 @@ const EncounterBuilder = ({
                         Party Tier
                       </span>
                     </div>
-                    <div style={{ width: '70px', textAlign: 'center', position: 'relative' }}>
+                    <div style={{ width: '80px', textAlign: 'center', position: 'relative' }}>
                       <button
                         onClick={() => setPlayerTier(Math.max(1, playerTier - 1))}
                         style={{
@@ -501,7 +501,7 @@ const EncounterBuilder = ({
                         <Plus size={10} />
                       </button>
                     </div>
-                    <div style={{ width: '60px', textAlign: 'right' }}>
+                    <div style={{ width: '80px', textAlign: 'right' }}>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                         
                       </span>
@@ -520,7 +520,7 @@ const EncounterBuilder = ({
                         Party Size
                       </span>
                     </div>
-                    <div style={{ width: '70px', textAlign: 'center', position: 'relative' }}>
+                    <div style={{ width: '80px', textAlign: 'center', position: 'relative' }}>
                       <button
                         onClick={() => setPcCount(Math.max(1, pcCount - 1))}
                         style={{
@@ -571,7 +571,7 @@ const EncounterBuilder = ({
                         <Plus size={10} />
                       </button>
                     </div>
-                    <div style={{ width: '60px', textAlign: 'right' }}>
+                    <div style={{ width: '80px', textAlign: 'right' }}>
                       <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                         +{calculateBaseBattlePoints(pcCount)}
                       </span>
@@ -600,7 +600,7 @@ const EncounterBuilder = ({
                             {encounterItem.item.name}
                           </span>
                         </div>
-                        <div style={{ width: '70px', textAlign: 'center', position: 'relative' }}>
+                        <div style={{ width: '80px', textAlign: 'center', position: 'relative' }}>
                           <button
                             onClick={() => handleRemoveFromEncounter(encounterItem.item.id, encounterItem.type)}
                             style={{
@@ -651,7 +651,7 @@ const EncounterBuilder = ({
                             <Plus size={10} />
                           </button>
                         </div>
-                        <div style={{ width: '60px', textAlign: 'right' }}>
+                        <div style={{ width: '80px', textAlign: 'right' }}>
                           <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                             -{totalCost}
                           </span>
@@ -685,8 +685,8 @@ const EncounterBuilder = ({
                             {reasons.join(', ')}
                           </span>
                         </div>
-                        <div style={{ width: '70px', textAlign: 'center' }}></div>
-                        <div style={{ width: '60px', textAlign: 'right' }}>
+                        <div style={{ width: '80px', textAlign: 'center' }}></div>
+                        <div style={{ width: '80px', textAlign: 'right' }}>
                           <span style={{
                             color: 'var(--text-primary)',
                             fontWeight: 600
@@ -711,8 +711,8 @@ const EncounterBuilder = ({
                       Remaining Budget
                     </span>
                   </div>
-                  <div style={{ width: '70px', textAlign: 'center' }}></div>
-                  <div style={{ width: '60px', textAlign: 'right' }}>
+                  <div style={{ width: '80px', textAlign: 'center' }}></div>
+                  <div style={{ width: '80px', textAlign: 'right' }}>
                     <span style={{
                       color: remainingBattlePoints < 0 ? 'var(--danger)' : 'var(--text-primary)',
                       fontWeight: 600
