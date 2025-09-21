@@ -33,6 +33,7 @@ const EncounterBuilder = ({
   isOpen, 
   onClose, 
   onAddAdversary,
+  onAddAdversariesBulk,
   onAddEnvironment,
   adversaries = [],
   environments = []
@@ -228,13 +229,19 @@ const EncounterBuilder = ({
   
   // Create the encounter
   const handleCreateEncounter = () => {
+    const adversariesToCreate = []
+    
     encounterItems.forEach(encounterItem => {
       for (let i = 0; i < encounterItem.quantity; i++) {
         if (encounterItem.type === 'adversary') {
-          onAddAdversary(encounterItem.item)
+          adversariesToCreate.push(encounterItem.item)
         }
       }
     })
+    
+    if (adversariesToCreate.length > 0) {
+      onAddAdversariesBulk(adversariesToCreate)
+    }
     
     // Reset and close
     setEncounterItems([])

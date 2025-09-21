@@ -215,6 +215,41 @@ export const GameStateProvider = ({ children }) => {
     setGameState(prev => ({ ...prev, adversaries: [...prev.adversaries, newAdversary] }))
   }
 
+  const createAdversariesBulk = (adversaryDataArray) => {
+    const newAdversaries = []
+    const baseNameCounts = {}
+    
+    adversaryDataArray.forEach(adversaryData => {
+      const baseName = adversaryData.baseName || adversaryData.name?.replace(/\s+\(\d+\)$/, '') || adversaryData.name || 'Unknown'
+      
+      // Count existing adversaries with this base name
+      const existingAdversaries = gameState.adversaries || []
+      const sameNameAdversaries = existingAdversaries.filter(adv => adv.baseName === baseName)
+      const existingCount = sameNameAdversaries.length
+      
+      // Count how many we've already created in this batch
+      const batchCount = baseNameCounts[baseName] || 0
+      
+      const duplicateNumber = existingCount + batchCount + 1
+      baseNameCounts[baseName] = batchCount + 1
+      
+      const newAdversary = {
+        ...adversaryData,
+        id: generateId('adv'),
+        baseName: baseName,
+        duplicateNumber: duplicateNumber,
+        name: `${baseName} (${duplicateNumber})`,
+        hp: 0,
+        stress: 0,
+        isVisible: true
+      }
+      
+      newAdversaries.push(newAdversary)
+    })
+    
+    setGameState(prev => ({ ...prev, adversaries: [...prev.adversaries, ...newAdversaries] }))
+  }
+
   const updateAdversary = (id, updates) => {
     setGameState(prev => ({
       ...prev,
@@ -328,6 +363,7 @@ export const GameStateProvider = ({ children }) => {
     reorderCountdowns,
     // Adversary actions
     createAdversary,
+    createAdversariesBulk,
     updateAdversary,
     deleteAdversary,
     reorderAdversaries,

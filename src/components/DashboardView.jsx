@@ -50,6 +50,7 @@ const DashboardContent = () => {
     fear,
     updateFear,
     createAdversary,
+    createAdversariesBulk,
     updateAdversary,
     deleteAdversary,
     createEnvironment,
@@ -334,6 +335,10 @@ const DashboardContent = () => {
         onClose={handleCloseEncounterBuilder}
         onAddAdversary={(itemData) => {
           createAdversary(itemData)
+          setLastAddedItemType('adversary')
+        }}
+        onAddAdversariesBulk={(adversariesArray) => {
+          createAdversariesBulk(adversariesArray)
           setLastAddedItemType('adversary')
         }}
         onAddEnvironment={(itemData) => {
