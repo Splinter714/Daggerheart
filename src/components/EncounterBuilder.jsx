@@ -445,7 +445,13 @@ const EncounterBuilder = ({
                     padding: '0.25rem 0',
                     borderBottom: '1px solid var(--border)'
                   }}>
-                    <div style={{ width: '60px', position: 'relative' }}>
+                    <div style={{ width: '60px' }}></div>
+                    <div style={{ flex: 1 }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        Party
+                      </span>
+                    </div>
+                    <div style={{ width: '50px', textAlign: 'center', position: 'relative' }}>
                       <button
                         onClick={() => setPcCount(Math.max(1, pcCount - 1))}
                         style={{
@@ -469,6 +475,9 @@ const EncounterBuilder = ({
                       >
                         <Minus size={10} />
                       </button>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        ({pcCount})
+                      </span>
                       <button
                         onClick={() => setPcCount(pcCount + 1)}
                         style={{
@@ -485,23 +494,13 @@ const EncounterBuilder = ({
                           height: '18px',
                           fontSize: '0.7rem',
                           position: 'absolute',
-                          left: '20px',
+                          right: '0',
                           top: '50%',
                           transform: 'translateY(-50%)'
                         }}
                       >
                         <Plus size={10} />
                       </button>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        Party
-                      </span>
-                    </div>
-                    <div style={{ width: '50px', textAlign: 'center' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        ({pcCount})
-                      </span>
                     </div>
                     <div style={{ width: '40px', textAlign: 'center' }}>
                       <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
@@ -517,7 +516,13 @@ const EncounterBuilder = ({
                     padding: '0.25rem 0',
                     borderBottom: '1px solid var(--border)'
                   }}>
-                    <div style={{ width: '60px', position: 'relative' }}>
+                    <div style={{ width: '60px' }}></div>
+                    <div style={{ flex: 1 }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        Tier
+                      </span>
+                    </div>
+                    <div style={{ width: '50px', textAlign: 'center', position: 'relative' }}>
                       <button
                         onClick={() => setPlayerTier(Math.max(1, playerTier - 1))}
                         style={{
@@ -541,6 +546,9 @@ const EncounterBuilder = ({
                       >
                         <Minus size={10} />
                       </button>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        ({playerTier})
+                      </span>
                       <button
                         onClick={() => setPlayerTier(Math.min(4, playerTier + 1))}
                         style={{
@@ -557,23 +565,13 @@ const EncounterBuilder = ({
                           height: '18px',
                           fontSize: '0.7rem',
                           position: 'absolute',
-                          left: '20px',
+                          right: '0',
                           top: '50%',
                           transform: 'translateY(-50%)'
                         }}
                       >
                         <Plus size={10} />
                       </button>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        Tier
-                      </span>
-                    </div>
-                    <div style={{ width: '50px', textAlign: 'center' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        ({playerTier})
-                      </span>
                     </div>
                     <div style={{ width: '40px', textAlign: 'center' }}>
                       <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
@@ -601,7 +599,13 @@ const EncounterBuilder = ({
                         padding: '0.25rem 0',
                         borderBottom: '1px solid var(--border)'
                       }}>
-                        <div style={{ width: '60px', position: 'relative' }}>
+                        <div style={{ width: '60px' }}></div>
+                        <div style={{ flex: 1 }}>
+                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                            {encounterItem.item.name}
+                          </span>
+                        </div>
+                        <div style={{ width: '50px', textAlign: 'center', position: 'relative' }}>
                           <button
                             onClick={() => handleRemoveFromEncounter(encounterItem.item.id, encounterItem.type)}
                             style={{
@@ -625,6 +629,9 @@ const EncounterBuilder = ({
                           >
                             {encounterItem.quantity === 0 ? <X size={10} /> : <Minus size={10} />}
                           </button>
+                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                            (×{encounterItem.quantity})
+                          </span>
                           <button
                             onClick={() => handleAddToEncounter(encounterItem.item, encounterItem.type)}
                             style={{
@@ -641,23 +648,13 @@ const EncounterBuilder = ({
                               height: '18px',
                               fontSize: '0.7rem',
                               position: 'absolute',
-                              left: '20px',
+                              right: '0',
                               top: '50%',
                               transform: 'translateY(-50%)'
                             }}
                           >
                             <Plus size={10} />
                           </button>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                            {encounterItem.item.name}
-                          </span>
-                        </div>
-                        <div style={{ width: '50px', textAlign: 'center' }}>
-                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                            (×{encounterItem.quantity})
-                          </span>
                         </div>
                         <div style={{ width: '40px', textAlign: 'center' }}>
                           <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
