@@ -1167,7 +1167,7 @@ const GameCard = ({
                       fontWeight: 600,
                       color: 'var(--text-primary)'
                     }}>
-                      {instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'}
+                      {instance.duplicateNumber || 1}
                     </span>
                   </div>
 
@@ -2182,7 +2182,7 @@ const GameCard = ({
                     fontWeight: 600,
                         color: 'var(--text-primary)'
                   }}>
-                        {instance.duplicateNumber || instance.name?.match(/\((\d+)\)/)?.[1] || '1'}
+                        {instance.duplicateNumber || 1}
                   </span>
             </div>
 

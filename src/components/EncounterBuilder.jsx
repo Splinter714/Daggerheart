@@ -519,7 +519,7 @@ const EncounterBuilder = ({
                       }}>
                         <div style={{ flex: 1 }}>
                           <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                            {encounterItem.item.name}
+                            {encounterItem.item.baseName || encounterItem.item.name?.replace(/\s+\(\d+\)$/, '') || encounterItem.item.name}
                           </span>
                         </div>
                         <div style={{ width: '60px', textAlign: 'center', position: 'relative' }}>
