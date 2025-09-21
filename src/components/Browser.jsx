@@ -372,7 +372,14 @@ const BrowserTableHeader = ({
   handleTypeSelect,
   isTierFiltered,
   isTypeFiltered,
-  getDropdownStyle
+  getDropdownStyle,
+  // Cost filter props
+  costFilter,
+  showCostDropdown,
+  setShowCostDropdown,
+  costFilterRef,
+  handleCostFilterSelect,
+  isCostFiltered
 }) => {
   const [hoveredColumn, setHoveredColumn] = useState(null)
 
@@ -383,7 +390,7 @@ const BrowserTableHeader = ({
         { key: 'tier', label: 'Tier', hasFilter: true },
         { key: 'type', label: 'Type', hasFilter: true },
         { key: 'difficulty', label: 'Diff' },
-        { key: 'cost', label: 'Cost' },
+        { key: 'cost', label: 'Cost', hasFilter: true },
         { key: 'action', label: '' } // Empty label for action column
       ]
     } else if (type === 'environment') {
@@ -399,6 +406,50 @@ const BrowserTableHeader = ({
   }
 
   const columns = getColumns()
+
+  const renderCostFilterDropdown = () => {
+    if (!showCostDropdown) return null
+
+    const costFilterOptions = [
+      { value: 'all', label: 'All' },
+      { value: 'auto-grey', label: 'Auto Grey' },
+      { value: 'auto-hide', label: 'Auto Hide' }
+    ]
+
+    return createPortal(
+      <div 
+        className="filter-dropdown"
+        style={{
+          ...styles.filterDropdown,
+          ...getDropdownStyle(costFilterRef),
+          maxHeight: '60vh',
+          overflow: 'auto'
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {costFilterOptions.map(option => {
+          const isSelected = costFilter === option.value
+          return (
+            <div
+              key={option.value}
+              style={{
+                ...styles.filterOption,
+                ...(isSelected ? styles.filterOptionSelected : {})
+              }}
+              onClick={() => handleCostFilterSelect(option.value)}
+            >
+              <span style={styles.checkIcon}>
+                {isSelected ? <CheckSquare size={16}/> : <Square size={16}/>}
+              </span>
+              <span style={styles.filterLabel}>{option.label}</span>
+            </div>
+          )
+        })}
+      </div>,
+      document.body
+    )
+  }
 
   const renderFilterDropdown = (filterType, values, selected, onSelect, isOpen, setIsOpen, filterRef, isFiltered) => {
     if (!isOpen) return null
@@ -493,11 +544,12 @@ const BrowserTableHeader = ({
                 {column.label}
               </span>
               <button
-                ref={column.key === 'tier' ? tierFilterRef : typeFilterRef}
+                ref={column.key === 'tier' ? tierFilterRef : column.key === 'type' ? typeFilterRef : costFilterRef}
                 style={{
                   ...styles.headerFilterIcon,
                   ...(column.key === 'tier' && isTierFiltered ? styles.headerFilterIconActive : {}),
-                  ...(column.key === 'type' && isTypeFiltered ? styles.headerFilterIconActive : {})
+                  ...(column.key === 'type' && isTypeFiltered ? styles.headerFilterIconActive : {}),
+                  ...(column.key === 'cost' && isCostFiltered ? styles.headerFilterIconActive : {})
                 }}
                 className="header-filter-icon"
                 onClick={(e) => {
@@ -505,14 +557,20 @@ const BrowserTableHeader = ({
                   if (column.key === 'tier') {
                     setShowTierDropdown(!showTierDropdown)
                     setShowTypeDropdown(false)
+                    setShowCostDropdown(false)
                   } else if (column.key === 'type') {
                     setShowTypeDropdown(!showTypeDropdown)
                     setShowTierDropdown(false)
+                    setShowCostDropdown(false)
+                  } else if (column.key === 'cost') {
+                    setShowCostDropdown(!showCostDropdown)
+                    setShowTierDropdown(false)
+                    setShowTypeDropdown(false)
                   }
                 }}
               >
                 <Filter size={14} />
-                {(column.key === 'tier' && isTierFiltered) || (column.key === 'type' && isTypeFiltered) ? (
+                {(column.key === 'tier' && isTierFiltered) || (column.key === 'type' && isTypeFiltered) || (column.key === 'cost' && isCostFiltered) ? (
                   <span style={styles.filterActiveDot}></span>
                 ) : null}
               </button>
@@ -530,6 +588,7 @@ const BrowserTableHeader = ({
             'type', uniqueTypes, selectedTypes, handleTypeSelect,
             showTypeDropdown, setShowTypeDropdown, typeFilterRef, isTypeFiltered
           )}
+          {column.key === 'cost' && renderCostFilterDropdown()}
         </th>
       ))}
     </tr>
@@ -537,7 +596,7 @@ const BrowserTableHeader = ({
 }
 
 // Browser Row Component
-const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0 }) => {
+const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0, costFilter = 'auto-grey' }) => {
   const [isHovered, setIsHovered] = useState(false)
 
   const handleAdd = () => {
@@ -589,8 +648,13 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
       const baseCost = BATTLE_POINT_COSTS[item.type] || 2
       const exceedsBudget = dynamicCost > remainingBudget
       
-      // De-emphasized styling for rows that exceed budget
-      const deEmphasizedStyle = exceedsBudget ? {
+      // Apply cost filter logic
+      if (costFilter === 'auto-hide' && exceedsBudget) {
+        return null // Hide the row completely
+      }
+      
+      // De-emphasized styling for rows that exceed budget (only for auto-grey mode)
+      const deEmphasizedStyle = (costFilter === 'auto-grey' && exceedsBudget) ? {
         opacity: 0.5,
         color: 'var(--text-secondary)'
       } : {}
@@ -619,6 +683,13 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
     return null
   }
 
+  const content = renderContent()
+  
+  // If renderContent returns null (auto-hide mode), don't render the row
+  if (content === null) {
+    return null
+  }
+
   return (
     <>
       <tr 
@@ -630,7 +701,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {renderContent()}
+        {content}
         <td style={{ 
           width: '40px', 
           minWidth: '40px', 
@@ -668,6 +739,10 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 
 // Main Browser Component
 const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1 }) => {
+  const [costFilter, setCostFilter] = useState('auto-grey') // 'all', 'auto-grey', 'auto-hide'
+  const [showCostDropdown, setShowCostDropdown] = useState(false)
+  const costFilterRef = useRef(null)
+  
   const {
     searchTerm,
     setSearchTerm,
@@ -753,6 +828,13 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
 
   const remainingBudget = calculateRemainingBudget()
 
+  const handleCostFilterSelect = (filter) => {
+    setCostFilter(filter)
+    setShowCostDropdown(false)
+  }
+
+  const isCostFiltered = costFilter !== 'auto-grey'
+
   if (loading) {
     return (
       <div style={styles.browser}>
@@ -793,6 +875,13 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
               isTierFiltered={isTierFiltered}
               isTypeFiltered={isTypeFiltered}
               getDropdownStyle={getDropdownStyle}
+              // Cost filter props
+              costFilter={costFilter}
+              showCostDropdown={showCostDropdown}
+              setShowCostDropdown={setShowCostDropdown}
+              costFilterRef={costFilterRef}
+              handleCostFilterSelect={handleCostFilterSelect}
+              isCostFiltered={isCostFiltered}
             />
           </thead>
           <tbody>
@@ -807,6 +896,7 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
                 pcCount={pcCount}
                 playerTier={playerTier}
                 remainingBudget={remainingBudget}
+                costFilter={costFilter}
               />
             ))}
           </tbody>
