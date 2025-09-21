@@ -706,25 +706,30 @@ const EncounterBuilder = ({
                   })()}
                 </div>
                 
-                {/* Total Battle Points */}
+                {/* Points Remaining */}
                 <div style={{
                   display: 'flex',
-                  justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '0.5rem 0',
-                  borderTop: '2px solid var(--border)',
+                  padding: '0.25rem 0',
+                  borderTop: '1px solid var(--border)',
                   marginTop: '0.5rem'
                 }}>
-                  <span style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '1rem' }}>
-                    Total Battle Points
-                  </span>
-                  <span style={{
-                    color: remainingBattlePoints >= 0 ? 'var(--success)' : 'var(--danger)',
-                    fontWeight: 700,
-                    fontSize: '1.2rem'
-                  }}>
-                    {remainingBattlePoints}
-                  </span>
+                  <div style={{ width: '60px' }}></div>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase' }}>
+                      Points Remaining
+                    </span>
+                  </div>
+                  <div style={{ width: '50px', textAlign: 'center' }}></div>
+                  <div style={{ width: '40px', textAlign: 'center' }}>
+                    <span style={{
+                      color: 'var(--text-primary)',
+                      fontWeight: 700,
+                      fontSize: '1rem'
+                    }}>
+                      {remainingBattlePoints}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
