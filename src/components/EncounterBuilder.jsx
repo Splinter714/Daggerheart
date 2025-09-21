@@ -47,10 +47,32 @@ const EncounterBuilder = ({
   })
   
   const [encounterItems, setEncounterItems] = useState([])
-  const [selectedType, setSelectedType] = useState('adversary')
   
   // Track previous PC count to calculate group changes
-  const prevPcCountRef = React.useRef(pcCount) // 'adversary' or 'environment'
+  const prevPcCountRef = React.useRef(pcCount)
+  
+  // Load existing adversaries when encounter builder opens
+  React.useEffect(() => {
+    if (isOpen && adversaries.length > 0) {
+      // Group adversaries by base name and add them to encounter items
+      const groupedAdversaries = {}
+      adversaries.forEach(adversary => {
+        const baseName = adversary.baseName || adversary.name?.replace(/\s+\(\d+\)$/, '') || adversary.name
+        if (!groupedAdversaries[baseName]) {
+          groupedAdversaries[baseName] = {
+            type: 'adversary',
+            item: adversary,
+            quantity: 0
+          }
+        }
+        groupedAdversaries[baseName].quantity += 1
+      })
+      
+      // Convert to array and set encounter items
+      const existingItems = Object.values(groupedAdversaries)
+      setEncounterItems(existingItems)
+    }
+  }, [isOpen, adversaries])
   
   // Calculate automatic adjustments based on encounter composition
   const automaticAdjustments = React.useMemo(() => {
@@ -83,12 +105,12 @@ const EncounterBuilder = ({
     }
     
     // Check for lower tier adversaries (only count those with quantity > 0)
-    const hasLowerTierAdversaries = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0
-    )
-    if (hasLowerTierAdversaries) {
-      adjustments += BATTLE_POINT_ADJUSTMENTS.lowerTierAdversary
-    }
+    // const hasLowerTierAdversaries = encounterItems.some(item => 
+    //   item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0
+    // )
+    // if (hasLowerTierAdversaries) {
+    //   adjustments += BATTLE_POINT_ADJUSTMENTS.lowerTierAdversary
+    // }
     
     return adjustments
   }, [encounterItems, playerTier])
@@ -210,8 +232,6 @@ const EncounterBuilder = ({
       for (let i = 0; i < encounterItem.quantity; i++) {
         if (encounterItem.type === 'adversary') {
           onAddAdversary(encounterItem.item)
-        } else if (encounterItem.type === 'environment') {
-          onAddEnvironment(encounterItem.item)
         }
       }
     })
@@ -292,97 +312,18 @@ const EncounterBuilder = ({
           flex: 1,
           overflow: 'hidden'
         }}>
-          {/* Left Panel - Encounter Browser */}
-          <div style={{
-            width: '300px',
-            borderRight: '1px solid var(--border)',
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: 'var(--bg-secondary)'
-          }}>
-            {/* Encounter Browser Header */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '1rem',
-              borderBottom: '1px solid var(--border)',
-              backgroundColor: 'var(--bg-secondary)'
-            }}>
-              <h3 style={{ 
-                margin: 0, 
-                color: 'var(--text-primary)',
-                fontSize: '1.1rem'
-              }}>
-                Saved Encounters
-              </h3>
-            </div>
-            
-            {/* Encounter List */}
-            <div style={{
-              flex: 1,
-              padding: '1rem',
-              overflowY: 'auto'
-            }}>
-              <div style={{
-                textAlign: 'center',
-                color: 'var(--text-secondary)',
-                fontStyle: 'italic',
-                padding: '2rem 0'
-              }}>
-                No saved encounters yet
-              </div>
-            </div>
-          </div>
-          
-          {/* Center Panel - Adversary/Environment Browser */}
+          {/* Center Panel - Adversary Browser */}
           <div style={{
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden'
           }}>
-            {/* Browser Tabs */}
-            <div style={{
-              display: 'flex',
-              borderBottom: '1px solid var(--border)',
-              backgroundColor: 'var(--bg-secondary)'
-            }}>
-              <button
-                onClick={() => setSelectedType('adversary')}
-                style={{
-                  background: selectedType === 'adversary' ? 'var(--bg-primary)' : 'transparent',
-                  border: 'none',
-                  color: 'var(--text-primary)',
-                  padding: '1rem',
-                  cursor: 'pointer',
-                  borderBottom: selectedType === 'adversary' ? '2px solid var(--purple)' : '2px solid transparent',
-                  transition: 'all 0.2s'
-                }}
-              >
-                Adversaries
-              </button>
-              <button
-                onClick={() => setSelectedType('environment')}
-                style={{
-                  background: selectedType === 'environment' ? 'var(--bg-primary)' : 'transparent',
-                  border: 'none',
-                  color: 'var(--text-primary)',
-                  padding: '1rem',
-                  cursor: 'pointer',
-                  borderBottom: selectedType === 'environment' ? '2px solid var(--purple)' : '2px solid transparent',
-                  transition: 'all 0.2s'
-                }}
-              >
-                Environments
-              </button>
-            </div>
-            
             {/* Browser Content */}
             <div style={{ flex: 1, overflowY: 'auto' }}>
               <Browser
-                type={selectedType}
-                onAddItem={(itemData) => handleAddToEncounter(itemData, selectedType)}
+                type="adversary"
+                onAddItem={(itemData) => handleAddToEncounter(itemData, 'adversary')}
                 onCancel={onClose}
                 encounterItems={encounterItems}
                 pcCount={pcCount}
@@ -399,25 +340,6 @@ const EncounterBuilder = ({
             flexDirection: 'column',
             backgroundColor: 'var(--bg-secondary)'
           }}>
-            {/* Battle Points Calculator Header */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '1rem',
-              borderBottom: '1px solid var(--border)',
-              backgroundColor: 'var(--bg-secondary)'
-            }}>
-              <Calculator size={20} />
-              <h3 style={{ 
-                margin: 0, 
-                color: 'var(--text-primary)',
-                fontSize: '1.1rem'
-              }}>
-                Battle Points Calculator
-              </h3>
-            </div>
-            
             {/* Battle Points Calculator Content */}
             <div style={{ padding: '1rem', overflowY: 'auto' }}>
               {/* Battle Points Receipt */}
@@ -433,7 +355,7 @@ const EncounterBuilder = ({
                   fontSize: '1rem',
                   textAlign: 'center'
                 }}>
-                  Battle Points Calculation
+                  Encounter Balance
                 </h4>
                 
                 {/* Receipt Items */}
@@ -450,7 +372,7 @@ const EncounterBuilder = ({
                         Party Tier
                       </span>
                     </div>
-                    <div style={{ width: '50px', textAlign: 'center', position: 'relative' }}>
+                    <div style={{ width: '60px', textAlign: 'center', position: 'relative' }}>
                       <button
                         onClick={() => setPlayerTier(Math.max(1, playerTier - 1))}
                         style={{
@@ -475,7 +397,7 @@ const EncounterBuilder = ({
                         <Minus size={10} />
                       </button>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        ({playerTier})
+                        {playerTier}
                       </span>
                       <button
                         onClick={() => setPlayerTier(Math.min(4, playerTier + 1))}
@@ -501,7 +423,7 @@ const EncounterBuilder = ({
                         <Plus size={10} />
                       </button>
                     </div>
-                    <div style={{ width: '80px', textAlign: 'right' }}>
+                    <div style={{ width: '35px', textAlign: 'right' }}>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                         
                       </span>
@@ -520,7 +442,7 @@ const EncounterBuilder = ({
                         Party Size
                       </span>
                     </div>
-                    <div style={{ width: '50px', textAlign: 'center', position: 'relative' }}>
+                    <div style={{ width: '60px', textAlign: 'center', position: 'relative' }}>
                       <button
                         onClick={() => setPcCount(Math.max(1, pcCount - 1))}
                         style={{
@@ -545,7 +467,7 @@ const EncounterBuilder = ({
                         <Minus size={10} />
                       </button>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        ({pcCount})
+                        {pcCount}
                       </span>
                       <button
                         onClick={() => setPcCount(pcCount + 1)}
@@ -571,9 +493,9 @@ const EncounterBuilder = ({
                         <Plus size={10} />
                       </button>
                     </div>
-                    <div style={{ width: '80px', textAlign: 'right' }}>
+                    <div style={{ width: '35px', textAlign: 'right' }}>
                       <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                        +{calculateBaseBattlePoints(pcCount)}
+                        {calculateBaseBattlePoints(pcCount)}
                       </span>
                     </div>
                   </div>
@@ -600,7 +522,7 @@ const EncounterBuilder = ({
                             {encounterItem.item.name}
                           </span>
                         </div>
-                        <div style={{ width: '50px', textAlign: 'center', position: 'relative' }}>
+                        <div style={{ width: '60px', textAlign: 'center', position: 'relative' }}>
                           <button
                             onClick={() => handleRemoveFromEncounter(encounterItem.item.id, encounterItem.type)}
                             style={{
@@ -625,7 +547,7 @@ const EncounterBuilder = ({
                             {encounterItem.quantity === 0 ? <X size={10} /> : <Minus size={10} />}
                           </button>
                           <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                            (×{encounterItem.quantity})
+                            {encounterItem.quantity}
                           </span>
                           <button
                             onClick={() => handleAddToEncounter(encounterItem.item, encounterItem.type)}
@@ -651,7 +573,7 @@ const EncounterBuilder = ({
                             <Plus size={10} />
                           </button>
                         </div>
-                        <div style={{ width: '80px', textAlign: 'right' }}>
+                        <div style={{ width: '35px', textAlign: 'right' }}>
                           <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                             -{totalCost}
                           </span>
@@ -669,9 +591,9 @@ const EncounterBuilder = ({
                     if (!encounterItems.some(item => item.type === 'adversary' && ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.item.type) && item.quantity > 0)) {
                       reasons.push('no major threats')
                     }
-                    if (encounterItems.some(item => item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0)) {
-                      reasons.push('Lower tier adversaries')
-                    }
+                    // if (encounterItems.some(item => item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0)) {
+                    //   reasons.push('Lower tier adversaries')
+                    // }
                     
                     return (
                       <div style={{
@@ -685,13 +607,13 @@ const EncounterBuilder = ({
                             {reasons.join(', ')}
                           </span>
                         </div>
-                        <div style={{ width: '50px', textAlign: 'center' }}></div>
-                        <div style={{ width: '80px', textAlign: 'right' }}>
+                        <div style={{ width: '60px', textAlign: 'center' }}></div>
+                        <div style={{ width: '35px', textAlign: 'right' }}>
                           <span style={{
                             color: 'var(--text-primary)',
                             fontWeight: 600
                           }}>
-                            {automaticAdjustments >= 0 ? '+' : ''}{automaticAdjustments}
+                            {automaticAdjustments}
                           </span>
                         </div>
                       </div>
@@ -703,16 +625,16 @@ const EncounterBuilder = ({
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '0.25rem 0',
+                  padding: '0.125rem 0',
                   borderBottom: '1px solid var(--border)'
                 }}>
-                  <div style={{ flex: 1 }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
                       Remaining Budget
                     </span>
                   </div>
-                  <div style={{ width: '50px', textAlign: 'center' }}></div>
-                  <div style={{ width: '80px', textAlign: 'right' }}>
+                  <div style={{ width: '60px', textAlign: 'center' }}></div>
+                  <div style={{ width: '35px', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                     <span style={{
                       color: remainingBattlePoints < 0 ? 'var(--danger)' : 'var(--text-primary)',
                       fontWeight: 600
