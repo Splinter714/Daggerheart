@@ -259,7 +259,7 @@ const EncounterBuilder = ({
       top: 0,
       left: 0,
       right: 0,
-      bottom: 0,
+      bottom: '80px', // Leave space for fear bar
       backgroundColor: 'rgba(0, 0, 0, 0.8)',
       zIndex: 1000,
       display: 'flex',
