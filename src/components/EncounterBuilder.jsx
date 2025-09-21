@@ -504,7 +504,7 @@ const EncounterBuilder = ({
                       </span>
                     </div>
                     <div style={{ width: '40px', textAlign: 'center' }}>
-                      <span style={{ color: 'var(--success)', fontWeight: 600 }}>
+                      <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                         +{calculateBaseBattlePoints(pcCount)}
                       </span>
                     </div>
@@ -660,7 +660,7 @@ const EncounterBuilder = ({
                           </span>
                         </div>
                         <div style={{ width: '40px', textAlign: 'center' }}>
-                          <span style={{ color: 'var(--danger)', fontWeight: 600 }}>
+                          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                             -{totalCost}
                           </span>
                         </div>
@@ -693,14 +693,14 @@ const EncounterBuilder = ({
                             Automatic ({reasons.join(', ')})
                           </span>
                         </div>
-                        <div style={{ width: '50px', textAlign: 'center' }}>
-                          <span style={{
-                            color: automaticAdjustments >= 0 ? 'var(--success)' : 'var(--danger)',
-                            fontWeight: 600
-                          }}>
-                            {automaticAdjustments >= 0 ? '+' : ''}{automaticAdjustments}
-                          </span>
-                        </div>
+        <div style={{ width: '50px', textAlign: 'center' }}>
+          <span style={{
+            color: 'var(--text-primary)',
+            fontWeight: 600
+          }}>
+            {automaticAdjustments >= 0 ? '+' : ''}{automaticAdjustments}
+          </span>
+        </div>
                       </div>
                     )
                   })()}
