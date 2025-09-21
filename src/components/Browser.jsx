@@ -105,7 +105,8 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
         item.description?.toLowerCase().includes(searchTerm.toLowerCase())
       
       // Tier filter
-      const matchesTier = selectedTiers.length === 0 || selectedTiers.includes(item.tier.toString())
+      const matchesTier = selectedTiers.length === 0 || 
+        (selectedTiers.includes('party-tier') ? item.tier === playerTier : selectedTiers.includes(item.tier.toString()))
       
       // Type filter
       const matchesType = selectedTypes.length === 0 || selectedTypes.includes(item.type)
@@ -155,10 +156,10 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
               }
             }
             
-            // Lower tier adjustment
-            if (item.tier < playerTier) {
-              automaticAdjustment += 1
-            }
+        // Lower tier adjustment
+        // if (item.tier < playerTier) {
+        //   automaticAdjustment += 1
+        // }
             
             return baseCost + automaticAdjustment
           }
@@ -243,6 +244,9 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
   const handleTierSelect = (tier) => {
     if (tier === 'clear') {
       setSelectedTiers([])
+    } else if (tier === 'party-tier') {
+      // Special case: only show party tier
+      setSelectedTiers(['party-tier'])
     } else {
       setSelectedTiers(prev => 
         prev.includes(tier) 
@@ -389,8 +393,8 @@ const BrowserTableHeader = ({
         { key: 'name', label: 'Name' },
         { key: 'tier', label: 'Tier', hasFilter: true },
         { key: 'type', label: 'Type', hasFilter: true },
-        { key: 'difficulty', label: 'Diff' },
         { key: 'cost', label: 'Cost', hasFilter: true },
+        { key: 'difficulty', label: 'Diff' },
         { key: 'action', label: '' } // Empty label for action column
       ]
     } else if (type === 'environment') {
@@ -488,6 +492,20 @@ const BrowserTableHeader = ({
           </span>
           <span style={styles.filterLabel}>All</span>
         </div>
+        {filterType === 'tier' && (
+          <div 
+            style={{
+              ...styles.filterOption,
+              ...(selected.includes('party-tier') ? styles.filterOptionSelected : {})
+            }}
+            onClick={() => onSelect('party-tier')}
+          >
+            <span style={styles.checkIcon}>
+              {selected.includes('party-tier') ? <CheckSquare size={16}/> : <Square size={16}/>}
+            </span>
+            <span style={styles.filterLabel}>Party Tier</span>
+          </div>
+        )}
         {values.map(value => {
           const isSelected = selected.includes(value.toString())
           return (
@@ -522,10 +540,10 @@ const BrowserTableHeader = ({
             position: 'relative',
             // Apply column-specific widths
             ...(column.key === 'name' ? { width: 'auto', minWidth: '0' } : {}),
-            ...(column.key === 'tier' ? { width: '80px', minWidth: '80px', maxWidth: '80px' } : {}),
-            ...(column.key === 'type' ? { width: '100px', minWidth: '100px', maxWidth: '100px' } : {}),
+            ...(column.key === 'tier' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {}),
+            ...(column.key === 'type' ? { width: '80px', minWidth: '80px', maxWidth: '80px' } : {}),
             ...(column.key === 'difficulty' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {}),
-            ...(column.key === 'cost' ? { width: '70px', minWidth: '70px', maxWidth: '70px' } : {}),
+            ...(column.key === 'cost' ? { width: '50px', minWidth: '50px', maxWidth: '50px' } : {}),
             ...(column.key === 'action' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {})
           }}
           onClick={() => onSort(column.key)}
@@ -634,10 +652,10 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
       }
     }
     
-    // Lower tier adjustment
-    if (item.tier < playerTier) {
-      automaticAdjustment += 1
-    }
+        // Lower tier adjustment
+        // if (item.tier < playerTier) {
+        //   automaticAdjustment += 1
+        // }
     
     return baseCost + automaticAdjustment
   }
@@ -646,7 +664,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
     if (type === 'adversary') {
       const dynamicCost = calculateDynamicCost()
       const baseCost = BATTLE_POINT_COSTS[item.type] || 2
-      const exceedsBudget = dynamicCost > remainingBudget
+      const exceedsBudget = dynamicCost > remainingBudget || remainingBudget <= 0
       
       // Apply cost filter logic
       if (costFilter === 'auto-hide' && exceedsBudget) {
@@ -662,12 +680,12 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
       return (
         <>
           <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left', ...deEmphasizedStyle}}>{item.name}</td>
-          <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center', ...deEmphasizedStyle}}>{item.tier}</td>
-          <td style={{...styles.rowCell, width: '100px', minWidth: '100px', maxWidth: '100px', textAlign: 'center', ...deEmphasizedStyle}}>{item.type}</td>
-          <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', ...deEmphasizedStyle}}>{item.difficulty}</td>
-          <td style={{...styles.rowCell, width: '70px', minWidth: '70px', maxWidth: '70px', textAlign: 'center', ...deEmphasizedStyle}}>
+          <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', ...deEmphasizedStyle}}>{item.tier}</td>
+          <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center', ...deEmphasizedStyle}}>{item.type}</td>
+          <td style={{...styles.rowCell, width: '50px', minWidth: '50px', maxWidth: '50px', textAlign: 'center', ...deEmphasizedStyle}}>
             {dynamicCost}
           </td>
+          <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', ...deEmphasizedStyle}}>{item.difficulty}</td>
         </>
       )
     } else if (type === 'environment') {
@@ -815,12 +833,12 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
     }
     
     // Check for lower tier adversaries (only count those with quantity > 0)
-    const hasLowerTierAdversaries = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0
-    )
-    if (hasLowerTierAdversaries) {
-      automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.lowerTierAdversary
-    }
+    // const hasLowerTierAdversaries = encounterItems.some(item => 
+    //   item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0
+    // )
+    // if (hasLowerTierAdversaries) {
+    //   automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.lowerTierAdversary
+    // }
     
     const availableBattlePoints = baseBattlePoints + automaticAdjustments
     return availableBattlePoints - spentBattlePoints
@@ -855,7 +873,7 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
       {/* Scrollable Content with Sticky Header */}
       <div className="browser-content" style={styles.browserContent}>
         <table style={styles.browserTable}>
-          <thead>
+          <thead style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'var(--bg-primary)' }}>
             <BrowserTableHeader
               sortFields={sortFields}
               onSort={handleSort}
@@ -1143,7 +1161,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '4px',
+    gap: '0px',
     position: 'relative'
   },
   headerFilterIcon: {
@@ -1157,7 +1175,8 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.2s ease',
-    position: 'relative'
+    position: 'relative',
+    marginLeft: '-2px'
   },
   headerFilterIconActive: {
     color: 'var(--purple)'
@@ -1177,9 +1196,7 @@ const styles = {
     pointerEvents: 'none'
   },
   filterDropdown: {
-    position: 'absolute',
-    top: '100%',
-    left: '0',
+    position: 'fixed',
     background: 'var(--bg-secondary)',
     border: '1px solid var(--border)',
     borderRadius: 'var(--radius-md)',
