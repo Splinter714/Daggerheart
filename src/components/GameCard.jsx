@@ -69,7 +69,7 @@ const styles = {
   card: {
     backgroundColor: 'var(--bg-card)',
     borderRadius: '8px',
-    padding: '12px',
+    padding: '8px',
     cursor: 'pointer',
     transition: 'all 0.1s ease',
     position: 'relative'
@@ -669,7 +669,7 @@ const GameCard = ({
         )}
         {/* Fixed Header Section - Identical to Compact View */}
         <div className="border-b" style={{
-          padding: '12px',
+          padding: '8px',
           flexShrink: 0,
           backgroundColor: 'var(--bg-card)',
           borderRadius: '8px 8px 0 0',
@@ -708,7 +708,7 @@ const GameCard = ({
         {/* Core Stats Section */}
         <div style={{
           marginBottom: '1rem',
-          padding: '0 12px 0.75rem 12px',
+          padding: '0 8px 0.75rem 8px',
           borderBottom: '1px solid var(--border)'
         }}>
           <div style={{
@@ -814,7 +814,7 @@ const GameCard = ({
         {item.features && item.features.length > 0 && (
           <div style={{
             marginBottom: '1rem',
-            padding: '0 12px'
+            padding: '0 8px'
           }}>
             {/* Passives */}
             {item.features.filter(f => f.type === 'Passive').length > 0 && (
@@ -997,7 +997,7 @@ const GameCard = ({
         {item.type !== 'Minion' && item.thresholds && (
           <div style={{
             marginTop: '1rem',
-            padding: '0.75rem 12px 0 12px',
+            padding: '0.75rem 8px 0 8px',
             borderTop: '1px solid var(--border)'
           }}>
             <div style={{
@@ -1363,7 +1363,7 @@ const GameCard = ({
         {item.motives && (
           <div style={{
             marginTop: '1rem',
-            padding: '0.75rem 12px 0 12px',
+            padding: '0.75rem 8px 0 8px',
             borderTop: '1px solid var(--border)'
           }}>
             <h3 style={{
@@ -1413,7 +1413,7 @@ const GameCard = ({
         {item.description && (
           <div style={{
             marginTop: '1rem',
-            padding: '0.75rem 12px 0 12px',
+            padding: '0.75rem 8px 0 8px',
             borderTop: '1px solid var(--border)'
           }}>
             <h3 style={{
@@ -1492,7 +1492,7 @@ const GameCard = ({
       >
         {/* Fixed Header Section - Similar to Adversary View */}
         <div className="border-b" style={{
-          padding: '12px',
+          padding: '8px',
           flexShrink: 0,
           backgroundColor: 'var(--bg-card)',
           borderRadius: '8px 8px 0 0',
@@ -1627,7 +1627,7 @@ const GameCard = ({
           {item.description && (
             <div style={{
               marginBottom: '1rem',
-              padding: '0 12px 0.75rem 12px',
+              padding: '0 8px 0.75rem 8px',
               borderBottom: '1px solid var(--border)'
             }}>
               <h3 style={{
@@ -1677,7 +1677,7 @@ const GameCard = ({
           {item.impulses && (
             <div style={{
               marginBottom: '1rem',
-              padding: '0 12px 0.75rem 12px',
+              padding: '0 8px 0.75rem 8px',
               borderBottom: '1px solid var(--border)'
             }}>
               <h3 style={{
@@ -1703,7 +1703,7 @@ const GameCard = ({
           {/* Core Stats Section */}
           <div style={{
             marginBottom: '1rem',
-            padding: '0 12px 0.75rem 12px',
+            padding: '0 8px 0.75rem 8px',
             borderBottom: '1px solid var(--border)'
           }}>
             <h3 style={{
@@ -1819,7 +1819,7 @@ const GameCard = ({
           {item.features && item.features.length > 0 && (
             <div style={{
               marginBottom: '1rem',
-              padding: '0 12px'
+              padding: '0 8px'
             }}>
               {/* Passives */}
               {item.features.filter(f => f.type === 'Passive').length > 0 && (

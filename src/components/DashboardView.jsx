@@ -88,7 +88,7 @@ const DashboardContent = () => {
   }, [])
 
   // Column layout calculations - dynamic sizing to always show full columns
-  const gap = 16
+  const gap = 12
   const minColumnWidth = 250
   const maxColumnWidth = 500
   
@@ -285,7 +285,7 @@ const DashboardContent = () => {
               display: 'flex', 
               justifyContent: 'space-between', 
               alignItems: 'center', 
-              padding: '1rem', 
+              padding: '0.5rem', 
               borderBottom: '1px solid var(--border)',
               backgroundColor: 'var(--bg-secondary)',
               flexShrink: 0
@@ -312,7 +312,7 @@ const DashboardContent = () => {
                 ×
               </button>
             </div>
-            <div style={{ flex: 1, padding: '1rem', overflowY: 'auto' }}>
+            <div style={{ flex: 1, padding: '8px', overflowY: 'auto' }}>
               <Browser
                 type={browserType}
                 onAddItem={(itemData) => {
