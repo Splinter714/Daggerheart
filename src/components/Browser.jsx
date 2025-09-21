@@ -739,7 +739,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 
 // Main Browser Component
 const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1 }) => {
-  const [costFilter, setCostFilter] = useState('auto-grey') // 'all', 'auto-grey', 'auto-hide'
+  const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
   const [showCostDropdown, setShowCostDropdown] = useState(false)
   const costFilterRef = useRef(null)
   
@@ -833,7 +833,7 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
     setShowCostDropdown(false)
   }
 
-  const isCostFiltered = costFilter !== 'auto-grey'
+  const isCostFiltered = costFilter !== 'all'
 
   if (loading) {
     return (
