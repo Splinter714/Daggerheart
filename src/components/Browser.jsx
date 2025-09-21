@@ -17,6 +17,13 @@ const BATTLE_POINT_COSTS = {
   'Solo': 5
 }
 
+// Battle Points adjustments (from EncounterBuilder)
+const BATTLE_POINT_ADJUSTMENTS = {
+  twoOrMoreSolos: -2,
+  noBruisersHordesLeadersSolos: 1,
+  lowerTierAdversary: 1
+}
+
 // Dynamically import JSON data to keep initial bundle smaller
 let adversariesData = { adversaries: [] }
 let environmentsData = { environments: [] }
@@ -702,7 +709,46 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
       }
       return total
     }, 0)
-    return baseBattlePoints - spentBattlePoints
+    
+    // Calculate automatic adjustments (same logic as EncounterBuilder)
+    let automaticAdjustments = 0
+    
+    // Check for 2 or more Solo adversaries (only count those with quantity > 0)
+    const soloCount = encounterItems
+      .filter(item => item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0)
+      .reduce((sum, item) => sum + item.quantity, 0)
+    if (soloCount >= 2) {
+      automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos
+    }
+    
+    // Check if no Bruisers, Hordes, Leaders, or Solos (only count those with quantity > 0)
+    const hasBruisers = encounterItems.some(item => 
+      item.type === 'adversary' && item.item.type === 'Bruiser' && item.quantity > 0
+    )
+    const hasHordes = encounterItems.some(item => 
+      item.type === 'adversary' && item.item.type === 'Horde' && item.quantity > 0
+    )
+    const hasLeaders = encounterItems.some(item => 
+      item.type === 'adversary' && item.item.type === 'Leader' && item.quantity > 0
+    )
+    const hasSolos = encounterItems.some(item => 
+      item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0
+    )
+    
+    if (!hasBruisers && !hasHordes && !hasLeaders && !hasSolos) {
+      automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos
+    }
+    
+    // Check for lower tier adversaries (only count those with quantity > 0)
+    const hasLowerTierAdversaries = encounterItems.some(item => 
+      item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0
+    )
+    if (hasLowerTierAdversaries) {
+      automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.lowerTierAdversary
+    }
+    
+    const availableBattlePoints = baseBattlePoints + automaticAdjustments
+    return availableBattlePoints - spentBattlePoints
   }
 
   const remainingBudget = calculateRemainingBudget()
