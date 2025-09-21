@@ -406,7 +406,7 @@ const GameCard = ({
   const renderTitle = () => {
     if (type === 'adversary' || type === 'adversaries') {
       const baseName = item.baseName || item.name?.replace(/\s+\(\d+\)$/, '') || ''
-      const duplicateNumber = item.duplicateNumber || (item.name?.match(/\((\d+)\)$/) ? parseInt(item.name.match(/\((\d+)\)$/)[1]) : 1)
+      const duplicateNumber = item.duplicateNumber || 1
       
       // Check if there are other adversaries with the same base name
       // Include the current item in the check to ensure accurate duplicate detection
