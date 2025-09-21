@@ -40,7 +40,7 @@ const loadData = async () => {
 }
 
 // Custom hook for browser functionality - all logic inline
-const useBrowser = (type) => {
+const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortFields, setSortFields] = useState([{ field: 'tier', direction: 'asc' }, { field: 'name', direction: 'asc' }])
   const [data, setData] = useState([])
@@ -684,7 +684,7 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
     isTierFiltered,
     isTypeFiltered,
     getDropdownStyle
-  } = useBrowser(type)
+  } = useBrowser(type, encounterItems, pcCount, playerTier)
 
   // Calculate remaining battle points budget
   const calculateRemainingBudget = () => {
