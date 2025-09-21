@@ -715,7 +715,7 @@ const EncounterBuilder = ({
                 }}>
                   <div style={{ width: '60px' }}></div>
                   <div style={{ flex: 1 }}>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                       Points Remaining
                     </span>
                   </div>
@@ -723,8 +723,7 @@ const EncounterBuilder = ({
                   <div style={{ width: '40px', textAlign: 'center' }}>
                     <span style={{
                       color: 'var(--text-primary)',
-                      fontWeight: 700,
-                      fontSize: '1rem'
+                      fontWeight: 600
                     }}>
                       {remainingBattlePoints}
                     </span>
