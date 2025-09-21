@@ -209,6 +209,13 @@ const DashboardContent = () => {
 
   const entityGroups = getEntityGroups()
 
+  // Auto-open encounter builder if no entities are loaded
+  useEffect(() => {
+    if (entityGroups.length === 0 && !encounterBuilderOpen) {
+      setEncounterBuilderOpen(true)
+    }
+  }, [entityGroups.length, encounterBuilderOpen])
+
   // Calculate total width needed for all columns
   const totalColumns = entityGroups.length
   const totalWidth = totalColumns * columnWidth + (totalColumns - 1) * gap + (gap * 2)
