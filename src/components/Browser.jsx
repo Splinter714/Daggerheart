@@ -488,7 +488,7 @@ const BrowserTableHeader = ({
 }
 
 // Browser Row Component
-const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1 }) => {
+const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0 }) => {
   const [isHovered, setIsHovered] = useState(false)
 
   const handleAdd = () => {
@@ -538,14 +538,21 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
     if (type === 'adversary') {
       const dynamicCost = calculateDynamicCost()
       const baseCost = BATTLE_POINT_COSTS[item.type] || 2
+      const exceedsBudget = dynamicCost > remainingBudget
+      
+      // De-emphasized styling for rows that exceed budget
+      const deEmphasizedStyle = exceedsBudget ? {
+        opacity: 0.5,
+        color: 'var(--text-secondary)'
+      } : {}
       
       return (
         <>
-          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left'}}>{item.name}</td>
-          <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center'}}>{item.tier}</td>
-          <td style={{...styles.rowCell, width: '100px', minWidth: '100px', maxWidth: '100px', textAlign: 'center'}}>{item.type}</td>
-          <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center'}}>{item.difficulty}</td>
-          <td style={{...styles.rowCell, width: '50px', minWidth: '50px', maxWidth: '50px', textAlign: 'center'}}>
+          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left', ...deEmphasizedStyle}}>{item.name}</td>
+          <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center', ...deEmphasizedStyle}}>{item.tier}</td>
+          <td style={{...styles.rowCell, width: '100px', minWidth: '100px', maxWidth: '100px', textAlign: 'center', ...deEmphasizedStyle}}>{item.type}</td>
+          <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', ...deEmphasizedStyle}}>{item.difficulty}</td>
+          <td style={{...styles.rowCell, width: '50px', minWidth: '50px', maxWidth: '50px', textAlign: 'center', ...deEmphasizedStyle}}>
             {dynamicCost}
           </td>
         </>
@@ -637,6 +644,27 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
     getDropdownStyle
   } = useBrowser(type)
 
+  // Calculate remaining battle points budget
+  const calculateRemainingBudget = () => {
+    const baseBattlePoints = (3 * pcCount) + 2
+    const spentBattlePoints = encounterItems.reduce((total, item) => {
+      if (item.type === 'adversary') {
+        const cost = BATTLE_POINT_COSTS[item.item.type] || 2
+        if (item.item.type === 'Minion') {
+          // Minions cost 1 BP per group equal to party size
+          const groups = Math.ceil(item.quantity / pcCount)
+          return total + (groups * cost)
+        } else {
+          return total + (item.quantity * cost)
+        }
+      }
+      return total
+    }, 0)
+    return baseBattlePoints - spentBattlePoints
+  }
+
+  const remainingBudget = calculateRemainingBudget()
+
   if (loading) {
     return (
       <div style={styles.browser}>
@@ -690,6 +718,7 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
                 encounterItems={encounterItems}
                 pcCount={pcCount}
                 playerTier={playerTier}
+                remainingBudget={remainingBudget}
               />
             ))}
           </tbody>
