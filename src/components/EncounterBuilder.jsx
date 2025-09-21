@@ -684,20 +684,23 @@ const EncounterBuilder = ({
                     return (
                       <div style={{
                         display: 'flex',
-                        justifyContent: 'space-between',
                         alignItems: 'center',
                         padding: '0.25rem 0',
                         borderBottom: '1px solid var(--border)'
                       }}>
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                          Automatic ({reasons.join(', ')})
-                        </span>
-                        <span style={{
-                          color: automaticAdjustments >= 0 ? 'var(--success)' : 'var(--danger)',
-                          fontWeight: 600
-                        }}>
-                          {automaticAdjustments >= 0 ? '+' : ''}{automaticAdjustments}
-                        </span>
+                        <div style={{ flex: 1 }}>
+                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                            Automatic ({reasons.join(', ')})
+                          </span>
+                        </div>
+                        <div style={{ width: '50px', textAlign: 'center' }}>
+                          <span style={{
+                            color: automaticAdjustments >= 0 ? 'var(--success)' : 'var(--danger)',
+                            fontWeight: 600
+                          }}>
+                            {automaticAdjustments >= 0 ? '+' : ''}{automaticAdjustments}
+                          </span>
+                        </div>
                       </div>
                     )
                   })()}
