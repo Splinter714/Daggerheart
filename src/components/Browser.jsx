@@ -503,22 +503,11 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
     let automaticAdjustment = 0
     
     // Count current adversaries by type
-    const currentSoloCount = encounterItems.filter(encounterItem => 
-      encounterItem.type === 'adversary' && encounterItem.item.type === 'Solo' && encounterItem.quantity > 0
-    ).reduce((sum, encounterItem) => sum + encounterItem.quantity, 0)
-    
     const currentMajorThreatCount = encounterItems.filter(encounterItem => 
       encounterItem.type === 'adversary' && ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(encounterItem.item.type) && encounterItem.quantity > 0
     ).reduce((sum, encounterItem) => sum + encounterItem.quantity, 0)
     
     // Calculate automatic adjustments
-    if (item.type === 'Solo') {
-      // If this would be the 2nd+ Solo, add 2 BP (penalty for 2+ Solos)
-      if (currentSoloCount >= 1) {
-        automaticAdjustment += 2
-      }
-    }
-    
     if (['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.type)) {
       // If this is the first Major Threat, add 1 BP (automatic adjustment for lack of Major Threats)
       if (currentMajorThreatCount === 0) {
