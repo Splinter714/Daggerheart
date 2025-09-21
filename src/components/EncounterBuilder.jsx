@@ -504,8 +504,8 @@ const EncounterBuilder = ({
                       </span>
                     </div>
                     <div style={{ width: '40px', textAlign: 'center' }}>
-                      <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                        {calculateBaseBattlePoints(pcCount)}
+                      <span style={{ color: 'var(--success)', fontWeight: 600 }}>
+                        +{calculateBaseBattlePoints(pcCount)}
                       </span>
                     </div>
                   </div>
@@ -660,8 +660,8 @@ const EncounterBuilder = ({
                           </span>
                         </div>
                         <div style={{ width: '40px', textAlign: 'center' }}>
-                          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                            {totalCost}
+                          <span style={{ color: 'var(--danger)', fontWeight: 600 }}>
+                            -{totalCost}
                           </span>
                         </div>
                       </div>
@@ -706,55 +706,25 @@ const EncounterBuilder = ({
                   })()}
                 </div>
                 
-                {/* Total */}
+                {/* Total Battle Points */}
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '0.5rem 0',
                   borderTop: '2px solid var(--border)',
-                  borderBottom: '1px solid var(--border)',
                   marginTop: '0.5rem'
                 }}>
-                  <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1rem' }}>
-                    Available Battle Points
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '1rem' }}>
+                    Total Battle Points
                   </span>
-                  <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1.2rem' }}>
-                    {availableBattlePoints}
+                  <span style={{
+                    color: remainingBattlePoints >= 0 ? 'var(--success)' : 'var(--danger)',
+                    fontWeight: 700,
+                    fontSize: '1.2rem'
+                  }}>
+                    {remainingBattlePoints}
                   </span>
-                </div>
-                
-                {/* Spent vs Remaining */}
-                <div style={{ marginTop: '0.5rem' }}>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '0.25rem 0'
-                  }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                      Spent
-                    </span>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                      {spentBattlePoints}
-                    </span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '0.25rem 0'
-                  }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                      Remaining
-                    </span>
-                    <span style={{
-                      color: remainingBattlePoints >= 0 ? 'var(--success)' : 'var(--danger)',
-                      fontWeight: 700
-                    }}>
-                      {remainingBattlePoints}
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
