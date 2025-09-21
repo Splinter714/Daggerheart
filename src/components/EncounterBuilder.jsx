@@ -438,7 +438,77 @@ const EncounterBuilder = ({
                 
                 {/* Receipt Items */}
                 <div style={{ marginBottom: '0.75rem' }}>
-                  {/* PC Count Row */}
+                  {/* Player Tier Row */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0.25rem 0',
+                    borderBottom: '1px solid var(--border)'
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        Tier
+                      </span>
+                    </div>
+                    <div style={{ width: '80px', textAlign: 'center', position: 'relative' }}>
+                      <button
+                        onClick={() => setPlayerTier(Math.max(1, playerTier - 1))}
+                        style={{
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text-primary)',
+                          borderRadius: '3px',
+                          padding: '0',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: '18px',
+                          height: '18px',
+                          fontSize: '0.7rem',
+                          position: 'absolute',
+                          left: '0',
+                          top: '50%',
+                          transform: 'translateY(-50%)'
+                        }}
+                      >
+                        <Minus size={10} />
+                      </button>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        ({playerTier})
+                      </span>
+                      <button
+                        onClick={() => setPlayerTier(Math.min(4, playerTier + 1))}
+                        style={{
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text-primary)',
+                          borderRadius: '3px',
+                          padding: '0',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: '18px',
+                          height: '18px',
+                          fontSize: '0.7rem',
+                          position: 'absolute',
+                          right: '0',
+                          top: '50%',
+                          transform: 'translateY(-50%)'
+                        }}
+                      >
+                        <Plus size={10} />
+                      </button>
+                    </div>
+                    <div style={{ width: '60px', textAlign: 'center' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Party Size Row */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -507,78 +577,6 @@ const EncounterBuilder = ({
                       </span>
                     </div>
                   </div>
-                  
-                  {/* Player Tier Row */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '0.25rem 0',
-                    borderBottom: '1px solid var(--border)'
-                  }}>
-                    <div style={{ flex: 1 }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        Tier
-                      </span>
-                    </div>
-                    <div style={{ width: '80px', textAlign: 'center', position: 'relative' }}>
-                      <button
-                        onClick={() => setPlayerTier(Math.max(1, playerTier - 1))}
-                        style={{
-                          background: 'var(--bg-secondary)',
-                          border: '1px solid var(--border)',
-                          color: 'var(--text-primary)',
-                          borderRadius: '3px',
-                          padding: '0',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minWidth: '18px',
-                          height: '18px',
-                          fontSize: '0.7rem',
-                          position: 'absolute',
-                          left: '0',
-                          top: '50%',
-                          transform: 'translateY(-50%)'
-                        }}
-                      >
-                        <Minus size={10} />
-                      </button>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        ({playerTier})
-                      </span>
-                      <button
-                        onClick={() => setPlayerTier(Math.min(4, playerTier + 1))}
-                        style={{
-                          background: 'var(--bg-secondary)',
-                          border: '1px solid var(--border)',
-                          color: 'var(--text-primary)',
-                          borderRadius: '3px',
-                          padding: '0',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minWidth: '18px',
-                          height: '18px',
-                          fontSize: '0.7rem',
-                          position: 'absolute',
-                          right: '0',
-                          top: '50%',
-                          transform: 'translateY(-50%)'
-                        }}
-                      >
-                        <Plus size={10} />
-                      </button>
-                    </div>
-                    <div style={{ width: '60px', textAlign: 'center' }}>
-                      <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                        -
-                      </span>
-                    </div>
-                  </div>
-                  
-                  
                   
                   {/* Individual Adversary Costs */}
                   {encounterItems.map((encounterItem) => {
@@ -666,10 +664,10 @@ const EncounterBuilder = ({
                   {automaticAdjustments !== 0 && (() => {
                     const reasons = []
                     if (encounterItems.filter(item => item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0).reduce((sum, item) => sum + item.quantity, 0) >= 2) {
-                      reasons.push('2+ Solo adversaries')
+                      reasons.push('2+ Solo')
                     }
                     if (!encounterItems.some(item => item.type === 'adversary' && ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.item.type) && item.quantity > 0)) {
-                      reasons.push('No major threats')
+                      reasons.push('no major threats')
                     }
                     if (encounterItems.some(item => item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0)) {
                       reasons.push('Lower tier adversaries')
@@ -684,7 +682,7 @@ const EncounterBuilder = ({
                       }}>
                         <div style={{ flex: 1 }}>
                           <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                            Automatic ({reasons.join(', ')})
+                            {reasons.join(', ')}
                           </span>
                         </div>
                         <div style={{ width: '80px', textAlign: 'center' }}></div>
@@ -710,13 +708,13 @@ const EncounterBuilder = ({
                 }}>
                   <div style={{ flex: 1 }}>
                     <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                      Points Remaining
+                      Remaining Budget
                     </span>
                   </div>
                   <div style={{ width: '80px', textAlign: 'center' }}></div>
                   <div style={{ width: '60px', textAlign: 'center' }}>
                     <span style={{
-                      color: 'var(--text-primary)',
+                      color: remainingBattlePoints < 0 ? 'var(--danger)' : 'var(--text-primary)',
                       fontWeight: 600
                     }}>
                       {remainingBattlePoints}
