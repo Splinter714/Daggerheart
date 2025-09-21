@@ -525,7 +525,7 @@ const BrowserTableHeader = ({
             ...(column.key === 'tier' ? { width: '80px', minWidth: '80px', maxWidth: '80px' } : {}),
             ...(column.key === 'type' ? { width: '100px', minWidth: '100px', maxWidth: '100px' } : {}),
             ...(column.key === 'difficulty' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {}),
-            ...(column.key === 'cost' ? { width: '50px', minWidth: '50px', maxWidth: '50px' } : {}),
+            ...(column.key === 'cost' ? { width: '70px', minWidth: '70px', maxWidth: '70px' } : {}),
             ...(column.key === 'action' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {})
           }}
           onClick={() => onSort(column.key)}
@@ -665,7 +665,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
           <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center', ...deEmphasizedStyle}}>{item.tier}</td>
           <td style={{...styles.rowCell, width: '100px', minWidth: '100px', maxWidth: '100px', textAlign: 'center', ...deEmphasizedStyle}}>{item.type}</td>
           <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', ...deEmphasizedStyle}}>{item.difficulty}</td>
-          <td style={{...styles.rowCell, width: '50px', minWidth: '50px', maxWidth: '50px', textAlign: 'center', ...deEmphasizedStyle}}>
+          <td style={{...styles.rowCell, width: '70px', minWidth: '70px', maxWidth: '70px', textAlign: 'center', ...deEmphasizedStyle}}>
             {dynamicCost}
           </td>
         </>

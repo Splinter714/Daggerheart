@@ -445,13 +445,12 @@ const EncounterBuilder = ({
                     padding: '0.25rem 0',
                     borderBottom: '1px solid var(--border)'
                   }}>
-                    <div style={{ width: '60px' }}></div>
                     <div style={{ flex: 1 }}>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                         Party
                       </span>
                     </div>
-                    <div style={{ width: '50px', textAlign: 'center', position: 'relative' }}>
+                    <div style={{ width: '80px', textAlign: 'center', position: 'relative' }}>
                       <button
                         onClick={() => setPcCount(Math.max(1, pcCount - 1))}
                         style={{
@@ -502,7 +501,7 @@ const EncounterBuilder = ({
                         <Plus size={10} />
                       </button>
                     </div>
-                    <div style={{ width: '40px', textAlign: 'center' }}>
+                    <div style={{ width: '60px', textAlign: 'center' }}>
                       <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                         +{calculateBaseBattlePoints(pcCount)}
                       </span>
@@ -516,13 +515,12 @@ const EncounterBuilder = ({
                     padding: '0.25rem 0',
                     borderBottom: '1px solid var(--border)'
                   }}>
-                    <div style={{ width: '60px' }}></div>
                     <div style={{ flex: 1 }}>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                         Tier
                       </span>
                     </div>
-                    <div style={{ width: '50px', textAlign: 'center', position: 'relative' }}>
+                    <div style={{ width: '80px', textAlign: 'center', position: 'relative' }}>
                       <button
                         onClick={() => setPlayerTier(Math.max(1, playerTier - 1))}
                         style={{
@@ -573,7 +571,7 @@ const EncounterBuilder = ({
                         <Plus size={10} />
                       </button>
                     </div>
-                    <div style={{ width: '40px', textAlign: 'center' }}>
+                    <div style={{ width: '60px', textAlign: 'center' }}>
                       <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                         -
                       </span>
@@ -599,13 +597,12 @@ const EncounterBuilder = ({
                         padding: '0.25rem 0',
                         borderBottom: '1px solid var(--border)'
                       }}>
-                        <div style={{ width: '60px' }}></div>
                         <div style={{ flex: 1 }}>
                           <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                             {encounterItem.item.name}
                           </span>
                         </div>
-                        <div style={{ width: '50px', textAlign: 'center', position: 'relative' }}>
+                        <div style={{ width: '80px', textAlign: 'center', position: 'relative' }}>
                           <button
                             onClick={() => handleRemoveFromEncounter(encounterItem.item.id, encounterItem.type)}
                             style={{
@@ -656,7 +653,7 @@ const EncounterBuilder = ({
                             <Plus size={10} />
                           </button>
                         </div>
-                        <div style={{ width: '40px', textAlign: 'center' }}>
+                        <div style={{ width: '60px', textAlign: 'center' }}>
                           <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                             -{totalCost}
                           </span>
@@ -690,14 +687,15 @@ const EncounterBuilder = ({
                             Automatic ({reasons.join(', ')})
                           </span>
                         </div>
-        <div style={{ width: '50px', textAlign: 'center' }}>
-          <span style={{
-            color: 'var(--text-primary)',
-            fontWeight: 600
-          }}>
-            {automaticAdjustments >= 0 ? '+' : ''}{automaticAdjustments}
-          </span>
-        </div>
+                        <div style={{ width: '80px', textAlign: 'center' }}></div>
+                        <div style={{ width: '60px', textAlign: 'center' }}>
+                          <span style={{
+                            color: 'var(--text-primary)',
+                            fontWeight: 600
+                          }}>
+                            {automaticAdjustments >= 0 ? '+' : ''}{automaticAdjustments}
+                          </span>
+                        </div>
                       </div>
                     )
                   })()}
@@ -710,14 +708,13 @@ const EncounterBuilder = ({
                   padding: '0.25rem 0',
                   borderBottom: '1px solid var(--border)'
                 }}>
-                  <div style={{ width: '60px' }}></div>
                   <div style={{ flex: 1 }}>
                     <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                       Points Remaining
                     </span>
                   </div>
-                  <div style={{ width: '50px', textAlign: 'center' }}></div>
-                  <div style={{ width: '40px', textAlign: 'center' }}>
+                  <div style={{ width: '80px', textAlign: 'center' }}></div>
+                  <div style={{ width: '60px', textAlign: 'center' }}>
                     <span style={{
                       color: 'var(--text-primary)',
                       fontWeight: 600
