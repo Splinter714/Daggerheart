@@ -447,7 +447,7 @@ const EncounterBuilder = ({
                   }}>
                     <div style={{ flex: 1 }}>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        Tier
+                        Party Tier
                       </span>
                     </div>
                     <div style={{ width: '80px', textAlign: 'center', position: 'relative' }}>
@@ -517,7 +517,7 @@ const EncounterBuilder = ({
                   }}>
                     <div style={{ flex: 1 }}>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        Party
+                        Party Size
                       </span>
                     </div>
                     <div style={{ width: '80px', textAlign: 'center', position: 'relative' }}>
