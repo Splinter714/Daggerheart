@@ -501,7 +501,7 @@ const EncounterBuilder = ({
                         <Plus size={10} />
                       </button>
                     </div>
-                    <div style={{ width: '60px', textAlign: 'center' }}>
+                    <div style={{ width: '60px', textAlign: 'right' }}>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                         
                       </span>
@@ -571,7 +571,7 @@ const EncounterBuilder = ({
                         <Plus size={10} />
                       </button>
                     </div>
-                    <div style={{ width: '60px', textAlign: 'center' }}>
+                    <div style={{ width: '60px', textAlign: 'right' }}>
                       <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                         +{calculateBaseBattlePoints(pcCount)}
                       </span>
@@ -651,7 +651,7 @@ const EncounterBuilder = ({
                             <Plus size={10} />
                           </button>
                         </div>
-                        <div style={{ width: '60px', textAlign: 'center' }}>
+                        <div style={{ width: '60px', textAlign: 'right' }}>
                           <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                             -{totalCost}
                           </span>
@@ -686,7 +686,7 @@ const EncounterBuilder = ({
                           </span>
                         </div>
                         <div style={{ width: '80px', textAlign: 'center' }}></div>
-                        <div style={{ width: '60px', textAlign: 'center' }}>
+                        <div style={{ width: '60px', textAlign: 'right' }}>
                           <span style={{
                             color: 'var(--text-primary)',
                             fontWeight: 600
@@ -712,7 +712,7 @@ const EncounterBuilder = ({
                     </span>
                   </div>
                   <div style={{ width: '80px', textAlign: 'center' }}></div>
-                  <div style={{ width: '60px', textAlign: 'center' }}>
+                  <div style={{ width: '60px', textAlign: 'right' }}>
                     <span style={{
                       color: remainingBattlePoints < 0 ? 'var(--danger)' : 'var(--text-primary)',
                       fontWeight: 600
