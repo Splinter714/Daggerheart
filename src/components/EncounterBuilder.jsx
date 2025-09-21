@@ -711,8 +711,7 @@ const EncounterBuilder = ({
                   display: 'flex',
                   alignItems: 'center',
                   padding: '0.25rem 0',
-                  borderTop: '1px solid var(--border)',
-                  marginTop: '0.5rem'
+                  borderBottom: '1px solid var(--border)'
                 }}>
                   <div style={{ width: '60px' }}></div>
                   <div style={{ flex: 1 }}>
