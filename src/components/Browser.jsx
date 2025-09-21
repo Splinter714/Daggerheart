@@ -512,8 +512,12 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
     ).reduce((sum, encounterItem) => sum + encounterItem.quantity, 0)
     
     // Calculate automatic adjustments
-    // Note: The "2+ Solos" adjustment is a penalty to available BP, not a cost reduction
-    // So Solo costs don't change based on Solo count
+    if (item.type === 'Solo') {
+      // If this would be the 2nd+ Solo, add 2 BP (penalty for 2+ Solos)
+      if (currentSoloCount >= 1) {
+        automaticAdjustment += 2
+      }
+    }
     
     if (['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.type)) {
       // If this is the first Major Threat, add 1 BP (automatic adjustment for lack of Major Threats)
