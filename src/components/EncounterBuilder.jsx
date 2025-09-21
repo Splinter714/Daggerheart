@@ -56,35 +56,35 @@ const EncounterBuilder = ({
   const automaticAdjustments = React.useMemo(() => {
     let adjustments = 0
     
-    // Check for 2 or more Solo adversaries
+    // Check for 2 or more Solo adversaries (only count those with quantity > 0)
     const soloCount = encounterItems
-      .filter(item => item.type === 'adversary' && item.item.type === 'Solo')
+      .filter(item => item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0)
       .reduce((sum, item) => sum + item.quantity, 0)
     if (soloCount >= 2) {
       adjustments += BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos
     }
     
-    // Check if no Bruisers, Hordes, Leaders, or Solos
+    // Check if no Bruisers, Hordes, Leaders, or Solos (only count those with quantity > 0)
     const hasBruisers = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Bruiser'
+      item.type === 'adversary' && item.item.type === 'Bruiser' && item.quantity > 0
     )
     const hasHordes = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Horde'
+      item.type === 'adversary' && item.item.type === 'Horde' && item.quantity > 0
     )
     const hasLeaders = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Leader'
+      item.type === 'adversary' && item.item.type === 'Leader' && item.quantity > 0
     )
     const hasSolos = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Solo'
+      item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0
     )
     
     if (!hasBruisers && !hasHordes && !hasLeaders && !hasSolos) {
       adjustments += BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos
     }
     
-    // Check for lower tier adversaries
+    // Check for lower tier adversaries (only count those with quantity > 0)
     const hasLowerTierAdversaries = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.tier && item.item.tier < playerTier
+      item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0
     )
     if (hasLowerTierAdversaries) {
       adjustments += BATTLE_POINT_ADJUSTMENTS.lowerTierAdversary
@@ -671,13 +671,13 @@ const EncounterBuilder = ({
                   {/* Automatic Adjustments */}
                   {automaticAdjustments !== 0 && (() => {
                     const reasons = []
-                    if (encounterItems.filter(item => item.type === 'adversary' && item.item.type === 'Solo').reduce((sum, item) => sum + item.quantity, 0) >= 2) {
+                    if (encounterItems.filter(item => item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0).reduce((sum, item) => sum + item.quantity, 0) >= 2) {
                       reasons.push('2+ Solo adversaries')
                     }
-                    if (!encounterItems.some(item => item.type === 'adversary' && ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.item.type))) {
+                    if (!encounterItems.some(item => item.type === 'adversary' && ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.item.type) && item.quantity > 0)) {
                       reasons.push('No major threats')
                     }
-                    if (encounterItems.some(item => item.type === 'adversary' && item.item.tier && item.item.tier < playerTier)) {
+                    if (encounterItems.some(item => item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0)) {
                       reasons.push('Lower tier adversaries')
                     }
                     
