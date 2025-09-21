@@ -546,13 +546,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
           <td style={{...styles.rowCell, width: '100px', minWidth: '100px', maxWidth: '100px', textAlign: 'center'}}>{item.type}</td>
           <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center'}}>{item.difficulty}</td>
           <td style={{...styles.rowCell, width: '50px', minWidth: '50px', maxWidth: '50px', textAlign: 'center'}}>
-            {dynamicCost !== baseCost ? (
-              <span style={{ color: dynamicCost < baseCost ? 'var(--success)' : 'var(--danger)' }}>
-                {dynamicCost}
-              </span>
-            ) : (
-              baseCost
-            )}
+            {dynamicCost}
           </td>
         </>
       )
