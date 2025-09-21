@@ -5,6 +5,56 @@
     "lastUpdated": "2025-08-25",
     "totalAdversaries": 129
   },
+
+  "_improvisation_guidance": {
+    "description": "Daggerheart Improvising Adversaries Guide",
+    "source": "Daggerheart SRD - Improvising Adversaries section",
+    
+    "quick_adjustment": "When mid-session and you need a new adversary, quickly adjust a stat block to a different tier using the Improvised Statistics by Tier table below.",
+    
+    "improvised_statistics_by_tier": {
+      "tier_1": {
+        "attack_modifier": "+1",
+        "damage_dice": "1d6+2 to 1d12+4",
+        "difficulty": 11,
+        "damage_thresholds": "Major 7/Severe 12"
+      },
+      "tier_2": {
+        "attack_modifier": "+2", 
+        "damage_dice": "2d6+3 to 2d12+4",
+        "difficulty": 14,
+        "damage_thresholds": "Major 10/Severe 20"
+      },
+      "tier_3": {
+        "attack_modifier": "+3",
+        "damage_dice": "3d8+3 to 3d12+5", 
+        "difficulty": 17,
+        "damage_thresholds": "Major 20/Severe 32"
+      },
+      "tier_4": {
+        "attack_modifier": "+4",
+        "damage_dice": "4d8+10 to 4d12+15",
+        "difficulty": 20,
+        "damage_thresholds": "Major 25/Severe 45"
+      }
+    },
+    
+    "adjusting_between_tiers": "When moving adversaries from Tiers 1-2 to Tiers 3-4, consider raising HP and Stress by 1-3 points. Watch for features that deal different damage than standard attacks - they may need adjustment too.",
+    
+    "adding_changing_features": {
+      "scaling_up": "When scaling to higher tier, consider adding a new feature to make them a greater threat instead of just scaling damage/difficulty.",
+      "scaling_down": "When scaling to lower tier, consider removing one of the adversary's most powerful or impactful features."
+    },
+    
+    "special_adversary_types": {
+      "horde": "Standard attack should deal high damage, then reduce (roughly by half) when the Horde has marked half or more of their HP.",
+      "minion": "Give flat damage value (1-5) for standard attack and 'Group Attack' feature. Set 'Minion' feature value (3-15 damage to defeat additional Minions in one attack, depending on tier).",
+      "solo": "Give high damage, high HP, and features that let them act more frequently (like 'Relentless') or deal area-of-effect damage."
+    },
+    
+    "note": "This guidance won't always make the adversary a perfect match for your party, but it reduces chances of overwhelming the party or PCs defeating Solo adversaries too easily."
+  },
+
   "adversaryTypes": {
     "SOLO": "Solo",
     "BRUISER": "Bruiser",
