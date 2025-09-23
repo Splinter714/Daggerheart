@@ -449,6 +449,50 @@ input[type="number"] {
   }
 }
 
+/* Encounter Builder Responsive Layout */
+@media (max-width: 800px) {
+  .encounter-builder-content {
+    flex-direction: column !important;
+  }
+  
+  .encounter-browser-panel {
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+  
+  .encounter-receipt-panel {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border) !important;
+    max-height: 40vh !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+/* Very narrow windows - compact receipt */
+@media (max-width: 600px) {
+  .encounter-receipt-panel {
+    max-height: 35vh !important;
+  }
+  
+  .encounter-receipt-panel .receipt-content {
+    padding: 0.75rem !important;
+  }
+  
+  .encounter-receipt-panel .receipt-item {
+    padding: 0.125rem 0 !important;
+    font-size: 0.85rem !important;
+  }
+  
+  .encounter-receipt-panel .receipt-controls {
+    min-width: 50px !important;
+  }
+  
+  .encounter-receipt-panel .receipt-value {
+    min-width: 30px !important;
+  }
+}
+
 /* Mobile hidden utility */
 .mobile-hidden {
   display: none !important;
