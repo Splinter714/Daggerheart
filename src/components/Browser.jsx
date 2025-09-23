@@ -240,7 +240,6 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
     })
   }
 
-
   const handleTierSelect = (tier) => {
     if (tier === 'clear') {
       setSelectedTiers([])
@@ -342,7 +341,7 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
 }
 
 // Browser Header Component
-const BrowserHeader = ({ searchTerm, onSearchChange, type }) => {
+const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls }) => {
   return (
     <div style={styles.browserHeader}>
       <input
@@ -352,6 +351,11 @@ const BrowserHeader = ({ searchTerm, onSearchChange, type }) => {
         onChange={(e) => onSearchChange(e.target.value)}
         style={styles.searchInput}
       />
+      {partyControls && (
+        <div style={styles.partyControls}>
+          {partyControls}
+        </div>
+      )}
     </div>
   )
 }
@@ -614,7 +618,7 @@ const BrowserTableHeader = ({
 }
 
 // Browser Row Component
-const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0, costFilter = 'auto-grey' }) => {
+const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0, costFilter = 'auto-grey', onAdversaryClick }) => {
   const [isHovered, setIsHovered] = useState(false)
 
   const handleAdd = () => {
@@ -679,7 +683,28 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
       
       return (
         <>
-          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left', ...deEmphasizedStyle}}>{item.name}</td>
+          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left', ...deEmphasizedStyle}}>
+            <div style={{ 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis', 
+              whiteSpace: 'nowrap',
+              maxWidth: '100%'
+            }}>
+              <div style={{ fontWeight: '600' }}>{item.name}</div>
+              {item.description && (
+                <div style={{ 
+                  fontSize: '0.85rem', 
+                  color: 'var(--text-secondary)', 
+                  marginTop: '0.125rem',
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis', 
+                  whiteSpace: 'nowrap'
+                }}>
+                  {item.description}
+                </div>
+              )}
+            </div>
+          </td>
           <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', ...deEmphasizedStyle}}>{item.tier}</td>
           <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center', ...deEmphasizedStyle}}>{item.type}</td>
           <td style={{...styles.rowCell, width: '50px', minWidth: '50px', maxWidth: '50px', textAlign: 'center', ...deEmphasizedStyle}}>
@@ -715,7 +740,13 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
           ...styles.row,
           ...(isHovered ? styles.rowHover : {})
         }}
-        onClick={() => onRowClick && onRowClick(item, type)}
+        onClick={() => {
+          if (type === 'adversary' && onAdversaryClick) {
+            onAdversaryClick(item)
+          } else if (onRowClick) {
+            onRowClick(item, type)
+          }
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -756,9 +787,10 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 }
 
 // Main Browser Component
-const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1 }) => {
+const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true }) => {
   const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
   const [showCostDropdown, setShowCostDropdown] = useState(false)
+  const [selectedAdversary, setSelectedAdversary] = useState(null)
   const costFilterRef = useRef(null)
   
   const {
@@ -862,12 +894,14 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
   }
 
   return (
-    <div style={styles.browserWrapper}>
+    <>
+      <div style={showContainer ? styles.browserWrapper : styles.browserWrapperNoContainer}>
       {/* Fixed Header Row */}
       <BrowserHeader
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         type={type}
+        partyControls={partyControls}
       />
 
       {/* Scrollable Content with Sticky Header */}
@@ -915,12 +949,55 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
                 playerTier={playerTier}
                 remainingBudget={remainingBudget}
                 costFilter={costFilter}
+                onAdversaryClick={(adversary) => {
+                  if (type === 'adversary') {
+                    setSelectedAdversary(adversary)
+                  }
+                }}
               />
             ))}
           </tbody>
         </table>
       </div>
     </div>
+    
+    {/* Adversary Card Modal */}
+    {selectedAdversary && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backdropFilter: 'blur(8px)',
+        zIndex: 2000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem'
+      }}
+      onClick={() => setSelectedAdversary(null)}
+      >
+        <div 
+          style={{
+            maxWidth: '600px',
+            width: '90vw',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GameCard
+            item={selectedAdversary}
+            type="adversary"
+            mode="expanded"
+            onClose={() => setSelectedAdversary(null)}
+          />
+        </div>
+      </div>
+    )}
+    </>
   )
 }
 
@@ -936,6 +1013,14 @@ const styles = {
     height: '100%',
     width: '100%', // Ensure wrapper uses full width
     position: 'relative' // Ensure proper positioning context
+  },
+  browserWrapperNoContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    height: '100%',
+    width: '100%',
+    position: 'relative'
   },
   browserContent: {
     flex: 1,
@@ -997,6 +1082,12 @@ const styles = {
     fontSize: '14px',
     marginRight: '12px',
     transition: 'all 0.2s ease'
+  },
+  partyControls: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    flexShrink: 0
   },
   searchInputFocus: {
     outline: 'none',
