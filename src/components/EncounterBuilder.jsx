@@ -40,7 +40,6 @@ const EncounterBuilder = ({
 }) => {
   // Encounter state
   const [pcCount, setPcCount] = useState(4)
-  const [playerTier, setPlayerTier] = useState(1)
   const [battlePointsAdjustments, setBattlePointsAdjustments] = useState({
     lessDifficult: false,
     increasedDamage: false,
@@ -108,16 +107,9 @@ const EncounterBuilder = ({
       adjustments += BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos
     }
     
-    // Check for lower tier adversaries (only count those with quantity > 0)
-    // const hasLowerTierAdversaries = encounterItems.some(item => 
-    //   item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0
-    // )
-    // if (hasLowerTierAdversaries) {
-    //   adjustments += BATTLE_POINT_ADJUSTMENTS.lowerTierAdversary
-    // }
     
     return adjustments
-  }, [encounterItems, playerTier])
+  }, [encounterItems])
   
   // Calculate available battle points
   const baseBattlePoints = calculateBaseBattlePoints(pcCount)
@@ -143,102 +135,6 @@ const EncounterBuilder = ({
   
   const remainingBattlePoints = availableBattlePoints - spentBattlePoints
   
-  // Create party controls component
-  const partyControls = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-      {/* Party Tier */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Tier:</span>
-        <button
-          onClick={() => setPlayerTier(Math.max(1, playerTier - 1))}
-          style={{
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-            borderRadius: '3px',
-            padding: '0',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: '18px',
-            height: '18px',
-            fontSize: '0.7rem'
-          }}
-        >
-          <Minus size={10} />
-        </button>
-        <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', minWidth: '20px', textAlign: 'center' }}>
-          {playerTier}
-        </span>
-        <button
-          onClick={() => setPlayerTier(Math.min(4, playerTier + 1))}
-          style={{
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-            borderRadius: '3px',
-            padding: '0',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: '18px',
-            height: '18px',
-            fontSize: '0.7rem'
-          }}
-        >
-          <Plus size={10} />
-        </button>
-      </div>
-      
-      {/* Party Size */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Size:</span>
-        <button
-          onClick={() => setPcCount(Math.max(1, pcCount - 1))}
-          style={{
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-            borderRadius: '3px',
-            padding: '0',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: '18px',
-            height: '18px',
-            fontSize: '0.7rem'
-          }}
-        >
-          <Minus size={10} />
-        </button>
-        <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', minWidth: '20px', textAlign: 'center' }}>
-          {pcCount}
-        </span>
-        <button
-          onClick={() => setPcCount(pcCount + 1)}
-          style={{
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-            borderRadius: '3px',
-            padding: '0',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: '18px',
-            height: '18px',
-            fontSize: '0.7rem'
-          }}
-        >
-          <Plus size={10} />
-        </button>
-      </div>
-    </div>
-  )
   
   // Adjust minion quantities when PC count changes
   React.useEffect(() => {
@@ -384,30 +280,6 @@ const EncounterBuilder = ({
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
         }}
       >
-        {/* Close button in top right */}
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-            fontSize: '1.5rem',
-            cursor: 'pointer',
-            padding: '0.5rem',
-            borderRadius: 'var(--radius-sm)',
-            transition: 'background-color 0.2s',
-            zIndex: 10
-          }}
-          onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-hover)'}
-          onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--bg-secondary)'}
-          title="Close Encounter Builder"
-        >
-          <X size={24} />
-        </button>
-      
       {/* Main Content */}
       <div className="encounter-builder-content" style={{
         display: 'flex',
@@ -427,8 +299,6 @@ const EncounterBuilder = ({
             onCancel={onClose}
             encounterItems={encounterItems}
             pcCount={pcCount}
-            playerTier={playerTier}
-            partyControls={partyControls}
             showContainer={false}
           />
         </div>
@@ -443,13 +313,20 @@ const EncounterBuilder = ({
           {/* Battle Points Calculator Content */}
           <div className="receipt-content" style={{ 
             padding: '1rem', 
-            overflowY: 'auto', 
             height: '100%',
             display: 'flex',
             flexDirection: 'column'
           }}>
-            {/* Receipt Items - Scrollable */}
-            <div style={{ flex: 1, overflowY: 'auto', marginBottom: '0.75rem' }}>
+            {/* Receipt Items - All aligned to top */}
+            <div style={{ 
+              flex: 1, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'flex-start',
+              overflowY: 'auto',
+              marginBottom: '0.75rem'
+            }}>
+                
                 
                 {/* Individual Adversary Costs */}
                 {encounterItems.map((encounterItem) => {
@@ -466,7 +343,8 @@ const EncounterBuilder = ({
                       display: 'flex',
                       alignItems: 'center',
                       padding: '0.25rem 0',
-                      borderBottom: '1px solid var(--border)'
+                      borderBottom: '1px solid var(--border)',
+                      flexShrink: 0
                     }}>
                       <div style={{ flex: 1 }}>
                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
@@ -532,69 +410,71 @@ const EncounterBuilder = ({
                     </div>
                   )
                 })}
-            </div>
-            
-            {/* Automatic Adjustments - Stuck to Bottom */}
-            {automaticAdjustments !== 0 && (() => {
-              const reasons = []
-              if (encounterItems.filter(item => item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0).reduce((sum, item) => sum + item.quantity, 0) >= 2) {
-                reasons.push('2+ Solo')
-              }
-              if (!encounterItems.some(item => item.type === 'adversary' && ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.item.type) && item.quantity > 0)) {
-                reasons.push('no major threats')
-              }
-              // if (encounterItems.some(item => item.type === 'adversary' && item.item.tier && item.item.tier < playerTier && item.quantity > 0)) {
-              //   reasons.push('Lower tier adversaries')
-              // }
-              
-              return (
+                
+                {/* Budget Summary - Total Row */}
                 <div className="receipt-item" style={{
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '0.25rem 0',
-                  borderBottom: '1px solid var(--border)',
+                  padding: '0.125rem 0',
+                  marginTop: '0.5rem',
                   flexShrink: 0
                 }}>
-                  <div style={{ flex: 1 }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                      {reasons.join(', ')}
-                    </span>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Party Size</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => setPcCount(Math.max(1, pcCount - 1))}
+                        style={{
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text-primary)',
+                          borderRadius: '3px',
+                          padding: '0',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: '18px',
+                          height: '18px',
+                          fontSize: '0.7rem'
+                        }}
+                      >
+                        <Minus size={10} />
+                      </button>
+                      <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', minWidth: '20px', textAlign: 'center' }}>
+                        {pcCount}
+                      </span>
+                      <button
+                        onClick={() => setPcCount(pcCount + 1)}
+                        style={{
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text-primary)',
+                          borderRadius: '3px',
+                          padding: '0',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: '18px',
+                          height: '18px',
+                          fontSize: '0.7rem'
+                        }}
+                      >
+                        <Plus size={10} />
+                      </button>
+                    </div>
                   </div>
                   <div className="receipt-controls" style={{ width: '60px', textAlign: 'center' }}></div>
-                  <div className="receipt-value" style={{ width: '35px', textAlign: 'right' }}>
+                  <div className="receipt-value" style={{ width: '35px', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                     <span style={{
-                      color: 'var(--text-primary)',
+                      color: spentBattlePoints > availableBattlePoints ? 'var(--danger)' : 'var(--text-primary)',
                       fontWeight: 600
                     }}>
-                      {automaticAdjustments}
+                      {spentBattlePoints}/{availableBattlePoints}
                     </span>
                   </div>
                 </div>
-              )
-            })()}
-            
-            {/* Budget Summary - Total Row - Stuck to Bottom */}
-            <div className="receipt-item" style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '0.125rem 0',
-              marginTop: '0.5rem',
-              flexShrink: 0
-            }}>
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                  {spentBattlePoints} / {availableBattlePoints}
-                </span>
-              </div>
-              <div className="receipt-controls" style={{ width: '60px', textAlign: 'center' }}></div>
-              <div className="receipt-value" style={{ width: '35px', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                <span style={{
-                  color: remainingBattlePoints < 0 ? 'var(--danger)' : 'var(--text-primary)',
-                  fontWeight: 600
-                }}>
-                  {remainingBattlePoints}
-                </span>
-              </div>
             </div>
             
             {/* Action Buttons */}

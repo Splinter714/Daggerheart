@@ -150,9 +150,9 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
             }
             
             if (['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.type)) {
-              // If this is the first Major Threat, add 1 BP (automatic adjustment for lack of Major Threats)
+              // If this is the first Major Threat, subtract 1 BP (automatic adjustment for lack of Major Threats)
               if (currentMajorThreatCount === 0) {
-                automaticAdjustment += 1
+                automaticAdjustment -= 1
               }
             }
             
@@ -650,9 +650,9 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
     }
     
     if (['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.type)) {
-      // If this is the first Major Threat, add 1 BP (automatic adjustment for lack of Major Threats)
+      // If this is the first Major Threat, subtract 1 BP (automatic adjustment for lack of Major Threats)
       if (currentMajorThreatCount === 0) {
-        automaticAdjustment += 1
+        automaticAdjustment -= 1
       }
     }
     
@@ -905,7 +905,7 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
       />
 
       {/* Scrollable Content with Sticky Header */}
-      <div className="browser-content" style={styles.browserContent}>
+      <div className="browser-content invisible-scrollbar" style={styles.browserContent}>
         <table style={styles.browserTable}>
           <thead style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'var(--bg-primary)' }}>
             <BrowserTableHeader
@@ -1027,7 +1027,9 @@ const styles = {
     overflowY: 'auto',
     overflowX: 'visible',
     padding: 0,
-    width: '100%' // Ensure content uses full width
+    width: '100%', // Ensure content uses full width
+    scrollbarWidth: 'none', // Firefox
+    msOverflowStyle: 'none' // IE/Edge
   },
   tableHeaderContainer: {
     flexShrink: 0, // Prevent header from shrinking
