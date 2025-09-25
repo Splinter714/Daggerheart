@@ -328,15 +328,9 @@ const EncounterBuilder = ({
             }}>
                 
                 
-                {/* Individual Adversary Costs */}
+                {/* Individual Adversary Items */}
                 {encounterItems.map((encounterItem) => {
                   if (encounterItem.type !== 'adversary') return null
-                  const cost = BATTLE_POINT_COSTS[encounterItem.item.type] || 2
-                  
-                  // Special handling for Minions: cost is per group equal to PC count
-                  const totalCost = encounterItem.item.type === 'Minion' 
-                    ? Math.ceil(encounterItem.quantity / pcCount) * cost
-                    : cost * encounterItem.quantity
                   
                   return (
                     <div key={`${encounterItem.item.id}-${encounterItem.type}`} className="receipt-item" style={{
@@ -346,11 +340,6 @@ const EncounterBuilder = ({
                       borderBottom: '1px solid var(--border)',
                       flexShrink: 0
                     }}>
-                      <div style={{ flex: 1 }}>
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                          {encounterItem.item.baseName || encounterItem.item.name?.replace(/\s+\(\d+\)$/, '') || encounterItem.item.name}
-                        </span>
-                      </div>
                       <div className="receipt-controls" style={{ width: '60px', textAlign: 'center', position: 'relative' }}>
                         <button
                           onClick={() => handleRemoveFromEncounter(encounterItem.item.id, encounterItem.type)}
@@ -402,9 +391,14 @@ const EncounterBuilder = ({
                           <Plus size={10} />
                         </button>
                       </div>
-                      <div className="receipt-value" style={{ width: '35px', textAlign: 'right' }}>
-                        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                          -{totalCost}
+                      <div style={{ flex: 1, marginLeft: '1rem' }}>
+                        <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                          {encounterItem.item.baseName || encounterItem.item.name?.replace(/\s+\(\d+\)$/, '') || encounterItem.item.name}
+                        </span>
+                      </div>
+                      <div style={{ width: '80px', textAlign: 'right' }}>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                          {encounterItem.item.type}
                         </span>
                       </div>
                     </div>
@@ -415,60 +409,71 @@ const EncounterBuilder = ({
                 <div className="receipt-item" style={{
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '0.125rem 0',
-                  marginTop: '0.5rem',
+                  padding: '0.25rem 0',
+                  borderBottom: '1px solid var(--border)',
                   flexShrink: 0
                 }}>
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem' }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Party Size</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <button
-                        onClick={() => setPcCount(Math.max(1, pcCount - 1))}
-                        style={{
-                          background: 'var(--bg-secondary)',
-                          border: '1px solid var(--border)',
-                          color: 'var(--text-primary)',
-                          borderRadius: '3px',
-                          padding: '0',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minWidth: '18px',
-                          height: '18px',
-                          fontSize: '0.7rem'
-                        }}
-                      >
-                        <Minus size={10} />
-                      </button>
-                      <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', minWidth: '20px', textAlign: 'center' }}>
-                        {pcCount}
-                      </span>
-                      <button
-                        onClick={() => setPcCount(pcCount + 1)}
-                        style={{
-                          background: 'var(--bg-secondary)',
-                          border: '1px solid var(--border)',
-                          color: 'var(--text-primary)',
-                          borderRadius: '3px',
-                          padding: '0',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minWidth: '18px',
-                          height: '18px',
-                          fontSize: '0.7rem'
-                        }}
-                      >
-                        <Plus size={10} />
-                      </button>
-                    </div>
+                  <div className="receipt-controls" style={{ width: '60px', textAlign: 'center', position: 'relative' }}>
+                    <button
+                      onClick={() => setPcCount(Math.max(1, pcCount - 1))}
+                      style={{
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                        borderRadius: '3px',
+                        padding: '0',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '18px',
+                        height: '18px',
+                        fontSize: '0.7rem',
+                        position: 'absolute',
+                        left: '0',
+                        top: '50%',
+                        transform: 'translateY(-50%)'
+                      }}
+                    >
+                      <Minus size={10} />
+                    </button>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                      {pcCount}
+                    </span>
+                    <button
+                      onClick={() => setPcCount(pcCount + 1)}
+                      style={{
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                        borderRadius: '3px',
+                        padding: '0',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '18px',
+                        height: '18px',
+                        fontSize: '0.7rem',
+                        position: 'absolute',
+                        right: '0',
+                        top: '50%',
+                        transform: 'translateY(-50%)'
+                      }}
+                    >
+                      <Plus size={10} />
+                    </button>
                   </div>
-                  <div className="receipt-controls" style={{ width: '60px', textAlign: 'center' }}></div>
-                  <div className="receipt-value" style={{ width: '35px', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                  <div style={{ flex: 1, marginLeft: '1rem' }}>
+                    <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                      Party Size
+                    </span>
+                  </div>
+                  <div style={{ width: '80px', textAlign: 'right' }}>
                     <span style={{
-                      color: spentBattlePoints > availableBattlePoints ? 'var(--danger)' : 'var(--text-primary)',
+                      color: spentBattlePoints > availableBattlePoints ? 'var(--danger)' : 
+                             spentBattlePoints === availableBattlePoints ? 'var(--purple)' : 
+                             'var(--text-primary)',
                       fontWeight: 600
                     }}>
                       {spentBattlePoints}/{availableBattlePoints}

@@ -150,9 +150,9 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
             }
             
             if (['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.type)) {
-              // If this is the first Major Threat, subtract 1 BP (automatic adjustment for lack of Major Threats)
+              // If this is the first Major Threat, add 1 BP (automatic adjustment for lack of Major Threats)
               if (currentMajorThreatCount === 0) {
-                automaticAdjustment -= 1
+                automaticAdjustment += 1
               }
             }
             
@@ -650,9 +650,9 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
     }
     
     if (['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.type)) {
-      // If this is the first Major Threat, subtract 1 BP (automatic adjustment for lack of Major Threats)
+      // If this is the first Major Threat, add 1 BP (automatic adjustment for lack of Major Threats)
       if (currentMajorThreatCount === 0) {
-        automaticAdjustment -= 1
+        automaticAdjustment += 1
       }
     }
     
