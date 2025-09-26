@@ -1081,7 +1081,7 @@ const styles = {
     borderRadius: '4px',
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--text-primary)',
-    fontSize: '14px',
+    fontSize: '16px',
     marginRight: '12px',
     transition: 'all 0.2s ease'
   },

@@ -90,33 +90,33 @@ const DashboardContent = () => {
 
   // Column layout calculations - dynamic sizing to always show full columns
   const gap = 12
-  const minColumnWidth = 250
-  const maxColumnWidth = 500
+  const getMinColumnWidth = (columnCount) => {
+    if (columnCount === 1) return 200  // Smaller minimum for single column
+    return 350  // Higher minimum for multiple columns
+  }
   
   const calculateColumnLayout = (width) => {
-    if (width <= 0) return { visibleColumns: 1, columnWidth: minColumnWidth }
+    if (width <= 0) return { visibleColumns: 1, columnWidth: getMinColumnWidth(1) }
     
     const padding = gap * 2
     const availableWidth = width - padding
     
     // Try different column counts to find the best fit
-    let bestLayout = { visibleColumns: 1, columnWidth: Math.min(availableWidth, maxColumnWidth) }
+    let bestLayout = { visibleColumns: 1, columnWidth: availableWidth }
     
     for (let columns = 1; columns <= 5; columns++) {
       const totalGapWidth = (columns - 1) * gap
       const columnWidth = (availableWidth - totalGapWidth) / columns
       
-      // Check if this column width is within our bounds AND fits perfectly
-      if (columnWidth >= minColumnWidth && columnWidth <= maxColumnWidth) {
+      // Check if this column width meets our minimum requirement AND fits perfectly
+      if (columnWidth >= getMinColumnWidth(columns)) {
         // Calculate the total width this layout would take
         const totalWidth = columns * columnWidth + totalGapWidth
         
         // Only use this layout if it fits exactly within available width
         if (totalWidth <= availableWidth) {
-          // Prefer more columns if possible
-          if (columns > bestLayout.visibleColumns) {
-            bestLayout = { visibleColumns: columns, columnWidth }
-          }
+          // Prefer more columns (narrower panels) - keep the last valid layout
+          bestLayout = { visibleColumns: columns, columnWidth }
         }
       }
     }
@@ -125,7 +125,7 @@ const DashboardContent = () => {
     const totalWidth = bestLayout.visibleColumns * bestLayout.columnWidth + (bestLayout.visibleColumns - 1) * gap
     if (totalWidth > availableWidth) {
       // Fall back to fewer columns
-      bestLayout = { visibleColumns: 1, columnWidth: Math.min(availableWidth, maxColumnWidth) }
+      bestLayout = { visibleColumns: 1, columnWidth: availableWidth }
     }
     
     return bestLayout

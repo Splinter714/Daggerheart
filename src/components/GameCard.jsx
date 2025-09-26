@@ -162,7 +162,7 @@ const styles = {
     borderRadius: '4px',
     padding: '4px 6px',
     color: 'var(--text-primary)',
-    fontSize: '12px',
+    fontSize: '16px',
     width: '80px',
     textAlign: 'center'
   },

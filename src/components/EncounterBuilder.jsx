@@ -249,6 +249,7 @@ const EncounterBuilder = ({
   return (
     <div 
       onClick={onClose}
+      className="encounter-builder-modal"
       style={{
         position: 'fixed',
         top: 0,
@@ -259,9 +260,9 @@ const EncounterBuilder = ({
         backdropFilter: 'blur(8px)',
         zIndex: 1000,
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
-        padding: '2rem'
+        padding: '12px'
       }}
     >
       <div 
@@ -272,7 +273,7 @@ const EncounterBuilder = ({
           borderRadius: '12px',
           width: '100%',
           maxWidth: '1200px',
-          height: '90vh',
+          height: 'calc(100vh - 24px)',
           maxHeight: '800px',
           display: 'flex',
           flexDirection: 'column',

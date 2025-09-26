@@ -268,21 +268,8 @@ div[style*="color: rgb(255, 255, 255)"],
    MOBILE SPECIFIC STYLES
    ======================================== */
 
-/* Prevent mobile auto-zoom on all input elements */
+/* Mobile utilities */
 @media (max-width: 768px) {
-  input[type="text"],
-  input[type="number"],
-  input[type="email"],
-  input[type="password"],
-  input[type="search"],
-  input[type="tel"],
-  input[type="url"],
-  textarea,
-  select {
-    font-size: 16px !important;
-  }
-  
-  /* Mobile utilities */
   .mobile-hidden { display: none !important; }
   .mobile-full-width { width: 100% !important; }
   .mobile-stack { flex-direction: column !important; }
@@ -450,48 +437,38 @@ input[type="number"] {
 }
 
 /* Encounter Builder Responsive Layout */
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .encounter-builder-content {
-    flex-direction: column !important;
+    flex-direction: column;
   }
   
   .encounter-browser-panel {
-    flex: 1 !important;
-    min-height: 0 !important;
+    flex: 1;
+    min-height: 0;
   }
   
   .encounter-receipt-panel {
-    width: 100% !important;
-    border-left: none !important;
-    border-top: 1px solid var(--border) !important;
-    max-height: 40vh !important;
-    flex-shrink: 0 !important;
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    max-height: 40vh;
+    flex-shrink: 0;
+  }
+  
+  /* Reduce modal padding in vertically stacked mode to match dashboard single column padding */
+  .encounter-builder-modal {
+    padding: 12px;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  
+  /* Allow modal content to extend further down in vertical mode */
+  .encounter-builder-modal > div {
+    height: calc(100vh - 24px) !important;
+    max-height: none !important;
   }
 }
 
-/* Very narrow windows - compact receipt */
-@media (max-width: 600px) {
-  .encounter-receipt-panel {
-    max-height: 35vh !important;
-  }
-  
-  .encounter-receipt-panel .receipt-content {
-    padding: 0.75rem !important;
-  }
-  
-  .encounter-receipt-panel .receipt-item {
-    padding: 0.125rem 0 !important;
-    font-size: 0.85rem !important;
-  }
-  
-  .encounter-receipt-panel .receipt-controls {
-    min-width: 50px !important;
-  }
-  
-  .encounter-receipt-panel .receipt-value {
-    min-width: 30px !important;
-  }
-}
 
 /* Mobile hidden utility */
 .mobile-hidden {
