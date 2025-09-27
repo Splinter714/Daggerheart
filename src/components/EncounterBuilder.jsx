@@ -217,7 +217,7 @@ const EncounterBuilder = ({
     }
   }, [pcCount])
   
-  // Handle adding items to encounter
+  // Handle adding items to encounter with real-time sync
   const handleAddToEncounter = (itemData, type) => {
     const existingIndex = encounterItems.findIndex(
       item => item.item.id === itemData.id && item.type === type
@@ -226,67 +226,38 @@ const EncounterBuilder = ({
     // Special handling for Minions: add in increments of party size
     const incrementAmount = (itemData.type === 'Minion') ? pcCount : 1
     
+    let newEncounterItems
     if (existingIndex >= 0) {
       // Increase quantity of existing item
-      setEncounterItems(prev => prev.map((item, index) => 
+      newEncounterItems = encounterItems.map((item, index) => 
         index === existingIndex 
           ? { ...item, quantity: item.quantity + incrementAmount }
           : item
-      ))
+      )
     } else {
       // Add new item
-      setEncounterItems(prev => [...prev, {
+      newEncounterItems = [...encounterItems, {
         item: itemData,
         type: type,
         quantity: incrementAmount
-      }])
+      }]
     }
+    
+    // Update local state
+    setEncounterItems(newEncounterItems)
+    
+    // Apply changes immediately to global state
+    applyEncounterToGlobalState(newEncounterItems)
   }
   
-  // Handle removing items from encounter
-  const handleRemoveFromEncounter = (itemId, itemType) => {
-    setEncounterItems(prev => {
-      const existingIndex = prev.findIndex(
-        item => item.item.id === itemId && item.type === itemType
-      )
-      
-      if (existingIndex >= 0) {
-        const item = prev[existingIndex]
-        // Special handling for Minions: remove in increments of party size
-        const decrementAmount = (item.item.type === 'Minion') ? pcCount : 1
-        
-        if (item.quantity > 0) {
-          // Decrease quantity (can go to 0)
-          return prev.map((encounterItem, index) => 
-            index === existingIndex 
-              ? { ...encounterItem, quantity: Math.max(0, encounterItem.quantity - decrementAmount) }
-              : encounterItem
-          )
-        } else {
-          // Remove entirely when quantity is 0
-          return prev.filter((_, index) => index !== existingIndex)
-        }
-      }
-      return prev
-    })
-  }
-  
-  // Handle battle points adjustment changes
-  const handleAdjustmentChange = (adjustment, value) => {
-    setBattlePointsAdjustments(prev => ({
-      ...prev,
-      [adjustment]: value
-    }))
-  }
-  
-  // Create/Update the encounter
-  const handleCreateEncounter = () => {
+  // Apply encounter items to global state in real-time
+  const applyEncounterToGlobalState = (items) => {
     // Calculate the difference between current dashboard and desired encounter
     const currentAdversaries = adversaries || []
     const desiredAdversaries = []
     
     // Build desired adversary list from encounter items
-    encounterItems.forEach(encounterItem => {
+    items.forEach(encounterItem => {
       for (let i = 0; i < encounterItem.quantity; i++) {
         if (encounterItem.type === 'adversary') {
           desiredAdversaries.push(encounterItem.item)
@@ -373,11 +344,50 @@ const EncounterBuilder = ({
     if (adversariesToAdd.length > 0) {
       onAddAdversariesBulk(adversariesToAdd)
     }
-    
-    // Reset and close
-    setEncounterItems([])
-    onClose()
   }
+
+  // Handle removing items from encounter with real-time sync
+  const handleRemoveFromEncounter = (itemId, itemType) => {
+    const newEncounterItems = (() => {
+      const existingIndex = encounterItems.findIndex(
+        item => item.item.id === itemId && item.type === itemType
+      )
+      
+      if (existingIndex >= 0) {
+        const item = encounterItems[existingIndex]
+        // Special handling for Minions: remove in increments of party size
+        const decrementAmount = (item.item.type === 'Minion') ? pcCount : 1
+        
+        if (item.quantity > 0) {
+          // Decrease quantity (can go to 0)
+          return encounterItems.map((encounterItem, index) => 
+            index === existingIndex 
+              ? { ...encounterItem, quantity: Math.max(0, encounterItem.quantity - decrementAmount) }
+              : encounterItem
+          )
+        } else {
+          // Remove entirely when quantity is 0
+          return encounterItems.filter((_, index) => index !== existingIndex)
+        }
+      }
+      return encounterItems
+    })()
+    
+    // Update local state
+    setEncounterItems(newEncounterItems)
+    
+    // Apply changes immediately to global state
+    applyEncounterToGlobalState(newEncounterItems)
+  }
+  
+  // Handle battle points adjustment changes
+  const handleAdjustmentChange = (adjustment, value) => {
+    setBattlePointsAdjustments(prev => ({
+      ...prev,
+      [adjustment]: value
+    }))
+  }
+  
 
   // Update encounter (overwrite existing)
   const handleUpdateEncounter = () => {
@@ -517,7 +527,8 @@ const EncounterBuilder = ({
   const handleLoadEncounter = (encounterId) => {
     const encounter = onLoadEncounter(encounterId)
     if (encounter) {
-      setEncounterItems(encounter.encounterItems || [])
+      const loadedItems = encounter.encounterItems || []
+      setEncounterItems(loadedItems)
       setPcCount(encounter.partySize || 4)
       setBattlePointsAdjustments(encounter.battlePointsAdjustments || {
         lessDifficult: false,
@@ -538,6 +549,9 @@ const EncounterBuilder = ({
           moreDangerous: false
         }
       })
+      
+      // Apply the loaded encounter immediately to global state
+      applyEncounterToGlobalState(loadedItems)
     }
   }
 
@@ -698,7 +712,7 @@ const EncounterBuilder = ({
                     </ReceiptButton>
                   </div>
                   
-                  {/* Bottom Row - Action Buttons */}
+                  {/* Bottom Row - Reset Button */}
                   <div style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -706,12 +720,6 @@ const EncounterBuilder = ({
                   }}>
                     <ReceiptButton onClick={handleClearClick} isConfirmation={clearConfirmation}>
                       Reset
-                    </ReceiptButton>
-                    <ReceiptButton onClick={onClose}>
-                      Cancel
-                    </ReceiptButton>
-                    <ReceiptButton onClick={handleCreateEncounter} variant="purple">
-                      Play
                     </ReceiptButton>
                   </div>
                 </div>
@@ -733,7 +741,6 @@ const EncounterBuilder = ({
           <Browser
             type="adversary"
             onAddItem={(itemData) => handleAddToEncounter(itemData, 'adversary')}
-            onCancel={onClose}
             encounterItems={encounterItems}
             pcCount={pcCount}
             showContainer={false}
@@ -1002,7 +1009,7 @@ const EncounterBuilder = ({
                 </ReceiptButton>
               </div>
               
-              {/* Bottom Row - Action Buttons */}
+              {/* Bottom Row - Reset Button */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'center',
@@ -1010,12 +1017,6 @@ const EncounterBuilder = ({
               }}>
                 <ReceiptButton onClick={handleClearClick} isConfirmation={clearConfirmation}>
                   Reset
-                </ReceiptButton>
-                <ReceiptButton onClick={onClose}>
-                  Cancel
-                </ReceiptButton>
-                <ReceiptButton onClick={handleCreateEncounter} variant="purple">
-                  Play
                 </ReceiptButton>
               </div>
             </div>
