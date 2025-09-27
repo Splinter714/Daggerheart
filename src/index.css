@@ -819,4 +819,25 @@ input[type="number"] {
   display: none; /* Webkit browsers */
 }
 
+/* Encounter Builder Responsive Styles */
+@media (max-width: 900px) {
+  .encounter-right-panel {
+    flex: 1 1 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+  
+  /* Hide receipt buttons in top bar, show them below receipt */
+  .encounter-receipt-buttons {
+    display: none !important;
+  }
+  
+  .encounter-receipt-buttons-vertical {
+    display: flex !important;
+  }
+}
+
+/* Saved Encounter Cards Responsive Styles */
+/* CSS Grid auto-fit handles responsive behavior automatically */
+
 /* Specialized styles */

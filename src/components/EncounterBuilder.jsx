@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { X, Plus, Minus, Users, Calculator } from 'lucide-react'
 import Browser from './Browser'
+import { useGameState } from '../state/state'
 
 // Battle Points calculation based on Daggerheart rules
 const calculateBaseBattlePoints = (pcCount) => (3 * pcCount) + 2
@@ -35,11 +36,23 @@ const EncounterBuilder = ({
   onAddAdversary,
   onAddAdversariesBulk,
   onAddEnvironment,
+  onDeleteAdversary,
+  onDeleteEnvironment,
+  onDeleteCountdown,
   adversaries = [],
-  environments = []
+  environments = [],
+  countdowns = [],
+  savedEncounters = [],
+  onSaveEncounter,
+  onLoadEncounter,
+  onDeleteEncounter
 }) => {
+  // Get party size from global state
+  const { partySize, updatePartySize } = useGameState()
+  const pcCount = partySize
+  const setPcCount = updatePartySize
+  
   // Encounter state
-  const [pcCount, setPcCount] = useState(4)
   const [battlePointsAdjustments, setBattlePointsAdjustments] = useState({
     lessDifficult: false,
     increasedDamage: false,
@@ -47,6 +60,49 @@ const EncounterBuilder = ({
   })
   
   const [encounterItems, setEncounterItems] = useState([])
+  const [clearConfirmation, setClearConfirmation] = useState(false)
+  const clearTimeoutRef = useRef(null)
+  const [encounterName, setEncounterName] = useState('')
+  const [activeTab, setActiveTab] = useState('adversaries')
+  const [loadedEncounterId, setLoadedEncounterId] = useState(null) // Track which encounter is loaded
+  const [originalEncounterData, setOriginalEncounterData] = useState(null) // Track original data for change detection
+  
+  // Check if current encounter has changes from original
+  const hasChanges = () => {
+    if (!originalEncounterData) return false
+    
+    return (
+      encounterName !== originalEncounterData.name ||
+      JSON.stringify(encounterItems) !== JSON.stringify(originalEncounterData.encounterItems) ||
+      pcCount !== originalEncounterData.partySize ||
+      JSON.stringify(battlePointsAdjustments) !== JSON.stringify(originalEncounterData.battlePointsAdjustments)
+    )
+  }
+  
+  // Reusable button component for receipt actions
+  const ReceiptButton = ({ onClick, children, variant = 'secondary', isConfirmation = false }) => {
+    const isDanger = variant === 'danger' || (variant === 'secondary' && isConfirmation)
+    const isPurple = variant === 'purple'
+    
+    return (
+      <button
+        onClick={onClick}
+        style={{
+          background: isDanger ? 'var(--danger)' : isPurple ? 'var(--purple)' : 'var(--bg-secondary)',
+          border: isPurple ? 'none' : '1px solid var(--border)',
+          color: isDanger || isPurple ? 'white' : 'var(--text-primary)',
+          padding: '0.375rem 0.75rem',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          transition: 'background-color 0.2s',
+          width: '70px',
+          fontSize: '0.875rem'
+        }}
+      >
+        {children}
+      </button>
+    )
+  }
   
   // Track previous PC count to calculate group changes
   const prevPcCountRef = React.useRef(pcCount)
@@ -223,26 +279,281 @@ const EncounterBuilder = ({
     }))
   }
   
-  // Create the encounter
+  // Create/Update the encounter
   const handleCreateEncounter = () => {
-    const adversariesToCreate = []
+    // Calculate the difference between current dashboard and desired encounter
+    const currentAdversaries = adversaries || []
+    const desiredAdversaries = []
     
+    // Build desired adversary list from encounter items
     encounterItems.forEach(encounterItem => {
       for (let i = 0; i < encounterItem.quantity; i++) {
         if (encounterItem.type === 'adversary') {
-          adversariesToCreate.push(encounterItem.item)
+          desiredAdversaries.push(encounterItem.item)
         }
       }
     })
     
-    if (adversariesToCreate.length > 0) {
-      onAddAdversariesBulk(adversariesToCreate)
+    // Group current adversaries by base name
+    const currentGroups = {}
+    currentAdversaries.forEach(adv => {
+      const baseName = adv.baseName || adv.name?.replace(/\s+\(\d+\)$/, '') || adv.name
+      if (!currentGroups[baseName]) {
+        currentGroups[baseName] = []
+      }
+      currentGroups[baseName].push(adv)
+    })
+    
+    // Group desired adversaries by base name
+    const desiredGroups = {}
+    desiredAdversaries.forEach(adv => {
+      const baseName = adv.baseName || adv.name?.replace(/\s+\(\d+\)$/, '') || adv.name
+      if (!desiredGroups[baseName]) {
+        desiredGroups[baseName] = []
+      }
+      desiredGroups[baseName].push(adv)
+    })
+    
+    // Calculate what needs to be added or removed
+    const adversariesToAdd = []
+    const adversariesToRemove = []
+    
+    // Check each desired group
+    Object.keys(desiredGroups).forEach(baseName => {
+      const currentCount = currentGroups[baseName]?.length || 0
+      const desiredCount = desiredGroups[baseName].length
+      
+      if (desiredCount > currentCount) {
+        // Need to add more
+        const toAdd = desiredCount - currentCount
+        for (let i = 0; i < toAdd; i++) {
+          adversariesToAdd.push(desiredGroups[baseName][0]) // Use first item as template
+        }
+      } else if (desiredCount < currentCount) {
+        // Need to remove some - remove highest numbered ones first
+        const toRemove = currentCount - desiredCount
+        const currentGroup = currentGroups[baseName]
+        
+        // Sort by duplicate number (highest first)
+        const sortedGroup = [...currentGroup].sort((a, b) => {
+          const aNum = a.duplicateNumber || 1
+          const bNum = b.duplicateNumber || 1
+          return bNum - aNum // Descending order (highest first)
+        })
+        
+        for (let i = 0; i < toRemove; i++) {
+          adversariesToRemove.push(sortedGroup[i].id)
+        }
+      }
+    })
+    
+    // Check for adversaries that should be completely removed
+    Object.keys(currentGroups).forEach(baseName => {
+      if (!desiredGroups[baseName]) {
+        // This adversary type is not in the desired encounter, remove all (highest numbered first)
+        const currentGroup = currentGroups[baseName]
+        const sortedGroup = [...currentGroup].sort((a, b) => {
+          const aNum = a.duplicateNumber || 1
+          const bNum = b.duplicateNumber || 1
+          return bNum - aNum // Descending order (highest first)
+        })
+        
+        sortedGroup.forEach(adv => {
+          adversariesToRemove.push(adv.id)
+        })
+      }
+    })
+    
+    // Remove adversaries that are no longer needed
+    adversariesToRemove.forEach(id => {
+      onDeleteAdversary(id)
+    })
+    
+    // Add new adversaries
+    if (adversariesToAdd.length > 0) {
+      onAddAdversariesBulk(adversariesToAdd)
     }
     
     // Reset and close
     setEncounterItems([])
     onClose()
   }
+
+  // Update encounter (overwrite existing)
+  const handleUpdateEncounter = () => {
+    if (encounterItems.length === 0) return
+    
+    // Generate incremental name if no name provided
+    let finalName = encounterName.trim()
+    if (!finalName) {
+      // Find encounters that match "Encounter #" pattern to get next number
+      const encounterPattern = /^Encounter (\d+)$/
+      const numberedEncounters = savedEncounters
+        .map(encounter => encounter.name)
+        .filter(name => encounterPattern.test(name))
+        .map(name => parseInt(name.match(encounterPattern)[1]))
+        .sort((a, b) => a - b) // Sort ascending
+      
+      // Find the first gap, or use the next number if no gaps
+      let nextNumber = 1
+      for (let i = 0; i < numberedEncounters.length; i++) {
+        if (numberedEncounters[i] !== i + 1) {
+          nextNumber = i + 1
+          break
+        }
+        nextNumber = i + 2 // If no gap found, use next number
+      }
+      
+      finalName = `Encounter ${nextNumber}`
+    }
+    
+    const encounterData = {
+      name: finalName,
+      encounterItems: encounterItems,
+      partySize: pcCount,
+      battlePointsAdjustments: battlePointsAdjustments
+    }
+    
+    // If we have a loaded encounter ID, this is an overwrite (Save)
+    // Otherwise, this is a new encounter (Save As)
+    if (loadedEncounterId) {
+      encounterData.id = loadedEncounterId
+    }
+    
+    onSaveEncounter(encounterData)
+    setEncounterName('')
+    setLoadedEncounterId(null) // Clear loaded encounter after save
+    setOriginalEncounterData(null) // Clear original data
+    setActiveTab('encounters')
+    // Don't close the modal - keep it open for further editing
+  }
+
+  // Save new encounter (create new copy)
+  const handleSaveNewEncounter = () => {
+    if (encounterItems.length === 0) return
+    
+    // Generate incremental name if no name provided
+    let finalName = encounterName.trim()
+    if (!finalName) {
+      // Find encounters that match "Encounter #" pattern to get next number
+      const encounterPattern = /^Encounter (\d+)$/
+      const numberedEncounters = savedEncounters
+        .map(encounter => encounter.name)
+        .filter(name => encounterPattern.test(name))
+        .map(name => parseInt(name.match(encounterPattern)[1]))
+        .sort((a, b) => a - b) // Sort ascending
+      
+      // Find the first gap, or use the next number if no gaps
+      let nextNumber = 1
+      for (let i = 0; i < numberedEncounters.length; i++) {
+        if (numberedEncounters[i] !== i + 1) {
+          nextNumber = i + 1
+          break
+        }
+        nextNumber = i + 2 // If no gap found, use next number
+      }
+      
+      finalName = `Encounter ${nextNumber}`
+    }
+    
+    const encounterData = {
+      name: finalName,
+      encounterItems: encounterItems,
+      partySize: pcCount,
+      battlePointsAdjustments: battlePointsAdjustments
+    }
+    
+    // Save New always creates a new encounter (no ID)
+    onSaveEncounter(encounterData)
+    setEncounterName('')
+    setLoadedEncounterId(null) // Clear loaded encounter after save new
+    setOriginalEncounterData(null) // Clear original data
+    setActiveTab('encounters')
+    // Don't close the modal - keep it open for further editing
+  }
+
+  // Handle clear button click with double-click confirmation
+  const handleClearClick = () => {
+    if (clearConfirmation) {
+      // Second click - actually clear everything from global state
+      // Clear all adversaries
+      adversaries.forEach(adversary => {
+        onDeleteAdversary(adversary.id)
+      })
+      
+      // Clear all environments
+      environments.forEach(environment => {
+        onDeleteEnvironment(environment.id)
+      })
+      
+      // Clear all countdowns
+      countdowns.forEach(countdown => {
+        onDeleteCountdown(countdown.id)
+      })
+      
+      setClearConfirmation(false)
+      if (clearTimeoutRef.current) {
+        clearTimeout(clearTimeoutRef.current)
+        clearTimeoutRef.current = null
+      }
+    } else {
+      // First click - show confirmation state
+      setClearConfirmation(true)
+      
+      // Clear any existing timeout
+      if (clearTimeoutRef.current) {
+        clearTimeout(clearTimeoutRef.current)
+      }
+      
+      // Set timeout to revert after 3 seconds
+      clearTimeoutRef.current = setTimeout(() => {
+        setClearConfirmation(false)
+        clearTimeoutRef.current = null
+      }, 3000)
+    }
+  }
+
+  // Load encounter
+  const handleLoadEncounter = (encounterId) => {
+    const encounter = onLoadEncounter(encounterId)
+    if (encounter) {
+      setEncounterItems(encounter.encounterItems || [])
+      setPcCount(encounter.partySize || 4)
+      setBattlePointsAdjustments(encounter.battlePointsAdjustments || {
+        lessDifficult: false,
+        increasedDamage: false,
+        moreDangerous: false
+      })
+      setEncounterName(encounter.name || '')
+      setLoadedEncounterId(encounterId)
+      
+      // Store original data for change detection
+      setOriginalEncounterData({
+        name: encounter.name || '',
+        encounterItems: encounter.encounterItems || [],
+        partySize: encounter.partySize || 4,
+        battlePointsAdjustments: encounter.battlePointsAdjustments || {
+          lessDifficult: false,
+          increasedDamage: false,
+          moreDangerous: false
+        }
+      })
+    }
+  }
+
+  // Delete encounter
+  const handleDeleteEncounter = (encounterId) => {
+    onDeleteEncounter(encounterId)
+  }
+
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (clearTimeoutRef.current) {
+        clearTimeout(clearTimeoutRef.current)
+      }
+    }
+  }, [])
   
   if (!isOpen) return null
   
@@ -281,14 +592,139 @@ const EncounterBuilder = ({
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
         }}
       >
-      {/* Main Content */}
-      <div className="encounter-builder-content" style={{
+      {/* Unified Top Bar - Tabs on Left, Receipt Buttons on Right */}
+      <div className="encounter-top-bar" style={{
+        flex: '0 0 auto',
         display: 'flex',
+        alignItems: 'center',
+        height: '39px',
+        backgroundColor: 'var(--bg-primary)',
+        borderBottom: '1px solid var(--border)'
+      }}>
+        {/* Left Side - Tabs (same width as browser below) */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          <button
+            onClick={() => setActiveTab('adversaries')}
+            style={{
+              flex: 1,
+              background: activeTab === 'adversaries' ? 'var(--gray-900)' : 'transparent',
+              border: 'none',
+              borderBottom: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              padding: '0.75rem 1rem',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: activeTab === 'adversaries' ? '500' : '400',
+              transition: 'all 0.2s ease',
+              position: 'relative',
+              borderRight: '1px solid var(--border)'
+            }}
+          >
+            Adversaries
+          </button>
+          <button
+            onClick={() => setActiveTab('encounters')}
+            style={{
+              flex: 1,
+              background: activeTab === 'encounters' ? 'var(--gray-900)' : 'transparent',
+              border: 'none',
+              borderBottom: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              padding: '0.75rem 1rem',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: activeTab === 'encounters' ? '500' : '400',
+              transition: 'all 0.2s ease',
+              position: 'relative',
+              borderRight: '1px solid var(--border)'
+            }}
+          >
+            Encounters
+          </button>
+          <button
+            onClick={() => setActiveTab('custom')}
+            style={{
+              flex: 1,
+              background: activeTab === 'custom' ? 'var(--gray-900)' : 'transparent',
+              border: 'none',
+              borderBottom: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              padding: '0.75rem 1rem',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: activeTab === 'custom' ? '500' : '400',
+              transition: 'all 0.2s ease',
+              position: 'relative'
+            }}
+          >
+            Custom Adversary
+          </button>
+        </div>
+        
+                {/* Right Side - Receipt Buttons */}
+                <div className="encounter-receipt-buttons" style={{
+                  flex: '0 0 350px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  borderLeft: '1px solid var(--border)',
+                  height: '100%',
+                  padding: '0.25rem 0.5rem'
+                }}>
+                  {/* Top Row - Save Buttons */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '0.25rem',
+                    marginBottom: '0.25rem'
+                  }}>
+                    <ReceiptButton 
+                      onClick={handleUpdateEncounter} 
+                      variant={loadedEncounterId && hasChanges() ? "purple" : "secondary"}
+                      style={loadedEncounterId && !hasChanges() ? { opacity: 0.5 } : {}}
+                    >
+                      Save Update
+                    </ReceiptButton>
+                    <ReceiptButton 
+                      onClick={handleSaveNewEncounter}
+                      variant={!loadedEncounterId || hasChanges() ? "purple" : "secondary"}
+                      style={loadedEncounterId && !hasChanges() ? { opacity: 0.5 } : {}}
+                    >
+                      Save New
+                    </ReceiptButton>
+                  </div>
+                  
+                  {/* Bottom Row - Action Buttons */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '0.25rem'
+                  }}>
+                    <ReceiptButton onClick={handleClearClick} isConfirmation={clearConfirmation}>
+                      Reset
+                    </ReceiptButton>
+                    <ReceiptButton onClick={onClose}>
+                      Cancel
+                    </ReceiptButton>
+                    <ReceiptButton onClick={handleCreateEncounter} variant="purple">
+                      Play
+                    </ReceiptButton>
+                  </div>
+                </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="encounter-builder-content" style={{
         flex: 1,
+        display: 'flex',
         overflow: 'hidden'
       }}>
-        {/* Center Panel - Adversary Browser */}
-        <div className="encounter-browser-panel" style={{
+        {/* Left Panel - Browser Content Below Tabs */}
+        <div style={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
@@ -301,33 +737,158 @@ const EncounterBuilder = ({
             encounterItems={encounterItems}
             pcCount={pcCount}
             showContainer={false}
+            savedEncounters={savedEncounters}
+            onLoadEncounter={handleLoadEncounter}
+            onDeleteEncounter={handleDeleteEncounter}
+            activeTab={activeTab}
           />
         </div>
         
-        {/* Right Panel - Battle Points Calculator */}
-        <div className="encounter-receipt-panel" style={{
-          width: '350px',
+        {/* Right Panel - Receipt Below Buttons */}
+        <div className="encounter-right-panel" style={{
+          flex: '0 0 350px',
           borderLeft: '1px solid var(--border)',
           display: 'flex',
-          flexDirection: 'column'
-        }}>
-          {/* Battle Points Calculator Content */}
-          <div className="receipt-content" style={{ 
-            padding: '1rem', 
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column'
+          flexDirection: 'column',
+          overflow: 'hidden'
           }}>
-            {/* Receipt Items - All aligned to top */}
-            <div style={{ 
-              flex: 1, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              justifyContent: 'flex-start',
-              overflowY: 'auto',
-              marginBottom: '0.75rem'
+            {/* Encounter Name Field */}
+            <div style={{
+              padding: '0.75rem 1rem',
+              borderBottom: '1px solid var(--border)',
+              backgroundColor: 'var(--bg-primary)'
             }}>
+              <input
+                type="text"
+                value={encounterName}
+                onChange={(e) => setEncounterName(e.target.value)}
+                placeholder="Encounter Name"
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem'
+                }}
+              />
+            </div>
+            
+            {/* Battle Points Calculator Content */}
+            <div className="receipt-content" style={{ 
+              padding: '1rem', 
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
+            }}>
+              {/* Receipt Items - Scrollable */}
+              <div style={{ 
+                flex: 1,
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'flex-start',
+                overflowY: 'auto',
+                marginBottom: '0.75rem'
+              }}>
                 
+                {/* Total Remaining Row */}
+                <div className="receipt-item" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0.25rem 0',
+                  borderBottom: '1px solid var(--border)',
+                  flexShrink: 0
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                      Encounter Balance
+                    </span>
+                  </div>
+                  <div style={{ width: '120px', textAlign: 'right' }}>
+                    <span style={{
+                      color: spentBattlePoints > availableBattlePoints ? 'var(--danger)' : 
+                             spentBattlePoints === availableBattlePoints ? 'var(--purple)' : 
+                             'var(--success)',
+                      fontWeight: 600
+                    }}>
+                      {spentBattlePoints > availableBattlePoints ? 
+                        `+${spentBattlePoints - availableBattlePoints}` : 
+                        availableBattlePoints - spentBattlePoints === 0 ? 
+                          '0' : 
+                          `-${availableBattlePoints - spentBattlePoints}`
+                      }
+                    </span>
+                  </div>
+                </div>
+
+                {/* Party Members Row */}
+                <div className="receipt-item" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0.25rem 0',
+                  borderBottom: '1px solid var(--border)',
+                  flexShrink: 0
+                }}>
+                  <div className="receipt-controls" style={{ width: '60px', textAlign: 'center', position: 'relative' }}>
+                    <button
+                      onClick={() => setPcCount(Math.max(1, pcCount - 1))}
+                      style={{
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                        borderRadius: '3px',
+                        padding: '0',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '18px',
+                        height: '18px',
+                        fontSize: '0.7rem',
+                        position: 'absolute',
+                        left: '0',
+                        top: '50%',
+                        transform: 'translateY(-50%)'
+                      }}
+                    >
+                      <Minus size={10} />
+                    </button>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                      {pcCount}
+                    </span>
+                    <button
+                      onClick={() => setPcCount(pcCount + 1)}
+                      style={{
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                        borderRadius: '3px',
+                        padding: '0',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '18px',
+                        height: '18px',
+                        fontSize: '0.7rem',
+                        position: 'absolute',
+                        right: '0',
+                        top: '50%',
+                        transform: 'translateY(-50%)'
+                      }}
+                    >
+                      <Plus size={10} />
+                    </button>
+                  </div>
+                  <div style={{ flex: 1, marginLeft: '1rem' }}>
+                    <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                      Party Size
+                    </span>
+                  </div>
+                  <div style={{ width: '120px', textAlign: 'right' }}>
+                  </div>
+                </div>
                 
                 {/* Individual Adversary Items */}
                 {encounterItems.map((encounterItem) => {
@@ -405,141 +966,63 @@ const EncounterBuilder = ({
                     </div>
                   )
                 })}
-                
-                {/* Budget Summary - Total Row */}
-                <div className="receipt-item" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '0.25rem 0',
-                  borderBottom: '1px solid var(--border)',
-                  flexShrink: 0
-                }}>
-                  <div className="receipt-controls" style={{ width: '60px', textAlign: 'center', position: 'relative' }}>
-                    <button
-                      onClick={() => setPcCount(Math.max(1, pcCount - 1))}
-                      style={{
-                        background: 'var(--bg-secondary)',
-                        border: '1px solid var(--border)',
-                        color: 'var(--text-primary)',
-                        borderRadius: '3px',
-                        padding: '0',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: '18px',
-                        height: '18px',
-                        fontSize: '0.7rem',
-                        position: 'absolute',
-                        left: '0',
-                        top: '50%',
-                        transform: 'translateY(-50%)'
-                      }}
-                    >
-                      <Minus size={10} />
-                    </button>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                      {pcCount}
-                    </span>
-                    <button
-                      onClick={() => setPcCount(pcCount + 1)}
-                      style={{
-                        background: 'var(--bg-secondary)',
-                        border: '1px solid var(--border)',
-                        color: 'var(--text-primary)',
-                        borderRadius: '3px',
-                        padding: '0',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: '18px',
-                        height: '18px',
-                        fontSize: '0.7rem',
-                        position: 'absolute',
-                        right: '0',
-                        top: '50%',
-                        transform: 'translateY(-50%)'
-                      }}
-                    >
-                      <Plus size={10} />
-                    </button>
-                  </div>
-                  <div style={{ flex: 1, marginLeft: '1rem' }}>
-                    <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                      Party Size
-                    </span>
-                  </div>
-                  <div style={{ width: '80px', textAlign: 'right' }}>
-                    <span style={{
-                      color: spentBattlePoints > availableBattlePoints ? 'var(--danger)' : 
-                             spentBattlePoints === availableBattlePoints ? 'var(--purple)' : 
-                             'var(--text-primary)',
-                      fontWeight: 600
-                    }}>
-                      {spentBattlePoints}/{availableBattlePoints}
-                    </span>
-                  </div>
-                </div>
             </div>
             
-            {/* Action Buttons */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '0.5rem',
-              padding: '0.75rem 0 0 0',
+            </div>
+            
+            {/* Receipt Buttons - Below Receipt in Vertical Mode */}
+            <div className="encounter-receipt-buttons-vertical" style={{
+              display: 'none', // Hidden by default, shown in vertical mode via CSS
+              padding: '0.75rem 1rem',
               borderTop: '1px solid var(--border)',
-              marginTop: '0.5rem',
-              flexShrink: 0
+              backgroundColor: 'var(--bg-primary)',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.5rem'
             }}>
-              <button
-                onClick={onClose}
-                style={{
-                  background: 'var(--bg-primary)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text-primary)',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-hover)'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--bg-primary)'}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateEncounter}
-                disabled={encounterItems.length === 0}
-                style={{
-                  background: encounterItems.length === 0 ? 'var(--gray-600)' : 'var(--purple)',
-                  border: 'none',
-                  color: 'white',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '6px',
-                  cursor: encounterItems.length === 0 ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s',
-                  opacity: encounterItems.length === 0 ? 0.6 : 1
-                }}
-                onMouseEnter={(e) => {
-                  if (encounterItems.length > 0) {
-                    e.target.style.backgroundColor = 'var(--purple-dark)'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (encounterItems.length > 0) {
-                    e.target.style.backgroundColor = 'var(--purple)'
-                  }
-                }}
-              >
-                Create Encounter
-              </button>
+              {/* Top Row - Save Buttons */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '0.25rem'
+              }}>
+                <ReceiptButton 
+                  onClick={handleUpdateEncounter} 
+                  variant={loadedEncounterId && hasChanges() ? "purple" : "secondary"}
+                  style={loadedEncounterId && !hasChanges() ? { opacity: 0.5 } : {}}
+                >
+                  Save Update
+                </ReceiptButton>
+                <ReceiptButton 
+                  onClick={handleSaveNewEncounter}
+                  variant={!loadedEncounterId || hasChanges() ? "purple" : "secondary"}
+                  style={loadedEncounterId && !hasChanges() ? { opacity: 0.5 } : {}}
+                >
+                  Save New
+                </ReceiptButton>
+              </div>
+              
+              {/* Bottom Row - Action Buttons */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '0.25rem'
+              }}>
+                <ReceiptButton onClick={handleClearClick} isConfirmation={clearConfirmation}>
+                  Reset
+                </ReceiptButton>
+                <ReceiptButton onClick={onClose}>
+                  Cancel
+                </ReceiptButton>
+                <ReceiptButton onClick={handleCreateEncounter} variant="purple">
+                  Play
+                </ReceiptButton>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
-    </div>
     </div>
   )
 }
