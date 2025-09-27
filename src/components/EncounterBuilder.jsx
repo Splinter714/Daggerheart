@@ -66,33 +66,12 @@ const EncounterBuilder = ({
   const [loadedEncounterId, setLoadedEncounterId] = useState(null) // Track which encounter is loaded
   const [originalEncounterData, setOriginalEncounterData] = useState(null) // Track original data for change detection
   
-  // Generate next incremental encounter name
-  const getNextEncounterName = useCallback(() => {
-    const encounterPattern = /^Encounter (\d+)$/
-    const numberedEncounters = savedEncounters
-      .map(encounter => encounter.name)
-      .filter(name => encounterPattern.test(name))
-      .map(name => parseInt(name.match(encounterPattern)[1]))
-      .sort((a, b) => a - b) // Sort ascending
-    
-    let nextNumber = 1
-    for (let i = 0; i < numberedEncounters.length; i++) {
-      if (numberedEncounters[i] !== i + 1) {
-        nextNumber = i + 1
-        break
-      }
-      nextNumber = i + 2 // If no gap found, use next number
-    }
-    
-    return `Encounter ${nextNumber}`
-  }, [savedEncounters])
-  
   // Pre-populate encounter name when component opens
   useEffect(() => {
     if (isOpen && !loadedEncounterId && encounterName === '') {
-      setEncounterName(getNextEncounterName())
+      setEncounterName('Encounter')
     }
-  }, [isOpen, loadedEncounterId, encounterName, getNextEncounterName])
+  }, [isOpen, loadedEncounterId, encounterName])
   
   // Check if current encounter has changes from original
   const hasChanges = () => {
@@ -420,10 +399,10 @@ const EncounterBuilder = ({
   const autoSave = useCallback(() => {
     if (encounterItems.length === 0) return
     
-    // Use current name or generate next incremental name
+    // Use current name or default name
     let finalName = encounterName.trim()
     if (!finalName) {
-      finalName = getNextEncounterName()
+      finalName = 'Encounter'
     }
     
     const encounterData = {
@@ -450,7 +429,7 @@ const EncounterBuilder = ({
       partySize: pcCount,
       battlePointsAdjustments: battlePointsAdjustments
     })
-  }, [encounterItems, encounterName, pcCount, battlePointsAdjustments, loadedEncounterId, getNextEncounterName, onSaveEncounter])
+  }, [encounterItems, encounterName, pcCount, battlePointsAdjustments, loadedEncounterId, onSaveEncounter])
 
   // Auto-save effect - save whenever encounter items change
   useEffect(() => {
@@ -467,10 +446,10 @@ const EncounterBuilder = ({
   const handleSaveAs = () => {
     if (encounterItems.length === 0) return
     
-    // Use current name or generate next incremental name
+    // Use current name or default name
     let finalName = encounterName.trim()
     if (!finalName) {
-      finalName = getNextEncounterName()
+      finalName = 'Encounter'
     }
     
     const encounterData = {
