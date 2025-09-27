@@ -48,6 +48,7 @@ const DashboardContent = () => {
     environments,
     countdowns,
     fear,
+    savedEncounters,
     updateFear,
     createAdversary,
     createAdversariesBulk,
@@ -59,7 +60,10 @@ const DashboardContent = () => {
     createCountdown,
     updateCountdown,
     deleteCountdown,
-    advanceCountdown
+    advanceCountdown,
+    saveEncounter,
+    loadEncounter,
+    deleteEncounter
   } = useGameState()
   
   // Dashboard state
@@ -378,8 +382,16 @@ const DashboardContent = () => {
           createEnvironment(itemData)
           setLastAddedItemType('environment')
         }}
+        onDeleteAdversary={deleteAdversary}
+        onDeleteEnvironment={deleteEnvironment}
+        onDeleteCountdown={deleteCountdown}
         adversaries={adversaries}
         environments={environments}
+        countdowns={countdowns}
+        savedEncounters={savedEncounters}
+        onSaveEncounter={saveEncounter}
+        onLoadEncounter={loadEncounter}
+        onDeleteEncounter={deleteEncounter}
       />
 
       {/* PWA Install Prompt */}
