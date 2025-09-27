@@ -44,7 +44,6 @@ const EncounterBuilder = ({
   countdowns = [],
   savedEncounters = [],
   onSaveEncounter,
-  onSaveEncounterAs,
   onLoadEncounter,
   onDeleteEncounter
 }) => {
@@ -442,29 +441,32 @@ const EncounterBuilder = ({
     }
   }, [encounterItems, autoSave])
 
-  // Save as new encounter (always creates new copy)
-  const handleSaveAs = () => {
-    if (encounterItems.length === 0) return
+  // Clear current encounter to start fresh
+  const handleNew = () => {
+    // Clear all encounter items
+    setEncounterItems([])
     
-    // Use current name or default name
-    let finalName = encounterName.trim()
-    if (!finalName) {
-      finalName = 'Encounter'
-    }
+    // Reset encounter name to default
+    setEncounterName('Encounter')
     
-    const encounterData = {
-      name: finalName,
-      encounterItems: encounterItems,
-      partySize: pcCount,
-      battlePointsAdjustments: battlePointsAdjustments
-    }
+    // Clear loaded encounter tracking
+    setLoadedEncounterId(null)
+    setOriginalEncounterData(null)
     
-    const newId = onSaveEncounterAs(encounterData)
-    setEncounterName('')
-    setLoadedEncounterId(null) // Clear loaded encounter after save as
-    setOriginalEncounterData(null) // Clear original data
-    setActiveTab('encounters')
-    // Don't close the modal - keep it open for further editing
+    // Clear all adversaries from global state
+    adversaries.forEach(adversary => {
+      onDeleteAdversary(adversary.id)
+    })
+    
+    // Clear all environments from global state
+    environments.forEach(environment => {
+      onDeleteEnvironment(environment.id)
+    })
+    
+    // Clear all countdowns from global state
+    countdowns.forEach(countdown => {
+      onDeleteCountdown(countdown.id)
+    })
   }
 
 
@@ -647,11 +649,11 @@ const EncounterBuilder = ({
                       }}
                     />
                     <ReceiptButton 
-                      onClick={handleSaveAs}
+                      onClick={handleNew}
                       variant="secondary"
                       style={{ whiteSpace: 'nowrap', minWidth: 'fit-content', flexShrink: 0 }}
                     >
-                      Save New
+                      New
                     </ReceiptButton>
                   </div>
                 </div>
@@ -916,11 +918,11 @@ const EncounterBuilder = ({
                   }}
                 />
                 <ReceiptButton 
-                  onClick={handleSaveAs}
+                  onClick={handleNew}
                   variant="secondary"
                   style={{ whiteSpace: 'nowrap', minWidth: 'fit-content', flexShrink: 0 }}
                 >
-                  Save New
+                  New
                 </ReceiptButton>
               </div>
             </div>
