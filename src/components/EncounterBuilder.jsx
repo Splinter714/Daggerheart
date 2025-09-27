@@ -441,7 +441,7 @@ const EncounterBuilder = ({
     }
   }, [encounterItems, autoSave])
 
-  // Clear current encounter to start fresh
+  // Create a new blank encounter
   const handleNew = () => {
     // Clear all encounter items
     setEncounterItems([])
@@ -466,6 +466,25 @@ const EncounterBuilder = ({
     // Clear all countdowns from global state
     countdowns.forEach(countdown => {
       onDeleteCountdown(countdown.id)
+    })
+    
+    // Create a new blank encounter and save it
+    const newEncounterData = {
+      name: 'Encounter',
+      encounterItems: [],
+      partySize: pcCount,
+      battlePointsAdjustments: battlePointsAdjustments
+    }
+    
+    const newId = onSaveEncounter(newEncounterData)
+    setLoadedEncounterId(newId)
+    
+    // Store current state as original for change detection
+    setOriginalEncounterData({
+      name: 'Encounter',
+      encounterItems: [],
+      partySize: pcCount,
+      battlePointsAdjustments: battlePointsAdjustments
     })
   }
 
