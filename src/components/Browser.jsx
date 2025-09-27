@@ -1,7 +1,90 @@
-import React, { useMemo, useEffect, useRef, useState } from 'react'
+import React, { useMemo, useEffect, useRef, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Filter, Square, CheckSquare } from 'lucide-react'
 import GameCard from './GameCard'
+
+// Hook to calculate optimal grid columns based on container width and item count
+const useOptimalGridColumns = (itemCount, containerRef) => {
+  const [columns, setColumns] = useState('max-content')
+  
+  const calculateColumns = useCallback(() => {
+    if (!containerRef.current || itemCount <= 3) {
+      return 'max-content'
+    }
+    
+    const containerWidth = containerRef.current.offsetWidth
+    const estimatedItemWidth = 120 // Estimated width per item including gap
+    const maxColumns = Math.floor(containerWidth / estimatedItemWidth)
+    
+    if (maxColumns <= 1) return 'max-content'
+    
+    // Smart distribution logic
+    if (itemCount === 4) return 'max-content max-content'
+    if (itemCount === 5) return maxColumns >= 2 ? 'max-content max-content' : 'max-content'
+    if (itemCount === 6) return maxColumns >= 2 ? 'max-content max-content' : 'max-content'
+    if (itemCount === 7) return maxColumns >= 3 ? 'max-content max-content max-content' : maxColumns >= 2 ? 'max-content max-content' : 'max-content'
+    
+    // For larger counts, use CSS auto-fit as fallback
+    return 'repeat(auto-fit, minmax(80px, max-content))'
+  }, [itemCount, containerRef])
+  
+  useEffect(() => {
+    const newColumns = calculateColumns()
+    setColumns(newColumns)
+    
+    // Set up ResizeObserver to recalculate when container size changes
+    const resizeObserver = new ResizeObserver(() => {
+      const updatedColumns = calculateColumns()
+      setColumns(updatedColumns)
+    })
+    
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current)
+    }
+    
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [calculateColumns])
+  
+  return columns
+}
+
+// AdversaryList component that uses the optimal grid columns hook
+const AdversaryList = ({ encounter }) => {
+  const containerRef = useRef(null)
+  const itemCount = encounter.encounterItems?.length || 0
+  const gridColumns = useOptimalGridColumns(itemCount, containerRef)
+  
+  return (
+    <div 
+      ref={containerRef}
+      className="saved-encounter-adversary-list"
+      style={{ 
+        flex: 1,
+        fontSize: '0.8rem',
+        color: 'var(--text-secondary)',
+        lineHeight: '1.3',
+        display: 'grid',
+        gridTemplateColumns: gridColumns,
+        gap: '0.25rem 1rem',
+        gridAutoRows: 'min-content'
+      }}>
+      {encounter.encounterItems?.length > 0 ? (
+        encounter.encounterItems.map((item, index) => {
+          const name = item.item.baseName || item.item.name?.replace(/\s+\(\d+\)$/, '') || item.item.name
+          return (
+            <div key={index} style={{ marginBottom: '0.125rem' }}>
+              {item.quantity}x {name}
+            </div>
+          )
+        })
+      ) : (
+        <div>No adversaries</div>
+      )}
+    </div>
+  )
+}
 
 // Battle Points costs for different adversary types (from EncounterBuilder)
 const BATTLE_POINT_COSTS = {
@@ -787,11 +870,61 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 }
 
 // Main Browser Component
-const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true }) => {
+const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries' }) => {
   const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
   const [showCostDropdown, setShowCostDropdown] = useState(false)
   const [selectedAdversary, setSelectedAdversary] = useState(null)
+  const [deleteConfirmations, setDeleteConfirmations] = useState({}) // Track which encounters are in delete confirmation state
+  const deleteTimeouts = useRef({}) // Track timeouts for each encounter
   const costFilterRef = useRef(null)
+  
+  // Handle two-stage delete
+  const handleDeleteClick = (encounterId) => {
+    if (deleteConfirmations[encounterId]) {
+      // Second click - actually delete (no popup confirmation)
+      onDeleteEncounter && onDeleteEncounter(encounterId)
+      setDeleteConfirmations(prev => {
+        const newState = { ...prev }
+        delete newState[encounterId]
+        return newState
+      })
+      // Clear any existing timeout
+      if (deleteTimeouts.current[encounterId]) {
+        clearTimeout(deleteTimeouts.current[encounterId])
+        delete deleteTimeouts.current[encounterId]
+      }
+    } else {
+      // First click - show confirmation state
+      setDeleteConfirmations(prev => ({
+        ...prev,
+        [encounterId]: true
+      }))
+      
+      // Clear any existing timeout for this encounter
+      if (deleteTimeouts.current[encounterId]) {
+        clearTimeout(deleteTimeouts.current[encounterId])
+      }
+      
+      // Set timeout to revert after 3 seconds
+      deleteTimeouts.current[encounterId] = setTimeout(() => {
+        setDeleteConfirmations(prev => {
+          const newState = { ...prev }
+          delete newState[encounterId]
+          return newState
+        })
+        delete deleteTimeouts.current[encounterId]
+      }, 3000)
+    }
+  }
+  
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(deleteTimeouts.current).forEach(timeout => {
+        clearTimeout(timeout)
+      })
+    }
+  }, [])
   
   const {
     searchTerm,
@@ -897,15 +1030,18 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
     <>
       <div style={showContainer ? styles.browserWrapper : styles.browserWrapperNoContainer}>
       {/* Fixed Header Row */}
-      <BrowserHeader
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        type={type}
-        partyControls={partyControls}
-      />
 
-      {/* Scrollable Content with Sticky Header */}
-      <div className="browser-content invisible-scrollbar" style={styles.browserContent}>
+      {activeTab === 'adversaries' && (
+        <>
+          <BrowserHeader
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            type={type}
+            partyControls={partyControls}
+          />
+
+          {/* Scrollable Content with Sticky Header */}
+          <div className="browser-content invisible-scrollbar" style={styles.browserContent}>
         <table style={styles.browserTable}>
           <thead style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'var(--bg-primary)' }}>
             <BrowserTableHeader
@@ -959,6 +1095,259 @@ const Browser = ({ type, onAddItem, onCancel, onRowClick, encounterItems = [], p
           </tbody>
         </table>
       </div>
+        </>
+      )}
+
+      {activeTab === 'encounters' && (
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '1rem'
+        }}>
+          {savedEncounters.length === 0 ? (
+            <div style={{
+              color: 'var(--text-secondary)',
+              fontSize: '0.9rem',
+              textAlign: 'center',
+              padding: '2rem 1rem'
+            }}>
+              No saved encounters yet
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {savedEncounters.map((encounter) => (
+                <div
+                  key={encounter.id}
+                style={{
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  padding: '8px',
+                  backgroundColor: 'var(--bg-card)',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                >
+                  {/* Tier, Party Size, and Balance (stacked vertically) */}
+                  <div style={{ 
+                    minWidth: '100px',
+                    borderRight: '1px solid var(--text-secondary)',
+                    paddingRight: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    minHeight: '60px'
+                  }}>
+                    <div style={{
+                      fontSize: '0.8rem',
+                      color: 'var(--text-primary)',
+                      marginBottom: '0.25rem'
+                    }}>
+                      Tier: {(() => {
+                        const tiers = encounter.encounterItems
+                          ?.filter(item => item.type === 'adversary')
+                          ?.map(item => item.item.tier)
+                          ?.filter(tier => tier !== undefined && tier !== null)
+                          ?.sort((a, b) => a - b) || []
+                        
+                        if (tiers.length === 0) return 'N/A'
+                        if (tiers.length === 1) return tiers[0]
+                        
+                        const uniqueTiers = [...new Set(tiers)]
+                        if (uniqueTiers.length === 1) return uniqueTiers[0]
+                        
+                        return `${Math.min(...uniqueTiers)}-${Math.max(...uniqueTiers)}`
+                      })()}
+                    </div>
+                    <div style={{
+                      fontSize: '0.8rem',
+                      color: 'var(--text-primary)',
+                      marginBottom: '0.25rem'
+                    }}>
+                      Party Size: {encounter.partySize || 4}
+                    </div>
+                    <div style={{
+                      fontSize: '0.8rem',
+                      color: 'var(--text-primary)'
+                    }}>
+                      Balance: {(() => {
+                        const partySize = encounter.partySize || 4
+                        const baseBattlePoints = (3 * partySize) + 2
+                        
+                        // Calculate automatic adjustments (same logic as EncounterBuilder)
+                        let automaticAdjustments = 0
+                        const encounterItems = encounter.encounterItems || []
+                        
+                        // Check for 2 or more Solo adversaries
+                        const soloCount = encounterItems
+                          .filter(item => item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0)
+                          .reduce((sum, item) => sum + item.quantity, 0)
+                        if (soloCount >= 2) {
+                          automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos
+                        }
+                        
+                        // Check if no Bruisers, Hordes, Leaders, or Solos
+                        const hasBruisers = encounterItems.some(item => 
+                          item.type === 'adversary' && item.item.type === 'Bruiser' && item.quantity > 0
+                        )
+                        const hasHordes = encounterItems.some(item => 
+                          item.type === 'adversary' && item.item.type === 'Horde' && item.quantity > 0
+                        )
+                        const hasLeaders = encounterItems.some(item => 
+                          item.type === 'adversary' && item.item.type === 'Leader' && item.quantity > 0
+                        )
+                        const hasSolos = encounterItems.some(item => 
+                          item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0
+                        )
+                        
+                        if (!hasBruisers && !hasHordes && !hasLeaders && !hasSolos) {
+                          automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos
+                        }
+                        
+                        const availableBattlePoints = baseBattlePoints + automaticAdjustments
+                        
+                        const spentBattlePoints = encounterItems.reduce((total, item) => {
+                          if (item.type === 'adversary') {
+                            const cost = BATTLE_POINT_COSTS[item.item.type] || 2
+                            if (item.item.type === 'Minion') {
+                              const groups = Math.ceil(item.quantity / partySize)
+                              return total + (groups * cost)
+                            } else {
+                              return total + (item.quantity * cost)
+                            }
+                          }
+                          return total
+                        }, 0)
+                        
+                        if (spentBattlePoints > availableBattlePoints) {
+                          return `+${spentBattlePoints - availableBattlePoints}`
+                        } else if (spentBattlePoints === availableBattlePoints) {
+                          return '0'
+                        } else {
+                          return `-${availableBattlePoints - spentBattlePoints}`
+                        }
+                      })()}
+                    </div>
+                  </div>
+                  
+                  {/* Encounter Name */}
+                  <div style={{ 
+                    minWidth: '120px',
+                    borderRight: '1px solid var(--text-secondary)',
+                    paddingRight: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    minHeight: '60px'
+                  }}>
+                    <div style={{
+                      fontWeight: '500',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.9rem'
+                    }}>
+                      {encounter.name}
+                    </div>
+                  </div>
+                  
+                  {/* Adversary List */}
+                  <AdversaryList encounter={encounter} />
+                  
+                  {/* Load Button */}
+                  <div style={{
+                    borderLeft: '1px solid var(--text-secondary)',
+                    paddingLeft: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    minHeight: '60px'
+                  }}>
+                    <button
+                      onClick={() => onLoadEncounter && onLoadEncounter(encounter.id)}
+                      style={{
+                        background: 'var(--purple)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '0.4rem 0.8rem',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        cursor: 'pointer',
+                        minWidth: '60px',
+                        transition: 'background-color 0.2s'
+                      }}
+                    >
+                      Load
+                    </button>
+                  </div>
+                  
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => handleDeleteClick(encounter.id)}
+                    style={{
+                      background: deleteConfirmations[encounter.id] ? 'var(--danger)' : 'var(--gray-600)',
+                      border: 'none',
+                      color: 'white',
+                      padding: '0.4rem 0.8rem',
+                      borderRadius: '4px',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                      minWidth: '60px',
+                      transition: 'background-color 0.2s'
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'custom' && (
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '1rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            textAlign: 'center',
+            color: 'var(--text-secondary)',
+            fontSize: '1rem',
+            marginBottom: '1rem'
+          }}>
+            🛠️ Custom Adversary Creator
+          </div>
+          <div style={{
+            color: 'var(--text-secondary)',
+            fontSize: '0.9rem',
+            textAlign: 'center',
+            maxWidth: '300px',
+            lineHeight: '1.4'
+          }}>
+            Create your own custom adversaries with unique stats, abilities, and features. This feature will be available soon!
+          </div>
+          <button
+            style={{
+              marginTop: '1.5rem',
+              padding: '0.75rem 1.5rem',
+              backgroundColor: 'var(--purple)',
+              border: 'none',
+              color: 'white',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              opacity: 0.6,
+              cursor: 'not-allowed'
+            }}
+            disabled
+          >
+            Coming Soon
+          </button>
+        </div>
+      )}
     </div>
     
     {/* Adversary Card Modal */}
