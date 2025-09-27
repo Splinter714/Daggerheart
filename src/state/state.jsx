@@ -33,7 +33,9 @@ export const GameStateProvider = ({ children }) => {
     fear: { value: 0, visible: false },
     countdowns: [],
     adversaries: [],
-    environments: []
+    environments: [],
+    partySize: 4,
+    savedEncounters: []
   });
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -70,6 +72,45 @@ export const GameStateProvider = ({ children }) => {
     setGameState(prev => ({
       ...prev,
       fear: { ...prev.fear, visible: !prev.fear.visible }
+    }));
+  };
+
+  // Party size management
+  const updatePartySize = (size) => {
+    setGameState(prev => ({
+      ...prev,
+      partySize: Math.max(1, size)
+    }));
+  };
+
+  // Saved encounters management
+  const saveEncounter = (encounterData) => {
+    const newEncounter = {
+      id: generateId('encounter'),
+      name: encounterData.name || `Encounter ${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      encounterItems: encounterData.encounterItems || [],
+      partySize: encounterData.partySize || 4,
+      battlePointsAdjustments: encounterData.battlePointsAdjustments || {}
+    };
+    
+    setGameState(prev => ({
+      ...prev,
+      savedEncounters: [...(prev.savedEncounters || []), newEncounter]
+    }));
+    
+    return newEncounter.id;
+  };
+
+  const loadEncounter = (encounterId) => {
+    const encounter = (gameState.savedEncounters || []).find(e => e.id === encounterId);
+    return encounter;
+  };
+
+  const deleteEncounter = (encounterId) => {
+    setGameState(prev => ({
+      ...prev,
+      savedEncounters: (prev.savedEncounters || []).filter(e => e.id !== encounterId)
     }));
   };
 
@@ -277,6 +318,13 @@ export const GameStateProvider = ({ children }) => {
     }))
   }
 
+  const clearAllAdversaries = () => {
+    setGameState(prev => ({
+      ...prev,
+      adversaries: []
+    }))
+  }
+
   const reorderAdversaries = (newOrder) => {
     setGameState(prev => {
       const [oldIndex, newIndex] = newOrder
@@ -356,6 +404,12 @@ export const GameStateProvider = ({ children }) => {
     // Fear actions
     updateFear,
     toggleFearVisibility,
+    // Party size actions
+    updatePartySize,
+    // Saved encounters actions
+    saveEncounter,
+    loadEncounter,
+    deleteEncounter,
     // Countdown actions
     createCountdown,
     updateCountdown,
@@ -369,6 +423,7 @@ export const GameStateProvider = ({ children }) => {
     createAdversariesBulk,
     updateAdversary,
     deleteAdversary,
+    clearAllAdversaries,
     reorderAdversaries,
     bulkReorderAdversaries,
     // Environment actions
@@ -397,10 +452,16 @@ export const useGameState = () => {
       countdowns: [],
       adversaries: [],
       environments: [],
+      partySize: 4,
+      savedEncounters: [],
       
       // Actions (no-op functions)
       updateFear: () => {},
       toggleFearVisibility: () => {},
+      updatePartySize: () => {},
+      saveEncounter: () => {},
+      loadEncounter: () => {},
+      deleteEncounter: () => {},
       createCountdown: () => {},
       updateCountdown: () => {},
       deleteCountdown: () => {},
@@ -411,6 +472,7 @@ export const useGameState = () => {
       createAdversary: () => {},
       updateAdversary: () => {},
       deleteAdversary: () => {},
+      clearAllAdversaries: () => {},
       reorderAdversaries: () => {},
       createEnvironment: () => {},
       updateEnvironment: () => {},
@@ -441,10 +503,16 @@ export const useGameState = () => {
       countdowns: [],
       adversaries: [],
       environments: [],
+      partySize: 4,
+      savedEncounters: [],
       
       // Actions (no-op functions)
       updateFear: () => {},
       toggleFearVisibility: () => {},
+      updatePartySize: () => {},
+      saveEncounter: () => {},
+      loadEncounter: () => {},
+      deleteEncounter: () => {},
       createCountdown: () => {},
       updateCountdown: () => {},
       deleteCountdown: () => {},
@@ -455,6 +523,7 @@ export const useGameState = () => {
       createAdversary: () => {},
       updateAdversary: () => {},
       deleteAdversary: () => {},
+      clearAllAdversaries: () => {},
       reorderAdversaries: () => {},
       createEnvironment: () => {},
       updateEnvironment: () => {},
@@ -473,7 +542,7 @@ export const useGameState = () => {
     };
   }
   
-  const { fear, countdowns, adversaries, environments } = gameState;
+  const { fear, countdowns, adversaries, environments, partySize, savedEncounters } = gameState;
   
   return {
     // Include the full gameState for components that need it
@@ -484,6 +553,8 @@ export const useGameState = () => {
     countdowns,
     adversaries,
     environments,
+    partySize,
+    savedEncounters,
     
     // Actions
     ...actions,
