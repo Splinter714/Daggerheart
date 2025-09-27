@@ -534,14 +534,6 @@ const EncounterBuilder = ({
     onDeleteEncounter(encounterId)
   }
 
-  // Cleanup timeout on unmount
-  React.useEffect(() => {
-    return () => {
-      if (clearTimeoutRef.current) {
-        clearTimeout(clearTimeoutRef.current)
-      }
-    }
-  }, [])
   
   if (!isOpen) return null
   
@@ -725,8 +717,9 @@ const EncounterBuilder = ({
                 <ReceiptButton 
                   onClick={handleSaveAs}
                   variant="secondary"
+                  style={{ whiteSpace: 'nowrap', minWidth: 'fit-content' }}
                 >
-                  Save As
+                  Save New
                 </ReceiptButton>
               </div>
             </div>
