@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Plus, Minus, Users, Calculator } from 'lucide-react'
 import Browser from './Browser'
 import { useGameState } from '../state/state'
@@ -61,8 +61,6 @@ const EncounterBuilder = ({
   })
   
   const [encounterItems, setEncounterItems] = useState([])
-  const [clearConfirmation, setClearConfirmation] = useState(false)
-  const clearTimeoutRef = useRef(null)
   const [encounterName, setEncounterName] = useState('')
   const [activeTab, setActiveTab] = useState('adversaries')
   const [loadedEncounterId, setLoadedEncounterId] = useState(null) // Track which encounter is loaded
@@ -498,46 +496,6 @@ const EncounterBuilder = ({
     // Don't close the modal - keep it open for further editing
   }
 
-  // Handle clear button click with double-click confirmation
-  const handleClearClick = () => {
-    if (clearConfirmation) {
-      // Second click - actually clear everything from global state
-      // Clear all adversaries
-      adversaries.forEach(adversary => {
-        onDeleteAdversary(adversary.id)
-      })
-      
-      // Clear all environments
-      environments.forEach(environment => {
-        onDeleteEnvironment(environment.id)
-      })
-      
-      // Clear all countdowns
-      countdowns.forEach(countdown => {
-        onDeleteCountdown(countdown.id)
-      })
-      
-      setClearConfirmation(false)
-      if (clearTimeoutRef.current) {
-        clearTimeout(clearTimeoutRef.current)
-        clearTimeoutRef.current = null
-      }
-    } else {
-      // First click - show confirmation state
-      setClearConfirmation(true)
-      
-      // Clear any existing timeout
-      if (clearTimeoutRef.current) {
-        clearTimeout(clearTimeoutRef.current)
-      }
-      
-      // Set timeout to revert after 3 seconds
-      clearTimeoutRef.current = setTimeout(() => {
-        setClearConfirmation(false)
-        clearTimeoutRef.current = null
-      }, 3000)
-    }
-  }
 
   // Load encounter
   const handleLoadEncounter = (encounterId) => {
@@ -695,25 +653,12 @@ const EncounterBuilder = ({
           </button>
         </div>
         
-                {/* Right Side - Receipt Buttons */}
+                {/* Right Side - Empty Space */}
                 <div className="encounter-receipt-buttons" style={{
                   flex: '0 0 350px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.25rem',
                   borderLeft: '1px solid var(--border)',
                   height: '100%'
                 }}>
-                  <ReceiptButton 
-                    onClick={handleSaveAs}
-                    variant="secondary"
-                  >
-                    Save As
-                  </ReceiptButton>
-                  <ReceiptButton onClick={handleClearClick} isConfirmation={clearConfirmation}>
-                    Reset
-                  </ReceiptButton>
                 </div>
       </div>
 
@@ -760,8 +705,7 @@ const EncounterBuilder = ({
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                marginBottom: '0.25rem'
+                gap: '0.5rem'
               }}>
                 <input
                   type="text"
@@ -778,15 +722,12 @@ const EncounterBuilder = ({
                     fontSize: '0.875rem'
                   }}
                 />
-                {loadedEncounterId && (
-                  <div style={{
-                    fontSize: '0.75rem',
-                    color: 'var(--text-secondary)',
-                    fontStyle: 'italic'
-                  }}>
-                    Auto-saved
-                  </div>
-                )}
+                <ReceiptButton 
+                  onClick={handleSaveAs}
+                  variant="secondary"
+                >
+                  Save As
+                </ReceiptButton>
               </div>
             </div>
             
@@ -985,26 +926,6 @@ const EncounterBuilder = ({
             
             </div>
             
-            {/* Receipt Buttons - Below Receipt in Vertical Mode */}
-            <div className="encounter-receipt-buttons-vertical" style={{
-              display: 'none', // Hidden by default, shown in vertical mode via CSS
-              padding: '0.75rem 1rem',
-              borderTop: '1px solid var(--border)',
-              backgroundColor: 'var(--bg-primary)',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '0.25rem'
-            }}>
-              <ReceiptButton 
-                onClick={handleSaveAs}
-                variant="secondary"
-              >
-                Save As
-              </ReceiptButton>
-              <ReceiptButton onClick={handleClearClick} isConfirmation={clearConfirmation}>
-                Reset
-              </ReceiptButton>
-            </div>
           </div>
 
         </div>
