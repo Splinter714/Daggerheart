@@ -84,6 +84,20 @@ const EncounterBuilder = ({
     )
   }
   
+  // Check if there are any meaningful changes to preserve (items added, name changed, etc.)
+  const hasMeaningfulChanges = () => {
+    // If we have encounter items, there are changes
+    if (encounterItems.length > 0) return true
+    
+    // If name is not the default "Encounter", there are changes
+    if (encounterName.trim() !== 'Encounter') return true
+    
+    // If we have a loaded encounter and there are changes, there are changes
+    if (loadedEncounterId && hasChanges()) return true
+    
+    return false
+  }
+  
   // Reusable button component for receipt actions
   const ReceiptButton = ({ onClick, children, variant = 'secondary', isConfirmation = false }) => {
     const isDanger = variant === 'danger' || (variant === 'secondary' && isConfirmation)
@@ -443,6 +457,8 @@ const EncounterBuilder = ({
 
   // Create a new blank encounter
   const handleNew = () => {
+    // Only create new encounter if there are meaningful changes to preserve
+    if (!hasMeaningfulChanges()) return
     // Clear all encounter items
     setEncounterItems([])
     
@@ -670,7 +686,13 @@ const EncounterBuilder = ({
                     <ReceiptButton 
                       onClick={handleNew}
                       variant="secondary"
-                      style={{ whiteSpace: 'nowrap', minWidth: 'fit-content', flexShrink: 0 }}
+                      style={{ 
+                        whiteSpace: 'nowrap', 
+                        minWidth: 'fit-content', 
+                        flexShrink: 0,
+                        opacity: hasMeaningfulChanges() ? 1 : 0.5,
+                        cursor: hasMeaningfulChanges() ? 'pointer' : 'not-allowed'
+                      }}
                     >
                       New
                     </ReceiptButton>
@@ -939,7 +961,13 @@ const EncounterBuilder = ({
                 <ReceiptButton 
                   onClick={handleNew}
                   variant="secondary"
-                  style={{ whiteSpace: 'nowrap', minWidth: 'fit-content', flexShrink: 0 }}
+                  style={{ 
+                    whiteSpace: 'nowrap', 
+                    minWidth: 'fit-content', 
+                    flexShrink: 0,
+                    opacity: hasMeaningfulChanges() ? 1 : 0.5,
+                    cursor: hasMeaningfulChanges() ? 'pointer' : 'not-allowed'
+                  }}
                 >
                   New
                 </ReceiptButton>
