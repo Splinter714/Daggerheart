@@ -85,6 +85,51 @@ export const GameStateProvider = ({ children }) => {
 
   // Saved encounters management
   const saveEncounter = (encounterData) => {
+    // If encounterData has an ID, update existing encounter
+    if (encounterData.id) {
+      setGameState(prev => ({
+        ...prev,
+        savedEncounters: (prev.savedEncounters || []).map(encounter => 
+          encounter.id === encounterData.id 
+            ? {
+                ...encounter,
+                name: encounterData.name || encounter.name,
+                encounterItems: encounterData.encounterItems || encounter.encounterItems,
+                partySize: encounterData.partySize || encounter.partySize,
+                battlePointsAdjustments: encounterData.battlePointsAdjustments || encounter.battlePointsAdjustments,
+                updatedAt: new Date().toISOString()
+              }
+            : encounter
+        )
+      }));
+      return encounterData.id;
+    } else {
+      // Create new encounter
+      const newEncounter = {
+        id: generateId('encounter'),
+        name: encounterData.name || `Encounter ${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        encounterItems: encounterData.encounterItems || [],
+        partySize: encounterData.partySize || 4,
+        battlePointsAdjustments: encounterData.battlePointsAdjustments || {}
+      };
+      
+      setGameState(prev => ({
+        ...prev,
+        savedEncounters: [...(prev.savedEncounters || []), newEncounter]
+      }));
+      
+      return newEncounter.id;
+    }
+  };
+
+  const loadEncounter = (encounterId) => {
+    const encounter = (gameState.savedEncounters || []).find(e => e.id === encounterId);
+    return encounter;
+  };
+
+  const saveEncounterAs = (encounterData) => {
+    // Always create a new encounter, even if encounterData has an ID
     const newEncounter = {
       id: generateId('encounter'),
       name: encounterData.name || `Encounter ${Date.now()}`,
@@ -100,11 +145,6 @@ export const GameStateProvider = ({ children }) => {
     }));
     
     return newEncounter.id;
-  };
-
-  const loadEncounter = (encounterId) => {
-    const encounter = (gameState.savedEncounters || []).find(e => e.id === encounterId);
-    return encounter;
   };
 
   const deleteEncounter = (encounterId) => {
@@ -408,6 +448,7 @@ export const GameStateProvider = ({ children }) => {
     updatePartySize,
     // Saved encounters actions
     saveEncounter,
+    saveEncounterAs,
     loadEncounter,
     deleteEncounter,
     // Countdown actions

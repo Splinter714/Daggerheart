@@ -62,6 +62,7 @@ const DashboardContent = () => {
     deleteCountdown,
     advanceCountdown,
     saveEncounter,
+    saveEncounterAs,
     loadEncounter,
     deleteEncounter
   } = useGameState()
@@ -390,6 +391,7 @@ const DashboardContent = () => {
         countdowns={countdowns}
         savedEncounters={savedEncounters}
         onSaveEncounter={saveEncounter}
+        onSaveEncounterAs={saveEncounterAs}
         onLoadEncounter={loadEncounter}
         onDeleteEncounter={deleteEncounter}
       />

@@ -44,6 +44,7 @@ const EncounterBuilder = ({
   countdowns = [],
   savedEncounters = [],
   onSaveEncounter,
+  onSaveEncounterAs,
   onLoadEncounter,
   onDeleteEncounter
 }) => {
@@ -389,8 +390,8 @@ const EncounterBuilder = ({
   }
   
 
-  // Update encounter (overwrite existing)
-  const handleUpdateEncounter = () => {
+  // Auto-save function that saves to current encounter or creates new one
+  const autoSave = useCallback(() => {
     if (encounterItems.length === 0) return
     
     // Generate incremental name if no name provided
@@ -424,22 +425,38 @@ const EncounterBuilder = ({
       battlePointsAdjustments: battlePointsAdjustments
     }
     
-    // If we have a loaded encounter ID, this is an overwrite (Save)
-    // Otherwise, this is a new encounter (Save As)
+    // If we have a loaded encounter, update it; otherwise create new
     if (loadedEncounterId) {
       encounterData.id = loadedEncounterId
+      const savedId = onSaveEncounter(encounterData)
+      setLoadedEncounterId(savedId) // Keep the same ID
+    } else {
+      const newId = onSaveEncounter(encounterData)
+      setLoadedEncounterId(newId) // Set the new ID
     }
     
-    onSaveEncounter(encounterData)
-    setEncounterName('')
-    setLoadedEncounterId(null) // Clear loaded encounter after save
-    setOriginalEncounterData(null) // Clear original data
-    setActiveTab('encounters')
-    // Don't close the modal - keep it open for further editing
-  }
+    // Store current state as original for change detection
+    setOriginalEncounterData({
+      name: finalName,
+      encounterItems: encounterItems,
+      partySize: pcCount,
+      battlePointsAdjustments: battlePointsAdjustments
+    })
+  }, [encounterItems, encounterName, pcCount, battlePointsAdjustments, loadedEncounterId, savedEncounters, onSaveEncounter])
 
-  // Save new encounter (create new copy)
-  const handleSaveNewEncounter = () => {
+  // Auto-save effect - save whenever encounter items change
+  useEffect(() => {
+    if (encounterItems.length > 0) {
+      const timeoutId = setTimeout(() => {
+        autoSave()
+      }, 1000) // Debounce auto-save by 1 second
+      
+      return () => clearTimeout(timeoutId)
+    }
+  }, [encounterItems, autoSave])
+
+  // Save as new encounter (always creates new copy)
+  const handleSaveAs = () => {
     if (encounterItems.length === 0) return
     
     // Generate incremental name if no name provided
@@ -473,10 +490,9 @@ const EncounterBuilder = ({
       battlePointsAdjustments: battlePointsAdjustments
     }
     
-    // Save New always creates a new encounter (no ID)
-    onSaveEncounter(encounterData)
+    const newId = onSaveEncounterAs(encounterData)
     setEncounterName('')
-    setLoadedEncounterId(null) // Clear loaded encounter after save new
+    setLoadedEncounterId(null) // Clear loaded encounter after save as
     setOriginalEncounterData(null) // Clear original data
     setActiveTab('encounters')
     // Don't close the modal - keep it open for further editing
@@ -683,45 +699,21 @@ const EncounterBuilder = ({
                 <div className="encounter-receipt-buttons" style={{
                   flex: '0 0 350px',
                   display: 'flex',
-                  flexDirection: 'column',
+                  alignItems: 'center',
                   justifyContent: 'center',
+                  gap: '0.25rem',
                   borderLeft: '1px solid var(--border)',
-                  height: '100%',
-                  padding: '0.25rem 0.5rem'
+                  height: '100%'
                 }}>
-                  {/* Top Row - Save Buttons */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    gap: '0.25rem',
-                    marginBottom: '0.25rem'
-                  }}>
-                    <ReceiptButton 
-                      onClick={handleUpdateEncounter} 
-                      variant={loadedEncounterId && hasChanges() ? "purple" : "secondary"}
-                      style={loadedEncounterId && !hasChanges() ? { opacity: 0.5 } : {}}
-                    >
-                      Save Update
-                    </ReceiptButton>
-                    <ReceiptButton 
-                      onClick={handleSaveNewEncounter}
-                      variant={!loadedEncounterId || hasChanges() ? "purple" : "secondary"}
-                      style={loadedEncounterId && !hasChanges() ? { opacity: 0.5 } : {}}
-                    >
-                      Save New
-                    </ReceiptButton>
-                  </div>
-                  
-                  {/* Bottom Row - Reset Button */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    gap: '0.25rem'
-                  }}>
-                    <ReceiptButton onClick={handleClearClick} isConfirmation={clearConfirmation}>
-                      Reset
-                    </ReceiptButton>
-                  </div>
+                  <ReceiptButton 
+                    onClick={handleSaveAs}
+                    variant="secondary"
+                  >
+                    Save As
+                  </ReceiptButton>
+                  <ReceiptButton onClick={handleClearClick} isConfirmation={clearConfirmation}>
+                    Reset
+                  </ReceiptButton>
                 </div>
       </div>
 
@@ -765,21 +757,37 @@ const EncounterBuilder = ({
               borderBottom: '1px solid var(--border)',
               backgroundColor: 'var(--bg-primary)'
             }}>
-              <input
-                type="text"
-                value={encounterName}
-                onChange={(e) => setEncounterName(e.target.value)}
-                placeholder="Encounter Name"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: '1px solid var(--border)',
-                  borderRadius: '4px',
-                  backgroundColor: 'var(--bg-secondary)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.875rem'
-                }}
-              />
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginBottom: '0.25rem'
+              }}>
+                <input
+                  type="text"
+                  value={encounterName}
+                  onChange={(e) => setEncounterName(e.target.value)}
+                  placeholder="Encounter Name"
+                  style={{
+                    flex: 1,
+                    padding: '0.5rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.875rem'
+                  }}
+                />
+                {loadedEncounterId && (
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: 'var(--text-secondary)',
+                    fontStyle: 'italic'
+                  }}>
+                    Auto-saved
+                  </div>
+                )}
+              </div>
             </div>
             
             {/* Battle Points Calculator Content */}
@@ -983,42 +991,19 @@ const EncounterBuilder = ({
               padding: '0.75rem 1rem',
               borderTop: '1px solid var(--border)',
               backgroundColor: 'var(--bg-primary)',
-              flexDirection: 'column',
+              justifyContent: 'center',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.25rem'
             }}>
-              {/* Top Row - Save Buttons */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '0.25rem'
-              }}>
-                <ReceiptButton 
-                  onClick={handleUpdateEncounter} 
-                  variant={loadedEncounterId && hasChanges() ? "purple" : "secondary"}
-                  style={loadedEncounterId && !hasChanges() ? { opacity: 0.5 } : {}}
-                >
-                  Save Update
-                </ReceiptButton>
-                <ReceiptButton 
-                  onClick={handleSaveNewEncounter}
-                  variant={!loadedEncounterId || hasChanges() ? "purple" : "secondary"}
-                  style={loadedEncounterId && !hasChanges() ? { opacity: 0.5 } : {}}
-                >
-                  Save New
-                </ReceiptButton>
-              </div>
-              
-              {/* Bottom Row - Reset Button */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '0.25rem'
-              }}>
-                <ReceiptButton onClick={handleClearClick} isConfirmation={clearConfirmation}>
-                  Reset
-                </ReceiptButton>
-              </div>
+              <ReceiptButton 
+                onClick={handleSaveAs}
+                variant="secondary"
+              >
+                Save As
+              </ReceiptButton>
+              <ReceiptButton onClick={handleClearClick} isConfirmation={clearConfirmation}>
+                Reset
+              </ReceiptButton>
             </div>
           </div>
 
