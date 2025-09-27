@@ -650,10 +650,9 @@ const EncounterBuilder = ({
                   flex: '0 0 350px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
                   borderLeft: '1px solid var(--border)',
                   height: '100%',
-                  padding: '0 1rem'
+                  padding: '0 0.75rem'
                 }}>
                   <div style={{
                     display: 'flex',
@@ -679,7 +678,7 @@ const EncounterBuilder = ({
                     <ReceiptButton 
                       onClick={handleSaveAs}
                       variant="secondary"
-                      style={{ whiteSpace: 'nowrap', minWidth: 'fit-content' }}
+                      style={{ whiteSpace: 'nowrap', minWidth: 'fit-content', flexShrink: 0 }}
                     >
                       Save New
                     </ReceiptButton>
@@ -920,14 +919,15 @@ const EncounterBuilder = ({
             {/* Encounter Name Field - Below Receipt in Vertical Mode */}
             <div className="encounter-receipt-buttons-vertical" style={{
               display: 'none', // Hidden by default, shown in vertical mode via CSS
-              padding: '0.75rem 1rem',
+              padding: '0.75rem',
               borderTop: '1px solid var(--border)',
               backgroundColor: 'var(--bg-primary)'
             }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem'
+                gap: '0.5rem',
+                width: '100%'
               }}>
                 <input
                   type="text"
@@ -947,7 +947,7 @@ const EncounterBuilder = ({
                 <ReceiptButton 
                   onClick={handleSaveAs}
                   variant="secondary"
-                  style={{ whiteSpace: 'nowrap', minWidth: 'fit-content' }}
+                  style={{ whiteSpace: 'nowrap', minWidth: 'fit-content', flexShrink: 0 }}
                 >
                   Save New
                 </ReceiptButton>
