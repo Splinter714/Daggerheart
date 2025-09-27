@@ -826,6 +826,15 @@ input[type="number"] {
     border-left: none;
     border-top: 1px solid var(--border);
   }
+  
+  /* Move encounter name field below receipt in vertical mode */
+  .encounter-receipt-buttons {
+    display: none !important;
+  }
+  
+  .encounter-receipt-buttons-vertical {
+    display: flex !important;
+  }
 }
 
 /* Saved Encounter Cards Responsive Styles */

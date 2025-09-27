@@ -645,12 +645,45 @@ const EncounterBuilder = ({
           </button>
         </div>
         
-                {/* Right Side - Empty Space */}
+                {/* Right Side - Encounter Name Field */}
                 <div className="encounter-receipt-buttons" style={{
                   flex: '0 0 350px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   borderLeft: '1px solid var(--border)',
-                  height: '100%'
+                  height: '100%',
+                  padding: '0 1rem'
                 }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    width: '100%'
+                  }}>
+                    <input
+                      type="text"
+                      value={encounterName}
+                      onChange={(e) => setEncounterName(e.target.value)}
+                      placeholder="Encounter Name"
+                      style={{
+                        flex: 1,
+                        padding: '0.5rem',
+                        border: '1px solid var(--border)',
+                        borderRadius: '4px',
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.875rem'
+                      }}
+                    />
+                    <ReceiptButton 
+                      onClick={handleSaveAs}
+                      variant="secondary"
+                      style={{ whiteSpace: 'nowrap', minWidth: 'fit-content' }}
+                    >
+                      Save New
+                    </ReceiptButton>
+                  </div>
                 </div>
       </div>
 
@@ -688,41 +721,6 @@ const EncounterBuilder = ({
           flexDirection: 'column',
           overflow: 'hidden'
           }}>
-            {/* Encounter Name Field */}
-            <div style={{
-              padding: '0.75rem 1rem',
-              borderBottom: '1px solid var(--border)',
-              backgroundColor: 'var(--bg-primary)'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                <input
-                  type="text"
-                  value={encounterName}
-                  onChange={(e) => setEncounterName(e.target.value)}
-                  placeholder="Encounter Name"
-                  style={{
-                    flex: 1,
-                    padding: '0.5rem',
-                    border: '1px solid var(--border)',
-                    borderRadius: '4px',
-                    backgroundColor: 'var(--bg-secondary)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.875rem'
-                  }}
-                />
-                <ReceiptButton 
-                  onClick={handleSaveAs}
-                  variant="secondary"
-                  style={{ whiteSpace: 'nowrap', minWidth: 'fit-content' }}
-                >
-                  Save New
-                </ReceiptButton>
-              </div>
-            </div>
             
             {/* Battle Points Calculator Content */}
             <div className="receipt-content" style={{ 
@@ -917,6 +915,43 @@ const EncounterBuilder = ({
                 })}
             </div>
             
+            </div>
+            
+            {/* Encounter Name Field - Below Receipt in Vertical Mode */}
+            <div className="encounter-receipt-buttons-vertical" style={{
+              display: 'none', // Hidden by default, shown in vertical mode via CSS
+              padding: '0.75rem 1rem',
+              borderTop: '1px solid var(--border)',
+              backgroundColor: 'var(--bg-primary)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <input
+                  type="text"
+                  value={encounterName}
+                  onChange={(e) => setEncounterName(e.target.value)}
+                  placeholder="Encounter Name"
+                  style={{
+                    flex: 1,
+                    padding: '0.5rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.875rem'
+                  }}
+                />
+                <ReceiptButton 
+                  onClick={handleSaveAs}
+                  variant="secondary"
+                  style={{ whiteSpace: 'nowrap', minWidth: 'fit-content' }}
+                >
+                  Save New
+                </ReceiptButton>
+              </div>
             </div>
             
           </div>
