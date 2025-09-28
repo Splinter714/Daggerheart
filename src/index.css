@@ -840,4 +840,28 @@ input[type="number"] {
 /* Saved Encounter Cards Responsive Styles */
 /* CSS Grid auto-fit handles responsive behavior automatically */
 
+/* Saved Encounter Card Hover Effects */
+.saved-encounter-card {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.saved-encounter-card:hover {
+  background-color: var(--bg-secondary) !important;
+}
+
+.saved-encounter-card:active {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Prevent text selection in saved encounter cards */
+.saved-encounter-card * {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
 /* Specialized styles */
