@@ -38,20 +38,35 @@ export const GameStateProvider = ({ children }) => {
     savedEncounters: []
   });
   const [isLoaded, setIsLoaded] = useState(false);
+  
+  // Custom content state
+  const [customContent, setCustomContent] = useState({
+    adversaries: [],
+    environments: []
+  });
 
   // Load state from localStorage on mount
   useEffect(() => {
     const savedState = readFromStorage('daggerheart-game-state');
     if (savedState) {
       try {
-        // Only set state if it's not empty
-        if (savedState.adversaries?.length > 0 || savedState.environments?.length > 0 || savedState.countdowns?.length > 0) {
+        // Only set state if it's not empty OR if there are saved encounters
+        if (savedState.adversaries?.length > 0 || savedState.environments?.length > 0 || savedState.countdowns?.length > 0 || savedState.savedEncounters?.length > 0) {
           setGameState(savedState);
         }
       } catch (error) {
         console.error('Failed to load saved state:', error);
       }
     }
+    
+    // Load custom content from localStorage
+    const customAdversaries = readFromStorage('daggerheart-custom-adversaries') || [];
+    const customEnvironments = readFromStorage('daggerheart-custom-environments') || [];
+    setCustomContent({
+      adversaries: customAdversaries,
+      environments: customEnvironments
+    });
+    
     setIsLoaded(true);
   }, []);
 
@@ -438,9 +453,101 @@ export const GameStateProvider = ({ children }) => {
     })
   }
 
+  // Custom content management
+  const addCustomAdversary = (adversaryData) => {
+    const newAdversary = {
+      ...adversaryData,
+      id: generateId('custom-adv'),
+      source: adversaryData.source || 'Homebrew',
+      isCustom: true
+    }
+    
+    setCustomContent(prev => ({
+      ...prev,
+      adversaries: [...prev.adversaries, newAdversary]
+    }))
+    
+    // Also save to localStorage
+    writeToStorage('daggerheart-custom-adversaries', [...customContent.adversaries, newAdversary])
+    
+    return newAdversary.id
+  }
+
+  const addCustomEnvironment = (environmentData) => {
+    const newEnvironment = {
+      ...environmentData,
+      id: generateId('custom-env'),
+      source: environmentData.source || 'Homebrew',
+      isCustom: true
+    }
+    
+    setCustomContent(prev => ({
+      ...prev,
+      environments: [...prev.environments, newEnvironment]
+    }))
+    
+    // Also save to localStorage
+    writeToStorage('daggerheart-custom-environments', [...customContent.environments, newEnvironment])
+    
+    return newEnvironment.id
+  }
+
+  const updateCustomAdversary = (id, updates) => {
+    setCustomContent(prev => ({
+      ...prev,
+      adversaries: prev.adversaries.map(adv => 
+        adv.id === id ? { ...adv, ...updates } : adv
+      )
+    }))
+    
+    // Also update localStorage
+    const updatedAdversaries = customContent.adversaries.map(adv => 
+      adv.id === id ? { ...adv, ...updates } : adv
+    )
+    writeToStorage('daggerheart-custom-adversaries', updatedAdversaries)
+  }
+
+  const updateCustomEnvironment = (id, updates) => {
+    setCustomContent(prev => ({
+      ...prev,
+      environments: prev.environments.map(env => 
+        env.id === id ? { ...env, ...updates } : env
+      )
+    }))
+    
+    // Also update localStorage
+    const updatedEnvironments = customContent.environments.map(env => 
+      env.id === id ? { ...env, ...updates } : env
+    )
+    writeToStorage('daggerheart-custom-environments', updatedEnvironments)
+  }
+
+  const deleteCustomAdversary = (id) => {
+    setCustomContent(prev => ({
+      ...prev,
+      adversaries: prev.adversaries.filter(adv => adv.id !== id)
+    }))
+    
+    // Also update localStorage
+    const updatedAdversaries = customContent.adversaries.filter(adv => adv.id !== id)
+    writeToStorage('daggerheart-custom-adversaries', updatedAdversaries)
+  }
+
+  const deleteCustomEnvironment = (id) => {
+    setCustomContent(prev => ({
+      ...prev,
+      environments: prev.environments.filter(env => env.id !== id)
+    }))
+    
+    // Also update localStorage
+    const updatedEnvironments = customContent.environments.filter(env => env.id !== id)
+    writeToStorage('daggerheart-custom-environments', updatedEnvironments)
+  }
+
   const value = {
     gameState,
     isLoaded,
+    customContent,
     // Fear actions
     updateFear,
     toggleFearVisibility,
@@ -472,6 +579,13 @@ export const GameStateProvider = ({ children }) => {
     updateEnvironment,
     deleteEnvironment,
     reorderEnvironments,
+    // Custom content actions
+    addCustomAdversary,
+    addCustomEnvironment,
+    updateCustomAdversary,
+    updateCustomEnvironment,
+    deleteCustomAdversary,
+    deleteCustomEnvironment,
   };
 
   return (
@@ -533,7 +647,7 @@ export const useGameState = () => {
   }
   
   // Destructure commonly used values for convenience
-  const { gameState, ...actions } = context;
+  const { gameState, customContent, ...actions } = context;
   
   // Ensure gameState exists and has the expected structure
   if (!gameState) {
@@ -546,6 +660,7 @@ export const useGameState = () => {
       environments: [],
       partySize: 4,
       savedEncounters: [],
+      customContent: { adversaries: [], environments: [] },
       
       // Actions (no-op functions)
       updateFear: () => {},
@@ -570,6 +685,12 @@ export const useGameState = () => {
       updateEnvironment: () => {},
       deleteEnvironment: () => {},
       reorderEnvironments: () => {},
+      addCustomAdversary: () => {},
+      addCustomEnvironment: () => {},
+      updateCustomAdversary: () => {},
+      updateCustomEnvironment: () => {},
+      deleteCustomAdversary: () => {},
+      deleteCustomEnvironment: () => {},
       
       // Computed values
       hasCountdowns: false,
@@ -596,6 +717,7 @@ export const useGameState = () => {
     environments,
     partySize,
     savedEncounters,
+    customContent,
     
     // Actions
     ...actions,

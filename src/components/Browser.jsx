@@ -110,23 +110,174 @@ const BATTLE_POINT_ADJUSTMENTS = {
 // Dynamically import JSON data to keep initial bundle smaller
 let adversariesData = { adversaries: [] }
 let environmentsData = { environments: [] }
+let playtestAdversariesData = { adversaries: [] }
+let playtestEnvironmentsData = { environments: [] }
 let _dataLoaded = false
+
+// Load custom content from localStorage
+const loadCustomContent = () => {
+  const customAdversaries = JSON.parse(localStorage.getItem('daggerheart-custom-adversaries') || '[]')
+  const customEnvironments = JSON.parse(localStorage.getItem('daggerheart-custom-environments') || '[]')
+  return { customAdversaries, customEnvironments }
+}
+
+// Save custom content to localStorage
+const saveCustomContent = (type, content) => {
+  if (type === 'adversary') {
+    localStorage.setItem('daggerheart-custom-adversaries', JSON.stringify(content))
+  } else if (type === 'environment') {
+    localStorage.setItem('daggerheart-custom-environments', JSON.stringify(content))
+  }
+}
 
 // Load data asynchronously
 const loadData = async () => {
+  // Prevent multiple simultaneous loads
+  if (_dataLoaded) {
+    return
+  }
+  
+  let officialAdversaries = { adversaries: [] }
+  let officialEnvironments = { environments: [] }
+  let playtestAdv = { adversaries: [] }
+  let playtestEnv = { environments: [] }
+  
   try {
     const mod = await import(/* @vite-ignore */ '../data/adversaries.json')
-    adversariesData = mod?.default || mod
+    officialAdversaries = mod?.default || mod
   } catch (e) {
     console.warn('Failed to load adversaries.json:', e)
   }
+  
   try {
     const mod = await import(/* @vite-ignore */ '../data/environments.json')
-    environmentsData = mod?.default || mod
+    officialEnvironments = mod?.default || mod
   } catch (e) {
     console.warn('Failed to load environments.json:', e)
   }
+  
+  try {
+    const mod = await import(/* @vite-ignore */ '../data/playtest-adversaries.json')
+    playtestAdv = mod?.default || mod
+  } catch (e) {
+    console.warn('Failed to load playtest-adversaries.json:', e)
+  }
+  
+  try {
+    const mod = await import(/* @vite-ignore */ '../data/playtest-environments.json')
+    playtestEnv = mod?.default || mod
+  } catch (e) {
+    console.warn('Failed to load playtest-environments.json:', e)
+  }
+  
+  // Load custom content and merge everything
+  const { customAdversaries, customEnvironments } = loadCustomContent()
+  
+  // Create merged data objects without mutating originals
+  adversariesData = {
+    ...officialAdversaries,
+    adversaries: [
+      ...(officialAdversaries.adversaries || []),
+      ...(playtestAdv.adversaries || []),
+      ...customAdversaries
+    ]
+  }
+  
+  environmentsData = {
+    ...officialEnvironments,
+    environments: [
+      ...(officialEnvironments.environments || []),
+      ...(playtestEnv.environments || []),
+      ...customEnvironments
+    ]
+  }
+  
   _dataLoaded = true
+  console.log(`Loaded ${adversariesData.adversaries.length} adversaries and ${environmentsData.environments.length} environments`)
+}
+
+// Functions to manage custom content
+const addCustomAdversary = (adversaryData) => {
+  const { customAdversaries } = loadCustomContent()
+  const newAdversary = {
+    ...adversaryData,
+    id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+    source: adversaryData.source || 'Homebrew'
+  }
+  const updatedAdversaries = [...customAdversaries, newAdversary]
+  saveCustomContent('adversary', updatedAdversaries)
+  
+  // Reset flag and reload data to include the new custom adversary
+  _dataLoaded = false
+  loadData()
+  
+  return newAdversary.id
+}
+
+const addCustomEnvironment = (environmentData) => {
+  const { customEnvironments } = loadCustomContent()
+  const newEnvironment = {
+    ...environmentData,
+    id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+    source: environmentData.source || 'Homebrew'
+  }
+  const updatedEnvironments = [...customEnvironments, newEnvironment]
+  saveCustomContent('environment', updatedEnvironments)
+  
+  // Reset flag and reload data to include the new custom environment
+  _dataLoaded = false
+  loadData()
+  
+  return newEnvironment.id
+}
+
+const updateCustomContent = (type, id, updates) => {
+  const { customAdversaries, customEnvironments } = loadCustomContent()
+  
+  if (type === 'adversary') {
+    const updatedAdversaries = customAdversaries.map(adv => 
+      adv.id === id ? { ...adv, ...updates } : adv
+    )
+    saveCustomContent('adversary', updatedAdversaries)
+  } else if (type === 'environment') {
+    const updatedEnvironments = customEnvironments.map(env => 
+      env.id === id ? { ...env, ...updates } : env
+    )
+    saveCustomContent('environment', updatedEnvironments)
+  }
+  
+  // Reset flag and reload data to reflect changes
+  _dataLoaded = false
+  loadData()
+}
+
+const deleteCustomContent = (type, id) => {
+  const { customAdversaries, customEnvironments } = loadCustomContent()
+  
+  if (type === 'adversary') {
+    const updatedAdversaries = customAdversaries.filter(adv => adv.id !== id)
+    saveCustomContent('adversary', updatedAdversaries)
+  } else if (type === 'environment') {
+    const updatedEnvironments = customEnvironments.filter(env => env.id !== id)
+    saveCustomContent('environment', updatedEnvironments)
+  }
+  
+  // Reset flag and reload data to reflect changes
+  _dataLoaded = false
+  loadData()
+}
+
+// Functions to manage playtest content (for development/admin use)
+const addPlaytestAdversary = (adversaryData) => {
+  // Note: This would typically be done by updating the playtest-adversaries.json file directly
+  // This function is here for completeness but playtest content is usually managed via file updates
+  console.warn('addPlaytestAdversary: Playtest content should be managed by updating playtest-adversaries.json directly')
+}
+
+const addPlaytestEnvironment = (environmentData) => {
+  // Note: This would typically be done by updating the playtest-environments.json file directly
+  // This function is here for completeness but playtest content is usually managed via file updates
+  console.warn('addPlaytestEnvironment: Playtest content should be managed by updating playtest-environments.json directly')
 }
 
 // Custom hook for browser functionality - all logic inline
@@ -1118,16 +1269,24 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
               {savedEncounters.map((encounter) => (
                 <div
                   key={encounter.id}
-                style={{
-                  border: '1px solid var(--border)',
-                  borderRadius: '8px',
-                  padding: '8px',
-                  backgroundColor: 'var(--bg-card)',
-                  transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}
+                  onClick={() => onLoadEncounter && onLoadEncounter(encounter.id)}
+                  style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    padding: '8px',
+                    backgroundColor: 'var(--bg-card)',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'var(--bg-secondary)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'var(--bg-card)'
+                  }}
                 >
                   {/* Tier, Party Size, and Balance (stacked vertically) */}
                   <div style={{ 
@@ -1243,7 +1402,11 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
                     <div style={{
                       fontWeight: '500',
                       color: 'var(--text-primary)',
-                      fontSize: '0.9rem'
+                      fontSize: '0.9rem',
+                      wordWrap: 'break-word',
+                      wordBreak: 'break-word',
+                      width: '150px',
+                      maxWidth: '150px'
                     }}>
                       {encounter.name}
                     </div>
@@ -1252,35 +1415,12 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
                   {/* Adversary List */}
                   <AdversaryList encounter={encounter} />
                   
-                  {/* Load Button */}
-                  <div style={{
-                    borderLeft: '1px solid var(--text-secondary)',
-                    paddingLeft: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    minHeight: '60px'
-                  }}>
-                    <button
-                      onClick={() => onLoadEncounter && onLoadEncounter(encounter.id)}
-                      style={{
-                        background: 'var(--purple)',
-                        border: 'none',
-                        color: 'white',
-                        padding: '0.4rem 0.8rem',
-                        borderRadius: '4px',
-                        fontSize: '0.75rem',
-                        cursor: 'pointer',
-                        minWidth: '60px',
-                        transition: 'background-color 0.2s'
-                      }}
-                    >
-                      Load
-                    </button>
-                  </div>
-                  
                   {/* Delete Button */}
                   <button
-                    onClick={() => handleDeleteClick(encounter.id)}
+                    onClick={(e) => {
+                      e.stopPropagation() // Prevent card click
+                      handleDeleteClick(encounter.id)
+                    }}
                     style={{
                       background: deleteConfirmations[encounter.id] ? 'var(--danger)' : 'var(--gray-600)',
                       border: 'none',
@@ -1719,6 +1859,18 @@ const styles = {
   filterLabel: {
     flex: 1
   }
+}
+
+// Export custom content management functions
+export { 
+  addCustomAdversary, 
+  addCustomEnvironment, 
+  updateCustomContent, 
+  deleteCustomContent,
+  loadCustomContent,
+  saveCustomContent,
+  addPlaytestAdversary,
+  addPlaytestEnvironment
 }
 
 export default Browser
