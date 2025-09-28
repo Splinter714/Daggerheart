@@ -92,8 +92,29 @@ const EncounterBuilder = ({
     // If name is not the default "Encounter", there are changes
     if (encounterName.trim() !== 'Encounter') return true
     
-    // If we have a loaded encounter and there are changes, there are changes
-    if (loadedEncounterId && hasChanges()) return true
+    // If we have a loaded encounter and there are changes (excluding party size), there are changes
+    if (loadedEncounterId && hasChanges()) {
+      // Check if changes are more than just party size differences
+      if (originalEncounterData) {
+        const currentItems = encounterItems.length
+        const originalItems = originalEncounterData.encounterItems?.length || 0
+        
+        // If encounter items changed, that's meaningful
+        if (currentItems !== originalItems) return true
+        
+        // If encounter name changed, that's meaningful
+        if (encounterName.trim() !== (originalEncounterData.name || '')) return true
+        
+        // If battle points adjustments changed, that's meaningful
+        const currentAdjustments = JSON.stringify(battlePointsAdjustments)
+        const originalAdjustments = JSON.stringify(originalEncounterData.battlePointsAdjustments || {})
+        if (currentAdjustments !== originalAdjustments) return true
+        
+        // Party size changes alone are not meaningful
+        return false
+      }
+      return true
+    }
     
     return false
   }
@@ -126,9 +147,9 @@ const EncounterBuilder = ({
   // Track previous PC count to calculate group changes
   const prevPcCountRef = React.useRef(pcCount)
   
-  // Load existing adversaries when encounter builder opens
+  // Load existing adversaries when encounter builder opens (only on initial open)
   React.useEffect(() => {
-    if (isOpen && adversaries.length > 0) {
+    if (isOpen && adversaries.length > 0 && encounterItems.length === 0) {
       // Group adversaries by base name and add them to encounter items
       const groupedAdversaries = {}
       adversaries.forEach(adversary => {
@@ -150,7 +171,7 @@ const EncounterBuilder = ({
       // Clear encounter items when no adversaries exist
       setEncounterItems([])
     }
-  }, [isOpen, adversaries])
+  }, [isOpen]) // Only depend on isOpen, not adversaries
   
   // Calculate automatic adjustments based on encounter composition
   const automaticAdjustments = React.useMemo(() => {
@@ -374,20 +395,23 @@ const EncounterBuilder = ({
       
       if (existingIndex >= 0) {
         const item = encounterItems[existingIndex]
-        // Special handling for Minions: remove in increments of party size
-        const decrementAmount = (item.item.type === 'Minion') ? pcCount : 1
         
-        if (item.quantity > 0) {
-          // Decrease quantity (can go to 0)
-          return encounterItems.map((encounterItem, index) => 
-            index === existingIndex 
-              ? { ...encounterItem, quantity: Math.max(0, encounterItem.quantity - decrementAmount) }
-              : encounterItem
-          )
-        } else {
-          // Remove entirely when quantity is 0
+        // If quantity is already 0, this is the second click - remove entirely
+        if (item.quantity === 0) {
           return encounterItems.filter((_, index) => index !== existingIndex)
         }
+        
+        // First click or subsequent clicks - decrease quantity
+        // Special handling for Minions: remove in increments of party size
+        const decrementAmount = (item.item.type === 'Minion') ? pcCount : 1
+        const newQuantity = Math.max(0, item.quantity - decrementAmount)
+        
+        // Decrease quantity (can go to 0)
+        return encounterItems.map((encounterItem, index) => 
+          index === existingIndex 
+            ? { ...encounterItem, quantity: newQuantity }
+            : encounterItem
+        )
       }
       return encounterItems
     })()
@@ -408,14 +432,45 @@ const EncounterBuilder = ({
   }
   
 
+  // Function to find matching saved encounter based on current data
+  const findMatchingEncounter = useCallback(() => {
+    // Don't match blank encounters - they're not meaningful
+    if (encounterItems.length === 0) return null
+    
+    const finalName = encounterName.trim() || 'Encounter'
+    
+    // Try to find exact match by name and content
+    const matchingEncounter = savedEncounters.find(encounter => {
+      if (encounter.name !== finalName) return false
+      if (encounter.encounterItems?.length !== encounterItems.length) return false
+      
+      // Check if all encounter items match
+      const encounterItemsStr = JSON.stringify(encounter.encounterItems?.sort())
+      const currentItemsStr = JSON.stringify([...encounterItems].sort())
+      
+      return encounterItemsStr === currentItemsStr
+    })
+    
+    return matchingEncounter?.id || null
+  }, [savedEncounters, encounterName, encounterItems])
+
   // Auto-save function that saves to current encounter or creates new one
   const autoSave = useCallback(() => {
-    if (encounterItems.length === 0) return
-    
-    // Use current name or default name
+    // Use current name as-is (allow empty names)
     let finalName = encounterName.trim()
-    if (!finalName) {
-      finalName = 'Encounter'
+    
+    // Try to find matching encounter if we don't have a loaded ID
+    let targetEncounterId = loadedEncounterId
+    if (!targetEncounterId) {
+      targetEncounterId = findMatchingEncounter()
+    }
+    
+    // If encounter is empty and has default/empty name, delete the encounter if it exists
+    if (encounterItems.length === 0 && (!finalName || finalName === 'Encounter') && targetEncounterId) {
+      onDeleteEncounter(targetEncounterId)
+      setLoadedEncounterId(null)
+      setOriginalEncounterData(null)
+      return
     }
     
     const encounterData = {
@@ -425,9 +480,9 @@ const EncounterBuilder = ({
       battlePointsAdjustments: battlePointsAdjustments
     }
     
-    // If we have a loaded encounter, update it; otherwise create new
-    if (loadedEncounterId) {
-      encounterData.id = loadedEncounterId
+    // If we have a target encounter, update it; otherwise create new
+    if (targetEncounterId) {
+      encounterData.id = targetEncounterId
       const savedId = onSaveEncounter(encounterData)
       setLoadedEncounterId(savedId) // Keep the same ID
     } else {
@@ -442,23 +497,33 @@ const EncounterBuilder = ({
       partySize: pcCount,
       battlePointsAdjustments: battlePointsAdjustments
     })
-  }, [encounterItems, encounterName, pcCount, battlePointsAdjustments, loadedEncounterId, onSaveEncounter])
+  }, [encounterItems, encounterName, pcCount, battlePointsAdjustments, loadedEncounterId, onSaveEncounter, findMatchingEncounter, onDeleteEncounter])
 
   // Auto-save effect - save whenever encounter items change
   useEffect(() => {
-    if (encounterItems.length > 0) {
+    // Auto-save if we have items OR if we have a loaded encounter (to handle cleanup)
+    // Always trigger if we have a loaded encounter, even when it becomes empty
+    if (loadedEncounterId) {
+      const timeoutId = setTimeout(() => {
+        autoSave()
+      }, 1000) // Debounce auto-save by 1 second
+      
+      return () => clearTimeout(timeoutId)
+    } else if (encounterItems.length > 0) {
+      // Only auto-save new encounters when they have items
       const timeoutId = setTimeout(() => {
         autoSave()
       }, 1000) // Debounce auto-save by 1 second
       
       return () => clearTimeout(timeoutId)
     }
-  }, [encounterItems, autoSave])
+  }, [encounterItems, loadedEncounterId, autoSave])
 
   // Create a new blank encounter
   const handleNew = () => {
     // Only create new encounter if there are meaningful changes to preserve
     if (!hasMeaningfulChanges()) return
+    
     // Clear all encounter items
     setEncounterItems([])
     
@@ -484,24 +549,8 @@ const EncounterBuilder = ({
       onDeleteCountdown(countdown.id)
     })
     
-    // Create a new blank encounter and save it
-    const newEncounterData = {
-      name: 'Encounter',
-      encounterItems: [],
-      partySize: pcCount,
-      battlePointsAdjustments: battlePointsAdjustments
-    }
-    
-    const newId = onSaveEncounter(newEncounterData)
-    setLoadedEncounterId(newId)
-    
-    // Store current state as original for change detection
-    setOriginalEncounterData({
-      name: 'Encounter',
-      encounterItems: [],
-      partySize: pcCount,
-      battlePointsAdjustments: battlePointsAdjustments
-    })
+    // Don't create an encounter immediately - let auto-save handle it when user adds items
+    // This prevents the conflict where we create then immediately delete the encounter
   }
 
 
@@ -540,6 +589,29 @@ const EncounterBuilder = ({
   // Delete encounter
   const handleDeleteEncounter = (encounterId) => {
     onDeleteEncounter(encounterId)
+    
+    // If we're deleting the currently loaded encounter, clear the receipt
+    if (loadedEncounterId === encounterId) {
+      setEncounterItems([])
+      setEncounterName('Encounter')
+      setLoadedEncounterId(null)
+      setOriginalEncounterData(null)
+      
+      // Clear all adversaries from global state
+      adversaries.forEach(adversary => {
+        onDeleteAdversary(adversary.id)
+      })
+      
+      // Clear all environments from global state
+      environments.forEach(environment => {
+        onDeleteEnvironment(environment.id)
+      })
+      
+      // Clear all countdowns from global state
+      countdowns.forEach(countdown => {
+        onDeleteCountdown(countdown.id)
+      })
+    }
   }
 
   
@@ -586,8 +658,7 @@ const EncounterBuilder = ({
         display: 'flex',
         alignItems: 'center',
         height: '39px',
-        backgroundColor: 'var(--bg-primary)',
-        borderBottom: '1px solid var(--border)'
+        backgroundColor: 'var(--bg-primary)'
       }}>
         {/* Left Side - Tabs (same width as browser below) */}
         <div style={{
@@ -657,10 +728,11 @@ const EncounterBuilder = ({
                 <div className="encounter-receipt-buttons" style={{
                   flex: '0 0 350px',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'flex-start',
+                  justifyContent: 'center',
                   borderLeft: '1px solid var(--border)',
                   height: '100%',
-                  padding: '0 0.75rem'
+                  padding: '1rem 0.75rem'
                 }}>
                   <div style={{
                     display: 'flex',
@@ -675,12 +747,15 @@ const EncounterBuilder = ({
                       placeholder="Encounter Name"
                       style={{
                         flex: 1,
-                        padding: '0.5rem',
+                        padding: '8px 12px',
                         border: '1px solid var(--border)',
                         borderRadius: '4px',
-                        backgroundColor: 'var(--bg-secondary)',
+                        backgroundColor: 'var(--bg-primary)',
                         color: 'var(--text-primary)',
-                        fontSize: '0.875rem'
+                        fontSize: '16px',
+                        textAlign: 'left',
+                        outline: 'none',
+                        transition: 'all 0.2s ease'
                       }}
                     />
                     <ReceiptButton 
@@ -711,7 +786,8 @@ const EncounterBuilder = ({
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          borderTop: '1px solid var(--border)'
         }}>
           <Browser
             type="adversary"
@@ -752,36 +828,6 @@ const EncounterBuilder = ({
                 marginBottom: '0.75rem'
               }}>
                 
-                {/* Total Remaining Row */}
-                <div className="receipt-item" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '0.25rem 0',
-                  borderBottom: '1px solid var(--border)',
-                  flexShrink: 0
-                }}>
-                  <div style={{ flex: 1 }}>
-                    <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                      Encounter Balance
-                    </span>
-                  </div>
-                  <div style={{ width: '120px', textAlign: 'right' }}>
-                    <span style={{
-                      color: spentBattlePoints > availableBattlePoints ? 'var(--danger)' : 
-                             spentBattlePoints === availableBattlePoints ? 'var(--purple)' : 
-                             'var(--success)',
-                      fontWeight: 600
-                    }}>
-                      {spentBattlePoints > availableBattlePoints ? 
-                        `+${spentBattlePoints - availableBattlePoints}` : 
-                        availableBattlePoints - spentBattlePoints === 0 ? 
-                          '0' : 
-                          `-${availableBattlePoints - spentBattlePoints}`
-                      }
-                    </span>
-                  </div>
-                </div>
-
                 {/* Party Members Row */}
                 <div className="receipt-item" style={{
                   display: 'flex',
@@ -926,6 +972,36 @@ const EncounterBuilder = ({
                     </div>
                   )
                 })}
+
+                {/* Balance Row - moved to bottom */}
+                <div className="receipt-item" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0.25rem 0',
+                  borderBottom: '1px solid var(--border)',
+                  flexShrink: 0
+                }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                      Balance
+                    </span>
+                  </div>
+                  <div style={{ width: '120px', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    <span style={{
+                      color: spentBattlePoints > availableBattlePoints ? 'var(--danger)' : 
+                             spentBattlePoints === availableBattlePoints ? 'var(--purple)' : 
+                             'var(--success)',
+                      fontWeight: 600
+                    }}>
+                      {spentBattlePoints > availableBattlePoints ? 
+                        `+${spentBattlePoints - availableBattlePoints}` : 
+                        availableBattlePoints - spentBattlePoints === 0 ? 
+                          '0' : 
+                          `-${availableBattlePoints - spentBattlePoints}`
+                      }
+                    </span>
+                  </div>
+                </div>
             </div>
             
             </div>
