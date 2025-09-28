@@ -5,13 +5,10 @@
     "lastUpdated": "2025-08-25",
     "totalAdversaries": 129
   },
-
   "_improvisation_guidance": {
     "description": "Daggerheart Improvising Adversaries Guide",
     "source": "Daggerheart SRD - Improvising Adversaries section",
-    
     "quick_adjustment": "When mid-session and you need a new adversary, quickly adjust a stat block to a different tier using the Improvised Statistics by Tier table below.",
-    
     "improvised_statistics_by_tier": {
       "tier_1": {
         "attack_modifier": "+1",
@@ -20,14 +17,14 @@
         "damage_thresholds": "Major 7/Severe 12"
       },
       "tier_2": {
-        "attack_modifier": "+2", 
+        "attack_modifier": "+2",
         "damage_dice": "2d6+3 to 2d12+4",
         "difficulty": 14,
         "damage_thresholds": "Major 10/Severe 20"
       },
       "tier_3": {
         "attack_modifier": "+3",
-        "damage_dice": "3d8+3 to 3d12+5", 
+        "damage_dice": "3d8+3 to 3d12+5",
         "difficulty": 17,
         "damage_thresholds": "Major 20/Severe 32"
       },
@@ -38,23 +35,18 @@
         "damage_thresholds": "Major 25/Severe 45"
       }
     },
-    
     "adjusting_between_tiers": "When moving adversaries from Tiers 1-2 to Tiers 3-4, consider raising HP and Stress by 1-3 points. Watch for features that deal different damage than standard attacks - they may need adjustment too.",
-    
     "adding_changing_features": {
       "scaling_up": "When scaling to higher tier, consider adding a new feature to make them a greater threat instead of just scaling damage/difficulty.",
       "scaling_down": "When scaling to lower tier, consider removing one of the adversary's most powerful or impactful features."
     },
-    
     "special_adversary_types": {
       "horde": "Standard attack should deal high damage, then reduce (roughly by half) when the Horde has marked half or more of their HP.",
       "minion": "Give flat damage value (1-5) for standard attack and 'Group Attack' feature. Set 'Minion' feature value (3-15 damage to defeat additional Minions in one attack, depending on tier).",
       "solo": "Give high damage, high HP, and features that let them act more frequently (like 'Relentless') or deal area-of-effect damage."
     },
-    
     "note": "This guidance won't always make the adversary a perfect match for your party, but it reduces chances of overwhelming the party or PCs defeating Solo adversaries too easily."
   },
-
   "adversaryTypes": {
     "SOLO": "Solo",
     "BRUISER": "Bruiser",
@@ -67,19 +59,7 @@
     "SOCIAL": "Social",
     "SUPPORT": "Support"
   },
-
   "adversaries": [
-
-
-
-
-
-
-
-
-
-
-
     {
       "id": "acid-burrower",
       "name": "Acid Burrower",
@@ -125,7 +105,8 @@
           "type": "Reaction",
           "description": "When the Burrower takes Severe damage, all creatures within Close range are bathed in their acidic blood, taking 1d10 physical damage. This splash covers the ground within Very Close range with blood, and all creatures other than the Burrower who move through it take 1d6 physical damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "bear",
@@ -168,7 +149,8 @@
           "type": "Reaction",
           "description": "When the Bear makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "cave-ogre",
@@ -215,7 +197,8 @@
           "type": "Reaction",
           "description": "When the Ogre marks 2 or more HP, they can rampage. Move the Ogre to a point within Close range and deal 2d6+3 direct physical damage to all targets in their path."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "construct",
@@ -265,7 +248,8 @@
           "type": "Reaction",
           "description": "When the Construct marks their last HP, the magic powering them ruptures in an explosion of force. Make an attack with advantage against all targets within Very Close range. Targets the Construct succeeds against take 1d12+2 magic damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "courter",
@@ -302,7 +286,8 @@
           "type": "Action",
           "description": "Spend a Fear and target a PC. The Courter convinces a crowd or prominent individual that the target is the cause of their current conflict or misfortune."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "deeproot-defender",
@@ -339,7 +324,8 @@
           "type": "Action",
           "description": "Make an attack against a target within Close range. On a success, spend a Fear to pull them into Melee range, deal 1d6+2 physical damage, and Restrain them until the Defender takes Severe damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "dire-wolf",
@@ -376,7 +362,8 @@
           "type": "Action",
           "description": "Mark a Stress to make an attack against a target within Melee range. On a success, deal 3d4+10 direct physical damage and make them Vulnerable until they clear at least 1 HP."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "giant-mosquitoes",
@@ -418,7 +405,8 @@
           "type": "Reaction",
           "description": "When the Mosquitoes' attack causes a target to mark HP, you can mark a Stress to force the target to mark an additional HP."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "giant-rat",
@@ -452,7 +440,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Giant Rats within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 1 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "giant-scorpion",
@@ -494,7 +483,8 @@
           "type": "Reaction",
           "description": "When the Scorpion makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "glass-snake",
@@ -534,7 +524,8 @@
           "type": "Action",
           "description": "Spend a Fear to introduce a d6 Spitter Die. When the Snake is in the spotlight, roll this die. On a result of 5 or higher, all targets in front of the Snake within Far range must succeed on an Agility Reaction Roll or take 1d4 physical damage. The Snake can take the spotlight a second time this GM turn."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "harrier",
@@ -571,7 +562,8 @@
           "type": "Reaction",
           "description": "When a creature moves into Melee range to make an attack, you can mark a Stress before the attack roll to move anywhere within Close range and make an attack against that creature. On a success, deal 1d10+2 physical damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "archer-guard",
@@ -603,7 +595,8 @@
           "type": "Action",
           "description": "Make an attack against a target within Far range. On a success, mark a Stress to deal 1d12+3 physical damage. If the target marks HP from this attack, they have disadvantage on Agility Rolls until they clear at least 1 HP."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "bladed-guard",
@@ -640,7 +633,8 @@
           "type": "Action",
           "description": "Make an attack against a target within Very Close range. On a success, mark a Stress to Restrain the target until they break free with a successful attack, Finesse Roll, or Strength Roll."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "head-guard",
@@ -683,7 +677,8 @@
           "type": "Reaction",
           "description": "When the Head Guard makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "jagged-knife-bandit",
@@ -720,7 +715,8 @@
           "type": "Passive",
           "description": "When the Bandit succeeds on a standard attack from above a target, they deal 1d10+1 physical damage instead of their standard damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "jagged-knife-hexer",
@@ -757,7 +753,8 @@
           "type": "Action",
           "description": "Make an attack against up to three targets within Very Close range. Mark a Stress to deal 2d6+3 magic damage to targets the Hexer succeeded against."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "jagged-knife-kneebreaker",
@@ -795,7 +792,8 @@
           "type": "Action",
           "description": "Make an attack against a target within Melee range. On a success, the target takes no damage but is Restrained and Vulnerable. The target can break free, clearing both conditions, with a successful Strength Roll or is freed automatically if the Kneebreaker takes Major or greater damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "jagged-knife-lackey",
@@ -829,7 +827,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Jagged Knife Lackeys within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 2 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "jagged-knife-lieutenant",
@@ -876,7 +875,8 @@
           "type": "Reaction",
           "description": "When the Lieutenant makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "jagged-knife-shadow",
@@ -913,7 +913,8 @@
           "type": "Action",
           "description": "Become Hidden until after the Shadow's next attack. Attacks made while Hidden from this feature have advantage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "jagged-knife-sniper",
@@ -945,7 +946,8 @@
           "type": "Passive",
           "description": "If the Sniper is Hidden when they make a successful standard attack against a target, they deal 1d10+4 physical damage instead of their standard damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "merchant",
@@ -982,7 +984,8 @@
           "type": "Passive",
           "description": "When a PC rolls a 14 or lower on a Presence Roll made against the Merchant, they must mark a Stress."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "minor-chaos-elemental",
@@ -1032,7 +1035,8 @@
           "type": "Reaction",
           "description": "When the Elemental makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "minor-fire-elemental",
@@ -1082,7 +1086,8 @@
           "type": "Reaction",
           "description": "When the Elemental makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "minor-demon",
@@ -1132,7 +1137,8 @@
           "type": "Reaction",
           "description": "When the Demon makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "minor-treant",
@@ -1164,7 +1170,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Minor Treants within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 4 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "green-ooze",
@@ -1211,7 +1218,8 @@
           "type": "Reaction",
           "description": "When the Ooze has 3 or more HP marked, you can spend a Fear to split them into two Tiny Green Oozes (with no marked HP or Stress). Immediately spotlight both of them."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "tiny-green-ooze",
@@ -1241,7 +1249,8 @@
           "type": "Passive",
           "description": "When the Ooze makes a successful attack, the target must mark an Armor Slot without receiving its benefits (they can still use armor to reduce the damage). If they can't mark an Armor Slot, they must mark an additional HP."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "red-ooze",
@@ -1283,7 +1292,8 @@
           "type": "Reaction",
           "description": "When the Ooze has 3 or more HP marked, you can spend a Fear to split them into two Tiny Red Oozes (with no marked HP or Stress). Immediately spotlight both of them."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "tiny-red-ooze",
@@ -1313,7 +1323,8 @@
           "type": "Reaction",
           "description": "When a creature within Melee range deals damage to the Ooze, they take 1d6 direct magic damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "petty-noble",
@@ -1355,7 +1366,8 @@
           "type": "Action",
           "description": "Spend a Fear and target a PC. The Noble proclaims that the target and their allies are exiled from the noble's territory. While exiled, the target and their allies have disadvantage during social situations within the Noble's domain."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "pirate-captain",
@@ -1403,7 +1415,8 @@
           "type": "Reaction",
           "description": "When the Captain makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "pirate-raiders",
@@ -1440,7 +1453,8 @@
           "type": "Passive",
           "description": "When the Raiders mark 2 or fewer HP from an attack within Melee range, the attacker must mark a Stress."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "pirate-tough",
@@ -1477,7 +1491,8 @@
           "type": "Action",
           "description": "Make an attack against a target within Very Close range. On a success, mark a Stress to move into Melee range of the target, dealing 3d4 physical damage and knocking the target back to Close range."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "sellsword",
@@ -1509,7 +1524,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Sellswords within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 3 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "skeleton-archer",
@@ -1544,7 +1560,8 @@
           "type": "Action",
           "description": "Make an attack against a Vulnerable target within Far range. On a success, mark a Stress to deal 3d4+8 physical damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "skeleton-dredge",
@@ -1576,7 +1593,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Dredges within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 1 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "skeleton-knight",
@@ -1616,7 +1634,8 @@
           "type": "Reaction",
           "description": "When the Knight is defeated, they make an attack against a target within Very Close range (prioritizing the creature who killed them). On a success, the target takes 1d4+8 physical damage and loses 1d4 Hope."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "skeleton-warrior",
@@ -1651,7 +1670,8 @@
           "type": "Reaction",
           "description": "When the Warrior is defeated, you can spotlight them and roll a d6. On a result of 6, if there are other adversaries on the battlefield, the Warrior re-forms with no marked HP."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "spellblade",
@@ -1698,7 +1718,8 @@
           "type": "Reaction",
           "description": "When the Spellblade makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "swarm-of-rats",
@@ -1733,7 +1754,8 @@
           "type": "Passive",
           "description": "All targets within Melee range have disadvantage on attacks against targets other than the Swarm."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "sylvan-soldier",
@@ -1775,7 +1797,8 @@
           "type": "Reaction",
           "description": "When the Soldier makes a successful attack, you can mark a Stress to become Hidden until the Soldier's next attack or a PC succeeds on an Instinct Roll (14) to find them."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "tangle-bramble-swarm",
@@ -1817,7 +1840,8 @@
           "type": "Reaction",
           "description": "When the Swarm succeeds on an attack, give the target a bramble token. If a target has any bramble tokens, they are Restrained. If a target has 3 or more bramble tokens, they are also Vulnerable. All bramble tokens can be removed by succeeding on a Finesse Roll (12 + the number of bramble tokens) or dealing Major or greater damage to the Swarm. If bramble tokens are removed from a target using a Finesse Roll, a number of Tangle Bramble Minions spawn within Melee range equal to the number of tokens removed."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "tangle-bramble",
@@ -1854,7 +1878,8 @@
           "type": "Reaction",
           "description": "When an attack from the Bramble causes a target to mark HP and there are three or more Tangle Bramble Minions within Close range, you can combine the Minions into a Tangle Bramble Swarm Horde. The Horde's HP is equal to the number of Minions combined."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "weaponmaster",
@@ -1894,7 +1919,8 @@
           "type": "Reaction",
           "description": "When the Weaponmaster makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "young-dryad",
@@ -1936,7 +1962,8 @@
           "type": "Reaction",
           "description": "When the Dryad makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "brawny-zombie",
@@ -1979,7 +2006,8 @@
           "type": "Reaction",
           "description": "When the Zombies makes a successful standard attack, you can mark a Stress to temporarily Restrain the target and force them to mark 2 Stress."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "patchwork-zombie-hulk",
@@ -2027,7 +2055,8 @@
           "type": "Action",
           "description": "Mark a Stress to cause all PCs within Far range to make a Presence Reaction Roll (13). Targets who fail lose a Hope and you gain a Fear for each. Targets who succeed must mark a Stress."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "rotted-zombie",
@@ -2059,7 +2088,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Rotted Zombies within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 2 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "shambling-zombie",
@@ -2094,7 +2124,8 @@
           "type": "Passive",
           "description": "Targets who mark HP from the Zombie's attacks must also mark a Stress."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "zombie-pack",
@@ -2129,7 +2160,8 @@
           "type": "Reaction",
           "description": "When the Zombies mark HP from an attack within Melee range, you can mark a Stress to make a standard attack against the attacker."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "archer-squadron",
@@ -2169,7 +2201,8 @@
           "type": "Action",
           "description": "Mark a Stress to target a point within Far range. Until the next roll with Fear, a creature who moves within Close range of that point must make an Agility Reaction Roll. On a failure, they take 2d6+3 physical damage. On a success, they take half damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "apprentice-assassin",
@@ -2203,7 +2236,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Apprentice Assassins within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 4 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "assassin-poisoner",
@@ -2245,7 +2279,8 @@
           "type": "Action",
           "description": "Drop a smoke bomb that fills the air within Close range with smoke, Dizzying all targets in this area. Dizzied targets have disadvantage on their next action roll, then clear the condition."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "master-assassin",
@@ -2293,7 +2328,8 @@
           "type": "Reaction",
           "description": "When the Assassin makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "battle-box",
@@ -2340,7 +2376,8 @@
           "type": "Reaction",
           "description": "When the Box marks their last HP, the magic powering them ruptures in an explosion of force. All targets within Close range must succeed on an Instinct Reaction Roll or take 2d8+1 magic damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "chaos-skull",
@@ -2385,7 +2422,8 @@
           "type": "Action",
           "description": "Spend a Fear to make an attack against a PC with a Spellcast trait within Very Close range. On a success, the target marks 1d4 Stress and the Skull clears that many Stress. Additionally, on a success, the Skull can immediately be spotlighted again."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "conscript",
@@ -2417,7 +2455,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Conscripts within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 6 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "courtesan",
@@ -2450,7 +2489,8 @@
           "type": "Reaction",
           "description": "When a PC within Close range makes a Presence Roll, you can mark a Stress to cast a gaze toward the aftermath. On the target's failure, they must mark 2 Stress and are Vulnerable until the scene ends or they succeed on a social action against the Courtesan. On the target's success, they must mark a Stress."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "cult-adept",
@@ -2498,7 +2538,8 @@
           "type": "Reaction",
           "description": "Twice per scene, when a PC rolls a failure with Fear, clear a Stress."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "cult-fang",
@@ -2533,7 +2574,8 @@
           "type": "Action",
           "description": "Mark a Stress to cause a target within Melee range to make an Instinct Reaction Roll. On a failure, the target must mark 2 Stress and is teleported with the Fang to a shadow within Far range, making them temporarily Vulnerable. On a success, the target must mark a Stress."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "cult-initiate",
@@ -2565,7 +2607,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Cult Initiates within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 5 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "demonic-hound-pack",
@@ -2607,7 +2650,8 @@
           "type": "Reaction",
           "description": "When the Pack makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "electric-eels",
@@ -2642,7 +2686,8 @@
           "type": "Action",
           "description": "Mark a Stress to make a standard attack against all targets within Very Close range. You gain a Fear for each target that marks HP."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "elite-soldier",
@@ -2677,7 +2722,8 @@
           "type": "Reaction",
           "description": "When the Soldier is within Very Close range of a knight or other noble who would take damage, you can mark a Stress to move into Melee range of them and take the damage instead."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "failed-experiment",
@@ -2719,7 +2765,8 @@
           "type": "Action",
           "description": "Mark a Stress to spotlight the Experiment as an additional GM move instead of spending Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "giant-beastmaster",
@@ -2761,7 +2808,8 @@
           "type": "Action",
           "description": "Twice per scene, summon a Bear, Dire Wolf, or similar Tier 1 animal adversary under the Beastmaster's control. The adversary appears at Close range and is immediately spotlighted."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "giant-brawler",
@@ -2803,7 +2851,8 @@
           "type": "Reaction",
           "description": "When the Brawler makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "giant-recruit",
@@ -2835,7 +2884,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Giant Recruits within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 5 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "giant-eagle",
@@ -2880,7 +2930,8 @@
           "type": "Action",
           "description": "While flying, the Eagle can drop a Restrained target they are holding. When dropped, the target is no longer Restrained but starts falling. If their fall isn't prevented during the PCs' next action, the target takes 2d20 physical damage when they land."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "gorgon",
@@ -2932,7 +2983,8 @@
           "type": "Reaction",
           "description": "When the Gorgon makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "juvenile-flickerfly",
@@ -2977,7 +3029,8 @@
           "type": "Reaction",
           "description": "Countdown (Loop 1d6). When the Flickerfly takes damage for the first time, activate the countdown. When it triggers, the Flickerfly breathes hallucinatory gas on all targets in front of them up to Far range. Targets must succeed on an Instinct Reaction Roll or be tormented by fearful hallucinations. Targets whose fears are known to the Flickerfly have disadvantage on this roll. Targets who fail must mark a Stress and lose a Hope."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "knight-of-the-realm",
@@ -3026,7 +3079,8 @@
           "type": "Action",
           "description": "Mark a Stress to spotlight 1d4+1 allies. Attacks they make while spotlighted in this way deal half damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "masked-thief",
@@ -3063,7 +3117,8 @@
           "type": "Action",
           "description": "Mark a Stress to reveal a snare trap set anywhere on the battlefield by the Thief. All targets within Very Close range of the trap must succeed on an Agility Reaction Roll (13) or be pulled off their feet and suspended upside down. A target is Restrained and Vulnerable until they break free, ending both conditions, with a successful Finesse or Strength Roll (13)."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "merchant-baron",
@@ -3101,7 +3156,8 @@
           "type": "Action",
           "description": "Once per scene, mark a Stress to summon 1d4+1 Tier 1 adversaries, who appear at Far range, to enforce the Baron's will."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "minotaur-wrecker",
@@ -3143,7 +3199,8 @@
           "type": "Action",
           "description": "Make an attack against a target within Very Close range, moving the Minotaur into Melee range of them. On a success, deal 2d8 direct physical damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "mortal-hunter",
@@ -3190,7 +3247,8 @@
           "type": "Reaction",
           "description": "Countdown (Loop 1d6). When the Hunter is in the spotlight for the first time, activate the countdown. When it triggers, move the Hunter in a straight line to a point within Far range and make an attack against all targets in their path. Targets the Hunter succeeds against take 2d8+2 physical damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "royal-advisor",
@@ -3233,7 +3291,8 @@
           "type": "Action",
           "description": "Spend a Fear to convince a crowd or notable individual that one person or group is responsible for some problem facing the target. The target becomes hostile to the scapegoat until convinced of their innocence with a successful Presence Roll (17)."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "secret-keeper",
@@ -3281,7 +3340,8 @@
           "type": "Reaction",
           "description": "Once per scene, when the Secret-Keeper marks 2 or more HP, you can mark a Stress to summon a Demonic Hound Pack, which appears at Close range and is immediately spotlighted."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "shark",
@@ -3323,7 +3383,8 @@
           "type": "Reaction",
           "description": "When a creature within Close range of the Shark marks HP from another creature's attack, you can mark a Stress to immediately spotlight the Shark, moving them into Melee range of the target and making a standard attack."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "siren",
@@ -3360,7 +3421,8 @@
           "type": "Action",
           "description": "Spend a Fear to sing a song that affects all targets within Close range. Targets must succeed on an Instinct Reaction Roll or become Entranced until they mark 2 Stress. Other Sirens within Close range of the target can mark a Stress to each add a +1 bonus to the Difficulty of the reaction roll. While Entranced, a target can't act and is Vulnerable."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "spectral-archer",
@@ -3397,7 +3459,8 @@
           "type": "Action",
           "description": "Spend a Fear to make an attack within Far range against a PC who is within Very Close range of at least two other PCs. On a success, the target takes 2d8+12 physical damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "spectral-captain",
@@ -3444,7 +3507,8 @@
           "type": "Reaction",
           "description": "When the Captain makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "spectral-guardian",
@@ -3481,7 +3545,8 @@
           "type": "Action",
           "description": "Spend a Fear to make an attack against a target within Very Close range. On a success, deal 2d10+6 physical damage and the target must mark a Stress."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "spy",
@@ -3518,7 +3583,8 @@
           "type": "Reaction",
           "description": "When a PC or group is discussing something sensitive, you can mark a Stress to reveal that the Spy is present in the scene, observing them. If the Spy escapes the scene to report their findings, you gain 1d4 Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "stonewraith",
@@ -3565,7 +3631,8 @@
           "type": "Reaction",
           "description": "When the Stonewraith makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "war-wizard",
@@ -3618,7 +3685,8 @@
           "type": "Reaction",
           "description": "When the Wizard takes damage from an attack within Close range, deal 2d6 magic damage to the attacker. This reaction can't be used again until the Wizard refreshes it with their \"Refresh Warding Sphere\" action."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "adult-flickerfly",
@@ -3678,7 +3746,8 @@
           "type": "Reaction",
           "description": "When the Flickerfly takes damage from an attack within Close range, you can mark a Stress to take half damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "demon-of-avarice",
@@ -3720,7 +3789,8 @@
           "type": "Action",
           "description": "Spend 3 handfuls of gold (or a Fear) to spotlight 1d4+1 allies."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "demon-of-despair",
@@ -3767,7 +3837,8 @@
           "type": "Reaction",
           "description": "When the Demon makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "demon-of-hubris",
@@ -3819,7 +3890,8 @@
           "type": "Reaction",
           "description": "When a PC fails a roll within Close range of the Demon, they must mark a Stress."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "demon-of-jealousy",
@@ -3866,7 +3938,8 @@
           "type": "Reaction",
           "description": "When a PC takes Severe damage within Very Close range of the Demon, you can spend a Fear to cause the target to make a Finesse Reaction Roll. On a failure, the Demon seizes one item or consumable of their choice from the target's inventory."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "demon-of-wrath",
@@ -3913,7 +3986,8 @@
           "type": "Reaction",
           "description": "Countdown (Loop 6). Activate the first time an attack is made within sight of the Demon. It ticks down when a PC takes a violent action. When it triggers, summon 1d4 Minor Demons, who appear at Close range."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "dire-bat",
@@ -3955,7 +4029,8 @@
           "type": "Reaction",
           "description": "When an allied Vampire marks HP, you can mark a Stress to fly into Melee range of the attacker and make an attack with advantage against them. On a success, deal 2d6+2 physical damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "dryad",
@@ -3997,7 +4072,8 @@
           "type": "Reaction",
           "description": "When an ally dies within Close range, you can spend a Fear to clear 2 HP and 2 Stress as the fallen ally's life force is returned to the forest."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "elemental-spark",
@@ -4032,7 +4108,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Elemental Sparks within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 5 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "greater-earth-elemental",
@@ -4082,7 +4159,8 @@
           "type": "Reaction",
           "description": "When the Elemental makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "greater-water-elemental",
@@ -4122,7 +4200,8 @@
           "type": "Reaction",
           "description": "When the Elemental makes a successful standard attack, you can mark a Stress to knock the target back to Close range."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "huge-green-ooze",
@@ -4169,7 +4248,8 @@
           "type": "Reaction",
           "description": "When the Ooze has 4 or more HP marked, you can spend a Fear to split them into two Green Oozes (with no marked HP or Stress). Immediately spotlight both of them."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "hydra",
@@ -4219,7 +4299,8 @@
           "type": "Reaction",
           "description": "When the Hydra takes magic damage, they become Dazed until the next roll with Fear. While Dazed, they can't use their Regeneration action but are immune to magic damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "monarch",
@@ -4262,7 +4343,8 @@
           "type": "Reaction",
           "description": "Long-Term Countdown (8). Spend a Fear to activate after the Monarch's desire for war is first revealed. When it triggers, the Monarch has a reason to rally the nation to war and the support to act on that reason. You gain 1d4 Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "stag-knight",
@@ -4304,7 +4386,8 @@
           "type": "Reaction",
           "description": "When the Knight takes damage from an attack within Melee range, you can mark a Stress to deal 1d10+5 physical damage to the attacker."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "oak-treant",
@@ -4346,7 +4429,8 @@
           "type": "Action",
           "description": "Mark a Stress to Root the Treant in place. The Treant is Restrained while Rooted, and can end this effect instead of moving while they are spotlighted. While Rooted, the Treant has resistance to physical damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "treant-sapling",
@@ -4381,7 +4465,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Treant Saplings within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 8 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "head-vampire",
@@ -4433,7 +4518,8 @@
           "type": "Reaction",
           "description": "When the Vampire is spotlighted, roll a d8. On a result of 6 or higher, all targets within Very Close range must mark a HP."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "vampire",
@@ -4470,7 +4556,8 @@
           "type": "Reaction",
           "description": "When the Vampire takes physical damage, you can spend a Fear to take half damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "vault-guardian-gaoler",
@@ -4505,7 +4592,8 @@
           "type": "Action",
           "description": "Mark a Stress to make an attack against a target within Very Close range. On a success, the target is Restrained within the Gaoler until freed with a successful Strength Roll (18). While Restrained, the target can only attack the Gaoler."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "vault-guardian-sentinel",
@@ -4550,7 +4638,8 @@
           "type": "Reaction",
           "description": "When the Sentinel makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "vault-guardian-turret",
@@ -4595,7 +4684,8 @@
           "type": "Reaction",
           "description": "When the Turret is destroyed, they explode. All targets within Close range must make an Agility Reaction Roll. Targets who fail take 3d20 physical damage. Targets who succeed take half damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "young-ice-dragon",
@@ -4657,7 +4747,8 @@
           "type": "Reaction",
           "description": "When the Dragon makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "arch-necromancer",
@@ -4710,7 +4801,8 @@
           "type": "Reaction",
           "description": "Countdown (Loop 2d6). When the Necromancer has marked 6 or more of their HP, activate the countdown. When it triggers, deal 2d10+6 direct magic damage to a target within Close range. The Necromancer then clears a number of Stress or HP equal to the number of HP marked by the target from this attack."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "fallen-shock-troop",
@@ -4750,7 +4842,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Fallen Shock Troops within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 12 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "fallen-sorcerer",
@@ -4797,7 +4890,8 @@
           "type": "Reaction",
           "description": "Countdown (Loop 2d6). When the Sorcerer is in the spotlight for the first time, activate the countdown. When it triggers, all targets within Far range become Vulnerable and must mark a Stress as they relive their greatest regrets. A target can break free from their regret with a successful Presence or Strength Roll. When a PC fails to break free, they lose a Hope."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "fallen-warlord-realm-breaker",
@@ -4856,7 +4950,8 @@
           "type": "Reaction",
           "description": "When the Realm-Breaker marks their last HP, replace them with the Undefeated Champion and immediately spotlight them."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "fallen-warlord-undefeated-champion",
@@ -4920,7 +5015,8 @@
           "type": "Reaction",
           "description": "When a target marks HP from an attack by the Undefeated Champion, all PCs within Far range of the target lose a Hope."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "hallowed-archer",
@@ -4955,7 +5051,8 @@
           "type": "Action",
           "description": "Mark a Stress to make a standard attack against up to three targets."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "hallowed-soldier",
@@ -4995,7 +5092,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Hallowed Soldiers within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 10 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "high-seraph",
@@ -5047,7 +5145,8 @@
           "type": "Action",
           "description": "Once per scene, spend a Fear to spotlight all other adversaries within Far range. Attacks they make while spotlighted in this way deal half damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "kraken",
@@ -5099,7 +5198,8 @@
           "type": "Reaction",
           "description": "When the Kraken makes a successful attack against a PC, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "oracle-of-doom",
@@ -5156,7 +5256,8 @@
           "type": "Reaction",
           "description": "When the Oracle marks HP from an attack within Very Close range, you can mark a Stress to knock the attacker back to Far range and deal 2d10+4 physical damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "outer-realms-abomination",
@@ -5201,7 +5302,8 @@
           "type": "Reaction",
           "description": "When the Abomination takes damage, reduce it by 1d20. If the Abomination marks 1 or fewer Hit Points from a successful attack against them, you gain a Fear."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "outer-realms-corrupter",
@@ -5236,7 +5338,8 @@
           "type": "Action",
           "description": "Mark a Stress to spew partially digested portions of consumed realities at all targets within Close range. Targets must succeed on a Knowledge Reaction Roll or mark 2 Stress."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "outer-realms-thrall",
@@ -5271,7 +5374,8 @@
           "type": "Action",
           "description": "Spend a Fear to choose a target and spotlight all Outer Realm Thralls within Close range of them. Those Minions move into Melee range of the target and make one shared attack roll. On a success, they deal 11 physical damage each. Combine this damage."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "volcanic-dragon-obsidian-predator",
@@ -5328,7 +5432,8 @@
           "type": "Reaction",
           "description": "When the Obsidian Predator marks their last HP, replace them with the Molten Scourge and immediately spotlight them."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "volcanic-dragon-molten-scourge",
@@ -5390,7 +5495,8 @@
           "type": "Reaction",
           "description": "When the Molten Scourge marks their last HP, replace them with the Ashen Tyrant and immediately spotlight them."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "volcanic-dragon-ashen-tyrant",
@@ -5452,7 +5558,8 @@
           "type": "Action",
           "description": "Countdown (1d12). Spend a Fear to activate. It ticks down when a PC rolls with Fear. When it triggers, the Ashen Tyrant thrashes about, causing environmental damage (such as an earthquake, avalanche, or collapsing walls). All targets within Far range must make a Strength Reaction Roll. Targets who fail take 2d10+10 physical damage and are Restrained by the rubble until they break free with a successful Strength Roll. Targets who succeed take half damage. If the Ashen Tyrant is defeated while this countdown is active, trigger the countdown immediately as the destruction caused by their death throes."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "perfected-zombie",
@@ -5496,7 +5603,8 @@
           "type": "Reaction",
           "description": "When another adversary deals damage to a target within Very Close range of the Zombie, you can spend a Fear to add the Zombie's standard attack damage to the damage roll."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "zombie-legion",
@@ -5540,7 +5648,8 @@
           "type": "Reaction",
           "description": "When the Legion takes Minor damage from an attack within Melee range, you can mark a Stress to make a standard attack with advantage against the attacker."
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     }
   ]
 }

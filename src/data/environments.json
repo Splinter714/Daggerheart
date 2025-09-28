@@ -46,6 +46,7 @@
       "description": "A former druidic grove lying fallow and fully reclaimed by nature.",
       "impulses": "Draw in the curious, Echo the past",
       "difficulty": 11,
+      "source": "Daggerheart SRD",
       "potentialAdversaries": [
         "Beasts (Bear, Dire Wolf, Glass Snake)",
         "Grove Guardians (Minor Treant, Sylvan Soldier, Young Dryad)"
@@ -103,6 +104,7 @@
       "description": "An ambush is set to catch an unsuspecting party off-guard.",
       "impulses": "Overwhelm, scatter, surround",
       "difficulty": "~",
+      "source": "Daggerheart SRD",
       "potentialAdversaries": [
         "Any"
       ],
@@ -157,7 +159,8 @@
             "How does this impact their approach to the fight?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "bustling-marketplace",
@@ -208,7 +211,8 @@
             "How do they feel about being alone but surrounded?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "cliffside-ascent",
@@ -252,7 +256,8 @@
             "What lives in these walls that might try to scare adventurers into falling for an easy meal?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "local-tavern",
@@ -321,7 +326,8 @@
             "What will it take to stop it?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "outpost-town",
@@ -379,7 +385,8 @@
             "What details show the party that these people are desperate former adventurers?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "raging-river",
@@ -421,7 +428,8 @@
             "What travelers have already fallen victim to this predator?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "cult-ritual",
@@ -470,7 +478,8 @@
             "What does it feel like to see such devotion turned to the pursuit of fear and domination?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "hallowed-temple",
@@ -519,7 +528,8 @@
             "Who leads the group and what led them to this calling?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "haunted-city",
@@ -571,7 +581,8 @@
             "What is known about this disaster, and how could that help the PCs escape?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "mountain-pass",
@@ -625,7 +636,8 @@
             "How do they try to keep warm as they press forward?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "ancient-library",
@@ -667,7 +679,8 @@
             "How does it feel to lose part of yourself?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "blighted-forest",
@@ -709,7 +722,8 @@
             "How do you know if it's working?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "crystal-caverns",
@@ -751,7 +765,8 @@
             "What patterns emerge in the crystal formations?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "floating-islands",
@@ -793,7 +808,8 @@
             "What do they want from the party?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "celestial-realm",
@@ -835,7 +851,8 @@
             "What consequences await the guilty?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "demonic-portal",
@@ -877,7 +894,8 @@
             "What warning signs precede instability?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "time-distortion",
@@ -919,7 +937,8 @@
             "How can it be resolved?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     },
     {
       "id": "void-rift",
@@ -961,7 +980,8 @@
             "How do they consume reality?"
           ]
         }
-      ]
+      ],
+      "source": "Daggerheart SRD"
     }
   ]
 }
