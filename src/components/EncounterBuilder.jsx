@@ -47,8 +47,8 @@ const EncounterBuilder = ({
   onLoadEncounter,
   onDeleteEncounter
 }) => {
-  // Get party size from global state
-  const { partySize, updatePartySize } = useGameState()
+  // Get party size and current encounter name from global state
+  const { partySize, updatePartySize, currentEncounterName, updateCurrentEncounterName } = useGameState()
   const pcCount = partySize
   const setPcCount = updatePartySize
   
@@ -60,17 +60,17 @@ const EncounterBuilder = ({
   })
   
   const [encounterItems, setEncounterItems] = useState([])
-  const [encounterName, setEncounterName] = useState('')
+  const [encounterName, setEncounterName] = useState(currentEncounterName || 'Encounter')
   const [activeTab, setActiveTab] = useState('adversaries')
   const [loadedEncounterId, setLoadedEncounterId] = useState(null) // Track which encounter is loaded
   const [originalEncounterData, setOriginalEncounterData] = useState(null) // Track original data for change detection
   
-  // Pre-populate encounter name when component opens
+  // Sync encounter name with global state
   useEffect(() => {
-    if (isOpen && !loadedEncounterId && encounterName === '') {
-      setEncounterName('Encounter')
+    if (isOpen && !loadedEncounterId) {
+      setEncounterName(currentEncounterName || 'Encounter')
     }
-  }, [isOpen, loadedEncounterId, encounterName])
+  }, [isOpen, loadedEncounterId, currentEncounterName])
   
   // Check if current encounter has changes from original
   const hasChanges = () => {
@@ -90,7 +90,7 @@ const EncounterBuilder = ({
     if (encounterItems.length > 0) return true
     
     // If name is not the default "Encounter", there are changes
-    if (encounterName.trim() !== 'Encounter') return true
+    if ((encounterName || '').trim() !== 'Encounter') return true
     
     // If we have a loaded encounter and there are changes (excluding party size), there are changes
     if (loadedEncounterId && hasChanges()) {
@@ -103,7 +103,7 @@ const EncounterBuilder = ({
         if (currentItems !== originalItems) return true
         
         // If encounter name changed, that's meaningful
-        if (encounterName.trim() !== (originalEncounterData.name || '')) return true
+        if ((encounterName || '').trim() !== (originalEncounterData.name || '')) return true
         
         // If battle points adjustments changed, that's meaningful
         const currentAdjustments = JSON.stringify(battlePointsAdjustments)
@@ -147,6 +147,38 @@ const EncounterBuilder = ({
   // Track previous PC count to calculate group changes
   const prevPcCountRef = React.useRef(pcCount)
   
+  // Function to find matching saved encounter by content only (for auto-loading)
+  const findMatchingEncounterByContent = useCallback((items) => {
+    if (!items || items.length === 0) return null
+    
+    // Try to find exact match by content only
+    const matchingEncounter = savedEncounters.find(encounter => {
+      if (encounter.encounterItems?.length !== items.length) return false
+      
+      // Check if all encounter items match by comparing base properties
+      const normalizeItem = (item) => ({
+        type: item.type,
+        quantity: item.quantity,
+        item: {
+          name: item.item.baseName || item.item.name?.replace(/\s+\(\d+\)$/, '') || item.item.name,
+          type: item.item.type,
+          tier: item.item.tier
+        }
+      })
+      
+      const normalizedEncounterItems = encounter.encounterItems?.map(normalizeItem).sort((a, b) => 
+        a.item.name.localeCompare(b.item.name) || a.item.type.localeCompare(b.item.type)
+      )
+      const normalizedCurrentItems = items.map(normalizeItem).sort((a, b) => 
+        a.item.name.localeCompare(b.item.name) || a.item.type.localeCompare(b.item.type)
+      )
+      
+      return JSON.stringify(normalizedEncounterItems) === JSON.stringify(normalizedCurrentItems)
+    })
+    
+    return matchingEncounter || null
+  }, [savedEncounters])
+
   // Load existing adversaries when encounter builder opens (only on initial open)
   React.useEffect(() => {
     if (isOpen && adversaries.length > 0 && encounterItems.length === 0) {
@@ -167,11 +199,30 @@ const EncounterBuilder = ({
       // Convert to array and set encounter items
       const existingItems = Object.values(groupedAdversaries)
       setEncounterItems(existingItems)
+      
+      // Check if this matches a saved encounter and load it
+      const matchingEncounter = findMatchingEncounterByContent(existingItems)
+      if (matchingEncounter && !loadedEncounterId) {
+        setLoadedEncounterId(matchingEncounter.id)
+        setOriginalEncounterData({
+          name: matchingEncounter.name || '',
+          encounterItems: matchingEncounter.encounterItems || [],
+          partySize: matchingEncounter.partySize || 4,
+          battlePointsAdjustments: matchingEncounter.battlePointsAdjustments || {
+            lessDifficult: false,
+            increasedDamage: false,
+            moreDangerous: false
+          }
+        })
+        // Update the encounter name to match the saved encounter
+        setEncounterName(matchingEncounter.name || 'Encounter')
+        updateCurrentEncounterName(matchingEncounter.name || 'Encounter')
+      }
     } else if (isOpen && adversaries.length === 0) {
       // Clear encounter items when no adversaries exist
       setEncounterItems([])
     }
-  }, [isOpen]) // Only depend on isOpen, not adversaries
+  }, [isOpen, findMatchingEncounterByContent, loadedEncounterId, updateCurrentEncounterName]) // Added dependencies
   
   // Calculate automatic adjustments based on encounter composition
   const automaticAdjustments = React.useMemo(() => {
@@ -437,7 +488,7 @@ const EncounterBuilder = ({
     // Don't match blank encounters - they're not meaningful
     if (encounterItems.length === 0) return null
     
-    const finalName = encounterName.trim() || 'Encounter'
+    const finalName = (encounterName || '').trim() || 'Encounter'
     
     // Try to find exact match by name and content
     const matchingEncounter = savedEncounters.find(encounter => {
@@ -457,7 +508,7 @@ const EncounterBuilder = ({
   // Auto-save function that saves to current encounter or creates new one
   const autoSave = useCallback(() => {
     // Use current name as-is (allow empty names)
-    let finalName = encounterName.trim()
+    let finalName = (encounterName || '').trim()
     
     // Try to find matching encounter if we don't have a loaded ID
     let targetEncounterId = loadedEncounterId
@@ -501,23 +552,22 @@ const EncounterBuilder = ({
 
   // Auto-save effect - save whenever encounter items change
   useEffect(() => {
-    // Auto-save if we have items OR if we have a loaded encounter (to handle cleanup)
-    // Always trigger if we have a loaded encounter, even when it becomes empty
-    if (loadedEncounterId) {
+    // Only auto-save if we have a loaded encounter and there are changes
+    if (loadedEncounterId && hasChanges()) {
       const timeoutId = setTimeout(() => {
         autoSave()
-      }, 1000) // Debounce auto-save by 1 second
+      }, 2000) // Debounce auto-save by 2 seconds
       
       return () => clearTimeout(timeoutId)
-    } else if (encounterItems.length > 0) {
-      // Only auto-save new encounters when they have items
+    } else if (!loadedEncounterId && encounterItems.length > 0 && encounterName && encounterName.trim() !== '') {
+      // Only auto-save new encounters when they have items AND a valid name
       const timeoutId = setTimeout(() => {
         autoSave()
-      }, 1000) // Debounce auto-save by 1 second
+      }, 2000) // Debounce auto-save by 2 seconds
       
       return () => clearTimeout(timeoutId)
     }
-  }, [encounterItems, loadedEncounterId, autoSave])
+  }, [encounterItems, loadedEncounterId, encounterName, battlePointsAdjustments, pcCount]) // Removed autoSave from dependencies
 
   // Create a new blank encounter
   const handleNew = () => {
@@ -529,6 +579,7 @@ const EncounterBuilder = ({
     
     // Reset encounter name to default
     setEncounterName('Encounter')
+    updateCurrentEncounterName('Encounter')
     
     // Clear loaded encounter tracking
     setLoadedEncounterId(null)
@@ -567,6 +618,7 @@ const EncounterBuilder = ({
         moreDangerous: false
       })
       setEncounterName(encounter.name || '')
+      updateCurrentEncounterName(encounter.name || '')
       setLoadedEncounterId(encounterId)
       
       // Store original data for change detection
@@ -594,6 +646,7 @@ const EncounterBuilder = ({
     if (loadedEncounterId === encounterId) {
       setEncounterItems([])
       setEncounterName('Encounter')
+      updateCurrentEncounterName('Encounter')
       setLoadedEncounterId(null)
       setOriginalEncounterData(null)
       
@@ -743,7 +796,10 @@ const EncounterBuilder = ({
                     <input
                       type="text"
                       value={encounterName}
-                      onChange={(e) => setEncounterName(e.target.value)}
+                      onChange={(e) => {
+                        setEncounterName(e.target.value)
+                        updateCurrentEncounterName(e.target.value)
+                      }}
                       placeholder="Encounter Name"
                       style={{
                         flex: 1,
@@ -828,7 +884,7 @@ const EncounterBuilder = ({
                 marginBottom: '0.75rem'
               }}>
                 
-                {/* Party Members Row */}
+                  {/* Party Members Row */}
                 <div className="receipt-item" style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1022,7 +1078,10 @@ const EncounterBuilder = ({
                 <input
                   type="text"
                   value={encounterName}
-                  onChange={(e) => setEncounterName(e.target.value)}
+                  onChange={(e) => {
+                    setEncounterName(e.target.value)
+                    updateCurrentEncounterName(e.target.value)
+                  }}
                   placeholder="Encounter Name"
                   style={{
                     flex: 1,
