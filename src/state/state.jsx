@@ -35,7 +35,8 @@ export const GameStateProvider = ({ children }) => {
     adversaries: [],
     environments: [],
     partySize: 4,
-    savedEncounters: []
+    savedEncounters: [],
+    currentEncounterName: 'Encounter'
   });
   const [isLoaded, setIsLoaded] = useState(false);
   
@@ -98,6 +99,14 @@ export const GameStateProvider = ({ children }) => {
     }));
   };
 
+  // Current encounter name management
+  const updateCurrentEncounterName = (name) => {
+    setGameState(prev => ({
+      ...prev,
+      currentEncounterName: name || 'Encounter'
+    }));
+  };
+
   // Saved encounters management
   const saveEncounter = (encounterData) => {
     // If encounterData has an ID, update existing encounter
@@ -122,7 +131,7 @@ export const GameStateProvider = ({ children }) => {
       // Create new encounter
       const newEncounter = {
         id: generateId('encounter'),
-        name: encounterData.name || `Encounter ${Date.now()}`,
+        name: encounterData.name || 'Encounter',
         createdAt: new Date().toISOString(),
         encounterItems: encounterData.encounterItems || [],
         partySize: encounterData.partySize || 4,
@@ -553,6 +562,8 @@ export const GameStateProvider = ({ children }) => {
     toggleFearVisibility,
     // Party size actions
     updatePartySize,
+    // Current encounter name actions
+    updateCurrentEncounterName,
     // Saved encounters actions
     saveEncounter,
     saveEncounterAs,
@@ -614,6 +625,7 @@ export const useGameState = () => {
       updateFear: () => {},
       toggleFearVisibility: () => {},
       updatePartySize: () => {},
+      updateCurrentEncounterName: () => {},
       saveEncounter: () => {},
       loadEncounter: () => {},
       deleteEncounter: () => {},
@@ -666,6 +678,7 @@ export const useGameState = () => {
       updateFear: () => {},
       toggleFearVisibility: () => {},
       updatePartySize: () => {},
+      updateCurrentEncounterName: () => {},
       saveEncounter: () => {},
       loadEncounter: () => {},
       deleteEncounter: () => {},
