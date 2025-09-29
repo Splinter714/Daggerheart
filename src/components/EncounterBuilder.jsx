@@ -61,7 +61,7 @@ const EncounterBuilder = ({
   
   const [encounterItems, setEncounterItems] = useState([])
   const [encounterName, setEncounterName] = useState(currentEncounterName || 'Encounter')
-  const [activeTab, setActiveTab] = useState('adversaries')
+  const [activeTab, setActiveTab] = useState('custom')
   const [loadedEncounterId, setLoadedEncounterId] = useState(null) // Track which encounter is loaded
   const [originalEncounterData, setOriginalEncounterData] = useState(null) // Track original data for change detection
   

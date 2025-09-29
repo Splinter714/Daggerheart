@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom'
 import { Filter, Square, CheckSquare, Plus, X } from 'lucide-react'
 import GameCard from './GameCard'
 
-// Custom Adversary Creator Component
-const CustomAdversaryCreator = ({ onSave, onRefresh }) => {
+// Custom Adversary Creator Component - Editable Card Style
+const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem }) => {
   const [formData, setFormData] = useState({
     name: '',
     tier: 1,
@@ -23,13 +23,7 @@ const CustomAdversaryCreator = ({ onSave, onRefresh }) => {
     features: []
   })
   
-  const [newExperience, setNewExperience] = useState('')
-  const [newFeature, setNewFeature] = useState({ name: '', type: 'Action', description: '' })
   const [isSaving, setIsSaving] = useState(false)
-
-  const adversaryTypes = ['Standard', 'Solo', 'Bruiser', 'Horde', 'Minion', 'Ranged', 'Leader', 'Skulk', 'Social', 'Support']
-  const ranges = ['Melee', 'Very Close', 'Close', 'Medium', 'Long', 'Very Long']
-  const featureTypes = ['Action', 'Passive', 'Reaction']
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -48,40 +42,6 @@ const CustomAdversaryCreator = ({ onSave, onRefresh }) => {
     }))
   }
 
-  const addExperience = () => {
-    if (newExperience.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        experience: [...prev.experience, newExperience.trim()]
-      }))
-      setNewExperience('')
-    }
-  }
-
-  const removeExperience = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      experience: prev.experience.filter((_, i) => i !== index)
-    }))
-  }
-
-  const addFeature = () => {
-    if (newFeature.name.trim() && newFeature.description.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        features: [...prev.features, { ...newFeature, name: newFeature.name.trim(), description: newFeature.description.trim() }]
-      }))
-      setNewFeature({ name: '', type: 'Action', description: '' })
-    }
-  }
-
-  const removeFeature = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      features: prev.features.filter((_, i) => i !== index)
-    }))
-  }
-
   const handleSave = async () => {
     if (!formData.name.trim()) {
       alert('Please enter a name for the adversary')
@@ -97,7 +57,12 @@ const CustomAdversaryCreator = ({ onSave, onRefresh }) => {
         source: 'Homebrew'
       }
       
-      await onSave(adversaryData)
+      const savedAdversary = await onSave(adversaryData)
+      
+      // Add the new adversary to the current encounter
+      if (onAddItem && savedAdversary) {
+        onAddItem(savedAdversary)
+      }
       
       // Refresh the browser data to show the new adversary
       if (onRefresh) {
@@ -132,403 +97,48 @@ const CustomAdversaryCreator = ({ onSave, onRefresh }) => {
     }
   }
 
-  const inputStyle = {
-    padding: '0.5rem',
-    border: '1px solid var(--border)',
-    borderRadius: '4px',
-    backgroundColor: 'var(--bg-primary)',
-    color: 'var(--text-primary)',
-    fontSize: '0.875rem',
-    width: '100%'
-  }
-
-  const labelStyle = {
-    display: 'block',
-    marginBottom: '0.25rem',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    color: 'var(--text-primary)'
-  }
-
-  const sectionStyle = {
-    marginBottom: '1.5rem',
-    padding: '1rem',
-    border: '1px solid var(--border)',
-    borderRadius: '8px',
-    backgroundColor: 'var(--bg-secondary)'
+  // Create a mock adversary object for the GameCard
+  const mockAdversary = {
+    ...formData,
+    id: 'new-adversary',
+    hp: 0,
+    stress: 0,
+    source: 'Homebrew'
   }
 
   return (
     <div style={{
       flex: 1,
       overflowY: 'auto',
-      padding: '1rem'
+      padding: '1rem',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'flex-start'
     }}>
       <div style={{
-        maxWidth: '800px',
-        margin: '0 auto'
+        maxWidth: '600px',
+        width: '100%'
       }}>
-        <h2 style={{
-          color: 'var(--text-primary)',
-          marginBottom: '1.5rem',
-          fontSize: '1.5rem',
-          fontWeight: '600'
+        {/* Header */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem'
         }}>
-          Create Custom Adversary
-        </h2>
-
-        {/* Basic Information */}
-        <div style={sectionStyle}>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem', fontSize: '1.1rem' }}>
-            Basic Information
-          </h3>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-            <div>
-              <label style={labelStyle}>Name *</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                style={inputStyle}
-                placeholder="Adversary name"
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Type</label>
-              <select
-                value={formData.type}
-                onChange={(e) => handleInputChange('type', e.target.value)}
-                style={inputStyle}
-              >
-                {adversaryTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-            <div>
-              <label style={labelStyle}>Tier</label>
-              <select
-                value={formData.tier}
-                onChange={(e) => handleInputChange('tier', parseInt(e.target.value))}
-                style={inputStyle}
-              >
-                <option value={1}>Tier 1</option>
-                <option value={2}>Tier 2</option>
-                <option value={3}>Tier 3</option>
-                <option value={4}>Tier 4</option>
-              </select>
-            </div>
-            <div>
-              <label style={labelStyle}>Difficulty</label>
-              <input
-                type="number"
-                value={formData.difficulty}
-                onChange={(e) => handleInputChange('difficulty', parseInt(e.target.value) || 0)}
-                style={inputStyle}
-                min="1"
-                max="30"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label style={labelStyle}>Description</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }}
-              placeholder="Brief description of the adversary"
-            />
-          </div>
-
-          <div>
-            <label style={labelStyle}>Motives</label>
-            <input
-              type="text"
-              value={formData.motives}
-              onChange={(e) => handleInputChange('motives', e.target.value)}
-              style={inputStyle}
-              placeholder="e.g., Hunt, defend, escape, feed"
-            />
-          </div>
-        </div>
-
-        {/* Combat Stats */}
-        <div style={sectionStyle}>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem', fontSize: '1.1rem' }}>
-            Combat Stats
-          </h3>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-            <div>
-              <label style={labelStyle}>HP Max</label>
-              <input
-                type="number"
-                value={formData.hpMax}
-                onChange={(e) => handleInputChange('hpMax', parseInt(e.target.value) || 0)}
-                style={inputStyle}
-                min="1"
-                max="20"
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Stress Max</label>
-              <input
-                type="number"
-                value={formData.stressMax}
-                onChange={(e) => handleInputChange('stressMax', parseInt(e.target.value) || 0)}
-                style={inputStyle}
-                min="0"
-                max="10"
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Attack Modifier</label>
-              <input
-                type="number"
-                value={formData.atk}
-                onChange={(e) => handleInputChange('atk', parseInt(e.target.value) || 0)}
-                style={inputStyle}
-                min="-5"
-                max="10"
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-            <div>
-              <label style={labelStyle}>Major Threshold</label>
-              <input
-                type="number"
-                value={formData.thresholds.major}
-                onChange={(e) => handleThresholdChange('major', e.target.value)}
-                style={inputStyle}
-                min="1"
-                max="50"
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Severe Threshold</label>
-              <input
-                type="number"
-                value={formData.thresholds.severe}
-                onChange={(e) => handleThresholdChange('severe', e.target.value)}
-                style={inputStyle}
-                min="1"
-                max="50"
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Range</label>
-              <select
-                value={formData.range}
-                onChange={(e) => handleInputChange('range', e.target.value)}
-                style={inputStyle}
-              >
-                {ranges.map(range => (
-                  <option key={range} value={range}>{range}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div>
-              <label style={labelStyle}>Weapon</label>
-              <input
-                type="text"
-                value={formData.weapon}
-                onChange={(e) => handleInputChange('weapon', e.target.value)}
-                style={inputStyle}
-                placeholder="e.g., Claws, Sword, Bow"
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Damage</label>
-              <input
-                type="text"
-                value={formData.damage}
-                onChange={(e) => handleInputChange('damage', e.target.value)}
-                style={inputStyle}
-                placeholder="e.g., 1d8+3 phy"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Experience */}
-        <div style={sectionStyle}>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem', fontSize: '1.1rem' }}>
-            Experience
-          </h3>
-          
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-            <input
-              type="text"
-              value={newExperience}
-              onChange={(e) => setNewExperience(e.target.value)}
-              style={inputStyle}
-              placeholder="e.g., Keen Senses +2"
-              onKeyPress={(e) => e.key === 'Enter' && addExperience()}
-            />
-            <button
-              onClick={addExperience}
-              style={{
-                padding: '0.5rem',
-                backgroundColor: 'var(--purple)',
-                border: 'none',
-                color: 'white',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <Plus size={16} />
-            </button>
-          </div>
-
-          {formData.experience.map((exp, index) => (
-            <div key={index} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginBottom: '0.5rem',
-              padding: '0.5rem',
-              backgroundColor: 'var(--bg-primary)',
-              borderRadius: '4px',
-              border: '1px solid var(--border)'
-            }}>
-              <span style={{ flex: 1, color: 'var(--text-primary)' }}>{exp}</span>
-              <button
-                onClick={() => removeExperience(index)}
-                style={{
-                  padding: '0.25rem',
-                  backgroundColor: 'var(--danger)',
-                  border: 'none',
-                  color: 'white',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <X size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Features */}
-        <div style={sectionStyle}>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem', fontSize: '1.1rem' }}>
-            Features
-          </h3>
-          
-          <div style={{ marginBottom: '1rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <input
-                type="text"
-                value={newFeature.name}
-                onChange={(e) => setNewFeature(prev => ({ ...prev, name: e.target.value }))}
-                style={inputStyle}
-                placeholder="Feature name"
-              />
-              <select
-                value={newFeature.type}
-                onChange={(e) => setNewFeature(prev => ({ ...prev, type: e.target.value }))}
-                style={inputStyle}
-              >
-                {featureTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-            <textarea
-              value={newFeature.description}
-              onChange={(e) => setNewFeature(prev => ({ ...prev, description: e.target.value }))}
-              style={{ ...inputStyle, minHeight: '60px', resize: 'vertical' }}
-              placeholder="Feature description"
-            />
-            <button
-              onClick={addFeature}
-              style={{
-                marginTop: '0.5rem',
-                padding: '0.5rem 1rem',
-                backgroundColor: 'var(--purple)',
-                border: 'none',
-                color: 'white',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              <Plus size={16} />
-              Add Feature
-            </button>
-          </div>
-
-          {formData.features.map((feature, index) => (
-            <div key={index} style={{
-              marginBottom: '1rem',
-              padding: '1rem',
-              backgroundColor: 'var(--bg-primary)',
-              borderRadius: '4px',
-              border: '1px solid var(--border)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                <div>
-                  <strong style={{ color: 'var(--text-primary)' }}>{feature.name}</strong>
-                  <span style={{ 
-                    marginLeft: '0.5rem', 
-                    padding: '0.25rem 0.5rem', 
-                    backgroundColor: 'var(--purple)', 
-                    color: 'white', 
-                    borderRadius: '3px', 
-                    fontSize: '0.75rem' 
-                  }}>
-                    {feature.type}
-                  </span>
-                </div>
-                <button
-                  onClick={() => removeFeature(index)}
-                  style={{
-                    padding: '0.25rem',
-                    backgroundColor: 'var(--danger)',
-                    border: 'none',
-                    color: 'white',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <X size={14} />
-                </button>
-              </div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0 }}>
-                {feature.description}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Save Button */}
-        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <h2 style={{
+            color: 'var(--text-primary)',
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            margin: 0
+          }}>
+            Create Custom Adversary
+          </h2>
           <button
             onClick={handleSave}
             disabled={isSaving || !formData.name.trim()}
             style={{
-              padding: '1rem 2rem',
+              padding: '0.75rem 1.5rem',
               backgroundColor: isSaving || !formData.name.trim() ? 'var(--gray-600)' : 'var(--purple)',
               border: 'none',
               color: 'white',
@@ -539,9 +149,19 @@ const CustomAdversaryCreator = ({ onSave, onRefresh }) => {
               opacity: isSaving || !formData.name.trim() ? 0.6 : 1
             }}
           >
-            {isSaving ? 'Creating...' : 'Create Adversary'}
+            {isSaving ? 'Creating...' : 'Create and Add'}
           </button>
         </div>
+
+        {/* Editable Adversary Card */}
+        <GameCard
+          item={mockAdversary}
+          type="adversary"
+          mode="edit"
+          onUpdate={(id, updates) => {
+            setFormData(prev => ({ ...prev, ...updates }))
+          }}
+        />
       </div>
     </div>
   )
@@ -755,7 +375,7 @@ const addCustomAdversary = (adversaryData) => {
   _dataLoaded = false
   loadData()
   
-  return newAdversary.id
+  return newAdversary
 }
 
 const addCustomEnvironment = (environmentData) => {
@@ -2003,6 +1623,7 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
         <CustomAdversaryCreator 
           onSave={addCustomAdversary}
           onRefresh={refreshData}
+          onAddItem={onAddItem}
         />
       )}
     </div>

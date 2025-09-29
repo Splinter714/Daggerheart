@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle } from 'lucide-react'
 
 // Reusable Threshold Tag Component
 const ThresholdTag = ({ value }) => (
@@ -675,6 +675,27 @@ const GameCard = ({
             position: 'relative',
             zIndex: isDead ? 1 : 'auto'
           }}>
+            {isEditMode ? (
+              <input
+                type="text"
+                value={item.name || ''}
+                onChange={(e) => {
+                  onUpdate && onUpdate(item.id, { name: e.target.value })
+                }}
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  color: 'var(--text-primary)',
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  padding: '0.5rem',
+                  width: '100%',
+                  maxWidth: '300px'
+                }}
+                placeholder="Adversary name"
+              />
+            ) : (
             <h4 style={{
               ...styles.rowTitle,
               color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
@@ -684,30 +705,114 @@ const GameCard = ({
             }}>
               {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
             </h4>
+            )}
             
             {/* Badges on the right */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.25rem'
             }}>
+              {/* Type Badge */}
+              {(item.type || isEditMode) && (
+                <div>
+                  {isEditMode ? (
+                    <select
+                      value={item.type || ''}
+                      onChange={(e) => {
+                        onUpdate && onUpdate(item.id, { type: e.target.value })
+                      }}
+                      style={{
+                        backgroundColor: 'var(--purple)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '3px',
+                        color: 'var(--text-primary)',
+                        fontSize: '10px',
+                        fontWeight: '600',
+                        textTransform: 'uppercase',
+                        padding: '2px 6px',
+                        outline: 'none'
+                      }}
+                    >
+                      <option value="Standard">Standard</option>
+                      <option value="Solo">Solo</option>
+                      <option value="Bruiser">Bruiser</option>
+                      <option value="Horde">Horde</option>
+                      <option value="Minion">Minion</option>
+                      <option value="Ranged">Ranged</option>
+                      <option value="Leader">Leader</option>
+                      <option value="Skulk">Skulk</option>
+                      <option value="Social">Social</option>
+                      <option value="Support">Support</option>
+                    </select>
+                  ) : (
+                    <span style={{ ...styles.badge, ...styles.typeBadge }}>
+                      {item.type}
+                    </span>
+                  )}
+                </div>
+              )}
+
               {/* Difficulty Badge */}
-              {item.difficulty && (
+              {(item.difficulty || isEditMode) && (
+                <div>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   position: 'relative'
                 }}>
-                  <Hexagon 
-                    size={24} 
+                    <Shield 
+                      size={28} 
+                      strokeWidth={1}
                     style={{ 
-                      color: 'var(--text-secondary)',
-                      transform: 'rotate(0deg)'
-                    }} 
-                  />
+                        color: 'var(--text-secondary)'
+                      }} 
+                    />
+                    {isEditMode ? (
+                      <input
+                        type="text"
+                        value={item.difficulty || ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '')
+                          if (value.length <= 2) {
+                            onUpdate && onUpdate(item.id, { difficulty: parseInt(value) || 0 })
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowUp') {
+                            e.preventDefault()
+                            const current = parseInt(item.difficulty) || 0
+                            onUpdate && onUpdate(item.id, { difficulty: Math.min(current + 1, 99) })
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault()
+                            const current = parseInt(item.difficulty) || 0
+                            onUpdate && onUpdate(item.id, { difficulty: Math.max(current - 1, 0) })
+                          }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '0.625rem',
+                          fontWeight: 600,
+                          width: '20px',
+                          textAlign: 'center',
+                          outline: 'none'
+                        }}
+                        placeholder="10"
+                        maxLength="2"
+                      />
+                    ) : (
                   <span style={{
                     position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
                     fontSize: '0.625rem',
                     fontWeight: 600,
                     color: 'white',
@@ -715,11 +820,14 @@ const GameCard = ({
                   }}>
                     {item.difficulty}
                   </span>
+                    )}
+                  </div>
                 </div>
               )}
               
               {/* Attack Modifier Badge */}
-              {item.atk !== undefined && (
+              {(item.atk !== undefined || isEditMode) && (
+                <div>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -727,14 +835,56 @@ const GameCard = ({
                   position: 'relative'
                 }}>
                   <Locate 
-                    size={24} 
+                      size={32} 
                     strokeWidth={1}
                     style={{
                       color: 'var(--text-secondary)'
                     }}
                   />
+                    {isEditMode ? (
+                      <input
+                        type="text"
+                        value={item.atk || ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9+\-d]/g, '')
+                          if (value.length <= 3) {
+                            onUpdate && onUpdate(item.id, { atk: value })
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowUp') {
+                            e.preventDefault()
+                            const current = parseInt(item.atk) || 0
+                            onUpdate && onUpdate(item.id, { atk: current >= 0 ? `+${current + 1}` : `${current + 1}` })
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault()
+                            const current = parseInt(item.atk) || 0
+                            onUpdate && onUpdate(item.id, { atk: current > 0 ? `+${current - 1}` : `${current - 1}` })
+                          }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '0.625rem',
+                          fontWeight: 600,
+                          width: '20px',
+                          textAlign: 'center',
+                          outline: 'none'
+                        }}
+                        placeholder="+1"
+                        maxLength="3"
+                      />
+                    ) : (
                   <span style={{
                     position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
                     fontSize: '0.625rem',
                     fontWeight: 600,
                     color: 'white',
@@ -742,6 +892,79 @@ const GameCard = ({
                   }}>
                     {item.atk >= 0 ? '+' : ''}{item.atk}
                   </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Tier Badge */}
+              {(item.tier || isEditMode) && (
+                <div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}>
+                    <Diamond 
+                      size={28} 
+                      strokeWidth={1}
+                      style={{ 
+                        color: 'var(--text-secondary)'
+                      }} 
+                    />
+                    {isEditMode ? (
+                      <input
+                        type="text"
+                        value={item.tier || ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^1-4]/g, '')
+                          if (value.length <= 1) {
+                            onUpdate && onUpdate(item.id, { tier: value === '' ? '' : parseInt(value) })
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowUp') {
+                            e.preventDefault()
+                            const current = parseInt(item.tier) || 1
+                            onUpdate && onUpdate(item.id, { tier: Math.min(current + 1, 4) })
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault()
+                            const current = parseInt(item.tier) || 1
+                            onUpdate && onUpdate(item.id, { tier: Math.max(current - 1, 1) })
+                          }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '0.625rem',
+                          fontWeight: 600,
+                          width: '20px',
+                          textAlign: 'center',
+                          outline: 'none'
+                        }}
+                        maxLength="1"
+                      />
+                    ) : (
+                      <span style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        fontSize: '0.625rem',
+                        fontWeight: 600,
+                        color: 'white',
+                        pointerEvents: 'none'
+                      }}>
+                        {item.tier}
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -758,22 +981,90 @@ const GameCard = ({
 
 
         {/* Motives and Experiences Section */}
-        {(item.motives || (item.experience && item.experience.length > 0)) && (
+        {(item.motives || (item.experience && item.experience.length > 0) || isEditMode) && (
           <div style={{
             padding: '0.75rem 8px',
             marginBottom: '1rem'
           }}>
-            {item.motives && (
+            {/* Motives */}
+            {(item.motives || isEditMode) && (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+                marginBottom: (item.experience && item.experience.length > 0) || isEditMode ? '1rem' : '0'
+              }}>
+                <div style={{
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  marginBottom: '0.5rem'
+                }}>
+                  Motives
+                </div>
+                {isEditMode ? (
+                  <textarea
+                    value={item.motives || ''}
+                    onChange={(e) => onUpdate && onUpdate(item.id, { motives: e.target.value })}
+                    placeholder="Enter motives (e.g., Hunt, defend, patrol)"
+                    rows={2}
+                    style={{
+                      padding: '0.5rem',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      backgroundColor: 'var(--bg-primary)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.875rem',
+                      resize: 'vertical'
+                    }}
+                  />
+                ) : (
               <div style={{
                 fontSize: '0.875rem',
                 lineHeight: 1.5,
-                color: 'var(--text-secondary)',
-                marginBottom: item.experience && item.experience.length > 0 ? '0.75rem' : '0'
+                    color: 'var(--text-secondary)'
               }}>
                 {item.motives}
               </div>
             )}
-            {item.experience && item.experience.length > 0 && (
+              </div>
+            )}
+            
+            {/* Experience */}
+            {(item.experience && item.experience.length > 0 || isEditMode) && (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem'
+              }}>
+                <div style={{
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  marginBottom: '0.5rem'
+                }}>
+                  Experience
+                </div>
+                {isEditMode ? (
+                  <textarea
+                    value={(item.experience || []).join(', ') || ''}
+                    onChange={(e) => {
+                      const experienceArray = e.target.value.split(',').map(exp => exp.trim()).filter(exp => exp.length > 0)
+                      onUpdate && onUpdate(item.id, { experience: experienceArray })
+                    }}
+                    placeholder="Enter experience tags (e.g., Battle Hardened +3, Keen Senses +2)"
+                    rows={2}
+                    style={{
+                      padding: '0.5rem',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      backgroundColor: 'var(--bg-primary)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.875rem',
+                      resize: 'vertical'
+                    }}
+                  />
+                ) : (
               <div style={{
                 fontSize: '0.875rem',
                 lineHeight: 1.5,
@@ -782,19 +1073,21 @@ const GameCard = ({
                 {item.experience.map(exp => 
                   typeof exp === 'string' ? exp : `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`
                 ).join(', ')}
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
 
         {/* Features Section - Organized by Type */}
-        {item.features && item.features.length > 0 && (
+        {((item.features && item.features.length > 0) || isEditMode) && (
           <div style={{
             marginBottom: '1rem',
             padding: '0 8px'
           }}>
             {/* Actions */}
-            {((item.atk !== undefined && item.weapon) || item.features.filter(f => f.type === 'Action').length > 0) && (
+            {(((item.atk !== undefined && item.weapon) || item.features.filter(f => f.type === 'Action').length > 0) || isEditMode) && (
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{
                   display: 'flex',
@@ -832,8 +1125,78 @@ const GameCard = ({
                   flexDirection: 'column',
                   gap: '0.5rem'
                 }}>
-                  {/* Standard Attack - Always show first if attack data exists */}
-                  {item.atk !== undefined && item.weapon && (
+                  {/* Standard Attack - Show in view mode or edit mode */}
+                  {isEditMode ? (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem',
+                      padding: '0.5rem',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      backgroundColor: 'var(--bg-secondary)'
+                    }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <input
+                          type="text"
+                          value={item.weapon || ''}
+                          onChange={(e) => onUpdate && onUpdate(item.id, { weapon: e.target.value })}
+                          placeholder="Standard attack name"
+                          style={{
+                            flex: 1,
+                            padding: '0.25rem 0.5rem',
+                            border: '1px solid var(--border)',
+                            borderRadius: '4px',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.875rem'
+                          }}
+                        />
+                        <select
+                          value={item.range || ''}
+                          onChange={(e) => onUpdate && onUpdate(item.id, { range: e.target.value })}
+                          style={{
+                            flex: 1,
+                            padding: '0.25rem 0.5rem',
+                            border: '1px solid var(--border)',
+                            borderRadius: '4px',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.875rem',
+                            appearance: 'none',
+                            backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23666\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6,9 12,15 18,9\'%3e%3c/polyline%3e%3c/svg%3e")',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'right 0.5rem center',
+                            backgroundSize: '1rem',
+                            paddingRight: '2rem'
+                          }}
+                        >
+                          <option value="">Range</option>
+                          <option value="Melee">Melee</option>
+                          <option value="Very Close">Very Close</option>
+                          <option value="Close">Close</option>
+                          <option value="Far">Far</option>
+                          <option value="Very Far">Very Far</option>
+                        </select>
+                        <input
+                          type="text"
+                          value={item.damage || ''}
+                          onChange={(e) => onUpdate && onUpdate(item.id, { damage: e.target.value })}
+                          placeholder="Damage (e.g., 1d6+2)"
+                          style={{
+                            flex: 1,
+                            padding: '0.25rem 0.5rem',
+                            border: '1px solid var(--border)',
+                            borderRadius: '4px',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.875rem'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    item.atk !== undefined && item.weapon && (
                     <div style={{
                       fontSize: '0.875rem',
                       lineHeight: 1.4,
@@ -844,10 +1207,179 @@ const GameCard = ({
                       </span>
                       <span> - Make an attack against a target within {item.range || 'Melee'} range. On a success, deal {item.damage || 'damage varies'}.</span>
                     </div>
+                    )
                   )}
                   
                   {/* Other Actions */}
-                  {item.features.filter(f => f.type === 'Action').map((feature, index) => {
+                  {(() => {
+                    const actionFeatures = item.features.filter(f => f.type === 'Action')
+                    // Ensure at least one empty action feature in edit mode
+                    const featuresToShow = isEditMode && actionFeatures.length === 0 
+                      ? [{ type: 'Action', name: '', description: '' }]
+                      : actionFeatures
+                    
+                    return featuresToShow.map((feature, index) => {
+                      if (isEditMode) {
+                        return (
+                          <div key={index} style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.5rem',
+                            padding: '0.5rem',
+                            border: '1px solid var(--border)',
+                            borderRadius: '4px',
+                            backgroundColor: 'var(--bg-secondary)'
+                          }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              {/* Up/Down Controls */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <button
+                                  onClick={() => {
+                                    const newFeatures = [...(item.features || [])]
+                                    const actionFeatures = newFeatures.filter(f => f.type === 'Action')
+                                    const currentIndex = actionFeatures.findIndex(f => f === feature)
+                                    if (currentIndex > 0) {
+                                      let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex])
+                                      let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex - 1])
+                                      [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
+                                      onUpdate && onUpdate(item.id, { features: newFeatures })
+                                    }
+                                  }}
+                                  disabled={(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === 0}
+                                  style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    padding: '0',
+                                    border: 'none',
+                                    backgroundColor: 'transparent',
+                                    color: (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === 0 ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                    cursor: (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === 0 ? 'not-allowed' : 'pointer',
+                                    fontSize: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                >
+                                  ↑
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    const newFeatures = [...(item.features || [])]
+                                    const actionFeatures = newFeatures.filter(f => f.type === 'Action')
+                                    const currentIndex = actionFeatures.findIndex(f => f === feature)
+                                    if (currentIndex < actionFeatures.length - 1) {
+                                      let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex])
+                                      let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex + 1])
+                                      [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
+                                      onUpdate && onUpdate(item.id, { features: newFeatures })
+                                    }
+                                  }}
+                                  disabled={(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Action').length - 1}
+                                  style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    padding: '0',
+                                    border: 'none',
+                                    backgroundColor: 'transparent',
+                                    color: (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Action').length - 1 ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                    cursor: (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Action').length - 1 ? 'not-allowed' : 'pointer',
+                                    fontSize: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                >
+                                  ↓
+                                </button>
+                              </div>
+
+                              <input
+                                type="text"
+                                value={feature.name || ''}
+                                onChange={(e) => {
+                                  const newFeatures = [...(item.features || [])]
+                                  const actionIndex = newFeatures.findIndex(f => f.type === 'Action' && f === feature)
+                                  if (actionIndex >= 0) {
+                                    newFeatures[actionIndex] = { ...newFeatures[actionIndex], name: e.target.value }
+                                  } else {
+                                    newFeatures.push({ type: 'Action', name: e.target.value, description: feature.description || '' })
+                                  }
+                                  
+                                  // Auto-add new action if this was the last action and both name and description are filled
+                                  const actionFeatures = newFeatures.filter(f => f.type === 'Action')
+                                  const lastAction = actionFeatures[actionFeatures.length - 1]
+                                  if (lastAction && lastAction.name.trim() && lastAction.description.trim()) {
+                                    newFeatures.push({ type: 'Action', name: '', description: '' })
+                                  }
+                                  
+                                  onUpdate && onUpdate(item.id, { features: newFeatures })
+                                }}
+                                placeholder="Action name"
+                                style={{
+                                  flex: 1,
+                                  padding: '0.25rem 0.5rem',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '4px',
+                                  backgroundColor: 'var(--bg-primary)',
+                                  color: 'var(--text-primary)',
+                                  fontSize: '0.875rem'
+                                }}
+                              />
+                              <button
+                                onClick={() => onUpdate && onUpdate(item.id, { 
+                                  features: item.features.filter(f => f !== feature)
+                                })}
+                                disabled={!feature.name.trim() && !feature.description.trim()}
+                                style={{
+                                  padding: '0.25rem 0.5rem',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '4px',
+                                  backgroundColor: 'var(--bg-primary)',
+                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                  cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
+                                  opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
+                                  fontSize: '0.875rem'
+                                }}
+                              >
+                                ×
+                              </button>
+                            </div>
+                            <textarea
+                              value={feature.description || ''}
+                              onChange={(e) => {
+                                const newFeatures = [...(item.features || [])]
+                                const actionIndex = newFeatures.findIndex(f => f.type === 'Action' && f === feature)
+                                if (actionIndex >= 0) {
+                                  newFeatures[actionIndex] = { ...newFeatures[actionIndex], description: e.target.value }
+                                } else {
+                                  newFeatures.push({ type: 'Action', name: feature.name || '', description: e.target.value })
+                                }
+                                
+                                // Auto-add new action if this was the last action and both name and description are filled
+                                const actionFeatures = newFeatures.filter(f => f.type === 'Action')
+                                const lastAction = actionFeatures[actionFeatures.length - 1]
+                                if (lastAction && lastAction.name.trim() && lastAction.description.trim()) {
+                                  newFeatures.push({ type: 'Action', name: '', description: '' })
+                                }
+                                
+                                onUpdate && onUpdate(item.id, { features: newFeatures })
+                              }}
+                              placeholder="Action description"
+                              rows={2}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                border: '1px solid var(--border)',
+                                borderRadius: '4px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.875rem',
+                                resize: 'vertical'
+                              }}
+                            />
+                          </div>
+                        )
+                      }
                     return (
                     <div key={index} style={{
                       fontSize: '0.875rem',
@@ -862,13 +1394,14 @@ const GameCard = ({
                       )}
                     </div>
                     );
-                  })}
+                    })
+                  })()}
                 </div>
               </div>
             )}
 
             {/* Passives */}
-            {item.features.filter(f => f.type === 'Passive').length > 0 && (
+            {(item.features.filter(f => f.type === 'Passive').length > 0 || isEditMode) && (
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{
                   display: 'flex',
@@ -906,7 +1439,176 @@ const GameCard = ({
                   flexDirection: 'column',
                   gap: '0.5rem'
                 }}>
-                  {item.features.filter(f => f.type === 'Passive').map((feature, index) => (
+                  {(() => {
+                    const passiveFeatures = item.features.filter(f => f.type === 'Passive')
+                    // Ensure at least one empty passive feature in edit mode
+                    const featuresToShow = isEditMode && passiveFeatures.length === 0 
+                      ? [{ type: 'Passive', name: '', description: '' }]
+                      : passiveFeatures
+                    
+                    return featuresToShow.map((feature, index) => {
+                      if (isEditMode) {
+                        return (
+                          <div key={index} style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.5rem',
+                            padding: '0.5rem',
+                            border: '1px solid var(--border)',
+                            borderRadius: '4px',
+                            backgroundColor: 'var(--bg-secondary)'
+                          }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              {/* Up/Down Controls */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <button
+                                  onClick={() => {
+                                    const newFeatures = [...(item.features || [])]
+                                    const passiveFeatures = newFeatures.filter(f => f.type === 'Passive')
+                                    const currentIndex = passiveFeatures.findIndex(f => f === feature)
+                                    if (currentIndex > 0) {
+                                      let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === passiveFeatures[currentIndex])
+                                      let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === passiveFeatures[currentIndex - 1])
+                                      [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
+                                      onUpdate && onUpdate(item.id, { features: newFeatures })
+                                    }
+                                  }}
+                                  disabled={(item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) === 0}
+                                  style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    padding: '0',
+                                    border: 'none',
+                                    backgroundColor: 'transparent',
+                                    color: (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) === 0 ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                    cursor: (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) === 0 ? 'not-allowed' : 'pointer',
+                                    fontSize: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                >
+                                  ↑
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    const newFeatures = [...(item.features || [])]
+                                    const passiveFeatures = newFeatures.filter(f => f.type === 'Passive')
+                                    const currentIndex = passiveFeatures.findIndex(f => f === feature)
+                                    if (currentIndex < passiveFeatures.length - 1) {
+                                      let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === passiveFeatures[currentIndex])
+                                      let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === passiveFeatures[currentIndex + 1])
+                                      [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
+                                      onUpdate && onUpdate(item.id, { features: newFeatures })
+                                    }
+                                  }}
+                                  disabled={(item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Passive').length - 1}
+                                  style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    padding: '0',
+                                    border: 'none',
+                                    backgroundColor: 'transparent',
+                                    color: (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Passive').length - 1 ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                    cursor: (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Passive').length - 1 ? 'not-allowed' : 'pointer',
+                                    fontSize: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                >
+                                  ↓
+                                </button>
+                              </div>
+
+                              <input
+                                type="text"
+                                value={feature.name || ''}
+                                onChange={(e) => {
+                                  const newFeatures = [...(item.features || [])]
+                                  const passiveIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === feature)
+                                  if (passiveIndex >= 0) {
+                                    newFeatures[passiveIndex] = { ...newFeatures[passiveIndex], name: e.target.value }
+                                  } else {
+                                    newFeatures.push({ type: 'Passive', name: e.target.value, description: feature.description || '' })
+                                  }
+                                  
+                                  // Auto-add new passive if this was the last passive and both name and description are filled
+                                  const passiveFeatures = newFeatures.filter(f => f.type === 'Passive')
+                                  const lastPassive = passiveFeatures[passiveFeatures.length - 1]
+                                  if (lastPassive && lastPassive.name.trim() && lastPassive.description.trim()) {
+                                    newFeatures.push({ type: 'Passive', name: '', description: '' })
+                                  }
+                                  
+                                  onUpdate && onUpdate(item.id, { features: newFeatures })
+                                }}
+                                placeholder="Passive name"
+                                style={{
+                                  flex: 1,
+                                  padding: '0.25rem 0.5rem',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '4px',
+                                  backgroundColor: 'var(--bg-primary)',
+                                  color: 'var(--text-primary)',
+                                  fontSize: '0.875rem'
+                                }}
+                              />
+                              <button
+                                onClick={() => onUpdate && onUpdate(item.id, { 
+                                  features: item.features.filter(f => f !== feature)
+                                })}
+                               disabled={!feature.name.trim() && !feature.description.trim()}
+                                style={{
+                                  padding: '0.25rem 0.5rem',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '4px',
+                                  backgroundColor: 'var(--bg-primary)',
+                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                  cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
+                                  opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
+                                  fontSize: '0.875rem'
+                                }}
+                              >
+                                ×
+                              </button>
+                            </div>
+                            <textarea
+                              value={feature.description || ''}
+                              onChange={(e) => {
+                                const newFeatures = [...(item.features || [])]
+                                const passiveIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === feature)
+                                if (passiveIndex >= 0) {
+                                  newFeatures[passiveIndex] = { ...newFeatures[passiveIndex], description: e.target.value }
+                                } else {
+                                  newFeatures.push({ type: 'Passive', name: feature.name || '', description: e.target.value })
+                                }
+                                
+                                // Auto-add new passive if this was the last passive and both name and description are filled
+                                const passiveFeatures = newFeatures.filter(f => f.type === 'Passive')
+                                const lastPassive = passiveFeatures[passiveFeatures.length - 1]
+                                if (lastPassive && lastPassive.name.trim() && lastPassive.description.trim()) {
+                                  newFeatures.push({ type: 'Passive', name: '', description: '' })
+                                }
+                                
+                                onUpdate && onUpdate(item.id, { features: newFeatures })
+                              }}
+                              placeholder="Passive description"
+                              rows={2}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                border: '1px solid var(--border)',
+                                borderRadius: '4px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.875rem',
+                                resize: 'vertical'
+                              }}
+                            />
+                          </div>
+                        )
+                      }
+                      return (
                     <div key={index} style={{
                       fontSize: '0.875rem',
                       lineHeight: 1.4,
@@ -919,13 +1621,15 @@ const GameCard = ({
                         <span> - {feature.description}</span>
                       )}
                     </div>
-                  ))}
+                      )
+                    })
+                  })()}
                 </div>
               </div>
             )}
 
             {/* Reactions */}
-            {item.features.filter(f => f.type === 'Reaction').length > 0 && (
+            {(item.features.filter(f => f.type === 'Reaction').length > 0 || isEditMode) && (
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{
                   display: 'flex',
@@ -963,7 +1667,176 @@ const GameCard = ({
                   flexDirection: 'column',
                   gap: '0.5rem'
                 }}>
-                  {item.features.filter(f => f.type === 'Reaction').map((feature, index) => (
+                  {(() => {
+                    const reactionFeatures = item.features.filter(f => f.type === 'Reaction')
+                    // Ensure at least one empty reaction feature in edit mode
+                    const featuresToShow = isEditMode && reactionFeatures.length === 0 
+                      ? [{ type: 'Reaction', name: '', description: '' }]
+                      : reactionFeatures
+                    
+                    return featuresToShow.map((feature, index) => {
+                      if (isEditMode) {
+                        return (
+                          <div key={index} style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.5rem',
+                            padding: '0.5rem',
+                            border: '1px solid var(--border)',
+                            borderRadius: '4px',
+                            backgroundColor: 'var(--bg-secondary)'
+                          }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              {/* Up/Down Controls */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <button
+                                  onClick={() => {
+                                    const newFeatures = [...(item.features || [])]
+                                    const reactionFeatures = newFeatures.filter(f => f.type === 'Reaction')
+                                    const currentIndex = reactionFeatures.findIndex(f => f === feature)
+                                    if (currentIndex > 0) {
+                                      let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Reaction' && f === reactionFeatures[currentIndex])
+                                      let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Reaction' && f === reactionFeatures[currentIndex - 1])
+                                      [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
+                                      onUpdate && onUpdate(item.id, { features: newFeatures })
+                                    }
+                                  }}
+                                  disabled={(item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) === 0}
+                                  style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    padding: '0',
+                                    border: 'none',
+                                    backgroundColor: 'transparent',
+                                    color: (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) === 0 ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                    cursor: (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) === 0 ? 'not-allowed' : 'pointer',
+                                    fontSize: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                >
+                                  ↑
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    const newFeatures = [...(item.features || [])]
+                                    const reactionFeatures = newFeatures.filter(f => f.type === 'Reaction')
+                                    const currentIndex = reactionFeatures.findIndex(f => f === feature)
+                                    if (currentIndex < reactionFeatures.length - 1) {
+                                      let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Reaction' && f === reactionFeatures[currentIndex])
+                                      let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Reaction' && f === reactionFeatures[currentIndex + 1])
+                                      [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
+                                      onUpdate && onUpdate(item.id, { features: newFeatures })
+                                    }
+                                  }}
+                                  disabled={(item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Reaction').length - 1}
+                                  style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    padding: '0',
+                                    border: 'none',
+                                    backgroundColor: 'transparent',
+                                    color: (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Reaction').length - 1 ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                    cursor: (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Reaction').length - 1 ? 'not-allowed' : 'pointer',
+                                    fontSize: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                >
+                                  ↓
+                                </button>
+                              </div>
+
+                              <input
+                                type="text"
+                                value={feature.name || ''}
+                                onChange={(e) => {
+                                  const newFeatures = [...(item.features || [])]
+                                  const reactionIndex = newFeatures.findIndex(f => f.type === 'Reaction' && f === feature)
+                                  if (reactionIndex >= 0) {
+                                    newFeatures[reactionIndex] = { ...newFeatures[reactionIndex], name: e.target.value }
+                                  } else {
+                                    newFeatures.push({ type: 'Reaction', name: e.target.value, description: feature.description || '' })
+                                  }
+                                  
+                                  // Auto-add new reaction if this was the last reaction and both name and description are filled
+                                  const reactionFeatures = newFeatures.filter(f => f.type === 'Reaction')
+                                  const lastReaction = reactionFeatures[reactionFeatures.length - 1]
+                                  if (lastReaction && lastReaction.name.trim() && lastReaction.description.trim()) {
+                                    newFeatures.push({ type: 'Reaction', name: '', description: '' })
+                                  }
+                                  
+                                  onUpdate && onUpdate(item.id, { features: newFeatures })
+                                }}
+                                placeholder="Reaction name"
+                                style={{
+                                  flex: 1,
+                                  padding: '0.25rem 0.5rem',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '4px',
+                                  backgroundColor: 'var(--bg-primary)',
+                                  color: 'var(--text-primary)',
+                                  fontSize: '0.875rem'
+                                }}
+                              />
+                              <button
+                                onClick={() => onUpdate && onUpdate(item.id, { 
+                                  features: item.features.filter(f => f !== feature)
+                                })}
+                                disabled={!feature.name.trim() && !feature.description.trim()}
+                                style={{
+                                  padding: '0.25rem 0.5rem',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '4px',
+                                  backgroundColor: 'var(--bg-primary)',
+                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                  cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
+                                  opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
+                                  fontSize: '0.875rem'
+                                }}
+                              >
+                                ×
+                              </button>
+                            </div>
+                            <textarea
+                              value={feature.description || ''}
+                              onChange={(e) => {
+                                const newFeatures = [...(item.features || [])]
+                                const reactionIndex = newFeatures.findIndex(f => f.type === 'Reaction' && f === feature)
+                                if (reactionIndex >= 0) {
+                                  newFeatures[reactionIndex] = { ...newFeatures[reactionIndex], description: e.target.value }
+                                } else {
+                                  newFeatures.push({ type: 'Reaction', name: feature.name || '', description: e.target.value })
+                                }
+                                
+                                // Auto-add new reaction if this was the last reaction and both name and description are filled
+                                const reactionFeatures = newFeatures.filter(f => f.type === 'Reaction')
+                                const lastReaction = reactionFeatures[reactionFeatures.length - 1]
+                                if (lastReaction && lastReaction.name.trim() && lastReaction.description.trim()) {
+                                  newFeatures.push({ type: 'Reaction', name: '', description: '' })
+                                }
+                                
+                                onUpdate && onUpdate(item.id, { features: newFeatures })
+                              }}
+                              placeholder="Reaction description"
+                              rows={2}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                border: '1px solid var(--border)',
+                                borderRadius: '4px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.875rem',
+                                resize: 'vertical'
+                              }}
+                            />
+                          </div>
+                        )
+                      }
+                      return (
                     <div key={index} style={{
                       fontSize: '0.875rem',
                       lineHeight: 1.4,
@@ -976,7 +1849,9 @@ const GameCard = ({
                         <span> - {feature.description}</span>
                       )}
                     </div>
-                  ))}
+                      )
+                    })
+                  })()}
                 </div>
               </div>
             )}
@@ -1386,7 +2261,7 @@ const GameCard = ({
         )}
 
         {/* Description Section */}
-        {item.description && (
+        {(item.description || isEditMode) && (
           <div style={{
             marginBottom: '1rem',
             padding: '0 8px'
