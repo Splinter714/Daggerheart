@@ -1282,11 +1282,23 @@ const GameCard = ({
                                       const newFeatures = [...features]
                                       const actionFeatures = newFeatures.filter(f => f.type === 'Action')
                                       const currentIndex = actionFeatures.findIndex(f => f === feature)
-                                      if (currentIndex > 0) {
-                                        let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex])
-                                        let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex - 1])
-                                        [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
-                                        onUpdate && onUpdate(item.id, { features: newFeatures })
+                                      if (currentIndex > 0 && currentIndex < actionFeatures.length) {
+                                        // Find indices in the full array
+                                        const currentAction = actionFeatures[currentIndex]
+                                        const previousAction = actionFeatures[currentIndex - 1]
+                                        
+                                        if (currentAction && previousAction) {
+                                          const sourceIndex = newFeatures.findIndex(f => f === currentAction)
+                                          const targetIndex = newFeatures.findIndex(f => f === previousAction)
+                                          
+                                          if (sourceIndex >= 0 && targetIndex >= 0) {
+                                            // Swap the features
+                                            newFeatures[sourceIndex] = previousAction
+                                            newFeatures[targetIndex] = currentAction
+                                            
+                                            onUpdate && onUpdate(item.id, { features: newFeatures })
+                                          }
+                                        }
                                       }
                                     } catch (error) {
                                       console.error('Error in action up button:', error)
@@ -1317,11 +1329,23 @@ const GameCard = ({
                                       const newFeatures = [...features]
                                       const actionFeatures = newFeatures.filter(f => f.type === 'Action')
                                       const currentIndex = actionFeatures.findIndex(f => f === feature)
-                                      if (currentIndex < actionFeatures.length - 1) {
-                                        let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex])
-                                        let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex + 1])
-                                        [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
-                                        onUpdate && onUpdate(item.id, { features: newFeatures })
+                                      if (currentIndex < actionFeatures.length - 1 && currentIndex >= 0) {
+                                        // Find indices in the full array
+                                        const currentAction = actionFeatures[currentIndex]
+                                        const nextAction = actionFeatures[currentIndex + 1]
+                                        
+                                        if (currentAction && nextAction) {
+                                          const sourceIndex = newFeatures.findIndex(f => f === currentAction)
+                                          const targetIndex = newFeatures.findIndex(f => f === nextAction)
+                                          
+                                          if (sourceIndex >= 0 && targetIndex >= 0) {
+                                            // Swap the features
+                                            newFeatures[sourceIndex] = nextAction
+                                            newFeatures[targetIndex] = currentAction
+                                            
+                                            onUpdate && onUpdate(item.id, { features: newFeatures })
+                                          }
+                                        }
                                       }
                                     } catch (error) {
                                       console.error('Error in action down button:', error)
