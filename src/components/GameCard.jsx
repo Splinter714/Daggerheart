@@ -6,7 +6,7 @@ import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate
 // ============================================================================
 
 // Reorder Controls Component
-const ReorderControls = ({ feature, featureType, item, onUpdate }) => {
+const ReorderControls = ({ feature, featureType, item, onUpdate, handleFeatureDeleteClick, deleteConfirmations, getFeatureKey }) => {
   const handleUpClick = () => {
     try {
       const features = item?.features || []
@@ -70,16 +70,17 @@ const ReorderControls = ({ feature, featureType, item, onUpdate }) => {
   const filterExprWithName = f => f.type === featureType && f.name.trim()
   
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', height: '100%' }}>
       <button
         onClick={handleUpClick}
         disabled={(item.features || []).filter(filterExpr).findIndex(f => f === feature) === 0}
         style={{
-          width: '16px',
-          height: '16px',
+          width: '22px',
+          height: '22px',
           padding: '0',
-          border: 'none',
-          backgroundColor: 'transparent',
+          border: '1px solid var(--border)',
+          borderRadius: '3px',
+          backgroundColor: 'var(--gray-700)',
           color: ((item.features || []).filter(filterExprWithName).length >= 2 && 
                    (item.features || []).filter(filterExpr).findIndex(f => f === feature) !== 0 &&
                    feature.name.trim()) 
@@ -88,23 +89,55 @@ const ReorderControls = ({ feature, featureType, item, onUpdate }) => {
                     (item.features || []).filter(filterExpr).findIndex(f => f === feature) !== 0 &&
                     feature.name.trim())
                  ? 'pointer' : 'not-allowed',
-          fontSize: '10px',
+          fontSize: '14px',
+          lineHeight: '1',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          minHeight: '22px',
+          maxHeight: '22px'
         }}>
         ↑
+      </button>
+
+      {/* Delete Button */}
+      <button
+        onClick={() => handleFeatureDeleteClick(feature)}
+        disabled={!feature.name.trim() && !feature.description.trim()}
+        style={{
+          width: '22px',
+          height: '22px',
+          padding: '0',
+          border: '1px solid var(--border)',
+          borderRadius: '3px',
+          backgroundColor: deleteConfirmations[getFeatureKey(feature)] ? 'var(--danger)' : 'var(--gray-700)',
+          color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-secondary)' : 'white',
+          cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
+          opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
+          fontWeight: '600',
+          fontSize: '12px',
+          lineHeight: '1',
+          transition: 'background-color 0.2s',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '22px',
+          maxHeight: '22px'
+        }}
+      >
+        ×
       </button>
 
       <button
         onClick={handleDownClick}
         disabled={(item.features || []).filter(filterExpr).findIndex(f => f === feature) === (item.features || []).filter(filterExpr).length - 1}
         style={{
-          width: '16px',
-          height: '16px',
+          width: '22px',
+          height: '22px',
           padding: '0',
-          border: 'none',
-          backgroundColor: 'transparent',
+          border: '1px solid var(--border)',
+          borderRadius: '3px',
+          backgroundColor: 'var(--gray-700)',
           color: ((item.features || []).filter(filterExprWithName).length >= 2 && 
                    (item.features || []).filter(filterExpr).findIndex(f => f === feature) < (item.features || []).filter(filterExpr).length - 1 &&
                    (item.features || []).filter(filterExpr)[(item.features || []).filter(filterExpr).findIndex(f => f === feature) + 1]?.name.trim() &&
@@ -115,10 +148,13 @@ const ReorderControls = ({ feature, featureType, item, onUpdate }) => {
                     (item.features || []).filter(filterExpr)[(item.features || []).filter(filterExpr).findIndex(f => f === feature) + 1]?.name.trim() &&
                     feature.name.trim())
                  ? 'pointer' : 'not-allowed',
-          fontSize: '10px',
+          fontSize: '14px',
+          lineHeight: '1',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          minHeight: '22px',
+          maxHeight: '22px'
         }}>
         ↓
       </button>
@@ -850,7 +886,7 @@ const GameCard = ({
                   onUpdate && onUpdate(item.id, { name: e.target.value })
                 }}
                 style={{
-                  backgroundColor: 'var(--bg-secondary)',
+                  backgroundColor: 'var(--bg-primary)',
                   border: '1px solid var(--border)',
                   borderRadius: '4px',
                   color: 'var(--text-primary)',
@@ -894,7 +930,7 @@ const GameCard = ({
                         border: '1px solid var(--border)',
                         borderRadius: '3px',
                         color: 'var(--text-primary)',
-                        fontSize: '10px',
+                        fontSize: '14px',
                         fontWeight: '600',
                         textTransform: 'uppercase',
                         padding: '2px 6px',
@@ -1389,6 +1425,7 @@ const GameCard = ({
                       if (isEditMode) {
                         return (
                           <div key={index} style={{
+                            position: 'relative',
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '0.5rem',
@@ -1397,70 +1434,30 @@ const GameCard = ({
                             borderRadius: '4px',
                             backgroundColor: 'var(--bg-secondary)'
                           }}>
-                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                              {/* Up/Down Controls */}
-                              <ReorderControls feature={feature} featureType="Action" item={item} onUpdate={onUpdate} />
-
-                              <input
-                                type="text"
-                                value={feature.name || ''}
-                                onChange={(e) => {
-                                  const newFeatures = [...(item.features || [])]
-                                  const actionIndex = newFeatures.findIndex(f => f.type === 'Action' && f === feature)
-                                  if (actionIndex >= 0) {
-                                    newFeatures[actionIndex] = { ...newFeatures[actionIndex], name: e.target.value }
-                                  } else {
-                                    newFeatures.push({ type: 'Action', name: e.target.value, description: feature.description || '' })
-                                  }
-                                  
-                                  // Auto-add new action if this was the last action and name is filled
-                                  const actionFeatures = newFeatures.filter(f => f.type === 'Action')
-                                  const lastAction = actionFeatures[actionFeatures.length - 1]
-                                  if (lastAction && lastAction.name.trim()) {
-                                    newFeatures.push({ type: 'Action', name: '', description: '' })
-                                  }
-                                  
-                                  onUpdate && onUpdate(item.id, { features: newFeatures })
-                                }}
-                                placeholder="Action name"
-                                style={{
-                                  flex: 1,
-                                  padding: '0.25rem 0.5rem',
-                                  border: '1px solid var(--border)',
-                                  borderRadius: '4px',
-                                  backgroundColor: 'var(--bg-primary)',
-                                  color: 'var(--text-primary)',
-                                  fontSize: '0.875rem',
-                                  transition: 'background-color 0.2s'
-                                }}
+                            {/* Left column: Up/Down Controls - positioned closer to edges */}
+                            <div style={{ position: 'absolute', left: '0', top: '0', bottom: '0', width: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: '0.5rem', padding: '0.5rem 0.25rem', overflow: 'hidden' }}>
+                              <ReorderControls 
+                                feature={feature} 
+                                featureType="Action" 
+                                item={item} 
+                                onUpdate={onUpdate}
+                                handleFeatureDeleteClick={handleFeatureDeleteClick}
+                                deleteConfirmations={deleteConfirmations}
+                                getFeatureKey={getFeatureKey}
                               />
-                              <button
-                                onClick={() => handleFeatureDeleteClick(feature)}
-                                disabled={!feature.name.trim() && !feature.description.trim()}
-                                style={{
-                                  padding: '0.25rem 0.5rem',
-                                  border: '1px solid var(--border)',
-                                  borderRadius: '4px',
-                                  backgroundColor: deleteConfirmations[getFeatureKey(feature)] ? 'var(--danger)' : 'var(--bg-primary)',
-                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-secondary)' : 'white',
-                                  cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
-                                  opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
-                                  fontSize: '0.875rem',
-                                  transition: 'background-color 0.2s'
-                                }}
-                              >
-                                ×
-                              </button>
                             </div>
-                            <textarea
-                              value={feature.description || ''}
+
+                            {/* Row 1: Name Input */}
+                            <input
+                              type="text"
+                              value={feature.name || ''}
                               onChange={(e) => {
                                 const newFeatures = [...(item.features || [])]
                                 const actionIndex = newFeatures.findIndex(f => f.type === 'Action' && f === feature)
                                 if (actionIndex >= 0) {
-                                  newFeatures[actionIndex] = { ...newFeatures[actionIndex], description: e.target.value }
+                                  newFeatures[actionIndex] = { ...newFeatures[actionIndex], name: e.target.value }
                                 } else {
-                                  newFeatures.push({ type: 'Action', name: feature.name || '', description: e.target.value })
+                                  newFeatures.push({ type: 'Action', name: e.target.value, description: feature.description || '' })
                                 }
                                 
                                 // Auto-add new action if this was the last action and name is filled
@@ -1472,18 +1469,62 @@ const GameCard = ({
                                 
                                 onUpdate && onUpdate(item.id, { features: newFeatures })
                               }}
-                              placeholder="Action description"
-                              rows={2}
+                              placeholder="Action name"
                               style={{
+                                marginLeft: '3rem',
+                                marginRight: '0.5rem',
+                                width: 'calc(100% - 3.5rem)',
                                 padding: '0.25rem 0.5rem',
                                 border: '1px solid var(--border)',
                                 borderRadius: '4px',
                                 backgroundColor: 'var(--bg-primary)',
                                 color: 'var(--text-primary)',
                                 fontSize: '0.875rem',
-                                resize: 'vertical'
+                                transition: 'background-color 0.2s'
                               }}
                             />
+                            <textarea
+                              value={feature.description || ''}
+                              onChange={(e) => {
+                                const newFeatures = [...(item.features || [])]
+                                const actionIndex = newFeatures.findIndex(f => f.type === 'Action' && f === feature)
+                                if (actionIndex >= 0) {
+                                  newFeatures[actionIndex] = { ...newFeatures[actionIndex], description: e.target.value }
+                                } else {
+                                  newFeatures.push({ type: 'Action', name: feature.name || '', description: e.target.value })
+                                }
+                                
+                                // Auto-resize textarea
+                                e.target.style.height = 'auto'
+                                e.target.style.height = e.target.scrollHeight + 'px'
+                                
+                                // Auto-add new action if this was the last action and name is filled
+                                const actionFeatures = newFeatures.filter(f => f.type === 'Action')
+                                const lastAction = actionFeatures[actionFeatures.length - 1]
+                                if (lastAction && lastAction.name.trim()) {
+                                  newFeatures.push({ type: 'Action', name: '', description: '' })
+                                }
+                                
+                                onUpdate && onUpdate(item.id, { features: newFeatures })
+                              }}
+                              placeholder="Action description"
+                              rows={1}
+                              style={{
+                                marginLeft: '3rem',
+                                marginRight: '0.5rem',
+                                width: 'calc(100% - 3.5rem)',
+                                padding: '0.25rem 0.5rem',
+                                border: '1px solid var(--border)',
+                                borderRadius: '4px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.875rem',
+                                resize: 'none',
+                                overflow: 'hidden',
+                                minHeight: '1.5rem'
+                              }}
+                            />
+
                           </div>
                         )
                       }
@@ -1567,7 +1608,15 @@ const GameCard = ({
                           }}>
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                               {/* Up/Down Controls */}
-                              <ReorderControls feature={feature} featureType="Passive" item={item} onUpdate={onUpdate} />
+                              <ReorderControls 
+                                feature={feature} 
+                                featureType="Passive" 
+                                item={item} 
+                                onUpdate={onUpdate}
+                                handleFeatureDeleteClick={handleFeatureDeleteClick}
+                                deleteConfirmations={deleteConfirmations}
+                                getFeatureKey={getFeatureKey}
+                              />
 
                               <input
                                 type="text"
@@ -1606,15 +1655,24 @@ const GameCard = ({
                                 onClick={() => handleFeatureDeleteClick(feature)}
                                disabled={!feature.name.trim() && !feature.description.trim()}
                                 style={{
-                                  padding: '0.25rem 0.5rem',
+                                  width: '22px',
+                                  height: '22px',
+                                  padding: '0',
                                   border: '1px solid var(--border)',
                                   borderRadius: '4px',
-                                  backgroundColor: deleteConfirmations[getFeatureKey(feature)] ? 'var(--danger)' : 'var(--bg-primary)',
+                                  backgroundColor: deleteConfirmations[getFeatureKey(feature)] ? 'var(--danger)' : 'var(--gray-700)',
                                   color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-secondary)' : 'white',
                                   cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
                                   opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
-                                  fontSize: '0.875rem',
-                                  transition: 'background-color 0.2s'
+                                  fontSize: '12px',
+                                  fontWeight: '600',
+                                  lineHeight: '1',
+                                  transition: 'background-color 0.2s',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  minHeight: '22px',
+                                  maxHeight: '22px'
                                 }}
                               >
                                 ×
@@ -1631,6 +1689,10 @@ const GameCard = ({
                                   newFeatures.push({ type: 'Passive', name: feature.name || '', description: e.target.value })
                                 }
                                 
+                                // Auto-resize textarea
+                                e.target.style.height = 'auto'
+                                e.target.style.height = e.target.scrollHeight + 'px'
+                                
                                 // Auto-add new passive if this was the last passive and name is filled
                                 const passiveFeatures = newFeatures.filter(f => f.type === 'Passive')
                                 const lastPassive = passiveFeatures[passiveFeatures.length - 1]
@@ -1641,7 +1703,7 @@ const GameCard = ({
                                 onUpdate && onUpdate(item.id, { features: newFeatures })
                               }}
                               placeholder="Passive description"
-                              rows={2}
+                              rows={1}
                               style={{
                                 padding: '0.25rem 0.5rem',
                                 border: '1px solid var(--border)',
@@ -1649,7 +1711,9 @@ const GameCard = ({
                                 backgroundColor: 'var(--bg-primary)',
                                 color: 'var(--text-primary)',
                                 fontSize: '0.875rem',
-                                resize: 'vertical'
+                                resize: 'none',
+                                overflow: 'hidden',
+                                minHeight: '1.5rem'
                               }}
                             />
                           </div>
@@ -1735,7 +1799,15 @@ const GameCard = ({
                           }}>
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                               {/* Up/Down Controls */}
-                              <ReorderControls feature={feature} featureType="Reaction" item={item} onUpdate={onUpdate} />
+                              <ReorderControls 
+                                feature={feature} 
+                                featureType="Reaction" 
+                                item={item} 
+                                onUpdate={onUpdate}
+                                handleFeatureDeleteClick={handleFeatureDeleteClick}
+                                deleteConfirmations={deleteConfirmations}
+                                getFeatureKey={getFeatureKey}
+                              />
 
                               <input
                                 type="text"
@@ -1774,15 +1846,24 @@ const GameCard = ({
                                 onClick={() => handleFeatureDeleteClick(feature)}
                                 disabled={!feature.name.trim() && !feature.description.trim()}
                                 style={{
-                                  padding: '0.25rem 0.5rem',
+                                  width: '22px',
+                                  height: '22px',
+                                  padding: '0',
                                   border: '1px solid var(--border)',
                                   borderRadius: '4px',
-                                  backgroundColor: deleteConfirmations[getFeatureKey(feature)] ? 'var(--danger)' : 'var(--bg-primary)',
+                                  backgroundColor: deleteConfirmations[getFeatureKey(feature)] ? 'var(--danger)' : 'var(--gray-700)',
                                   color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-secondary)' : 'white',
                                   cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
                                   opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
-                                  fontSize: '0.875rem',
-                                  transition: 'background-color 0.2s'
+                                  fontSize: '12px',
+                                  fontWeight: '600',
+                                  lineHeight: '1',
+                                  transition: 'background-color 0.2s',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  minHeight: '22px',
+                                  maxHeight: '22px'
                                 }}
                               >
                                 ×
@@ -1799,6 +1880,10 @@ const GameCard = ({
                                   newFeatures.push({ type: 'Reaction', name: feature.name || '', description: e.target.value })
                                 }
                                 
+                                // Auto-resize textarea
+                                e.target.style.height = 'auto'
+                                e.target.style.height = e.target.scrollHeight + 'px'
+                                
                                 // Auto-add new reaction if this was the last reaction and name is filled
                                 const reactionFeatures = newFeatures.filter(f => f.type === 'Reaction')
                                 const lastReaction = reactionFeatures[reactionFeatures.length - 1]
@@ -1809,7 +1894,7 @@ const GameCard = ({
                                 onUpdate && onUpdate(item.id, { features: newFeatures })
                               }}
                               placeholder="Reaction description"
-                              rows={2}
+                              rows={1}
                               style={{
                                 padding: '0.25rem 0.5rem',
                                 border: '1px solid var(--border)',
@@ -1817,7 +1902,9 @@ const GameCard = ({
                                 backgroundColor: 'var(--bg-primary)',
                                 color: 'var(--text-primary)',
                                 fontSize: '0.875rem',
-                                resize: 'vertical'
+                                resize: 'none',
+                                overflow: 'hidden',
+                                minHeight: '1.5rem'
                               }}
                             />
                           </div>
@@ -1983,7 +2070,7 @@ const GameCard = ({
                 <div
                   key={instance.id}
                   style={{
-                    backgroundColor: 'var(--bg-secondary)',
+                    backgroundColor: 'var(--bg-primary)',
                     borderRadius: '4px',
                     padding: '4px',
                     border: '1px solid var(--border)',
@@ -2042,7 +2129,7 @@ const GameCard = ({
                   )}
                   {/* Number section - Fixed width for double digits */}
                   <div style={{
-                    backgroundColor: 'var(--bg-secondary)',
+                    backgroundColor: 'var(--bg-primary)',
                     borderRadius: '6px',
                     border: '1px solid var(--border-hover)',
                     width: '32px',
@@ -2292,15 +2379,20 @@ const GameCard = ({
                   padding: '0.5rem',
                   border: '1px solid var(--border)',
                   borderRadius: '0.5rem',
-                  backgroundColor: 'var(--bg-secondary)',
+                  backgroundColor: 'var(--bg-primary)',
                   color: 'white',
                   fontSize: '0.875rem',
                   lineHeight: 1.5,
-                  resize: 'vertical',
+                  resize: 'none',
+                  overflow: 'hidden',
                   fontFamily: 'inherit'
                 }}
                 value={item.description}
                 onChange={(e) => {
+                  // Auto-resize textarea
+                  e.target.style.height = 'auto'
+                  e.target.style.height = e.target.scrollHeight + 'px'
+                  
                   onUpdate && onUpdate(item.id, { description: e.target.value })
                 }}
                 placeholder="Enter adversary description..."
