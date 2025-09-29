@@ -1413,10 +1413,10 @@ const GameCard = ({
                                     newFeatures.push({ type: 'Action', name: e.target.value, description: feature.description || '' })
                                   }
                                   
-                                  // Auto-add new action if this was the last action and both name and description are filled
+                                  // Auto-add new action if this was the last action and name is filled
                                   const actionFeatures = newFeatures.filter(f => f.type === 'Action')
                                   const lastAction = actionFeatures[actionFeatures.length - 1]
-                                  if (lastAction && lastAction.name.trim() && lastAction.description.trim()) {
+                                  if (lastAction && lastAction.name.trim()) {
                                     newFeatures.push({ type: 'Action', name: '', description: '' })
                                   }
                                   
@@ -1463,10 +1463,10 @@ const GameCard = ({
                                   newFeatures.push({ type: 'Action', name: feature.name || '', description: e.target.value })
                                 }
                                 
-                                // Auto-add new action if this was the last action and both name and description are filled
+                                // Auto-add new action if this was the last action and name is filled
                                 const actionFeatures = newFeatures.filter(f => f.type === 'Action')
                                 const lastAction = actionFeatures[actionFeatures.length - 1]
-                                if (lastAction && lastAction.name.trim() && lastAction.description.trim()) {
+                                if (lastAction && lastAction.name.trim()) {
                                   newFeatures.push({ type: 'Action', name: '', description: '' })
                                 }
                                 
@@ -1581,10 +1581,10 @@ const GameCard = ({
                                     newFeatures.push({ type: 'Passive', name: e.target.value, description: feature.description || '' })
                                   }
                                   
-                                  // Auto-add new passive if this was the last passive and both name and description are filled
+                                  // Auto-add new passive if this was the last passive and name is filled
                                   const passiveFeatures = newFeatures.filter(f => f.type === 'Passive')
                                   const lastPassive = passiveFeatures[passiveFeatures.length - 1]
-                                  if (lastPassive && lastPassive.name.trim() && lastPassive.description.trim()) {
+                                  if (lastPassive && lastPassive.name.trim()) {
                                     newFeatures.push({ type: 'Passive', name: '', description: '' })
                                   }
                                   
@@ -1631,10 +1631,10 @@ const GameCard = ({
                                   newFeatures.push({ type: 'Passive', name: feature.name || '', description: e.target.value })
                                 }
                                 
-                                // Auto-add new passive if this was the last passive and both name and description are filled
+                                // Auto-add new passive if this was the last passive and name is filled
                                 const passiveFeatures = newFeatures.filter(f => f.type === 'Passive')
                                 const lastPassive = passiveFeatures[passiveFeatures.length - 1]
-                                if (lastPassive && lastPassive.name.trim() && lastPassive.description.trim()) {
+                                if (lastPassive && lastPassive.name.trim()) {
                                   newFeatures.push({ type: 'Passive', name: '', description: '' })
                                 }
                                 
@@ -1749,10 +1749,10 @@ const GameCard = ({
                                     newFeatures.push({ type: 'Reaction', name: e.target.value, description: feature.description || '' })
                                   }
                                   
-                                  // Auto-add new reaction if this was the last reaction and both name and description are filled
+                                  // Auto-add new reaction if this was the last reaction and name is filled
                                   const reactionFeatures = newFeatures.filter(f => f.type === 'Reaction')
                                   const lastReaction = reactionFeatures[reactionFeatures.length - 1]
-                                  if (lastReaction && lastReaction.name.trim() && lastReaction.description.trim()) {
+                                  if (lastReaction && lastReaction.name.trim()) {
                                     newFeatures.push({ type: 'Reaction', name: '', description: '' })
                                   }
                                   
@@ -1799,10 +1799,10 @@ const GameCard = ({
                                   newFeatures.push({ type: 'Reaction', name: feature.name || '', description: e.target.value })
                                 }
                                 
-                                // Auto-add new reaction if this was the last reaction and both name and description are filled
+                                // Auto-add new reaction if this was the last reaction and name is filled
                                 const reactionFeatures = newFeatures.filter(f => f.type === 'Reaction')
                                 const lastReaction = reactionFeatures[reactionFeatures.length - 1]
-                                if (lastReaction && lastReaction.name.trim() && lastReaction.description.trim()) {
+                                if (lastReaction && lastReaction.name.trim()) {
                                   newFeatures.push({ type: 'Reaction', name: '', description: '' })
                                 }
                                 
