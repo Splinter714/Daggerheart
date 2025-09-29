@@ -1276,9 +1276,21 @@ const GameCard = ({
                               {/* Up/Down Controls */}
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                 <button
-                                  onClick={function() {
-                                    console.log('Action up button clicked')
-                                    return
+                                  onClick={() => {
+                                    try {
+                                      const features = item?.features || []
+                                      const newFeatures = [...features]
+                                      const actionFeatures = newFeatures.filter(f => f.type === 'Action')
+                                      const currentIndex = actionFeatures.findIndex(f => f === feature)
+                                      if (currentIndex > 0) {
+                                        let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex])
+                                        let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex - 1])
+                                        [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
+                                        onUpdate && onUpdate(item.id, { features: newFeatures })
+                                      }
+                                    } catch (error) {
+                                      console.error('Error in action up button:', error)
+                                    }
                                   }}
                                   disabled={false}
                                   style={{
@@ -1299,9 +1311,21 @@ const GameCard = ({
                                 </button>
 
                                 <button
-                                  onClick={function() {
-                                    console.log('Action down button clicked')
-                                    return
+                                  onClick={() => {
+                                    try {
+                                      const features = item?.features || []
+                                      const newFeatures = [...features]
+                                      const actionFeatures = newFeatures.filter(f => f.type === 'Action')
+                                      const currentIndex = actionFeatures.findIndex(f => f === feature)
+                                      if (currentIndex < actionFeatures.length - 1) {
+                                        let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex])
+                                        let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex + 1])
+                                        [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
+                                        onUpdate && onUpdate(item.id, { features: newFeatures })
+                                      }
+                                    } catch (error) {
+                                      console.error('Error in action down button:', error)
+                                    }
                                   }}
                                   disabled={false}
                                   style={{
