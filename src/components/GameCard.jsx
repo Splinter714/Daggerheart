@@ -1278,7 +1278,7 @@ const GameCard = ({
                                 <button
                                   onClick={() => {
                                     const newFeatures = [...(item.features || [])]
-                                    const actionFeatures = newFeatures.filter(f => f.type === 'Action')
+                                    const actionFeatures = (newFeatures || []).filter(f => f.type === 'Action')
                                     const currentIndex = actionFeatures.findIndex(f => f === feature)
                                     if (currentIndex > 0) {
                                       let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex])
@@ -1314,7 +1314,7 @@ const GameCard = ({
                                 <button
                                   onClick={() => {
                                     const newFeatures = [...(item.features || [])]
-                                    const actionFeatures = newFeatures.filter(f => f.type === 'Action')
+                                    const actionFeatures = (newFeatures || []).filter(f => f.type === 'Action')
                                     const currentIndex = actionFeatures.findIndex(f => f === feature)
                                     if (currentIndex < actionFeatures.length - 1) {
                                       let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex])
@@ -1520,7 +1520,7 @@ const GameCard = ({
                                 <button
                                   onClick={() => {
                                     const newFeatures = [...(item.features || [])]
-                                    const passiveFeatures = newFeatures.filter(f => f.type === 'Passive')
+                                    const passiveFeatures = (newFeatures || []).filter(f => f.type === 'Passive')
                                     const currentIndex = passiveFeatures.findIndex(f => f === feature)
                                     if (currentIndex > 0) {
                                       let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === passiveFeatures[currentIndex])
@@ -1556,7 +1556,7 @@ const GameCard = ({
                                 <button
                                   onClick={() => {
                                     const newFeatures = [...(item.features || [])]
-                                    const passiveFeatures = newFeatures.filter(f => f.type === 'Passive')
+                                    const passiveFeatures = (newFeatures || []).filter(f => f.type === 'Passive')
                                     const currentIndex = passiveFeatures.findIndex(f => f === feature)
                                     if (currentIndex < passiveFeatures.length - 1) {
                                       let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === passiveFeatures[currentIndex])
@@ -1762,7 +1762,7 @@ const GameCard = ({
                                 <button
                                   onClick={() => {
                                     const newFeatures = [...(item.features || [])]
-                                    const reactionFeatures = newFeatures.filter(f => f.type === 'Reaction')
+                                    const reactionFeatures = (newFeatures || []).filter(f => f.type === 'Reaction')
                                     const currentIndex = reactionFeatures.findIndex(f => f === feature)
                                     if (currentIndex > 0) {
                                       let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Reaction' && f === reactionFeatures[currentIndex])
@@ -1798,7 +1798,7 @@ const GameCard = ({
                                 <button
                                   onClick={() => {
                                     const newFeatures = [...(item.features || [])]
-                                    const reactionFeatures = newFeatures.filter(f => f.type === 'Reaction')
+                                    const reactionFeatures = (newFeatures || []).filter(f => f.type === 'Reaction')
                                     const currentIndex = reactionFeatures.findIndex(f => f === feature)
                                     if (currentIndex < reactionFeatures.length - 1) {
                                       let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Reaction' && f === reactionFeatures[currentIndex])
