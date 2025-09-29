@@ -1518,16 +1518,9 @@ const GameCard = ({
                               {/* Up/Down Controls */}
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                 <button
-                                  onClick={() => {
-                                    const newFeatures = [...(item.features || [])]
-                                    const passiveFeatures = (newFeatures || []).filter(f => f.type === 'Passive')
-                                    const currentIndex = passiveFeatures.findIndex(f => f === feature)
-                                    if (currentIndex > 0) {
-                                      let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === passiveFeatures[currentIndex])
-                                      let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === passiveFeatures[currentIndex - 1])
-                                      [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
-                                      onUpdate && onUpdate(item.id, { features: newFeatures })
-                                    }
+                                  onClick={function() {
+                                    console.log('Passive up button clicked')
+                                    return
                                   }}
                                   disabled={(item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) === 0}
                                   style={{
@@ -1554,16 +1547,9 @@ const GameCard = ({
                                 </button>
 
                                 <button
-                                  onClick={() => {
-                                    const newFeatures = [...(item.features || [])]
-                                    const passiveFeatures = (newFeatures || []).filter(f => f.type === 'Passive')
-                                    const currentIndex = passiveFeatures.findIndex(f => f === feature)
-                                    if (currentIndex < passiveFeatures.length - 1) {
-                                      let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === passiveFeatures[currentIndex])
-                                      let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Passive' && f === passiveFeatures[currentIndex + 1])
-                                      [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
-                                      onUpdate && onUpdate(item.id, { features: newFeatures })
-                                    }
+                                  onClick={function() {
+                                    console.log('Passive down button clicked')
+                                    return
                                   }}
                                   disabled={(item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Passive').length - 1}
                                   style={{
