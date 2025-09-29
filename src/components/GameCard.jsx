@@ -967,7 +967,7 @@ const GameCard = ({
                   position: 'relative'
                 }}>
                     <Shield 
-                      size={28} 
+                      size={32} 
                       strokeWidth={1}
                     style={{ 
                         color: 'var(--text-secondary)'
@@ -1002,7 +1002,7 @@ const GameCard = ({
                           backgroundColor: 'transparent',
                           border: 'none',
                           color: 'white',
-                          fontSize: '0.625rem',
+                          fontSize: '0.75rem',
                           fontWeight: 600,
                           width: '20px',
                           textAlign: 'center',
@@ -1017,7 +1017,7 @@ const GameCard = ({
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                    fontSize: '0.625rem',
+                    fontSize: '0.75rem',
                     fontWeight: 600,
                     color: 'white',
                     pointerEvents: 'none'
@@ -1028,7 +1028,89 @@ const GameCard = ({
                   </div>
                 </div>
               )}
-              
+
+              {/* Damage Thresholds Badge */}
+              {item.type !== 'Minion' && item.thresholds && (
+                <div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}>
+                    {/* Connected Rhombus Container */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      position: 'relative'
+                    }}>
+                      {/* Major Threshold Rhombus */}
+                      <div style={{
+                        width: '24px',
+                        height: '24px',
+                        backgroundColor: 'transparent',
+                        border: '1px solid var(--text-secondary)',
+                        borderRight: 'none',
+                        transform: 'skewX(-25deg)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative'
+                      }}>
+                        <span style={{
+                          color: 'white',
+                          fontWeight: 600,
+                          fontSize: '0.75rem',
+                          transform: 'skewX(25deg)',
+                          textAlign: 'center',
+                          lineHeight: 1,
+                          position: 'relative',
+                          zIndex: 1
+                        }}>
+                          {item.thresholds.major || '7'}
+                        </span>
+                      </div>
+                      
+                      {/* Connecting Slanted Line */}
+                      <div style={{
+                        width: '1px',
+                        height: '24px',
+                        backgroundColor: 'var(--text-secondary)',
+                        transform: 'skewX(-25deg)',
+                        position: 'relative'
+                      }} />
+                      
+                      {/* Severe Threshold Rhombus */}
+                      <div style={{
+                        width: '24px',
+                        height: '24px',
+                        backgroundColor: 'transparent',
+                        border: '1px solid var(--text-secondary)',
+                        borderLeft: 'none',
+                        transform: 'skewX(-25deg)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative'
+                      }}>
+                        <span style={{
+                          color: 'white',
+                          fontWeight: 600,
+                          fontSize: '0.75rem',
+                          transform: 'skewX(25deg)',
+                          textAlign: 'center',
+                          lineHeight: 1,
+                          position: 'relative',
+                          zIndex: 1
+                        }}>
+                          {item.thresholds.severe || '14'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Attack Modifier Badge */}
               {(item.atk !== undefined || isEditMode) && (
                 <div>
@@ -1039,7 +1121,7 @@ const GameCard = ({
                   position: 'relative'
                 }}>
                   <Locate 
-                      size={32} 
+                      size={36} 
                     strokeWidth={1}
                     style={{
                       color: 'var(--text-secondary)'
@@ -1074,7 +1156,7 @@ const GameCard = ({
                           backgroundColor: 'transparent',
                           border: 'none',
                           color: 'white',
-                          fontSize: '0.625rem',
+                          fontSize: '0.75rem',
                           fontWeight: 600,
                           width: '20px',
                           textAlign: 'center',
@@ -1089,7 +1171,7 @@ const GameCard = ({
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                    fontSize: '0.625rem',
+                    fontSize: '0.75rem',
                     fontWeight: 600,
                     color: 'white',
                     pointerEvents: 'none'
@@ -1111,7 +1193,7 @@ const GameCard = ({
                     position: 'relative'
                   }}>
                     <Diamond 
-                      size={28} 
+                      size={32} 
                       strokeWidth={1}
                       style={{ 
                         color: 'var(--text-secondary)'
@@ -1146,7 +1228,7 @@ const GameCard = ({
                           backgroundColor: 'transparent',
                           border: 'none',
                           color: 'white',
-                          fontSize: '0.625rem',
+                          fontSize: '0.75rem',
                           fontWeight: 600,
                           width: '20px',
                           textAlign: 'center',
@@ -1160,7 +1242,7 @@ const GameCard = ({
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                        fontSize: '0.625rem',
+                        fontSize: '0.75rem',
                         fontWeight: 600,
                         color: 'white',
                         pointerEvents: 'none'
@@ -1923,10 +2005,10 @@ const GameCard = ({
 
         </div>
 
-        {/* Status Section */}
-        {item.type !== 'Minion' && item.thresholds && (
+        {/* Instances Section */}
+        {instances && instances.length > 0 && (
           <div style={{
-            marginBottom: '1rem',
+            marginTop: '1rem',
             padding: '0 8px'
           }}>
             <div style={{
@@ -1951,7 +2033,7 @@ const GameCard = ({
                 textAlign: 'center',
                 minWidth: '80px'
               }}>
-                Status
+                Instances
               </h4>
               <hr style={{
                 flex: 1,
@@ -1961,97 +2043,8 @@ const GameCard = ({
               }} />
             </div>
             <div style={{
-              padding: '0.75rem 0 0 0'
+              borderTop: '1px solid var(--border)'
             }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              fontSize: '0.875rem'
-            }}>
-              {/* HP Pip 1 */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '2px',
-                marginTop: '-3px'
-              }}>
-                <Droplet 
-                  size={16} 
-                  style={{ 
-                    color: 'var(--red)'
-                  }} 
-                />
-              </div>
-
-              {/* Threshold 1 */}
-              <ThresholdTag value={item.thresholds.major || '7'} />
-
-              {/* HP Pip 2 */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '2px',
-                marginTop: '-3px'
-              }}>
-                <Droplet 
-                  size={16} 
-                  style={{ 
-                    color: 'var(--red)'
-                  }} 
-                />
-                <Droplet 
-                  size={16} 
-                  style={{ 
-                    color: 'var(--red)'
-                  }} 
-                />
-              </div>
-
-              {/* Threshold 2 */}
-              <ThresholdTag value={item.thresholds.severe || '14'} />
-
-              {/* HP Pip 3 */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '2px',
-                marginTop: '-3px'
-              }}>
-                <Droplet 
-                  size={16} 
-                  style={{ 
-                    color: 'var(--red)'
-                  }} 
-                />
-                <Droplet 
-                  size={16} 
-                  style={{ 
-                    color: 'var(--red)'
-                  }} 
-                />
-                <Droplet 
-                  size={16} 
-                  style={{ 
-                    color: 'var(--red)'
-                  }} 
-                />
-              </div>
-            </div>
-            </div>
-          </div>
-        )}
-
-        {/* Condensed Cards for All Instances */}
-        {instances && instances.length > 0 && (
-          <div style={{
-            marginTop: '1rem',
-            borderTop: '1px solid var(--border)'
-          }}>
             {instances.map((instance, index) => {
               const isInstanceDead = (instance.hp || 0) >= (instance.hpMax || 1)
               return (
@@ -2320,6 +2313,7 @@ const GameCard = ({
               </div>
               )
             })}
+            </div>
           </div>
         )}
 
