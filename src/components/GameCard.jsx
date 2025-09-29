@@ -1276,32 +1276,19 @@ const GameCard = ({
                               {/* Up/Down Controls */}
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                 <button
-                                  onClick={() => {
-                                    const newFeatures = [...(item.features || [])]
-                                    const actionFeatures = (newFeatures || []).filter(f => f.type === 'Action')
-                                    const currentIndex = actionFeatures.findIndex(f => f === feature)
-                                    if (currentIndex > 0) {
-                                      let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex])
-                                      let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex - 1])
-                                      [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
-                                      onUpdate && onUpdate(item.id, { features: newFeatures })
-                                    }
+                                  onClick={function() {
+                                    console.log('Action up button clicked')
+                                    return
                                   }}
-                                  disabled={(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === 0}
+                                  disabled={false}
                                   style={{
                                     width: '16px',
                                     height: '16px',
                                     padding: '0',
                                     border: 'none',
                                     backgroundColor: 'transparent',
-                                    color: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
-                                             (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== 0 &&
-                                             feature.name.trim()) 
-                                           ? 'white' : 'var(--text-secondary)',
-                                    cursor: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
-                                              (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== 0 &&
-                                              feature.name.trim())
-                                           ? 'pointer' : 'not-allowed',
+                                    color: 'white',
+                                    cursor: 'pointer',
                                     fontSize: '10px',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -1312,34 +1299,19 @@ const GameCard = ({
                                 </button>
 
                                 <button
-                                  onClick={() => {
-                                    const newFeatures = [...(item.features || [])]
-                                    const actionFeatures = (newFeatures || []).filter(f => f.type === 'Action')
-                                    const currentIndex = actionFeatures.findIndex(f => f === feature)
-                                    if (currentIndex < actionFeatures.length - 1) {
-                                      let sourceArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex])
-                                      let targetArrayIndex = newFeatures.findIndex(f => f.type === 'Action' && f === actionFeatures[currentIndex + 1])
-                                      [newFeatures[sourceArrayIndex], newFeatures[targetArrayIndex]] = [newFeatures[targetArrayIndex], newFeatures[sourceArrayIndex]]
-                                      onUpdate && onUpdate(item.id, { features: newFeatures })
-                                    }
+                                  onClick={function() {
+                                    console.log('Action down button clicked')
+                                    return
                                   }}
-                                  disabled={(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Action').length - 1}
+                                  disabled={false}
                                   style={{
                                     width: '16px',
                                     height: '16px',
                                     padding: '0',
                                     border: 'none',
                                     backgroundColor: 'transparent',
-                                    color: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
-                                             (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) < (item.features || []).filter(f => f.type === 'Action').length - 1 &&
-                                             (item.features || []).filter(f => f.type === 'Action')[(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) + 1]?.name.trim() &&
-                                             feature.name.trim())
-                                           ? 'white' : 'var(--text-secondary)',
-                                    cursor: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
-                                              (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) < (item.features || []).filter(f => f.type === 'Action').length - 1 &&
-                                              (item.features || []).filter(f => f.type === 'Action')[(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) + 1]?.name.trim() &&
-                                              feature.name.trim())
-                                           ? 'pointer' : 'not-allowed',
+                                    color: 'white',
+                                    cursor: 'pointer',
                                     fontSize: '10px',
                                     display: 'flex',
                                     alignItems: 'center',
