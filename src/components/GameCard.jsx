@@ -1,6 +1,131 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle } from 'lucide-react'
 
+// ============================================================================
+// Reusable Components
+// ============================================================================
+
+// Reorder Controls Component
+const ReorderControls = ({ feature, featureType, item, onUpdate }) => {
+  const handleUpClick = () => {
+    try {
+      const features = item?.features || []
+      const newFeatures = [...features]
+      const typeFeatures = newFeatures.filter(f => f.type === featureType)
+      const currentIndex = typeFeatures.findIndex(f => f === feature)
+      if (currentIndex > 0 && currentIndex < typeFeatures.length) {
+        // Find indices in the full array
+        const currentFeature = typeFeatures[currentIndex]
+        const previousFeature = typeFeatures[currentIndex - 1]
+        
+        if (currentFeature && previousFeature) {
+          const sourceIndex = newFeatures.findIndex(f => f === currentFeature)
+          const targetIndex = newFeatures.findIndex(f => f === previousFeature)
+          
+          if (sourceIndex >= 0 && targetIndex >= 0) {
+            // Swap the features
+            newFeatures[sourceIndex] = previousFeature
+            newFeatures[targetIndex] = currentFeature
+            
+            onUpdate && onUpdate(item.id, { features: newFeatures })
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Error in ${featureType.toLowerCase()} up button:`, error)
+    }
+  }
+
+  const handleDownClick = () => {
+    try {
+      const features = item?.features || []
+      const newFeatures = [...features]
+      const typeFeatures = newFeatures.filter(f => f.type === featureType)
+      const currentIndex = typeFeatures.findIndex(f => f === feature)
+      if (currentIndex < typeFeatures.length - 1 && currentIndex >= 0) {
+        // Find indices in the full array
+        const currentFeature = typeFeatures[currentIndex]
+        const nextFeature = typeFeatures[currentIndex + 1]
+        
+        if (currentFeature && nextFeature) {
+          const sourceIndex = newFeatures.findIndex(f => f === currentFeature)
+          const targetIndex = newFeatures.findIndex(f => f === nextFeature)
+          
+          if (sourceIndex >= 0 && targetIndex >= 0) {
+            // Swap the features
+            newFeatures[sourceIndex] = nextFeature
+            newFeatures[targetIndex] = currentFeature
+            
+            onUpdate && onUpdate(item.id, { features: newFeatures })
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Error in ${featureType.toLowerCase()} down button:`, error)
+    }
+  }
+
+  // Generate base filtering expression
+  const filterExpr = f => f.type === featureType
+  const filterExprWithName = f => f.type === featureType && f.name.trim()
+  
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      <button
+        onClick={handleUpClick}
+        disabled={(item.features || []).filter(filterExpr).findIndex(f => f === feature) === 0}
+        style={{
+          width: '16px',
+          height: '16px',
+          padding: '0',
+          border: 'none',
+          backgroundColor: 'transparent',
+          color: ((item.features || []).filter(filterExprWithName).length >= 2 && 
+                   (item.features || []).filter(filterExpr).findIndex(f => f === feature) !== 0 &&
+                   feature.name.trim()) 
+                 ? 'white' : 'var(--text-secondary)',
+          cursor: ((item.features || []).filter(filterExprWithName).length >= 2 && 
+                    (item.features || []).filter(filterExpr).findIndex(f => f === feature) !== 0 &&
+                    feature.name.trim())
+                 ? 'pointer' : 'not-allowed',
+          fontSize: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+        ↑
+      </button>
+
+      <button
+        onClick={handleDownClick}
+        disabled={(item.features || []).filter(filterExpr).findIndex(f => f === feature) === (item.features || []).filter(filterExpr).length - 1}
+        style={{
+          width: '16px',
+          height: '16px',
+          padding: '0',
+          border: 'none',
+          backgroundColor: 'transparent',
+          color: ((item.features || []).filter(filterExprWithName).length >= 2 && 
+                   (item.features || []).filter(filterExpr).findIndex(f => f === feature) < (item.features || []).filter(filterExpr).length - 1 &&
+                   (item.features || []).filter(filterExpr)[(item.features || []).filter(filterExpr).findIndex(f => f === feature) + 1]?.name.trim() &&
+                   feature.name.trim())
+                 ? 'white' : 'var(--text-secondary)',
+          cursor: ((item.features || []).filter(filterExprWithName).length >= 2 && 
+                    (item.features || []).filter(filterExpr).findIndex(f => f === feature) < (item.features || []).filter(filterExpr).length - 1 &&
+                    (item.features || []).filter(filterExpr)[(item.features || []).filter(filterExpr).findIndex(f => f === feature) + 1]?.name.trim() &&
+                    feature.name.trim())
+                 ? 'pointer' : 'not-allowed',
+          fontSize: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+        ↓
+      </button>
+    </div>
+  )
+}
+
 // Reusable Threshold Tag Component
 const ThresholdTag = ({ value }) => (
   <div style={{
