@@ -218,8 +218,9 @@ const EncounterBuilder = ({
         setEncounterName(matchingEncounter.name || 'Encounter')
         updateCurrentEncounterName(matchingEncounter.name || 'Encounter')
       }
-    } else if (isOpen && adversaries.length === 0) {
-      // Clear encounter items when no adversaries exist
+    } else if (isOpen && adversaries.length === 0 && encounterItems.length === 0) {
+      // Only clear encounter items when no adversaries exist AND no encounter items exist
+      // This prevents clearing encounter items that have quantity 0 items
       setEncounterItems([])
     }
   }, [isOpen, findMatchingEncounterByContent, loadedEncounterId, updateCurrentEncounterName]) // Added dependencies
