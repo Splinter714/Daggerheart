@@ -325,6 +325,41 @@ const GameCard = ({
   instances = [], // All instances to embed as mini-cards in expanded view
   isEmbedded = false, // Whether this is an embedded card (removes border)
 }) => {
+  // State for two-stage delete functionality
+  const [deleteConfirmations, setDeleteConfirmations] = useState({})
+  
+  // Handle two-stage delete for features
+  const handleFeatureDeleteClick = (featureToDelete) => {
+    const featureKey = `${featureToDelete.type}-${featureToDelete.name || 'unnamed'}`
+    
+    if (deleteConfirmations[featureKey]) {
+      // Second click - actually delete
+      const newFeatures = item.features.filter(f => f !== featureToDelete)
+      onUpdate && onUpdate(item.id, { features: newFeatures })
+      
+      setDeleteConfirmations(prev => {
+        const newState = { ...prev }
+        delete newState[featureKey]
+        return newState
+      })
+    } else {
+      // First click - show confirmation state
+      setDeleteConfirmations(prev => ({
+        ...prev,
+        [featureKey]: true
+      }))
+      
+      // Auto-reset after 3 seconds
+      setTimeout(() => {
+        setDeleteConfirmations(prev => {
+          const newState = { ...prev }
+          delete newState[featureKey]
+          return newState
+        })
+      }, 3000)
+    }
+  }
+
   // Get adversary-specific logic
   const adversaryLogic = useAdversaryLogic(item, onApplyDamage, onApplyHealing, onApplyStressChange)
   
@@ -1323,23 +1358,23 @@ const GameCard = ({
                                   borderRadius: '4px',
                                   backgroundColor: 'var(--bg-primary)',
                                   color: 'var(--text-primary)',
-                                  fontSize: '0.875rem'
+                                  fontSize: '0.875rem',
+                                  transition: 'background-color 0.2s'
                                 }}
                               />
                               <button
-                                onClick={() => onUpdate && onUpdate(item.id, { 
-                                  features: item.features.filter(f => f !== feature)
-                                })}
+                                onClick={() => handleFeatureDeleteClick(feature)}
                                 disabled={!feature.name.trim() && !feature.description.trim()}
                                 style={{
                                   padding: '0.25rem 0.5rem',
                                   border: '1px solid var(--border)',
                                   borderRadius: '4px',
-                                  backgroundColor: 'var(--bg-primary)',
-                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                  backgroundColor: deleteConfirmations[`${feature.type}-${feature.name || 'unnamed'}`] ? 'var(--danger)' : 'var(--bg-primary)',
+                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'white',
                                   cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
                                   opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
-                                  fontSize: '0.875rem'
+                                  fontSize: '0.875rem',
+                                  transition: 'background-color 0.2s'
                                 }}
                               >
                                 ×
@@ -1551,23 +1586,23 @@ const GameCard = ({
                                   borderRadius: '4px',
                                   backgroundColor: 'var(--bg-primary)',
                                   color: 'var(--text-primary)',
-                                  fontSize: '0.875rem'
+                                  fontSize: '0.875rem',
+                                  transition: 'background-color 0.2s'
                                 }}
                               />
                               <button
-                                onClick={() => onUpdate && onUpdate(item.id, { 
-                                  features: item.features.filter(f => f !== feature)
-                                })}
+                                onClick={() => handleFeatureDeleteClick(feature)}
                                disabled={!feature.name.trim() && !feature.description.trim()}
                                 style={{
                                   padding: '0.25rem 0.5rem',
                                   border: '1px solid var(--border)',
                                   borderRadius: '4px',
-                                  backgroundColor: 'var(--bg-primary)',
-                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                  backgroundColor: deleteConfirmations[`${feature.type}-${feature.name || 'unnamed'}`] ? 'var(--danger)' : 'var(--bg-primary)',
+                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'white',
                                   cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
                                   opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
-                                  fontSize: '0.875rem'
+                                  fontSize: '0.875rem',
+                                  transition: 'background-color 0.2s'
                                 }}
                               >
                                 ×
@@ -1779,23 +1814,23 @@ const GameCard = ({
                                   borderRadius: '4px',
                                   backgroundColor: 'var(--bg-primary)',
                                   color: 'var(--text-primary)',
-                                  fontSize: '0.875rem'
+                                  fontSize: '0.875rem',
+                                  transition: 'background-color 0.2s'
                                 }}
                               />
                               <button
-                                onClick={() => onUpdate && onUpdate(item.id, { 
-                                  features: item.features.filter(f => f !== feature)
-                                })}
+                                onClick={() => handleFeatureDeleteClick(feature)}
                                 disabled={!feature.name.trim() && !feature.description.trim()}
                                 style={{
                                   padding: '0.25rem 0.5rem',
                                   border: '1px solid var(--border)',
                                   borderRadius: '4px',
-                                  backgroundColor: 'var(--bg-primary)',
-                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+                                  backgroundColor: deleteConfirmations[`${feature.type}-${feature.name || 'unnamed'}`] ? 'var(--danger)' : 'var(--bg-primary)',
+                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'white',
                                   cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
                                   opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
-                                  fontSize: '0.875rem'
+                                  fontSize: '0.875rem',
+                                  transition: 'background-color 0.2s'
                                 }}
                               >
                                 ×
