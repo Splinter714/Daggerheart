@@ -328,9 +328,16 @@ const GameCard = ({
   // State for two-stage delete functionality
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
   
+  // Helper function to generate unique keys for feature confirmations
+  const getFeatureKey = (feature) => {
+    const typeFeatures = (item.features || []).filter(f => f.type === feature.type)
+    const featureIndex = typeFeatures.findIndex(f => f === feature)
+    return `${feature.type}-${featureIndex}-${feature.name || 'blank'}`
+  }
+  
   // Handle two-stage delete for features
   const handleFeatureDeleteClick = (featureToDelete) => {
-    const featureKey = `${featureToDelete.type}-${featureToDelete.name || 'unnamed'}`
+    const featureKey = getFeatureKey(featureToDelete)
     
     if (deleteConfirmations[featureKey]) {
       // Second click - actually delete
@@ -1381,7 +1388,7 @@ const GameCard = ({
                                   padding: '0.25rem 0.5rem',
                                   border: '1px solid var(--border)',
                                   borderRadius: '4px',
-                                  backgroundColor: deleteConfirmations[`${feature.type}-${feature.name || 'unnamed'}`] ? 'var(--danger)' : 'var(--bg-primary)',
+                                  backgroundColor: deleteConfirmations[getFeatureKey(feature)] ? 'var(--danger)' : 'var(--bg-primary)',
                                   color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-secondary)' : 'white',
                                   cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
                                   opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
@@ -1621,7 +1628,7 @@ const GameCard = ({
                                   padding: '0.25rem 0.5rem',
                                   border: '1px solid var(--border)',
                                   borderRadius: '4px',
-                                  backgroundColor: deleteConfirmations[`${feature.type}-${feature.name || 'unnamed'}`] ? 'var(--danger)' : 'var(--bg-primary)',
+                                  backgroundColor: deleteConfirmations[getFeatureKey(feature)] ? 'var(--danger)' : 'var(--bg-primary)',
                                   color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-secondary)' : 'white',
                                   cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
                                   opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
@@ -1861,7 +1868,7 @@ const GameCard = ({
                                   padding: '0.25rem 0.5rem',
                                   border: '1px solid var(--border)',
                                   borderRadius: '4px',
-                                  backgroundColor: deleteConfirmations[`${feature.type}-${feature.name || 'unnamed'}`] ? 'var(--danger)' : 'var(--bg-primary)',
+                                  backgroundColor: deleteConfirmations[getFeatureKey(feature)] ? 'var(--danger)' : 'var(--bg-primary)',
                                   color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-secondary)' : 'white',
                                   cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
                                   opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
