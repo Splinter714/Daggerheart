@@ -1304,15 +1304,21 @@ const GameCard = ({
                                       console.error('Error in action up button:', error)
                                     }
                                   }}
-                                  disabled={false}
+                                  disabled={(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === 0}
                                   style={{
                                     width: '16px',
                                     height: '16px',
                                     padding: '0',
                                     border: 'none',
                                     backgroundColor: 'transparent',
-                                    color: 'white',
-                                    cursor: 'pointer',
+                                    color: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
+                                             (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== 0 &&
+                                             feature.name.trim()) 
+                                           ? 'white' : 'var(--text-secondary)',
+                                    cursor: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
+                                              (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== 0 &&
+                                              feature.name.trim())
+                                           ? 'pointer' : 'not-allowed',
                                     fontSize: '10px',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -1351,15 +1357,23 @@ const GameCard = ({
                                       console.error('Error in action down button:', error)
                                     }
                                   }}
-                                  disabled={false}
+                                  disabled={(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Action').length - 1}
                                   style={{
                                     width: '16px',
                                     height: '16px',
                                     padding: '0',
                                     border: 'none',
                                     backgroundColor: 'transparent',
-                                    color: 'white',
-                                    cursor: 'pointer',
+                                    color: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
+                                             (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) < (item.features || []).filter(f => f.type === 'Action').length - 1 &&
+                                             (item.features || []).filter(f => f.type === 'Action')[(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) + 1]?.name.trim() &&
+                                             feature.name.trim())
+                                           ? 'white' : 'var(--text-secondary)',
+                                    cursor: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
+                                              (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) < (item.features || []).filter(f => f.type === 'Action').length - 1 &&
+                                              (item.features || []).filter(f => f.type === 'Action')[(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) + 1]?.name.trim() &&
+                                              feature.name.trim())
+                                           ? 'pointer' : 'not-allowed',
                                     fontSize: '10px',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -1542,7 +1556,7 @@ const GameCard = ({
                                     console.log('Passive up button clicked')
                                     return
                                   }}
-                                  disabled={false}
+                                  disabled={(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Action').length - 1}
                                   style={{
                                     width: '16px',
                                     height: '16px',
@@ -1571,7 +1585,7 @@ const GameCard = ({
                                     console.log('Passive down button clicked')
                                     return
                                   }}
-                                  disabled={false}
+                                  disabled={(item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Action').length - 1}
                                   style={{
                                     width: '16px',
                                     height: '16px',
