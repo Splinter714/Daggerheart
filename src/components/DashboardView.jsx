@@ -68,7 +68,7 @@ const DashboardContent = () => {
   
   // Dashboard state
   const [isMobile, setIsMobile] = useState(false)
-  const [encounterBuilderOpen, setEncounterBuilderOpen] = useState(true)
+  const [encounterBuilderOpen, setEncounterBuilderOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [isClearMode, setIsClearMode] = useState(false)
   const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
