@@ -1290,7 +1290,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== 0 &&
                                              feature.name.trim()) 
-                                           ? 'white' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-secondary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== 0 &&
                                               feature.name.trim())
@@ -1326,7 +1326,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Action').length - 1 &&
                                              feature.name.trim())
-                                           ? 'white' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-secondary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Action').length - 1 &&
                                               feature.name.trim())
@@ -1382,7 +1382,7 @@ const GameCard = ({
                                   border: '1px solid var(--border)',
                                   borderRadius: '4px',
                                   backgroundColor: deleteConfirmations[`${feature.type}-${feature.name || 'unnamed'}`] ? 'var(--danger)' : 'var(--bg-primary)',
-                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'white',
+                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-secondary)' : 'white',
                                   cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
                                   opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
                                   fontSize: '0.875rem',
@@ -1530,7 +1530,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Passive' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) !== 0 &&
                                              feature.name.trim()) 
-                                           ? 'white' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-secondary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Passive' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) !== 0 &&
                                               feature.name.trim())
@@ -1566,7 +1566,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Passive' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Passive').length - 1 &&
                                              feature.name.trim())
-                                           ? 'white' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-secondary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Passive' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Passive').length - 1 &&
                                               feature.name.trim())
@@ -1622,7 +1622,7 @@ const GameCard = ({
                                   border: '1px solid var(--border)',
                                   borderRadius: '4px',
                                   backgroundColor: deleteConfirmations[`${feature.type}-${feature.name || 'unnamed'}`] ? 'var(--danger)' : 'var(--bg-primary)',
-                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'white',
+                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-secondary)' : 'white',
                                   cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
                                   opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
                                   fontSize: '0.875rem',
@@ -1770,7 +1770,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Reaction' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) !== 0 &&
                                              feature.name.trim()) 
-                                           ? 'white' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-secondary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Reaction' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) !== 0 &&
                                               feature.name.trim())
@@ -1806,7 +1806,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Reaction' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Reaction').length - 1 &&
                                              feature.name.trim())
-                                           ? 'white' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-secondary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Reaction' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Reaction').length - 1 &&
                                               feature.name.trim())
@@ -1862,7 +1862,7 @@ const GameCard = ({
                                   border: '1px solid var(--border)',
                                   borderRadius: '4px',
                                   backgroundColor: deleteConfirmations[`${feature.type}-${feature.name || 'unnamed'}`] ? 'var(--danger)' : 'var(--bg-primary)',
-                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-tertiary)' : 'white',
+                                  color: (!feature.name.trim() && !feature.description.trim()) ? 'var(--text-secondary)' : 'white',
                                   cursor: (!feature.name.trim() && !feature.description.trim()) ? 'not-allowed' : 'pointer',
                                   opacity: (!feature.name.trim() && !feature.description.trim()) ? 0.5 : 1,
                                   fontSize: '0.875rem',
