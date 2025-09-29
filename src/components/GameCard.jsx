@@ -1522,7 +1522,7 @@ const GameCard = ({
                                     console.log('Passive up button clicked')
                                     return
                                   }}
-                                  disabled={(item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) === 0}
+                                  disabled={false}
                                   style={{
                                     width: '16px',
                                     height: '16px',
@@ -1551,23 +1551,15 @@ const GameCard = ({
                                     console.log('Passive down button clicked')
                                     return
                                   }}
-                                  disabled={(item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) === (item.features || []).filter(f => f.type === 'Passive').length - 1}
+                                  disabled={false}
                                   style={{
                                     width: '16px',
                                     height: '16px',
                                     padding: '0',
                                     border: 'none',
                                     backgroundColor: 'transparent',
-                                    color: ((item.features || []).filter(f => f.type === 'Passive' && f.name.trim()).length >= 2 && 
-                                             (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) < (item.features || []).filter(f => f.type === 'Passive').length - 1 &&
-                                             (item.features || []).filter(f => f.type === 'Passive')[(item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) + 1]?.name.trim() &&
-                                             feature.name.trim())
-                                           ? 'white' : 'var(--text-secondary)',
-                                    cursor: ((item.features || []).filter(f => f.type === 'Passive' && f.name.trim()).length >= 2 && 
-                                              (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) < (item.features || []).filter(f => f.type === 'Passive').length - 1 &&
-                                              (item.features || []).filter(f => f.type === 'Passive')[(item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) + 1]?.name.trim() &&
-                                              feature.name.trim())
-                                           ? 'pointer' : 'not-allowed',
+                                    color: 'white',
+                                    cursor: 'pointer',
                                     fontSize: '10px',
                                     display: 'flex',
                                     alignItems: 'center',
