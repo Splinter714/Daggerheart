@@ -1290,7 +1290,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== 0 &&
                                              feature.name.trim()) 
-                                           ? 'var(--purple)' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-tertiary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== 0 &&
                                               feature.name.trim())
@@ -1326,7 +1326,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Action').length - 1 &&
                                              feature.name.trim())
-                                           ? 'var(--purple)' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-tertiary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Action' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Action').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Action').length - 1 &&
                                               feature.name.trim())
@@ -1530,7 +1530,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Passive' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) !== 0 &&
                                              feature.name.trim()) 
-                                           ? 'var(--purple)' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-tertiary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Passive' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) !== 0 &&
                                               feature.name.trim())
@@ -1566,7 +1566,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Passive' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Passive').length - 1 &&
                                              feature.name.trim())
-                                           ? 'var(--purple)' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-tertiary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Passive' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Passive').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Passive').length - 1 &&
                                               feature.name.trim())
@@ -1770,7 +1770,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Reaction' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) !== 0 &&
                                              feature.name.trim()) 
-                                           ? 'var(--purple)' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-tertiary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Reaction' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) !== 0 &&
                                               feature.name.trim())
@@ -1806,7 +1806,7 @@ const GameCard = ({
                                     color: ((item.features || []).filter(f => f.type === 'Reaction' && f.name.trim()).length >= 2 && 
                                              (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Reaction').length - 1 &&
                                              feature.name.trim())
-                                           ? 'var(--purple)' : 'var(--text-tertiary)',
+                                           ? 'white' : 'var(--text-tertiary)',
                                     cursor: ((item.features || []).filter(f => f.type === 'Reaction' && f.name.trim()).length >= 2 && 
                                               (item.features || []).filter(f => f.type === 'Reaction').findIndex(f => f === feature) !== (item.features || []).filter(f => f.type === 'Reaction').length - 1 &&
                                               feature.name.trim())
