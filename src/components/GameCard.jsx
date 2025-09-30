@@ -1038,74 +1038,49 @@ const GameCard = ({
                     justifyContent: 'center',
                     position: 'relative'
                   }}>
-                    {/* Connected Rhombus Container */}
+                    {/* Pill-shaped Threshold Container */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      position: 'relative'
+                      backgroundColor: 'transparent',
+                      border: '1px solid var(--text-secondary)',
+                      borderRadius: '12px',
+                      padding: '0 8px',
+                      height: '24px',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      gap: '6px'
                     }}>
-                      {/* Major Threshold Rhombus */}
-                      <div style={{
-                        width: '24px',
-                        height: '24px',
-                        backgroundColor: 'transparent',
-                        border: '1px solid var(--text-secondary)',
-                        borderRight: 'none',
-                        transform: 'skewX(-25deg)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        position: 'relative'
+                      {/* Major Threshold */}
+                      <span style={{
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                        textAlign: 'center',
+                        lineHeight: 1
                       }}>
-                        <span style={{
-                          color: 'white',
-                          fontWeight: 600,
-                          fontSize: '0.75rem',
-                          transform: 'skewX(25deg)',
-                          textAlign: 'center',
-                          lineHeight: 1,
-                          position: 'relative',
-                          zIndex: 1
-                        }}>
-                          {item.thresholds.major || '7'}
-                        </span>
-                      </div>
+                        {item.thresholds.major || '7'}
+                      </span>
                       
-                      {/* Connecting Slanted Line */}
+                      {/* Angled Divider Line */}
                       <div style={{
-                        width: '1px',
-                        height: '24px',
+                        width: '2px',
+                        height: '16px',
                         backgroundColor: 'var(--text-secondary)',
                         transform: 'skewX(-25deg)',
-                        position: 'relative'
+                        flexShrink: 0
                       }} />
                       
-                      {/* Severe Threshold Rhombus */}
-                      <div style={{
-                        width: '24px',
-                        height: '24px',
-                        backgroundColor: 'transparent',
-                        border: '1px solid var(--text-secondary)',
-                        borderLeft: 'none',
-                        transform: 'skewX(-25deg)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        position: 'relative'
+                      {/* Severe Threshold */}
+                      <span style={{
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                        textAlign: 'center',
+                        lineHeight: 1
                       }}>
-                        <span style={{
-                          color: 'white',
-                          fontWeight: 600,
-                          fontSize: '0.75rem',
-                          transform: 'skewX(25deg)',
-                          textAlign: 'center',
-                          lineHeight: 1,
-                          position: 'relative',
-                          zIndex: 1
-                        }}>
-                          {item.thresholds.severe || '14'}
-                        </span>
-                      </div>
+                        {item.thresholds.severe || '14'}
+                      </span>
                     </div>
                   </div>
                 </div>
