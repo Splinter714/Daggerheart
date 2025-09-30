@@ -712,6 +712,11 @@ const GameCard = ({
     return `${feature.type}-${featureIndex}-${feature.name || 'blank'}`
   }
   
+  // Helper function to generate unique keys for experience confirmations
+  const getExperienceKey = (exp, index) => {
+    return `experience-${index}-${typeof exp === 'string' ? exp : exp.name || 'blank'}`
+  }
+  
   // Handle two-stage delete for features
   const handleFeatureDeleteClick = (featureToDelete) => {
     const featureKey = getFeatureKey(featureToDelete)
@@ -738,6 +743,39 @@ const GameCard = ({
         setDeleteConfirmations(prev => {
           const newState = { ...prev }
           delete newState[featureKey]
+          return newState
+        })
+      }, 3000)
+    }
+  }
+  
+  // Handle two-stage delete for experiences
+  const handleExperienceDeleteClick = (expToDelete, index) => {
+    const experienceKey = getExperienceKey(expToDelete, index)
+    
+    if (deleteConfirmations[experienceKey]) {
+      // Second click - actually delete
+      const newExp = [...(item.experience || [])]
+      newExp.splice(index, 1)
+      onUpdate && onUpdate(item.id, { experience: newExp })
+      
+      setDeleteConfirmations(prev => {
+        const newState = { ...prev }
+        delete newState[experienceKey]
+        return newState
+      })
+    } else {
+      // First click - show confirmation state
+      setDeleteConfirmations(prev => ({
+        ...prev,
+        [experienceKey]: true
+      }))
+      
+      // Auto-reset after 3 seconds
+      setTimeout(() => {
+        setDeleteConfirmations(prev => {
+          const newState = { ...prev }
+          delete newState[experienceKey]
           return newState
         })
       }, 3000)
@@ -1115,7 +1153,7 @@ const GameCard = ({
                   maxWidth: '300px',
                   paddingRight: '0.625rem'
                 }}
-                placeholder="Adversary name"
+                placeholder="Name"
               />
             ) : (
             <h4 style={{
@@ -1156,14 +1194,14 @@ const GameCard = ({
         {(item.motives || isEditMode) && (
             <div style={{
               padding: '0.5rem 8px',
-              textAlign: 'left'
+              textAlign: 'center'
           }}>
             {isEditMode ? (
               <input
                 type="text"
                 value={item.motives || ''}
                 onChange={(e) => onUpdate && onUpdate(item.id, { motives: e.target.value })}
-                placeholder="Enter motives (e.g., Hunt, defend, patrol)"
+                placeholder="Motives..."
                 style={{
                   width: '100%',
                   padding: '0.5rem',
@@ -1180,7 +1218,8 @@ const GameCard = ({
                 fontSize: '0.875rem',
                 fontStyle: 'italic',
                 color: 'var(--text-secondary)',
-                lineHeight: 1.4
+                lineHeight: 1.4,
+                textAlign: 'center'
               }}>
                 {item.motives}{item.motives && !item.motives.endsWith('.') ? '.' : ''}
                     </div>
@@ -1234,6 +1273,17 @@ const GameCard = ({
                           const value = e.target.value.replace(/[^0-9]/g, '')
                           if (value.length <= 2) {
                             onUpdate && onUpdate(item.id, { difficulty: parseInt(value) || 0 })
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowUp') {
+                            e.preventDefault()
+                            const current = parseInt(item.difficulty) || 0
+                            onUpdate && onUpdate(item.id, { difficulty: Math.min(current + 1, 99) })
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault()
+                            const current = parseInt(item.difficulty) || 0
+                            onUpdate && onUpdate(item.id, { difficulty: Math.max(current - 1, 0) })
                           }
                         }}
                         style={{
@@ -1310,8 +1360,21 @@ const GameCard = ({
                         value={item.atk || ''}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^0-9+\-d]/g, '')
-                          if (value.length <= 3) {
+                          if (value.length <= 4) {
                             onUpdate && onUpdate(item.id, { atk: value })
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowUp') {
+                            e.preventDefault()
+                            const current = parseInt(item.atk) || 0
+                            const newValue = current + 1
+                            onUpdate && onUpdate(item.id, { atk: newValue >= 0 ? `+${newValue}` : newValue.toString() })
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault()
+                            const current = parseInt(item.atk) || 0
+                            const newValue = current - 1
+                            onUpdate && onUpdate(item.id, { atk: newValue >= 0 ? `+${newValue}` : newValue.toString() })
                           }
                         }}
                         style={{
@@ -1360,27 +1423,230 @@ const GameCard = ({
                 </div>
 
             {/* Right Column - Experiences */}
-            <div>
+            <div style={{ paddingTop: '0' }}>
                 {isEditMode ? (
-                  <textarea
-                    value={(item.experience || []).join(', ') || ''}
-                    onChange={(e) => {
-                      const experienceArray = e.target.value.split(',').map(exp => exp.trim()).filter(exp => exp.length > 0)
-                      onUpdate && onUpdate(item.id, { experience: experienceArray })
-                    }}
-                    placeholder="Enter experience tags (e.g., Battle Hardened +3, Keen Senses +2)"
-                  rows={3}
-                    style={{
-                    width: '100%',
-                      padding: '0.5rem',
-                      border: '1px solid var(--border)',
-                      borderRadius: '4px',
-                      backgroundColor: 'var(--bg-primary)',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.875rem',
-                      resize: 'vertical'
-                    }}
-                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', marginTop: '-0.25rem' }}>
+                    {(() => {
+                      const experiences = item.experience || []
+                      // Ensure at least one empty experience in edit mode
+                      const experiencesToShow = experiences.length === 0 
+                        ? [{ name: '', modifier: 1 }]
+                        : experiences
+                      
+                      return experiencesToShow.map((exp, index) => (
+                        <div key={index} style={{ 
+                          position: 'relative',
+                          marginBottom: '0.5rem'
+                        }}>
+                          <div style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            paddingTop: '1px',
+                            width: '24px',
+                            height: '24px'
+                          }}>
+                            <input
+                              type="text"
+                              value={typeof exp === 'object' ? (exp.modifier >= 1 ? `+${exp.modifier}` : '+1') : '+1'}
+                              onChange={(e) => {
+                                const newExp = [...(item.experience || [])]
+                                const modifier = parseInt(e.target.value.replace(/[^0-9+-]/g, '')) || 1
+                                const clampedModifier = Math.max(1, modifier)
+                                newExp[index] = { name: typeof exp === 'string' ? exp : exp.name || '', modifier: clampedModifier }
+                                onUpdate && onUpdate(item.id, { experience: newExp })
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'ArrowUp') {
+                                  e.preventDefault()
+                                  const newExp = [...(item.experience || [])]
+                                  const currentModifier = typeof exp === 'object' ? Math.max(1, exp.modifier) : 1
+                                  newExp[index] = { 
+                                    name: typeof exp === 'string' ? exp : exp.name || '', 
+                                    modifier: currentModifier + 1 
+                                  }
+                                  onUpdate && onUpdate(item.id, { experience: newExp })
+                                } else if (e.key === 'ArrowDown') {
+                                  e.preventDefault()
+                                  const newExp = [...(item.experience || [])]
+                                  const currentModifier = typeof exp === 'object' ? Math.max(1, exp.modifier) : 1
+                                  newExp[index] = { 
+                                    name: typeof exp === 'string' ? exp : exp.name || '', 
+                                    modifier: Math.max(1, currentModifier - 1)
+                                  }
+                                  onUpdate && onUpdate(item.id, { experience: newExp })
+                                }
+                              }}
+                              style={{
+                                width: '24px',
+                                height: '24px',
+                                border: '1px solid var(--text-secondary)',
+                                borderRadius: '4px',
+                                backgroundColor: 'transparent',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                paddingTop: '1px',
+                                fontSize: '0.8rem',
+                                fontWeight: 600,
+                                color: 'var(--text-primary)',
+                                textAlign: 'center',
+                                outline: 'none'
+                              }}
+                            />
+                          </div>
+                          
+                          <div style={{
+                            marginLeft: '32px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                          }}>
+                            <input
+                              type="text"
+                              value={typeof exp === 'string' ? exp : exp.name || ''}
+                              onChange={(e) => {
+                                const newExp = [...(item.experience || [])]
+                                const currentModifier = typeof exp === 'object' ? exp.modifier : 1
+                                newExp[index] = { name: e.target.value, modifier: currentModifier }
+                                
+                                // Auto-add new experience if this was the last experience and name is filled
+                                const lastExperience = newExp[newExp.length - 1]
+                                if (lastExperience && lastExperience.name.trim()) {
+                                  newExp.push({ name: '', modifier: 1 })
+                                }
+                                
+                                onUpdate && onUpdate(item.id, { experience: newExp })
+                              }}
+                              placeholder="Experience name"
+                              style={{
+                                flex: 1,
+                                padding: '0.25rem 0.5rem',
+                                border: '1px solid var(--border)',
+                                borderRadius: '4px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.875rem',
+                                transition: 'background-color 0.2s'
+                              }}
+                            />
+                            
+                            {/* Control Buttons */}
+                            <div style={{ display: 'flex', gap: '0.125rem' }}>
+                              {/* Up Button */}
+                              <button
+                                onClick={() => {
+                                  const newExp = [...(item.experience || [])]
+                                  const currentExpName = typeof exp === 'string' ? exp.trim() : exp.name?.trim()
+                                  const prevExp = newExp[index - 1]
+                                  const prevExpName = typeof prevExp === 'string' ? prevExp.trim() : prevExp.name?.trim()
+                                  
+                                  if (index > 0 && index < newExp.length && currentExpName && prevExpName) {
+                                    // Swap with previous experience
+                                    newExp[index] = prevExp
+                                    newExp[index - 1] = exp
+                                    onUpdate && onUpdate(item.id, { experience: newExp })
+                                  }
+                                }}
+                                disabled={index === 0 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index - 1] === 'string' ? experiencesToShow[index - 1].trim() : experiencesToShow[index - 1].name?.trim())}
+                                style={{
+                                  width: '22px',
+                                  height: '22px',
+                                  padding: '0',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '3px',
+                                  backgroundColor: (index === 0 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index - 1] === 'string' ? experiencesToShow[index - 1].trim() : experiencesToShow[index - 1].name?.trim())) ? 'var(--gray-800)' : 'var(--gray-700)',
+                                  color: (index === 0 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index - 1] === 'string' ? experiencesToShow[index - 1].trim() : experiencesToShow[index - 1].name?.trim())) ? 'var(--text-secondary)' : 'white',
+                                  cursor: (index === 0 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index - 1] === 'string' ? experiencesToShow[index - 1].trim() : experiencesToShow[index - 1].name?.trim())) ? 'not-allowed' : 'pointer',
+                                  opacity: (index === 0 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index - 1] === 'string' ? experiencesToShow[index - 1].trim() : experiencesToShow[index - 1].name?.trim())) ? 0.5 : 1,
+                                  fontWeight: '600',
+                                  fontSize: '12px',
+                                  lineHeight: '1',
+                                  transition: 'background-color 0.2s',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                                title="Move up"
+                              >
+                                ↑
+                              </button>
+                              
+                              {/* Down Button */}
+                              <button
+                                onClick={() => {
+                                  const newExp = [...(item.experience || [])]
+                                  const currentExpName = typeof exp === 'string' ? exp.trim() : exp.name?.trim()
+                                  const nextExp = newExp[index + 1]
+                                  const nextExpName = typeof nextExp === 'string' ? nextExp.trim() : nextExp.name?.trim()
+                                  
+                                  if (index < newExp.length - 1 && index >= 0 && currentExpName && nextExpName) {
+                                    // Swap with next experience
+                                    newExp[index] = nextExp
+                                    newExp[index + 1] = exp
+                                    onUpdate && onUpdate(item.id, { experience: newExp })
+                                  }
+                                }}
+                                disabled={index === experiencesToShow.length - 1 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index + 1] === 'string' ? experiencesToShow[index + 1].trim() : experiencesToShow[index + 1].name?.trim())}
+                                style={{
+                                  width: '22px',
+                                  height: '22px',
+                                  padding: '0',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '3px',
+                                  backgroundColor: (index === experiencesToShow.length - 1 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index + 1] === 'string' ? experiencesToShow[index + 1].trim() : experiencesToShow[index + 1].name?.trim())) ? 'var(--gray-800)' : 'var(--gray-700)',
+                                  color: (index === experiencesToShow.length - 1 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index + 1] === 'string' ? experiencesToShow[index + 1].trim() : experiencesToShow[index + 1].name?.trim())) ? 'var(--text-secondary)' : 'white',
+                                  cursor: (index === experiencesToShow.length - 1 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index + 1] === 'string' ? experiencesToShow[index + 1].trim() : experiencesToShow[index + 1].name?.trim())) ? 'not-allowed' : 'pointer',
+                                  opacity: (index === experiencesToShow.length - 1 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index + 1] === 'string' ? experiencesToShow[index + 1].trim() : experiencesToShow[index + 1].name?.trim())) ? 0.5 : 1,
+                                  fontWeight: '600',
+                                  fontSize: '12px',
+                                  lineHeight: '1',
+                                  transition: 'background-color 0.2s',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                                title="Move down"
+                              >
+                                ↓
+                              </button>
+                              
+                              {/* Delete Button */}
+                              <button
+                                onClick={() => handleExperienceDeleteClick(exp, index)}
+                                disabled={!(typeof exp === 'string' ? exp.trim() : exp.name?.trim())}
+                                style={{
+                                  width: '22px',
+                                  height: '22px',
+                                  padding: '0',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '3px',
+                                  backgroundColor: deleteConfirmations[getExperienceKey(exp, index)] ? 'var(--danger)' : (!(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) ? 'var(--gray-800)' : 'var(--gray-700)'),
+                                  color: (!(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) ? 'var(--text-secondary)' : 'white'),
+                                  cursor: (!(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) ? 'not-allowed' : 'pointer'),
+                                  opacity: (!(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) ? 0.5 : 1),
+                                  fontWeight: '600',
+                                  fontSize: '12px',
+                                  lineHeight: '1',
+                                  transition: 'background-color 0.2s',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                                title={deleteConfirmations[getExperienceKey(exp, index)] ? "Click again to confirm delete" : "Delete experience"}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    })()}
+                  </div>
                 ) : (
               <div style={{
                 fontSize: '0.875rem',
@@ -1500,7 +1766,7 @@ const GameCard = ({
             padding: '0 8px 8px 8px'
           }}>
             {/* Standard Attack */}
-            {(item.atk !== undefined && item.weapon) && (
+            {((item.atk !== undefined && item.weapon) || isEditMode) && (
               <div>
                 <div style={{
                   display: 'flex',
@@ -1538,7 +1804,9 @@ const GameCard = ({
                       padding: '0.5rem',
                       border: '1px solid var(--border)',
                       borderRadius: '4px',
-                      backgroundColor: 'var(--bg-secondary)'
+                      backgroundColor: 'var(--bg-secondary)',
+                      marginTop: '0.75rem',
+                      marginBottom: '0.75rem'
                     }}>
                       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                         <input
@@ -1575,7 +1843,7 @@ const GameCard = ({
                             paddingRight: '2rem'
                           }}
                         >
-                          <option value="">Range</option>
+                          <option value=""></option>
                           <option value="Melee">Melee</option>
                           <option value="Very Close">Very Close</option>
                           <option value="Close">Close</option>
@@ -2166,7 +2434,7 @@ const GameCard = ({
               }} />
               <h4 style={{
                 margin: 0,
-                        fontSize: '0.8rem',
+                fontSize: '0.75rem',
                 fontWeight: '500',
                 color: 'var(--text-secondary)',
                 textTransform: 'uppercase',
@@ -2178,7 +2446,94 @@ const GameCard = ({
             </div>
 
             {/* Instances */}
-            {instances && instances.length > 0 && (
+            {isEditMode ? (
+              <div style={{ marginBottom: '0.5rem' }}>
+                <div style={{
+                  padding: '0.75rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)'
+                }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {/* HP Row */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <input
+                        type="number"
+                        value={item.hpMax || ''}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value) || 1
+                          onUpdate && onUpdate(item.id, { hpMax: value })
+                        }}
+                        min="1"
+                        max="99"
+                        style={{
+                          width: '40px',
+                          padding: '0.25rem 0.25rem',
+                          border: '1px solid var(--border)',
+                          borderRadius: '4px',
+                          backgroundColor: 'var(--bg-primary)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.875rem',
+                          textAlign: 'center'
+                        }}
+                      />
+                      <Pips
+                        type="adversaryHP"
+                        value={0}
+                        maxValue={item.hpMax || 1}
+                        showTooltip={false}
+                      />
+                      <span style={{ 
+                        fontSize: '0.75rem', 
+                        color: 'var(--text-secondary)', 
+                        textTransform: 'uppercase',
+                        minWidth: '40px'
+                      }}>
+                        HP
+                      </span>
+                    </div>
+                    
+                    {/* Stress Row */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <input
+                        type="number"
+                        value={item.stressMax || ''}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value) || 1
+                          onUpdate && onUpdate(item.id, { stressMax: value })
+                        }}
+                        min="1"
+                        max="99"
+                        style={{
+                          width: '40px',
+                          padding: '0.25rem 0.25rem',
+                          border: '1px solid var(--border)',
+                          borderRadius: '4px',
+                          backgroundColor: 'var(--bg-primary)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.875rem',
+                          textAlign: 'center'
+                        }}
+                      />
+                      <Pips
+                        type="adversaryStress"
+                        value={0}
+                        maxValue={item.stressMax || 1}
+                        showTooltip={false}
+                      />
+                      <span style={{ 
+                        fontSize: '0.75rem', 
+                        color: 'var(--text-secondary)', 
+                        textTransform: 'uppercase',
+                        minWidth: '40px'
+                      }}>
+                        Stress
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : instances && instances.length > 0 && (
               instances.map((instance, index) => {
               const isInstanceDead = (instance.hp || 0) >= (instance.hpMax || 1)
               return (
@@ -2407,9 +2762,47 @@ const GameCard = ({
                       {isEditMode ? (
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem' }}>
                           <span style={{ color: 'var(--text-primary)', fontSize: '0.6875rem', fontWeight: '500', textTransform: 'uppercase' }}>Minor</span>
-                          <ThresholdTag value={item.thresholds?.major || '7'} />
+                          <input
+                            type="text"
+                            value={item.thresholds?.major || '7'}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9]/g, '')
+                              if (value.length <= 2) {
+                                onUpdate && onUpdate(item.id, { thresholds: { ...item.thresholds, major: parseInt(value) || 7 } })
+                              }
+                            }}
+                            style={{
+                              width: '30px',
+                              padding: '0.125rem 0.25rem',
+                              border: '1px solid var(--border)',
+                              borderRadius: '4px',
+                              backgroundColor: 'var(--bg-primary)',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.8rem',
+                              textAlign: 'center'
+                            }}
+                          />
                           <span style={{ color: 'var(--text-primary)', fontSize: '0.6875rem', fontWeight: '500', textTransform: 'uppercase' }}>Major</span>
-                          <ThresholdTag value={item.thresholds?.severe || '14'} />
+                          <input
+                            type="text"
+                            value={item.thresholds?.severe || '14'}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9]/g, '')
+                              if (value.length <= 2) {
+                                onUpdate && onUpdate(item.id, { thresholds: { ...item.thresholds, severe: parseInt(value) || 14 } })
+                              }
+                            }}
+                            style={{
+                              width: '30px',
+                              padding: '0.125rem 0.25rem',
+                              border: '1px solid var(--border)',
+                              borderRadius: '4px',
+                              backgroundColor: 'var(--bg-primary)',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.8rem',
+                              textAlign: 'center'
+                            }}
+                          />
                           <span style={{ color: 'var(--text-primary)', fontSize: '0.6875rem', fontWeight: '500', textTransform: 'uppercase' }}>Severe</span>
                         </div>
                       ) : (
@@ -2462,14 +2855,12 @@ const GameCard = ({
         {/* Description Section */}
         {isEditMode && (
           <div style={{
-            marginBottom: '1rem',
             padding: '0 8px'
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '0.75rem'
+              marginBottom: '-0.25rem'
             }}>
               <hr style={{
                 flex: 1,
@@ -2478,23 +2869,16 @@ const GameCard = ({
                 margin: 0
               }} />
               <h4 style={{
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                color: 'white',
                 margin: 0,
+                fontSize: '0.75rem',
+                fontWeight: '500',
+                color: 'var(--text-secondary)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
-                textAlign: 'center',
-                minWidth: '80px'
+                marginLeft: '0.75rem'
               }}>
                 Description
               </h4>
-              <hr style={{
-                flex: 1,
-                border: 'none',
-                borderTop: '1px solid var(--border)',
-                margin: 0
-              }} />
             </div>
             {isEditMode ? (
               <textarea
@@ -2510,7 +2894,9 @@ const GameCard = ({
                   lineHeight: 1.5,
                   resize: 'none',
                   overflow: 'hidden',
-                  fontFamily: 'inherit'
+                  fontFamily: 'inherit',
+                  marginTop: '0.75rem',
+                  marginBottom: '0.75rem'
                 }}
                 value={item.description}
                 onChange={(e) => {
@@ -2520,7 +2906,7 @@ const GameCard = ({
                   
                   onUpdate && onUpdate(item.id, { description: e.target.value })
                 }}
-                placeholder="Enter adversary description..."
+                placeholder="Description..."
               />
             ) : (
               <div style={{
