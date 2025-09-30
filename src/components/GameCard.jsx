@@ -1044,7 +1044,7 @@ const GameCard = ({
                       alignItems: 'center',
                       backgroundColor: 'transparent',
                       border: '1px solid var(--text-secondary)',
-                      borderRadius: '12px',
+                      borderRadius: '11px',
                       padding: '0 8px',
                       height: '24px',
                       position: 'relative',
