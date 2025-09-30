@@ -70,52 +70,11 @@ const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => 
     return (
       <div style={{
         position: 'relative',
-        display: 'inline-flex',
+        display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        height: '32px',
-        width: `${totalWidth}px`
+        gap: '8px',
+        height: '32px'
       }}>
-        {/* Custom SVG Badge */}
-        <svg 
-          width={totalWidth} 
-          height="32" 
-          viewBox={`0 0 ${totalWidth} 32`}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 1
-          }}
-        >
-          {/* Rectangle background - extends behind diamond but stops at diamond's center */}
-          <rect 
-            x="1" 
-            y="6" 
-            width={typeWidth - 1} 
-            height="20" 
-            fill="var(--bg-primary)" 
-            stroke="var(--text-secondary)" 
-            strokeWidth="1" 
-            rx="4"
-            ry="4"
-          />
-        {/* Diamond - rounded rectangle rotated 45 degrees */}
-        <rect 
-          x={typeWidth - 10} 
-          y="6" 
-          width="20" 
-          height="20" 
-          fill="var(--bg-primary)" 
-          stroke="var(--text-secondary)" 
-          strokeWidth="1"
-          rx="2"
-          ry="2"
-          transform={`rotate(45 ${typeWidth - 1} 16)`}
-        />
-        </svg>
-        
         {/* Type Select */}
         <select
           value={type || ''}
@@ -123,19 +82,17 @@ const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => 
             onUpdate && onUpdate(itemId, { type: e.target.value })
           }}
           style={{
-            position: 'absolute',
-            top: '50%',
-            left: '4px',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'transparent',
-            border: 'none',
+            backgroundColor: 'var(--bg-primary)',
+            border: '1px solid var(--text-secondary)',
             color: 'var(--text-primary)',
             fontSize: '0.6875rem',
             fontWeight: '500',
             textTransform: 'uppercase',
             outline: 'none',
-            zIndex: 2,
-            width: `${typeWidth - 16}px`
+            borderRadius: '4px',
+            padding: '4px 8px',
+            width: '95px',
+            height: '24px'
           }}
         >
           <option value="Standard">Standard</option>
@@ -151,50 +108,61 @@ const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => 
         </select>
         
         {/* Tier Input */}
-        <input
-          type="text"
-          value={tier || ''}
-          onChange={(e) => {
-            const value = e.target.value.replace(/[^1-4]/g, '')
-            if (value.length <= 1) {
-              onUpdate && onUpdate(itemId, { tier: value === '' ? '' : parseInt(value) })
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'ArrowUp') {
-              e.preventDefault()
-              const current = parseInt(tier) || 1
-              onUpdate && onUpdate(itemId, { tier: Math.min(current + 1, 4) })
-            } else if (e.key === 'ArrowDown') {
-              e.preventDefault()
-              const current = parseInt(tier) || 1
-              onUpdate && onUpdate(itemId, { tier: Math.max(current - 1, 1) })
-            }
-          }}
-          style={{
+        <div style={{
+          position: 'relative',
+          width: '24px',
+          height: '24px'
+        }}>
+          <div style={{
             position: 'absolute',
             top: '50%',
-            left: `${typeWidth - 0.5}px`,
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: 'white',
-            fontSize: '0.8rem',
-            fontWeight: 600,
+            left: '50%',
+            transform: 'translate(-50%, -50%) rotate(45deg)',
             width: '20px',
-          height: '20px',
             height: '20px',
-            textAlign: 'center',
-            outline: 'none',
-            zIndex: 2,
-            lineHeight: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingTop: '1px'
-          }}
-          maxLength="1"
-        />
+            backgroundColor: 'var(--bg-primary)',
+            border: '1px solid var(--text-secondary)',
+            borderRadius: '2px'
+          }} />
+          <input
+            type="text"
+            value={tier || ''}
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^1-4]/g, '')
+              if (value.length <= 1) {
+                onUpdate && onUpdate(itemId, { tier: value === '' ? '' : parseInt(value) })
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowUp') {
+                e.preventDefault()
+                const current = parseInt(tier) || 1
+                onUpdate && onUpdate(itemId, { tier: Math.min(current + 1, 4) })
+              } else if (e.key === 'ArrowDown') {
+                e.preventDefault()
+                const current = parseInt(tier) || 1
+                onUpdate && onUpdate(itemId, { tier: Math.max(current - 1, 1) })
+              }
+            }}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'var(--text-primary)',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              width: '24px',
+              height: '24px',
+              textAlign: 'center',
+              outline: 'none',
+              zIndex: 1
+            }}
+            maxLength="1"
+          />
+        </div>
       </div>
     )
   }
@@ -1272,14 +1240,14 @@ const GameCard = ({
                           position: 'absolute',
                           top: '50%',
                           left: '50%',
-                          transform: 'translate(-50%, -50%)',
+                          transform: 'translate(-50%, -45%)',
                           backgroundColor: 'transparent',
                           border: 'none',
                           color: 'white',
                           fontSize: '0.8rem',
                           fontWeight: 600,
                           width: '20px',
-          height: '20px',
+                          height: '20px',
                           textAlign: 'center',
                           outline: 'none'
                         }}
@@ -1290,7 +1258,7 @@ const GameCard = ({
                     position: 'absolute',
                         top: '50%',
                         left: '50%',
-                        transform: 'translate(-50%, -50%)',
+                        transform: 'translate(-50%, -45%)',
                     fontSize: '0.8rem',
                     fontWeight: 600,
                     color: 'white',
@@ -1350,14 +1318,14 @@ const GameCard = ({
                           position: 'absolute',
                           top: '50%',
                           left: '50%',
-                          transform: 'translate(-50%, -50%)',
+                          transform: 'translate(-50%, -45%)',
                           backgroundColor: 'transparent',
                           border: 'none',
                           color: 'white',
                           fontSize: '0.8rem',
                           fontWeight: 600,
                           width: '20px',
-          height: '20px',
+                          height: '20px',
                           textAlign: 'center',
                           outline: 'none'
                         }}
@@ -1368,7 +1336,7 @@ const GameCard = ({
                         position: 'absolute',
                         top: '50%',
                         left: '50%',
-                        transform: 'translate(-50%, -50%)',
+                        transform: 'translate(-50%, -45%)',
                         fontSize: '0.8rem',
                         fontWeight: 600,
                         color: 'white',

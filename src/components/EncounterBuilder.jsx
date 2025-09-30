@@ -737,7 +737,7 @@ const EncounterBuilder = ({
               borderRight: '1px solid var(--border)'
             }}
           >
-            Adversaries
+            Adversary Browser
           </button>
           <button
             onClick={() => setActiveTab('encounters')}
@@ -756,7 +756,7 @@ const EncounterBuilder = ({
               borderRight: '1px solid var(--border)'
             }}
           >
-            Encounters
+            Saved Encounters
           </button>
           <button
             onClick={() => setActiveTab('custom')}
@@ -774,7 +774,7 @@ const EncounterBuilder = ({
               position: 'relative'
             }}
           >
-            Custom Adversary
+            Adversary Creator
           </button>
         </div>
         
@@ -868,6 +868,56 @@ const EncounterBuilder = ({
           overflow: 'hidden'
           }}>
             
+            {/* Encounter Name Field - Above Receipt in Vertical Mode */}
+            <div className="encounter-receipt-buttons-vertical" style={{
+              display: 'none', // Hidden by default, shown in vertical mode via CSS
+              padding: '0.75rem',
+              borderBottom: '1px solid var(--border)',
+              backgroundColor: 'var(--bg-primary)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                width: '100%'
+              }}>
+                <input
+                  type="text"
+                  value={encounterName}
+                  onChange={(e) => {
+                    setEncounterName(e.target.value)
+                    updateCurrentEncounterName(e.target.value)
+                  }}
+                  placeholder="Encounter Name"
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    border: '1px solid var(--border)',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--bg-primary)',
+                    color: 'var(--text-primary)',
+                    fontSize: '16px',
+                    textAlign: 'left',
+                    outline: 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                />
+                <ReceiptButton 
+                  onClick={handleNew}
+                  variant="secondary"
+                  style={{ 
+                    whiteSpace: 'nowrap', 
+                    minWidth: 'fit-content', 
+                    flexShrink: 0,
+                    opacity: hasMeaningfulChanges() ? 1 : 0.5,
+                    cursor: hasMeaningfulChanges() ? 'pointer' : 'not-allowed'
+                  }}
+                >
+                  New
+                </ReceiptButton>
+              </div>
+            </div>
+
             {/* Battle Points Calculator Content */}
             <div className="receipt-content" style={{ 
               padding: '1rem', 
@@ -1061,53 +1111,6 @@ const EncounterBuilder = ({
                 </div>
             </div>
             
-            </div>
-            
-            {/* Encounter Name Field - Below Receipt in Vertical Mode */}
-            <div className="encounter-receipt-buttons-vertical" style={{
-              display: 'none', // Hidden by default, shown in vertical mode via CSS
-              padding: '0.75rem',
-              borderTop: '1px solid var(--border)',
-              backgroundColor: 'var(--bg-primary)'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                width: '100%'
-              }}>
-                <input
-                  type="text"
-                  value={encounterName}
-                  onChange={(e) => {
-                    setEncounterName(e.target.value)
-                    updateCurrentEncounterName(e.target.value)
-                  }}
-                  placeholder="Encounter Name"
-                  style={{
-                    flex: 1,
-                    padding: '0.5rem',
-                    border: '1px solid var(--border)',
-                    borderRadius: '4px',
-                    backgroundColor: 'var(--bg-secondary)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.875rem'
-                  }}
-                />
-                <ReceiptButton 
-                  onClick={handleNew}
-                  variant="secondary"
-                  style={{ 
-                    whiteSpace: 'nowrap', 
-                    minWidth: 'fit-content', 
-                    flexShrink: 0,
-                    opacity: hasMeaningfulChanges() ? 1 : 0.5,
-                    cursor: hasMeaningfulChanges() ? 'pointer' : 'not-allowed'
-                  }}
-                >
-                  New
-                </ReceiptButton>
-              </div>
             </div>
             
           </div>
