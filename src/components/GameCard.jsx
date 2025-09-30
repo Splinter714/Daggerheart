@@ -1331,10 +1331,12 @@ const GameCard = ({
                 lineHeight: 1.5,
                 color: 'var(--text-secondary)'
               }}>
-                {item.experience.map(exp => 
-                  typeof exp === 'string' ? exp : `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`
-                ).join(', ')}
+                {item.experience.map((exp, index) => 
+                  <div key={index} style={{ marginBottom: '0.25rem' }}>
+                    {typeof exp === 'string' ? exp : `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`}
                   </div>
+                )}
+              </div>
                 )}
               </div>
             )}
@@ -1344,7 +1346,6 @@ const GameCard = ({
         {/* Features Section - Organized by Type */}
         {((item.features && item.features.length > 0) || isEditMode) && (
           <div style={{
-            marginBottom: '1rem',
             padding: '8px'
           }}>
             {/* Actions */}
@@ -1983,43 +1984,8 @@ const GameCard = ({
         {/* Instances Section */}
         {instances && instances.length > 0 && (
           <div style={{
-            marginTop: '1rem',
             padding: '0 8px'
           }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '0.75rem'
-            }}>
-              <hr style={{
-                flex: 1,
-                border: 'none',
-                borderTop: '1px solid var(--border)',
-                margin: 0
-              }} />
-              <h4 style={{
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                color: 'white',
-                margin: 0,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                textAlign: 'center',
-                minWidth: '80px'
-              }}>
-                Instances
-              </h4>
-              <hr style={{
-                flex: 1,
-                border: 'none',
-                borderTop: '1px solid var(--border)',
-                margin: 0
-              }} />
-            </div>
-            <div style={{
-              borderTop: '1px solid var(--border)'
-            }}>
             {instances.map((instance, index) => {
               const isInstanceDead = (instance.hp || 0) >= (instance.hpMax || 1)
               return (
@@ -2288,12 +2254,11 @@ const GameCard = ({
               </div>
               )
             })}
-            </div>
           </div>
         )}
 
         {/* Description Section */}
-        {(item.description || isEditMode) && (
+        {isEditMode && (
           <div style={{
             marginBottom: '1rem',
             padding: '0 8px'
