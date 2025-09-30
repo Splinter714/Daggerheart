@@ -2339,7 +2339,8 @@ const GameCard = ({
               <div style={{
                 display: 'flex',
                 justifyContent: 'center',
-                marginTop: '0.5rem'
+                marginTop: '0.5rem',
+                marginBottom: '0.5rem'
               }}>
                 <div style={{
                   display: 'flex',
