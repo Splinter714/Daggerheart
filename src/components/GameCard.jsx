@@ -1,6 +1,49 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle } from 'lucide-react'
 
+// Reusable Threshold Tag Component
+const ThresholdTag = ({ value }) => (
+  <div style={{
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '44px',
+    height: '32px',
+    zIndex: 3
+  }}>
+    <svg 
+      width="40" 
+      height="32" 
+      viewBox="0 0 40 32" 
+      fill="var(--bg-primary)" 
+      stroke="var(--text-secondary)" 
+      strokeWidth="1" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+      style={{
+        position: 'absolute',
+        zIndex: 1
+      }}
+    >
+      <path d="M2 2h28l6 14-6 14H2l6-14-6-14z"/>
+    </svg>
+    <span style={{
+      position: 'absolute',
+      fontSize: '0.7rem',
+      fontWeight: 500,
+      color: 'var(--text-primary)',
+      textAlign: 'center',
+      zIndex: 2,
+      left: '50%',
+      top: '50%',
+      transform: 'translate(-50%, -50%)'
+    }}>
+      {value}
+    </span>
+  </div>
+)
+
 // ============================================================================
 // Reusable Components
 // ============================================================================
@@ -162,47 +205,6 @@ const ReorderControls = ({ feature, featureType, item, onUpdate, handleFeatureDe
     </div>
   )
 }
-
-// Reusable Threshold Tag Component
-const ThresholdTag = ({ value }) => (
-  <div style={{
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '36px',
-    height: '24px'
-  }}>
-    <svg 
-      width="32" 
-      height="24" 
-      viewBox="0 0 32 24" 
-      fill="none" 
-      stroke="var(--text-secondary)" 
-      strokeWidth="1" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-      style={{
-        position: 'absolute'
-      }}
-    >
-      <path d="M2 2h20l4 10-4 10H2l4-10-4-10z"/>
-    </svg>
-    <span style={{
-      position: 'absolute',
-      fontSize: '0.7rem',
-      fontWeight: 500,
-      color: 'var(--text-primary)',
-      textAlign: 'center',
-      zIndex: 1,
-      left: '45%',
-      top: '50%',
-      transform: 'translate(-50%, -50%)'
-    }}>
-      {value}
-    </span>
-  </div>
-)
 
 // ============================================================================
 // UTILITIES
@@ -957,220 +959,22 @@ const GameCard = ({
                 </div>
               )}
 
-              {/* Difficulty Badge */}
-              {(item.difficulty || isEditMode) && (
-                <div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative'
-                }}>
-                    <Shield 
-                      size={32} 
-                      strokeWidth={1}
-                    style={{ 
-                        color: 'var(--text-secondary)'
-                      }} 
-                    />
-                    {isEditMode ? (
-                      <input
-                        type="text"
-                        value={item.difficulty || ''}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9]/g, '')
-                          if (value.length <= 2) {
-                            onUpdate && onUpdate(item.id, { difficulty: parseInt(value) || 0 })
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'ArrowUp') {
-                            e.preventDefault()
-                            const current = parseInt(item.difficulty) || 0
-                            onUpdate && onUpdate(item.id, { difficulty: Math.min(current + 1, 99) })
-                          } else if (e.key === 'ArrowDown') {
-                            e.preventDefault()
-                            const current = parseInt(item.difficulty) || 0
-                            onUpdate && onUpdate(item.id, { difficulty: Math.max(current - 1, 0) })
-                          }
-                        }}
-                        style={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          color: 'white',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          width: '20px',
-                          textAlign: 'center',
-                          outline: 'none'
-                        }}
-                        placeholder="10"
-                        maxLength="2"
-                      />
-                    ) : (
-                  <span style={{
-                    position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    color: 'white',
-                    pointerEvents: 'none'
-                  }}>
-                    {item.difficulty}
-                  </span>
-                    )}
-                  </div>
-                </div>
-              )}
 
-              {/* Damage Thresholds Badge */}
-              {item.type !== 'Minion' && item.thresholds && (
-                <div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}>
-                    {/* Pill-shaped Threshold Container */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      backgroundColor: 'transparent',
-                      border: '1px solid var(--text-secondary)',
-                      borderRadius: '11px',
-                      padding: '0 8px',
-                      height: '24px',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      gap: '6px'
-                    }}>
-                      {/* Major Threshold */}
-                      <span style={{
-                        color: 'white',
-                        fontWeight: 600,
-                        fontSize: '0.75rem',
-                        textAlign: 'center',
-                        lineHeight: 1
-                      }}>
-                        {item.thresholds.major || '7'}
-                      </span>
-                      
-                      {/* Angled Divider Line */}
-                      <div style={{
-                        width: '2px',
-                        height: '16px',
-                        backgroundColor: 'var(--text-secondary)',
-                        transform: 'skewX(-25deg)',
-                        flexShrink: 0
-                      }} />
-                      
-                      {/* Severe Threshold */}
-                      <span style={{
-                        color: 'white',
-                        fontWeight: 600,
-                        fontSize: '0.75rem',
-                        textAlign: 'center',
-                        lineHeight: 1
-                      }}>
-                        {item.thresholds.severe || '14'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
 
-              {/* Attack Modifier Badge */}
-              {(item.atk !== undefined || isEditMode) && (
-                <div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative'
-                }}>
-                  <Locate 
-                      size={36} 
-                    strokeWidth={1}
-                    style={{
-                      color: 'var(--text-secondary)'
-                    }}
-                  />
-                    {isEditMode ? (
-                      <input
-                        type="text"
-                        value={item.atk || ''}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9+\-d]/g, '')
-                          if (value.length <= 3) {
-                            onUpdate && onUpdate(item.id, { atk: value })
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'ArrowUp') {
-                            e.preventDefault()
-                            const current = parseInt(item.atk) || 0
-                            onUpdate && onUpdate(item.id, { atk: current >= 0 ? `+${current + 1}` : `${current + 1}` })
-                          } else if (e.key === 'ArrowDown') {
-                            e.preventDefault()
-                            const current = parseInt(item.atk) || 0
-                            onUpdate && onUpdate(item.id, { atk: current > 0 ? `+${current - 1}` : `${current - 1}` })
-                          }
-                        }}
-                        style={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          color: 'white',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          width: '20px',
-                          textAlign: 'center',
-                          outline: 'none'
-                        }}
-                        placeholder="+1"
-                        maxLength="3"
-                      />
-                    ) : (
-                  <span style={{
-                    position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    color: 'white',
-                    pointerEvents: 'none'
-                  }}>
-                    {item.atk >= 0 ? '+' : ''}{item.atk}
-                  </span>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {/* Tier Badge */}
               {(item.tier || isEditMode) && (
                 <div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
+                }}>
                     <Diamond 
                       size={32} 
                       strokeWidth={1}
-                      style={{ 
+                    style={{ 
                         color: 'var(--text-secondary)'
                       }} 
                     />
@@ -1212,6 +1016,211 @@ const GameCard = ({
                         maxLength="1"
                       />
                     ) : (
+                  <span style={{
+                    position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: 'white',
+                    pointerEvents: 'none'
+                  }}>
+                        {item.tier}
+                  </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Expandable Content Section */}
+                  <div style={{
+          borderRadius: '0 0 8px 8px'
+        }}>
+
+
+
+
+
+        {/* Motives */}
+        {(item.motives || isEditMode) && (
+                    <div style={{
+            padding: '0.5rem 8px',
+            textAlign: 'center'
+          }}>
+            {isEditMode ? (
+              <input
+                type="text"
+                value={item.motives || ''}
+                onChange={(e) => onUpdate && onUpdate(item.id, { motives: e.target.value })}
+                placeholder="Enter motives (e.g., Hunt, defend, patrol)"
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--bg-primary)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                  textAlign: 'center'
+                }}
+              />
+            ) : (
+                      <div style={{
+                fontSize: '0.875rem',
+                fontStyle: 'italic',
+                color: 'var(--text-secondary)',
+                lineHeight: 1.4
+              }}>
+                {item.motives}{item.motives && !item.motives.endsWith('.') ? '.' : ''}
+                    </div>
+            )}
+                </div>
+              )}
+
+        {/* Stats and Experiences - Two Column Layout */}
+        {((item.difficulty || item.atk !== undefined || (item.thresholds && item.type !== 'Minion') || (item.experience && item.experience.length > 0)) || isEditMode) && (
+          <div style={{
+            padding: '0.5rem 8px',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '1rem'
+          }}>
+            {/* Left Column - Stats */}
+                <div style={{
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              {/* Difficulty */}
+              {(item.difficulty || isEditMode) && (
+                <div style={{
+                  position: 'relative',
+                  marginBottom: '0.75rem'
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                    width: '36px'
+                }}>
+                    <Hexagon 
+                      size={32} 
+                    strokeWidth={1}
+                    style={{
+                        color: 'var(--text-secondary)',
+                        transform: 'rotate(0deg)'
+                    }}
+                  />
+                    {isEditMode ? (
+                      <input
+                        type="text"
+                        value={item.difficulty || ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '')
+                          if (value.length <= 2) {
+                            onUpdate && onUpdate(item.id, { difficulty: parseInt(value) || 0 })
+                          }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          width: '20px',
+                          textAlign: 'center',
+                          outline: 'none'
+                        }}
+                        maxLength="2"
+                      />
+                    ) : (
+                  <span style={{
+                    position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: 'white',
+                    pointerEvents: 'none'
+                  }}>
+                        {item.difficulty}
+                  </span>
+                    )}
+                  </div>
+                  <div style={{
+                    fontSize: '0.875rem',
+                    lineHeight: 1.4,
+                    color: 'var(--text-secondary)',
+                    marginLeft: '44px'
+                  }}>
+                    Difficulty
+                  </div>
+                </div>
+              )}
+
+              {/* Attack Modifier */}
+              {(item.atk !== undefined || isEditMode) && (
+                  <div style={{
+                  position: 'relative',
+                  marginBottom: '0.75rem'
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '36px'
+                  }}>
+                    <Locate 
+                      size={36} 
+                      strokeWidth={1}
+                      style={{ 
+                        color: 'var(--text-secondary)',
+                        transform: 'rotate(45deg)'
+                      }} 
+                    />
+                    {isEditMode ? (
+                      <input
+                        type="text"
+                        value={item.atk || ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9+\-d]/g, '')
+                          if (value.length <= 3) {
+                            onUpdate && onUpdate(item.id, { atk: value })
+                          }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          width: '20px',
+                          textAlign: 'center',
+                          outline: 'none'
+                        }}
+                        maxLength="3"
+                      />
+                    ) : (
                       <span style={{
                         position: 'absolute',
                         top: '50%',
@@ -1222,90 +1231,25 @@ const GameCard = ({
                         color: 'white',
                         pointerEvents: 'none'
                       }}>
-                        {item.tier}
+                        {item.atk >= 0 ? '+' : ''}{item.atk}
                       </span>
                     )}
                   </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Expandable Content Section */}
-        <div style={{
-          borderRadius: '0 0 8px 8px'
-        }}>
-
-
-
-
-
-        {/* Motives and Experiences Section */}
-        {(item.motives || (item.experience && item.experience.length > 0) || isEditMode) && (
-          <div style={{
-            padding: '0.75rem 8px',
-            marginBottom: '1rem'
-          }}>
-            {/* Motives */}
-            {(item.motives || isEditMode) && (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem',
-                marginBottom: (item.experience && item.experience.length > 0) || isEditMode ? '1rem' : '0'
-              }}>
                 <div style={{
                   fontSize: '0.875rem',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
-                  marginBottom: '0.5rem'
-                }}>
-                  Motives
+                    lineHeight: 1.4,
+                    color: 'var(--text-secondary)',
+                    marginLeft: '44px'
+                  }}>
+                    Attack
                 </div>
-                {isEditMode ? (
-                  <textarea
-                    value={item.motives || ''}
-                    onChange={(e) => onUpdate && onUpdate(item.id, { motives: e.target.value })}
-                    placeholder="Enter motives (e.g., Hunt, defend, patrol)"
-                    rows={2}
-                    style={{
-                      padding: '0.5rem',
-                      border: '1px solid var(--border)',
-                      borderRadius: '4px',
-                      backgroundColor: 'var(--bg-primary)',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.875rem',
-                      resize: 'vertical'
-                    }}
-                  />
-                ) : (
-              <div style={{
-                fontSize: '0.875rem',
-                lineHeight: 1.5,
-                    color: 'var(--text-secondary)'
-              }}>
-                {item.motives}
-              </div>
-            )}
               </div>
             )}
             
-            {/* Experience */}
-            {(item.experience && item.experience.length > 0 || isEditMode) && (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem'
-              }}>
-                <div style={{
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
-                  marginBottom: '0.5rem'
-                }}>
-                  Experience
                 </div>
+
+            {/* Right Column - Experiences */}
+            <div>
                 {isEditMode ? (
                   <textarea
                     value={(item.experience || []).join(', ') || ''}
@@ -1314,8 +1258,9 @@ const GameCard = ({
                       onUpdate && onUpdate(item.id, { experience: experienceArray })
                     }}
                     placeholder="Enter experience tags (e.g., Battle Hardened +3, Keen Senses +2)"
-                    rows={2}
+                  rows={3}
                     style={{
+                    width: '100%',
                       padding: '0.5rem',
                       border: '1px solid var(--border)',
                       borderRadius: '4px',
@@ -1328,25 +1273,116 @@ const GameCard = ({
                 ) : (
               <div style={{
                 fontSize: '0.875rem',
-                lineHeight: 1.5,
+                  lineHeight: 1.4,
                 color: 'var(--text-secondary)'
               }}>
-                {item.experience.map((exp, index) => 
+                  {item.experience && item.experience.length > 0 ? (
+                    item.experience.map((exp, index) => {
+                      if (typeof exp === 'string') {
+                        // Handle string format - try to parse bonus from the end
+                        const match = exp.match(/^(.+?)\s*([+-]?\d+)$/)
+                        if (match) {
+                          const [, name, bonus] = match
+                          return (
+                            <div key={index} style={{ 
+                              position: 'relative',
+                              marginBottom: '0.75rem' 
+                            }}>
+                              <div style={{
+                                position: 'absolute',
+                                left: 0,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '24px',
+                                height: '24px'
+                              }}>
+                                <div style={{
+                                  width: '24px',
+                                  height: '24px',
+                                  border: '1px solid var(--text-secondary)',
+                                  borderRadius: '4px',
+                                  backgroundColor: 'transparent',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}>
+                                  <span style={{
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                    color: 'var(--text-primary)'
+                                  }}>
+                                    {bonus}
+                                  </span>
+                                </div>
+                              </div>
+                              <span style={{ marginLeft: '32px' }}>{name}</span>
+                            </div>
+                          )
+                        } else {
+                          // No bonus found, just show the string
+                          return (
                   <div key={index} style={{ marginBottom: '0.25rem' }}>
-                    {typeof exp === 'string' ? exp : `${exp.name} ${exp.modifier >= 0 ? '+' : ''}${exp.modifier}`}
+                              {exp}
                   </div>
-                )}
+                          )
+                        }
+                      } else {
+                        // Handle object format
+                        return (
+                          <div key={index} style={{ 
+                            position: 'relative',
+                            marginBottom: '0.75rem' 
+                          }}>
+                            <div style={{
+                              position: 'absolute',
+                              left: 0,
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '24px',
+                              height: '24px'
+                            }}>
+                              <div style={{
+                                width: '24px',
+                                height: '24px',
+                                border: '1px solid var(--text-secondary)',
+                                borderRadius: '4px',
+                                backgroundColor: 'transparent',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                <span style={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 600,
+                                  color: 'var(--text-primary)'
+                                }}>
+                                  {exp.modifier >= 0 ? '+' : ''}{exp.modifier}
+                                </span>
               </div>
-                )}
+                            </div>
+                            <span style={{ marginLeft: '32px' }}>{exp.name}</span>
+                          </div>
+                        )
+                      }
+                    })
+                  ) : null}
               </div>
             )}
+            </div>
           </div>
         )}
+
 
         {/* Features Section - Organized by Type */}
         {((item.features && item.features.length > 0) || isEditMode) && (
           <div style={{
-            padding: '8px'
+            padding: '0 8px 8px 8px'
           }}>
             {/* Standard Attack */}
             {(item.atk !== undefined && item.weapon) && (
@@ -1383,7 +1419,7 @@ const GameCard = ({
                     <div style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '0.5rem',
+                      gap: '0.25rem',
                       padding: '0.5rem',
                       border: '1px solid var(--border)',
                       borderRadius: '4px',
@@ -1511,7 +1547,7 @@ const GameCard = ({
                         return (
                           <div key={index} style={{
                             display: 'flex',
-                            gap: '0.5rem',
+                            gap: '0.25rem',
                             margin: '0.5rem 0',
                             padding: '0.5rem',
                             border: '1px solid var(--border)',
@@ -1687,7 +1723,7 @@ const GameCard = ({
                         return (
                           <div key={index} style={{
                             display: 'flex',
-                            gap: '0.5rem',
+                            gap: '0.25rem',
                             margin: '0.5rem 0',
                             padding: '0.5rem',
                             border: '1px solid var(--border)',
@@ -1860,7 +1896,7 @@ const GameCard = ({
                         return (
                           <div key={index} style={{
                             display: 'flex',
-                            gap: '0.5rem',
+                            gap: '0.25rem',
                             margin: '0.5rem 0',
                             padding: '0.5rem',
                             border: '1px solid var(--border)',
@@ -1990,17 +2026,45 @@ const GameCard = ({
                 </div>
               </div>
             )}
+
           </div>
         )}
 
         </div>
 
-        {/* Instances Section */}
-        {instances && instances.length > 0 && (
+        {/* Status Section */}
+        {((instances && instances.length > 0) || (item.type !== 'Minion' && (item.thresholds || isEditMode))) && (
           <div style={{
             padding: '0 8px'
           }}>
-            {instances.map((instance, index) => {
+            {/* Status Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: '-0.25rem'
+            }}>
+              <hr style={{
+                flex: 1,
+                border: 'none',
+                borderTop: '1px solid var(--border)',
+                margin: 0
+              }} />
+              <h4 style={{
+                margin: 0,
+                fontSize: '0.75rem',
+                fontWeight: '500',
+                color: 'var(--text-secondary)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                marginLeft: '0.75rem'
+              }}>
+                Status
+              </h4>
+            </div>
+
+            {/* Instances */}
+            {instances && instances.length > 0 && (
+              instances.map((instance, index) => {
               const isInstanceDead = (instance.hp || 0) >= (instance.hpMax || 1)
               return (
               <div key={instance.id}>
@@ -2267,7 +2331,108 @@ const GameCard = ({
                 </div>
               </div>
               )
-            })}
+            })
+            )}
+
+            {/* Damage Thresholds Badge */}
+            {item.type !== 'Minion' && (item.thresholds || isEditMode) && (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                marginTop: '0.5rem'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
+                }}>
+                  {/* Pill-shaped Threshold Container */}
+                  <div style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '36px'
+                  }}>
+                    {/* Custom pill background that sits behind rhombuses */}
+                    <svg 
+                      width="300" 
+                      height="36" 
+                      viewBox="0 0 300 36" 
+                      style={{
+                        position: 'absolute',
+                        zIndex: 1
+                      }}
+                    >
+                      <rect 
+                        x="20" 
+                        y="6" 
+                        width="260" 
+                        height="24" 
+                        fill="var(--bg-primary)" 
+                        stroke="var(--text-secondary)" 
+                        strokeWidth="1" 
+                        rx="4"
+                      />
+                    </svg>
+                    {/* Content positioned above the background */}
+                    <div style={{
+                      position: 'relative',
+                      zIndex: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}>
+                      {isEditMode ? (
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem' }}>
+                          <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>Minor</span>
+                          <ThresholdTag value={item.thresholds?.major || '7'} />
+                          <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>Major</span>
+                          <ThresholdTag value={item.thresholds?.severe || '14'} />
+                          <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>Severe</span>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Minor Threshold */}
+                          <span style={{
+                            color: 'var(--text-primary)',
+                            fontSize: '0.8rem',
+                            fontWeight: 500
+                          }}>
+                            Minor
+                          </span>
+                          
+                          {/* Major Threshold Number */}
+                          <ThresholdTag value={item.thresholds?.major || '7'} />
+                          
+                          {/* Major Threshold */}
+                          <span style={{
+                            color: 'var(--text-primary)',
+                            fontSize: '0.8rem',
+                            fontWeight: 500
+                          }}>
+                            Major
+                          </span>
+                          
+                          {/* Severe Threshold Number */}
+                          <ThresholdTag value={item.thresholds?.severe || '14'} />
+                          
+                          {/* Severe Threshold */}
+                          <span style={{
+                            color: 'var(--text-primary)',
+                            fontSize: '0.8rem',
+                            fontWeight: 500
+                          }}>
+                            Severe
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
