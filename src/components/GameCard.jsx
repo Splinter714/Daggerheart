@@ -63,10 +63,8 @@ const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => 
   const leftPadding = 4
   const rightPadding = 18 // Fixed right padding to clear diamond
   const typeWidth = Math.max(50, textWidth + leftPadding + rightPadding)
-  const totalWidth = typeWidth + 20 // 20px for diamond overlap
+  const totalWidth = typeWidth + 15 // Slightly reduced from 20 to 15
   
-  // DEBUG: Log dimensions
-  console.log('Badge dimensions:', { type, tier, textWidth, typeWidth, totalWidth })
   
   if (isEditMode) {
     return (
@@ -76,9 +74,6 @@ const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => 
         alignItems: 'center',
         justifyContent: 'center',
         height: '32px',
-        // DEBUG: Add background to see component bounds
-        backgroundColor: 'rgba(0, 255, 0, 0.1)',
-        border: '1px solid green',
         width: `${totalWidth}px`
       }}>
         {/* Custom SVG Badge */}
@@ -179,7 +174,7 @@ const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => 
           style={{
             position: 'absolute',
             top: '50%',
-            left: `${typeWidth - 1}px`,
+            left: `${typeWidth - 0.5}px`,
             transform: 'translate(-50%, -50%)',
             backgroundColor: 'transparent',
             border: 'none',
@@ -187,6 +182,7 @@ const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => 
             fontSize: '0.8rem',
             fontWeight: 600,
             width: '20px',
+          height: '20px',
             height: '20px',
             textAlign: 'center',
             outline: 'none',
@@ -194,7 +190,8 @@ const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => 
             lineHeight: 1,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            paddingTop: '1px'
           }}
           maxLength="1"
         />
@@ -209,9 +206,6 @@ const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => 
       alignItems: 'center',
       justifyContent: 'center',
       height: '32px',
-      // DEBUG: Add background to see component bounds
-      backgroundColor: 'rgba(0, 255, 0, 0.1)',
-      border: '1px solid green',
       width: `${totalWidth}px`
     }}>
       {/* Custom SVG Badge */}
@@ -274,7 +268,7 @@ const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => 
       <span style={{
         position: 'absolute',
         top: '50%',
-        left: `${typeWidth - 1}px`,
+        left: `${typeWidth - 0.5}px`,
         transform: 'translate(-50%, -50%)',
         fontSize: '0.8rem',
         fontWeight: 600,
@@ -1131,9 +1125,6 @@ const GameCard = ({
             alignItems: 'center',
             position: 'relative',
             zIndex: isDead ? 1 : 'auto',
-            // DEBUG: Add background to see header bounds
-            backgroundColor: 'rgba(0, 0, 255, 0.1)',
-            border: '1px solid blue',
             padding: '2px',
             minHeight: '40px'
           }}>
@@ -1153,7 +1144,8 @@ const GameCard = ({
                   fontWeight: '600',
                   padding: '0.5rem',
                   width: '100%',
-                  maxWidth: '300px'
+                  maxWidth: '300px',
+                  paddingRight: '0.625rem'
                 }}
                 placeholder="Adversary name"
               />
@@ -1163,7 +1155,8 @@ const GameCard = ({
               color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
               textAlign: 'left',
               margin: 0,
-              fontSize: '1.1rem'
+              fontSize: '1.1rem',
+              paddingRight: '6px'
             }}>
               {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
             </h4>
@@ -1193,9 +1186,9 @@ const GameCard = ({
 
         {/* Motives */}
         {(item.motives || isEditMode) && (
-                    <div style={{
-            padding: '0.5rem 8px',
-            textAlign: 'center'
+            <div style={{
+              padding: '0.5rem 8px',
+              textAlign: 'left'
           }}>
             {isEditMode ? (
               <input
@@ -1254,6 +1247,7 @@ const GameCard = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+            paddingTop: '1px',
                     width: '36px'
                 }}>
                     <Hexagon 
@@ -1285,6 +1279,7 @@ const GameCard = ({
                           fontSize: '0.8rem',
                           fontWeight: 600,
                           width: '20px',
+          height: '20px',
                           textAlign: 'center',
                           outline: 'none'
                         }}
@@ -1330,6 +1325,7 @@ const GameCard = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+            paddingTop: '1px',
                     width: '36px'
                   }}>
                     <Locate 
@@ -1361,6 +1357,7 @@ const GameCard = ({
                           fontSize: '0.8rem',
                           fontWeight: 600,
                           width: '20px',
+          height: '20px',
                           textAlign: 'center',
                           outline: 'none'
                         }}
@@ -1442,6 +1439,7 @@ const GameCard = ({
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
+            paddingTop: '1px',
                                 width: '24px',
                                 height: '24px'
                               }}>
@@ -1453,7 +1451,8 @@ const GameCard = ({
                                   backgroundColor: 'transparent',
                                   display: 'flex',
                                   alignItems: 'center',
-                                  justifyContent: 'center'
+                                  justifyContent: 'center',
+            paddingTop: '1px'
                                 }}>
                                   <span style={{
                                     fontSize: '0.8rem',
@@ -1490,6 +1489,7 @@ const GameCard = ({
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
+            paddingTop: '1px',
                               width: '24px',
                               height: '24px'
                             }}>
@@ -1501,7 +1501,8 @@ const GameCard = ({
                                 backgroundColor: 'transparent',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+            paddingTop: '1px'
                               }}>
                                 <span style={{
                                   fontSize: '0.8rem',
@@ -2285,6 +2286,7 @@ const GameCard = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+            paddingTop: '1px',
                     flexShrink: 0,
                     opacity: isInstanceDead ? 0.5 : 1
                   }}>
@@ -2385,6 +2387,7 @@ const GameCard = ({
               <div style={{
                 display: 'flex',
                 justifyContent: 'center',
+            paddingTop: '1px',
                 marginTop: '0.5rem',
                 marginBottom: '0.5rem'
               }}>
@@ -2392,6 +2395,7 @@ const GameCard = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+            paddingTop: '1px',
                   position: 'relative'
                 }}>
                   {/* Pill-shaped Threshold Container */}
@@ -2400,6 +2404,7 @@ const GameCard = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+            paddingTop: '1px',
                     height: '36px'
                   }}>
                     {/* Custom pill background that sits behind rhombuses */}
