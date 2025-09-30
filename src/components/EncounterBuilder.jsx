@@ -699,7 +699,7 @@ const EncounterBuilder = ({
           width: '100%',
           maxWidth: '1200px',
           height: 'calc(100vh - 24px)',
-          maxHeight: '800px',
+          height: 'calc(100dvh - 24px)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
