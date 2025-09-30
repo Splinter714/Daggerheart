@@ -1091,27 +1091,6 @@ const GameCard = ({
               pointerEvents: 'none',
               zIndex: 9999
             }} />
-            {/* DEFEATED text */}
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              color: 'var(--text-secondary)',
-              fontSize: '1rem',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              zIndex: 10000,
-              pointerEvents: 'none',
-              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
-              backgroundColor: 'var(--gray-900)',
-              padding: '0.25rem 0.5rem',
-              borderRadius: '0.5rem',
-              border: '0.5px solid var(--gray-600)'
-            }}>
-              DEFEATED
-            </div>
           </>
         )}
         {/* Fixed Header Section - Identical to Compact View */}
@@ -2577,25 +2556,6 @@ const GameCard = ({
                         zIndex: 1,
                         borderRadius: '4px'
                       }} />
-                      {/* DEFEATED text */}
-                      <div style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        color: 'var(--text-secondary)',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        zIndex: 2,
-                        backgroundColor: 'var(--gray-900)',
-                        padding: '0.125rem 0.25rem',
-                        borderRadius: '0.25rem',
-                        border: '0.5px solid var(--gray-600)'
-                      }}>
-                        DEFEATED
-                      </div>
                     </>
                   )}
                   {/* Number section - Circular badge */}
