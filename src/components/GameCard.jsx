@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull } from 'lucide-react'
+import Pips from './Pips'
 
 // Reusable Threshold Tag Component
 const ThresholdTag = ({ value }) => (
@@ -2067,23 +2068,23 @@ const GameCard = ({
               instances.map((instance, index) => {
               const isInstanceDead = (instance.hp || 0) >= (instance.hpMax || 1)
               return (
-              <div key={instance.id}>
+              <div key={instance.id} style={{ marginBottom: '0.5rem' }}>
                 <div
                   key={instance.id}
                   style={{
-                    backgroundColor: 'var(--bg-primary)',
-                    borderRadius: '4px',
-                    padding: '4px',
-                    border: '1px solid var(--border)',
-                    marginBottom: '4px',
+                    backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-primary)',
+                    borderRadius: '6px',
+                    padding: '0.25rem 0.5rem',
+                    border: '1px solid',
+                    borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
                     display: 'flex',
                     justifyContent: 'flex-start',
                     alignItems: 'center',
-                    gap: '8px',
+                    gap: '0.5rem',
                     opacity: isInstanceDead ? 0.7 : 1,
-                    backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-secondary)',
-                    borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--border)',
-                    position: 'relative'
+                    position: 'relative',
+                    transition: 'all 0.2s ease',
+                    minHeight: '40px'
                   }}
                 >
                   {/* DEFEATED overlay for instances */}
@@ -2128,203 +2129,97 @@ const GameCard = ({
                       </div>
                     </>
                   )}
-                  {/* Number section - Fixed width for double digits */}
+                  {/* Number section - Circular badge */}
                   <div style={{
-                    backgroundColor: 'var(--bg-primary)',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-hover)',
-                    width: '32px',
-                    textAlign: 'center',
+                    backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-card)',
+                    border: '1px solid',
+                    borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
+                    borderRadius: '50%',
+                    width: '24px',
+                    height: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     flexShrink: 0,
-                    padding: '2px'
+                    opacity: isInstanceDead ? 0.5 : 1
                   }}>
                     <span style={{
-                      fontSize: '1rem',
+                      fontSize: '0.75rem',
                       fontWeight: 600,
-                      color: 'var(--text-primary)'
+                      color: isInstanceDead ? 'var(--gray-400)' : 'var(--text-primary)'
                     }}>
                       {instance.duplicateNumber || 1}
                     </span>
                   </div>
 
-                  {/* HP and Stress pips - Immediately after number */}
+                  {/* HP and Stress pips - Using Pips component */}
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'flex-start',
-                    gap: '2px'
+                    gap: '0.125rem'
                   }}>
                     {/* HP Row */}
-                    <div 
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        cursor: 'pointer'
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (!onApplyDamage || type !== 'adversary') return
-                        
-                        const outerRect = e.currentTarget.getBoundingClientRect()
-                        const containerElement = e.currentTarget.querySelector('.pip-container')
-                        
-                        if (!containerElement) {
-                          return
-                        }
-                        
-                        const containerRect = containerElement.getBoundingClientRect()
-                        const clickX = e.clientX - containerRect.left
-                        const currentHp = instance.hp || 0
-                        const maxHp = instance.hpMax || 1
-                        
-                        // Handle clicks outside the pip container (relative to pip container)
-                        if (clickX < 0) {
-                          // Click left of all pips = decrement (heal)
-                          if (currentHp > 0 && onApplyHealing) {
-                            onApplyHealing(instance.id, 1, currentHp)
+                    <div style={{ opacity: isInstanceDead ? 0.3 : 1 }}>
+                      <Pips
+                        type="adversaryHP"
+                        value={instance.hp || 0}
+                        maxValue={instance.hpMax || 1}
+                        onPipClick={(index, isFilled) => {
+                          if (onApplyDamage && type === 'adversary') {
+                            const currentHp = instance.hp || 0
+                            const maxHp = instance.hpMax || 1
+                            if (isFilled) {
+                              // Clicking a filled pip = heal (reduce damage)
+                              if (onApplyHealing) {
+                                onApplyHealing(instance.id, 1, currentHp)
+                              }
+                            } else {
+                              // Clicking an empty pip = take damage
+                              if (currentHp < maxHp) {
+                                onApplyDamage(instance.id, 1, currentHp, maxHp)
+                              }
+                            }
                           }
-                          return
-                        }
-                        
-                        if (clickX > containerRect.width) {
-                          // Click right of all pips = increment (damage)
-                          if (currentHp < maxHp) {
-                            onApplyDamage(instance.id, 1, currentHp, maxHp)
-                          }
-                          return
-                        }
-                        
-                        // Click within pip container - use boundary logic based on pip container width only
-                        const containerWidth = containerRect.width
-                        const pipPadding = containerWidth * 0.05
-                        const effectiveContainerWidth = containerWidth - (2 * pipPadding)
-                        const clickXWithinContainer = clickX - pipPadding
-                        
-                        // Calculate boundary at the end of the last filled pip
-                        const boundaryRatio = currentHp / maxHp
-                        const boundaryXWithinContainer = effectiveContainerWidth * boundaryRatio
-                        
-                        if (clickXWithinContainer < boundaryXWithinContainer) {
-                          // Click left of boundary = decrement (heal)
-                          if (currentHp > 0 && onApplyHealing) {
-                            onApplyHealing(instance.id, 1, currentHp)
-                          }
-                        } else {
-                          // Click right of boundary = increment (damage)
-                          if (currentHp < maxHp) {
-                            onApplyDamage(instance.id, 1, currentHp, maxHp)
-                          }
-                        }
-                      }}
-                    >
-                      <div 
-                        className="pip-container"
-                        style={{
-                          display: 'flex',
-                          gap: '2px',
-                          alignItems: 'center'
                         }}
-                      >
-                        {Array.from({ length: instance.hpMax || 1 }, (_, i) => (
-                          <span
-                            key={i}
-                            style={{
-                              fontSize: '0.75rem',
-                              color: i < (instance.hp || 0) ? 'var(--red)' : 'var(--text-secondary)',
-                              transition: 'all 0.1s ease'
-                            }}
-                          >
-                            <Droplet size={16} />
-                          </span>
-                        ))}
-                      </div>
+                        containerStyle={{
+                          height: 'auto',
+                          padding: '0'
+                        }}
+                        pipStyle={{
+                          fontSize: '0.75rem'
+                        }}
+                        showTooltip={false}
+                      />
                     </div>
 
                     {/* Stress Row */}
                     {instance.stressMax > 0 && (
-                      <div 
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          cursor: 'pointer'
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          if (!onApplyStressChange || type !== 'adversary') return
-                          
-                          const outerRect = e.currentTarget.getBoundingClientRect()
-                          const containerElement = e.currentTarget.querySelector('.pip-container')
-                          
-                          if (!containerElement) {
-                            return
-                          }
-                          
-                          const containerRect = containerElement.getBoundingClientRect()
-                          const clickX = e.clientX - containerRect.left
-                          const currentStress = instance.stress || 0
-                          const maxStress = instance.stressMax
-                          
-                          // Handle clicks outside the pip container (relative to pip container)
-                          if (clickX < 0) {
-                            // Click left of all pips = decrement
-                            if (currentStress > 0) {
-                              onApplyStressChange(instance.id, -1)
+                      <div style={{ opacity: isInstanceDead ? 0.3 : 1 }}>
+                        <Pips
+                          type="adversaryStress"
+                          value={instance.stress || 0}
+                          maxValue={instance.stressMax}
+                          onPipClick={(index, isFilled) => {
+                            if (onApplyStressChange && type === 'adversary') {
+                              if (isFilled) {
+                                // Clicking a filled pip = reduce stress
+                                onApplyStressChange(instance.id, -1)
+                              } else {
+                                // Clicking an empty pip = increase stress
+                                onApplyStressChange(instance.id, 1)
+                              }
                             }
-                            return
-                          }
-                          
-                          if (clickX > containerRect.width) {
-                            // Click right of all pips = increment
-                            if (currentStress < maxStress) {
-                              onApplyStressChange(instance.id, 1)
-                            }
-                            return
-                          }
-                          
-                          // Click within pip container - use boundary logic based on pip container width only
-                          const containerWidth = containerRect.width
-                          const pipPadding = containerWidth * 0.05
-                          const effectiveContainerWidth = containerWidth - (2 * pipPadding)
-                          const clickXWithinContainer = clickX - pipPadding
-                          
-                          // Calculate boundary at the end of the last filled pip
-                          const boundaryRatio = currentStress / maxStress
-                          const boundaryXWithinContainer = effectiveContainerWidth * boundaryRatio
-                          
-                          if (clickXWithinContainer < boundaryXWithinContainer) {
-                            // Click left of boundary = decrement
-                            if (currentStress > 0) {
-                              onApplyStressChange(instance.id, -1)
-                            }
-                          } else {
-                            // Click right of boundary = increment
-                            if (currentStress < maxStress) {
-                              onApplyStressChange(instance.id, 1)
-                            }
-                          }
-                        }}
-                      >
-                        <div 
-                          className="pip-container"
-                          style={{
-                            display: 'flex',
-                            gap: '2px',
-                            alignItems: 'center'
                           }}
-                        >
-                          {Array.from({ length: instance.stressMax }, (_, i) => (
-                            <span
-                              key={i}
-                              style={{
-                                fontSize: '0.75rem',
-                                color: i < (instance.stress || 0) ? 'var(--gold)' : 'var(--text-secondary)',
-                                transition: 'all 0.1s ease'
-                              }}
-                            >
-                              <Activity size={16} />
-                            </span>
-                          ))}
-                        </div>
+                          containerStyle={{
+                            height: 'auto',
+                            padding: '0'
+                          }}
+                          pipStyle={{
+                            fontSize: '0.75rem'
+                          }}
+                          showTooltip={false}
+                        />
                       </div>
                     )}
                   </div>
