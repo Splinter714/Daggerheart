@@ -454,7 +454,7 @@ const Pips = ({
                     />
                   ) : (
                     <IconComponent 
-                      size={16}
+                      size={size === 'lg' ? 18 : 16}
                     />
                   )}
                 </span>

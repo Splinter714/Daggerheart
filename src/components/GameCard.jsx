@@ -2187,8 +2187,11 @@ const GameCard = ({
                           padding: '0'
                         }}
                         pipStyle={{
-                          fontSize: '0.75rem'
+                          fontSize: '1rem',
+                          width: '1.25rem',
+                          height: '1.25rem'
                         }}
+                        size="lg"
                         showTooltip={false}
                       />
                     </div>
@@ -2216,8 +2219,11 @@ const GameCard = ({
                             padding: '0'
                           }}
                           pipStyle={{
-                            fontSize: '0.75rem'
+                            fontSize: '1rem',
+                            width: '1.25rem',
+                            height: '1.25rem'
                           }}
+                          size="lg"
                           showTooltip={false}
                         />
                       </div>
