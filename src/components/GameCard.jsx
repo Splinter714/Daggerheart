@@ -2041,7 +2041,7 @@ const GameCard = ({
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              marginBottom: '-0.25rem'
+              marginBottom: '0.25rem'
             }}>
               <hr style={{
                 flex: 1,
