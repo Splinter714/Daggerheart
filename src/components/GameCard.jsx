@@ -1348,14 +1348,13 @@ const GameCard = ({
           <div style={{
             padding: '8px'
           }}>
-            {/* Actions */}
-            {(((item.atk !== undefined && item.weapon) || item.features.filter(f => f.type === 'Action').length > 0) || isEditMode) && (
-              <div style={{ marginBottom: '1rem' }}>
+            {/* Standard Attack */}
+            {(item.atk !== undefined && item.weapon) && (
+              <div>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem',
-                  marginBottom: '0.75rem'
+                  marginBottom: '-0.25rem'
                 }}>
                   <hr style={{
                     flex: 1,
@@ -1364,28 +1363,20 @@ const GameCard = ({
                     margin: 0
                   }} />
                   <h4 style={{
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: 'white',
                     margin: 0,
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    color: 'var(--text-secondary)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    textAlign: 'center',
-                    minWidth: '80px'
+                    marginLeft: '0.75rem'
                   }}>
-                    Actions
+                    Standard Attack
                   </h4>
-                  <hr style={{
-                    flex: 1,
-                    border: 'none',
-                    borderTop: '1px solid var(--border)',
-                    margin: 0
-                  }} />
                 </div>
                 <div style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.5rem'
+                  flexDirection: 'column'
                 }}>
                   {/* Standard Attack - Show in view mode or edit mode */}
                   {isEditMode ? (
@@ -1462,17 +1453,52 @@ const GameCard = ({
                     <div style={{
                       fontSize: '0.875rem',
                       lineHeight: 1.4,
-                      color: 'var(--text-secondary)'
+                      color: 'var(--text-secondary)',
                     }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {item.weapon} (Standard)
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem', display: 'block' }}>
+                        {item.weapon}
                       </span>
-                      <span> - Make an attack against a target within {item.range || 'Melee'} range. On a success, deal {item.damage || 'damage varies'}.</span>
+                      <div style={{ marginLeft: '0.25rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                        Make an attack against a target within {item.range || 'Melee'} range. On a success, deal {item.damage || 'damage varies'}.
+                      </div>
                     </div>
                     )
                   )}
-                  
-                  {/* Other Actions */}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            {(item.features.filter(f => f.type === 'Action').length > 0 || isEditMode) && (
+              <div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: '-0.25rem'
+                }}>
+                  <hr style={{
+                    flex: 1,
+                    border: 'none',
+                    borderTop: '1px solid var(--border)',
+                    margin: 0
+                  }} />
+                  <h4 style={{
+                    margin: 0,
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    color: 'var(--text-secondary)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    marginLeft: '0.75rem'
+                  }}>
+                    Actions
+                  </h4>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  {/* Actions */}
                   {(() => {
                     const actionFeatures = item.features.filter(f => f.type === 'Action')
                     // Ensure at least one empty action feature in edit mode
@@ -1597,17 +1623,19 @@ const GameCard = ({
                           </div>
                         )
                       }
-                    return (
+                      return (
                     <div key={index} style={{
                       fontSize: '0.875rem',
                       lineHeight: 1.4,
-                      color: 'var(--text-secondary)'
+                      color: 'var(--text-secondary)',
                     }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem', display: 'block' }}>
                         {feature.name}
                       </span>
                       {feature.description && (
-                        <span> - {feature.description}</span>
+                        <div style={{ marginLeft: '0.25rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                          {feature.description}
+                        </div>
                       )}
                     </div>
                     );
@@ -1619,12 +1647,11 @@ const GameCard = ({
 
             {/* Passives */}
             {(item.features.filter(f => f.type === 'Passive').length > 0 || isEditMode) && (
-              <div style={{ marginBottom: '1rem' }}>
+              <div>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem',
-                  marginBottom: '0.75rem'
+                  marginBottom: '-0.25rem'
                 }}>
                   <hr style={{
                     flex: 1,
@@ -1633,28 +1660,20 @@ const GameCard = ({
                     margin: 0
                   }} />
                   <h4 style={{
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: 'white',
                     margin: 0,
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    color: 'var(--text-secondary)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    textAlign: 'center',
-                    minWidth: '80px'
+                    marginLeft: '0.75rem'
                   }}>
                     Passives
                   </h4>
-                  <hr style={{
-                    flex: 1,
-                    border: 'none',
-                    borderTop: '1px solid var(--border)',
-                    margin: 0
-                  }} />
                 </div>
                 <div style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.5rem'
+                  flexDirection: 'column'
                 }}>
                   {(() => {
                     const passiveFeatures = item.features.filter(f => f.type === 'Passive')
@@ -1781,13 +1800,15 @@ const GameCard = ({
                     <div key={index} style={{
                       fontSize: '0.875rem',
                       lineHeight: 1.4,
-                      color: 'var(--text-secondary)'
+                      color: 'var(--text-secondary)',
                     }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem', display: 'block' }}>
                         {feature.name}
                       </span>
                       {feature.description && (
-                        <span> - {feature.description}</span>
+                        <div style={{ marginLeft: '0.25rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                          {feature.description}
+                        </div>
                       )}
                     </div>
                       )
@@ -1799,12 +1820,11 @@ const GameCard = ({
 
             {/* Reactions */}
             {(item.features.filter(f => f.type === 'Reaction').length > 0 || isEditMode) && (
-              <div style={{ marginBottom: '1rem' }}>
+              <div>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem',
-                  marginBottom: '0.75rem'
+                  marginBottom: '-0.25rem'
                 }}>
                   <hr style={{
                     flex: 1,
@@ -1813,28 +1833,20 @@ const GameCard = ({
                     margin: 0
                   }} />
                   <h4 style={{
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: 'white',
                     margin: 0,
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    color: 'var(--text-secondary)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    textAlign: 'center',
-                    minWidth: '80px'
+                    marginLeft: '0.75rem'
                   }}>
                     Reactions
                   </h4>
-                  <hr style={{
-                    flex: 1,
-                    border: 'none',
-                    borderTop: '1px solid var(--border)',
-                    margin: 0
-                  }} />
                 </div>
                 <div style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.5rem'
+                  flexDirection: 'column'
                 }}>
                   {(() => {
                     const reactionFeatures = item.features.filter(f => f.type === 'Reaction')
@@ -1961,13 +1973,15 @@ const GameCard = ({
                     <div key={index} style={{
                       fontSize: '0.875rem',
                       lineHeight: 1.4,
-                      color: 'var(--text-secondary)'
+                      color: 'var(--text-secondary)',
                     }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem', display: 'block' }}>
                         {feature.name}
                       </span>
                       {feature.description && (
-                        <span> - {feature.description}</span>
+                        <div style={{ marginLeft: '0.25rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                          {feature.description}
+                        </div>
                       )}
                     </div>
                       )
