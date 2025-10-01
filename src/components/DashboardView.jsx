@@ -153,6 +153,10 @@ const DashboardContent = () => {
     setEncounterBuilderOpen(true)
   }
 
+  const handleToggleEncounterBuilder = () => {
+    setEncounterBuilderOpen(!encounterBuilderOpen)
+  }
+
   const handleCloseEncounterBuilder = useCallback(() => {
     setEncounterBuilderOpen(false)
   }, [])
@@ -233,16 +237,8 @@ const DashboardContent = () => {
 
       {/* Floating Menu */}
       <FloatingMenu
-        adversaries={adversaries}
-        environments={environments}
-        countdowns={countdowns}
-        deleteAdversary={deleteAdversary}
-        deleteEnvironment={deleteEnvironment}
-        deleteCountdown={deleteCountdown}
-        isClearMode={isClearMode}
-        setIsClearMode={setIsClearMode}
-        sortAdversaries={() => {}} // Disabled for dashboard view
-        onOpenDatabase={handleOpenEncounterBuilder}
+        onToggle={handleToggleEncounterBuilder}
+        isOpen={encounterBuilderOpen}
       />
 
       {/* Main Dashboard Content */}

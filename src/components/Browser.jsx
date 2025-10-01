@@ -2,6 +2,8 @@ import React, { useMemo, useEffect, useRef, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Filter, Square, CheckSquare, Plus, X } from 'lucide-react'
 import GameCard from './GameCard'
+import logoImage from '../assets/daggerheart-logo.svg'
+import CustomAdversaryBrowser from './CustomAdversaryBrowser'
 
 // Custom Adversary Creator Component - Editable Card Style
 const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem }) => {
@@ -1202,7 +1204,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 }
 
 // Main Browser Component
-const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries' }) => {
+const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary }) => {
   const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
   const [showCostDropdown, setShowCostDropdown] = useState(false)
   const [selectedAdversary, setSelectedAdversary] = useState(null)
@@ -1619,12 +1621,114 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
         </div>
       )}
 
-      {activeTab === 'custom' && (
+      {activeTab === 'create' && (
         <CustomAdversaryCreator 
           onSave={addCustomAdversary}
           onRefresh={refreshData}
           onAddItem={onAddItem}
         />
+      )}
+
+      {activeTab === 'myAdversaries' && (
+        <CustomAdversaryBrowser 
+          selectedAdversaryId={selectedCustomAdversaryId}
+          onSelectAdversary={onSelectCustomAdversary}
+        />
+      )}
+
+      {activeTab === 'info' && (
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '2rem'
+        }}>
+          {/* DPCGL Attribution */}
+          <div style={{
+            marginBottom: '2rem',
+            textAlign: 'center'
+          }}>
+            <img 
+              src={logoImage}
+              alt="Daggerheart Community Content Logo"
+              style={{
+                width: '100%',
+                maxWidth: '300px',
+                height: 'auto',
+                margin: '0 auto 1.5rem auto',
+                display: 'block'
+              }}
+              onError={(e) => {
+                console.error('Failed to load Daggerheart logo:', e.target.src);
+                e.target.style.display = 'none';
+              }}
+            />
+            <div style={{
+              fontSize: '0.875rem',
+              lineHeight: 1.6,
+              color: 'var(--text-secondary)',
+              textAlign: 'left',
+              maxWidth: '600px',
+              margin: '0 auto'
+            }}>
+              <p style={{ marginTop: 0 }}>This product includes materials from the Daggerheart System Reference Document 1.0, © Critical Role, LLC, under the terms of the Darrington Press Community Gaming (DPCGL) License.</p>
+              <p>More information can be found at <a href="https://www.daggerheart.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--purple)', textDecoration: 'underline' }}>daggerheart.com</a></p>
+              <p style={{ marginBottom: 0 }}><em>This project is unofficial and not endorsed by Darrington Press or Critical Role.</em></p>
+            </div>
+          </div>
+          
+          {/* Links */}
+          <div style={{
+            maxWidth: '600px',
+            margin: '0 auto',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            overflow: 'hidden'
+          }}>
+            <button 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '1rem 1.5rem',
+                color: 'var(--text-primary)',
+                border: 'none',
+                background: 'var(--bg-secondary)',
+                width: '100%',
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s ease',
+                fontSize: '0.875rem',
+                borderBottom: '1px solid var(--border)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'var(--bg-hover)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'var(--bg-secondary)'
+              }}
+              onClick={(e) => { 
+                e.stopPropagation();
+                window.open('https://github.com/Splinter714/Daggerheart', '_blank')
+              }}
+            >
+              <span>View on GitHub</span>
+              <span>→</span>
+            </button>
+            
+            {/* Version */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1rem 1.5rem',
+              color: 'var(--text-secondary)',
+              background: 'var(--bg-secondary)',
+              fontSize: '0.875rem'
+            }}>
+              Version {typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev'}
+            </div>
+          </div>
+        </div>
       )}
     </div>
     

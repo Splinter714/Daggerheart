@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Plus, Minus, Users, Calculator } from 'lucide-react'
 import Browser from './Browser'
 import { useGameState } from '../state/state'
+import GameCard from './GameCard'
 
 // Battle Points calculation based on Daggerheart rules
 const calculateBaseBattlePoints = (pcCount) => (3 * pcCount) + 2
@@ -48,7 +49,7 @@ const EncounterBuilder = ({
   onDeleteEncounter
 }) => {
   // Get party size and current encounter name from global state
-  const { partySize, updatePartySize, currentEncounterName, updateCurrentEncounterName } = useGameState()
+  const { partySize, updatePartySize, currentEncounterName, updateCurrentEncounterName, customContent } = useGameState()
   const pcCount = partySize
   const setPcCount = updatePartySize
   
@@ -61,9 +62,10 @@ const EncounterBuilder = ({
   
   const [encounterItems, setEncounterItems] = useState([])
   const [encounterName, setEncounterName] = useState(currentEncounterName || 'Encounter')
-  const [activeTab, setActiveTab] = useState('adversaries')
+  const [activeTab, setActiveTab] = useState('adversaries') // 'adversaries', 'encounters', 'create', 'myAdversaries', 'info'
   const [loadedEncounterId, setLoadedEncounterId] = useState(null) // Track which encounter is loaded
   const [originalEncounterData, setOriginalEncounterData] = useState(null) // Track original data for change detection
+  const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null) // Track selected custom adversary
   
   // Sync encounter name with global state
   useEffect(() => {
@@ -671,6 +673,11 @@ const EncounterBuilder = ({
   
   if (!isOpen) return null
   
+  // Detect if running as PWA
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                 window.navigator.standalone === true ||
+                 document.referrer.includes('android-app://')
+
   return (
     <div 
       onClick={onClose}
@@ -680,7 +687,7 @@ const EncounterBuilder = ({
         top: 0,
         left: 0,
         right: 0,
-        bottom: 0,
+        bottom: isPWA ? 'calc(60px + env(safe-area-inset-bottom) + 1rem)' : 'calc(60px + env(safe-area-inset-bottom))',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         backdropFilter: 'blur(8px)',
         zIndex: 1000,
@@ -698,138 +705,112 @@ const EncounterBuilder = ({
           borderRadius: '12px',
           width: '100%',
           maxWidth: '1200px',
-          height: 'calc(100vh - 24px)',
-          height: 'calc(100dvh - 24px)',
+          height: '100%',
+          maxHeight: '100%',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
         }}
       >
-      {/* Unified Top Bar - Tabs on Left, Receipt Buttons on Right */}
+      {/* Full-Width Tabs Bar */}
       <div className="encounter-top-bar" style={{
         flex: '0 0 auto',
         display: 'flex',
         alignItems: 'center',
         height: '39px',
-        backgroundColor: 'var(--bg-primary)'
+        backgroundColor: 'var(--bg-primary)',
+        borderBottom: '1px solid var(--border)'
       }}>
-        {/* Left Side - Tabs (same width as browser below) */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center'
-        }}>
-          <button
-            onClick={() => setActiveTab('adversaries')}
-            style={{
-              flex: 1,
-              background: activeTab === 'adversaries' ? 'var(--gray-900)' : 'transparent',
-              border: 'none',
-              borderBottom: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-              padding: '0.75rem 1rem',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: activeTab === 'adversaries' ? '500' : '400',
-              transition: 'all 0.2s ease',
-              position: 'relative',
-              borderRight: '1px solid var(--border)'
-            }}
-          >
-            Adversary Browser
-          </button>
-          <button
-            onClick={() => setActiveTab('encounters')}
-            style={{
-              flex: 1,
-              background: activeTab === 'encounters' ? 'var(--gray-900)' : 'transparent',
-              border: 'none',
-              borderBottom: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-              padding: '0.75rem 1rem',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: activeTab === 'encounters' ? '500' : '400',
-              transition: 'all 0.2s ease',
-              position: 'relative',
-              borderRight: '1px solid var(--border)'
-            }}
-          >
-            Saved Encounters
-          </button>
-          <button
-            onClick={() => setActiveTab('custom')}
-            style={{
-              flex: 1,
-              background: activeTab === 'custom' ? 'var(--gray-900)' : 'transparent',
-              border: 'none',
-              borderBottom: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-              padding: '0.75rem 1rem',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: activeTab === 'custom' ? '500' : '400',
-              transition: 'all 0.2s ease',
-              position: 'relative'
-            }}
-          >
-            Adversary Creator
-          </button>
-        </div>
-        
-                {/* Right Side - Encounter Name Field */}
-                <div className="encounter-receipt-buttons" style={{
-                  flex: '0 0 350px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: 'center',
-                  borderLeft: '1px solid var(--border)',
-                  height: '100%',
-                  padding: '1rem 0.75rem'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    width: '100%'
-                  }}>
-                    <input
-                      type="text"
-                      value={encounterName}
-                      onChange={(e) => {
-                        setEncounterName(e.target.value)
-                        updateCurrentEncounterName(e.target.value)
-                      }}
-                      placeholder="Encounter Name"
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        border: '1px solid var(--border)',
-                        borderRadius: '4px',
-                        backgroundColor: 'var(--bg-primary)',
-                        color: 'var(--text-primary)',
-                        fontSize: '16px',
-                        textAlign: 'left',
-                        outline: 'none',
-                        transition: 'all 0.2s ease'
-                      }}
-                    />
-                    <ReceiptButton 
-                      onClick={handleNew}
-                      variant="secondary"
-                      style={{ 
-                        whiteSpace: 'nowrap', 
-                        minWidth: 'fit-content', 
-                        flexShrink: 0,
-                        opacity: hasMeaningfulChanges() ? 1 : 0.5,
-                        cursor: hasMeaningfulChanges() ? 'pointer' : 'not-allowed'
-                      }}
-                    >
-                      New
-                    </ReceiptButton>
-                  </div>
-                </div>
+        <button
+          onClick={() => setActiveTab('adversaries')}
+          style={{
+            flex: 1,
+            background: activeTab === 'adversaries' ? 'var(--gray-900)' : 'transparent',
+            border: 'none',
+            color: 'var(--text-primary)',
+            padding: '0.75rem 1rem',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: activeTab === 'adversaries' ? '500' : '400',
+            transition: 'all 0.2s ease',
+            position: 'relative',
+            borderRight: '1px solid var(--border)'
+          }}
+        >
+          Adversary Browser
+        </button>
+        <button
+          onClick={() => setActiveTab('encounters')}
+          style={{
+            flex: 1,
+            background: activeTab === 'encounters' ? 'var(--gray-900)' : 'transparent',
+            border: 'none',
+            color: 'var(--text-primary)',
+            padding: '0.75rem 1rem',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: activeTab === 'encounters' ? '500' : '400',
+            transition: 'all 0.2s ease',
+            position: 'relative',
+            borderRight: '1px solid var(--border)'
+          }}
+        >
+          Saved Encounters
+        </button>
+        <button
+          onClick={() => setActiveTab('create')}
+          style={{
+            flex: 1,
+            background: activeTab === 'create' ? 'var(--gray-900)' : 'transparent',
+            border: 'none',
+            color: 'var(--text-primary)',
+            padding: '0.75rem 1rem',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: activeTab === 'create' ? '500' : '400',
+            transition: 'all 0.2s ease',
+            position: 'relative',
+            borderRight: '1px solid var(--border)'
+          }}
+        >
+          Create Adversary
+        </button>
+        <button
+          onClick={() => setActiveTab('myAdversaries')}
+          style={{
+            flex: 1,
+            background: activeTab === 'myAdversaries' ? 'var(--gray-900)' : 'transparent',
+            border: 'none',
+            color: 'var(--text-primary)',
+            padding: '0.75rem 1rem',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: activeTab === 'myAdversaries' ? '500' : '400',
+            transition: 'all 0.2s ease',
+            position: 'relative',
+            borderRight: '1px solid var(--border)'
+          }}
+        >
+          My Adversaries
+        </button>
+        <button
+          onClick={() => setActiveTab('info')}
+          style={{
+            flex: 1,
+            background: activeTab === 'info' ? 'var(--gray-900)' : 'transparent',
+            border: 'none',
+            color: 'var(--text-primary)',
+            padding: '0.75rem 1rem',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: activeTab === 'info' ? '500' : '400',
+            transition: 'all 0.2s ease',
+            position: 'relative'
+          }}
+        >
+          Info
+        </button>
       </div>
 
       {/* Main Content Area */}
@@ -856,10 +837,13 @@ const EncounterBuilder = ({
             onLoadEncounter={handleLoadEncounter}
             onDeleteEncounter={handleDeleteEncounter}
             activeTab={activeTab}
+            selectedCustomAdversaryId={selectedCustomAdversaryId}
+            onSelectCustomAdversary={setSelectedCustomAdversaryId}
           />
         </div>
         
         {/* Right Panel - Receipt Below Buttons */}
+        {activeTab !== 'info' && (
         <div className="encounter-right-panel" style={{
           flex: '0 0 350px',
           borderLeft: '1px solid var(--border)',
@@ -868,7 +852,61 @@ const EncounterBuilder = ({
           overflow: 'hidden'
           }}>
             
-            {/* Encounter Name Field - Above Receipt in Vertical Mode */}
+            {/* Encounter Name Field - At top of right panel */}
+            {(activeTab === 'adversaries' || activeTab === 'encounters') && (
+              <div style={{
+                padding: '0.75rem',
+                backgroundColor: 'var(--bg-primary)',
+                flexShrink: 0
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  width: '100%'
+                }}>
+                  <input
+                    type="text"
+                    value={encounterName}
+                    onChange={(e) => {
+                      setEncounterName(e.target.value)
+                      updateCurrentEncounterName(e.target.value)
+                    }}
+                    placeholder="Encounter Name"
+                    style={{
+                      flex: 1,
+                      padding: '8px 12px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      backgroundColor: 'var(--bg-primary)',
+                      color: 'var(--text-primary)',
+                      fontSize: '16px',
+                      textAlign: 'left',
+                      outline: 'none',
+                      transition: 'all 0.2s ease'
+                    }}
+                  />
+                  <ReceiptButton 
+                    onClick={handleNew}
+                    variant="secondary"
+                    style={{ 
+                      whiteSpace: 'nowrap', 
+                      minWidth: 'fit-content', 
+                      flexShrink: 0,
+                      opacity: hasMeaningfulChanges() ? 1 : 0.5,
+                      cursor: hasMeaningfulChanges() ? 'pointer' : 'not-allowed'
+                    }}
+                  >
+                    New
+                  </ReceiptButton>
+                </div>
+              </div>
+            )}
+            
+            {/* Show Encounter Receipt for Adversaries and Encounters tabs */}
+            {(activeTab === 'adversaries' || activeTab === 'encounters') && (
+              <>
+            {/* Encounter Name Field - Above Receipt in Vertical Mode (for mobile) */}
             <div className="encounter-receipt-buttons-vertical" style={{
               display: 'none', // Hidden by default, shown in vertical mode via CSS
               padding: '0.75rem',
@@ -1112,11 +1150,118 @@ const EncounterBuilder = ({
             </div>
             
             </div>
-            
-          </div>
+              </>
+            )}
+
+            {/* Show Adversary Creation Guidance for Create tab */}
+            {activeTab === 'create' && (
+              <div style={{
+                padding: '1.5rem',
+                overflowY: 'auto',
+                height: '100%'
+              }}>
+                <h3 style={{
+                  fontSize: '1.125rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  marginTop: 0,
+                  marginBottom: '1rem'
+                }}>
+                  Creating Adversaries
+                </h3>
+                <div style={{
+                  fontSize: '0.875rem',
+                  lineHeight: 1.6,
+                  color: 'var(--text-secondary)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem'
+                }}>
+                  <p>Use the form to create custom adversaries for your encounters.</p>
+                  
+                  <div>
+                    <strong style={{ color: 'var(--text-primary)' }}>Adversary Types:</strong>
+                    <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
+                      <li><strong>Minion (1 BP):</strong> Weak enemies in groups</li>
+                      <li><strong>Standard (2 BP):</strong> Average threat level</li>
+                      <li><strong>Leader (3 BP):</strong> Commands others</li>
+                      <li><strong>Bruiser (4 BP):</strong> High HP tank</li>
+                      <li><strong>Solo (5 BP):</strong> Boss-level threat</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <strong style={{ color: 'var(--text-primary)' }}>Tips:</strong>
+                    <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
+                      <li>Match adversary tier to party level</li>
+                      <li>Balance encounter difficulty with Battle Points</li>
+                      <li>Mix adversary types for variety</li>
+                      <li>Add features that create interesting choices</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Show Selected Adversary Preview for My Adversaries tab */}
+            {activeTab === 'myAdversaries' && (
+              <div style={{
+                padding: '1.5rem',
+                overflowY: 'auto',
+                height: '100%'
+              }}>
+                {selectedCustomAdversaryId ? (
+                  (() => {
+                    const selectedAdversary = customContent?.adversaries?.find(
+                      adv => adv.id === selectedCustomAdversaryId
+                    )
+                    return selectedAdversary ? (
+                      <GameCard
+                        item={selectedAdversary}
+                        type="adversary"
+                        mode="expanded"
+                        onUpdate={() => {}}
+                        onDelete={() => {}}
+                      />
+                    ) : (
+                      <div style={{
+                        fontSize: '0.875rem',
+                        color: 'var(--text-secondary)',
+                        textAlign: 'center',
+                        padding: '2rem 0'
+                      }}>
+                        Adversary not found
+                      </div>
+                    )
+                  })()
+                ) : (
+                  <div>
+                    <h3 style={{
+                      fontSize: '1.125rem',
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      marginTop: 0,
+                      marginBottom: '1rem'
+                    }}>
+                      Adversary Preview
+                    </h3>
+                    <div style={{
+                      fontSize: '0.875rem',
+                      color: 'var(--text-secondary)',
+                      textAlign: 'center',
+                      padding: '2rem 0'
+                    }}>
+                      Select an adversary to view details
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
         </div>
+        )}
       </div>
+    </div>
     </div>
   )
 }
