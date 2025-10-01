@@ -1,5 +1,0 @@
-/* Browser Component Specific Styles - Modular imports */
-
-/* Import browser component modules */
-@import "./browser-table.css";
-@import "./browser-controls.css";
