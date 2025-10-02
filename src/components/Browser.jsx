@@ -4,9 +4,10 @@ import { Filter, Square, CheckSquare, Plus, X } from 'lucide-react'
 import GameCard from './GameCard'
 import logoImage from '../assets/daggerheart-logo.svg'
 import CustomAdversaryBrowser from './CustomAdversaryBrowser'
+import { useGameState } from '../state/state'
 
 // Custom Adversary Creator Component - Editable Card Style
-const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem }) => {
+const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem, editingAdversary, onCancelEdit }) => {
   const [formData, setFormData] = useState({
     name: '',
     tier: 1,
@@ -17,7 +18,7 @@ const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem }) => {
     thresholds: { major: 7, severe: 12 },
     hpMax: 3,
     stressMax: 1,
-    atk: '+1',
+    atk: 1,
     weapon: '',
     range: 'Melee',
     damage: '',
@@ -26,6 +27,48 @@ const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem }) => {
   })
   
   const [isSaving, setIsSaving] = useState(false)
+
+  // Initialize form data when editing
+  React.useEffect(() => {
+    if (editingAdversary) {
+      setFormData({
+        name: editingAdversary.name || '',
+        tier: editingAdversary.tier || 1,
+        type: editingAdversary.type || 'Standard',
+        description: editingAdversary.description || '',
+        motives: editingAdversary.motives || '',
+        difficulty: editingAdversary.difficulty || 11,
+        thresholds: editingAdversary.thresholds || { major: 7, severe: 12 },
+        hpMax: editingAdversary.hpMax || 3,
+        stressMax: editingAdversary.stressMax || 1,
+        atk: editingAdversary.atk || 1,
+        weapon: editingAdversary.weapon || '',
+        range: editingAdversary.range || 'Melee',
+        damage: editingAdversary.damage || '',
+        experience: editingAdversary.experience || [],
+        features: editingAdversary.features || []
+      })
+    } else {
+      // Reset to default when not editing
+      setFormData({
+        name: '',
+        tier: 1,
+        type: 'Standard',
+        description: '',
+        motives: '',
+        difficulty: 11,
+        thresholds: { major: 7, severe: 12 },
+        hpMax: 3,
+        stressMax: 1,
+        atk: 1,
+        weapon: '',
+        range: 'Melee',
+        damage: '',
+        experience: [],
+        features: []
+      })
+    }
+  }, [editingAdversary])
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -54,43 +97,51 @@ const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem }) => {
     try {
       const adversaryData = {
         ...formData,
-        hp: 0,
-        stress: 0,
+        hp: editingAdversary ? editingAdversary.hp : 0,
+        stress: editingAdversary ? editingAdversary.stress : 0,
         source: 'Homebrew'
       }
       
-      const savedAdversary = await onSave(adversaryData)
-      
-      // Add the new adversary to the current encounter
-      if (onAddItem && savedAdversary) {
-        onAddItem(savedAdversary)
+      if (editingAdversary) {
+        // Update existing adversary
+        adversaryData.id = editingAdversary.id
+        await onSave(adversaryData, editingAdversary.id)
+        alert('Adversary updated successfully!')
+        if (onCancelEdit) {
+          onCancelEdit()
+        }
+      } else {
+        // Create new adversary
+        const savedAdversary = await onSave(adversaryData)
+        
+        // Note: Removed auto-add to encounter - user can manually add from browser
+        
+        // Refresh the browser data to show the new adversary
+        if (onRefresh) {
+          await onRefresh()
+        }
+        
+        // Reset form
+        setFormData({
+          name: '',
+          tier: 1,
+          type: 'Standard',
+          description: '',
+          motives: '',
+          difficulty: 11,
+          thresholds: { major: 7, severe: 12 },
+          hpMax: 3,
+          stressMax: 1,
+          atk: 1,
+          weapon: '',
+          range: 'Melee',
+          damage: '',
+          experience: [],
+          features: []
+        })
+        
+        alert('Custom adversary created successfully!')
       }
-      
-      // Refresh the browser data to show the new adversary
-      if (onRefresh) {
-        await onRefresh()
-      }
-      
-      // Reset form
-      setFormData({
-        name: '',
-        tier: 1,
-        type: 'Standard',
-        description: '',
-        motives: '',
-        difficulty: 11,
-        thresholds: { major: 7, severe: 12 },
-        hpMax: 3,
-        stressMax: 1,
-        atk: '+1',
-        weapon: '',
-        range: 'Melee',
-        damage: '',
-        experience: [],
-        features: []
-      })
-      
-      alert('Custom adversary created successfully!')
     } catch (error) {
       console.error('Error saving adversary:', error)
       alert('Error saving adversary. Please try again.')
@@ -134,7 +185,7 @@ const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem }) => {
             fontWeight: '600',
             margin: 0
           }}>
-            Create Custom Adversary
+            {editingAdversary ? 'Edit Custom Adversary' : 'Create Custom Adversary'}
           </h2>
           <button
             onClick={handleSave}
@@ -151,7 +202,7 @@ const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem }) => {
               opacity: isSaving || !formData.name.trim() ? 0.6 : 1
             }}
           >
-            {isSaving ? 'Creating...' : 'Create and Add'}
+            {isSaving ? (editingAdversary ? 'Saving...' : 'Creating...') : (editingAdversary ? 'Save' : 'Create')}
           </button>
         </div>
 
@@ -363,22 +414,7 @@ const loadData = async () => {
 }
 
 // Functions to manage custom content
-const addCustomAdversary = (adversaryData) => {
-  const { customAdversaries } = loadCustomContent()
-  const newAdversary = {
-    ...adversaryData,
-    id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
-    source: adversaryData.source || 'Homebrew'
-  }
-  const updatedAdversaries = [...customAdversaries, newAdversary]
-  saveCustomContent('adversary', updatedAdversaries)
-  
-  // Reset flag and reload data to include the new custom adversary
-  _dataLoaded = false
-  loadData()
-  
-  return newAdversary
-}
+// Note: addCustomAdversary is now imported from useGameState
 
 const addCustomEnvironment = (environmentData) => {
   const { customEnvironments } = loadCustomContent()
@@ -1204,13 +1240,38 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 }
 
 // Main Browser Component
-const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary }) => {
+const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange }) => {
+  const { addCustomAdversary, updateCustomAdversary } = useGameState()
+  const [editingAdversary, setEditingAdversary] = useState(null)
   const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
   const [showCostDropdown, setShowCostDropdown] = useState(false)
   const [selectedAdversary, setSelectedAdversary] = useState(null)
   const [deleteConfirmations, setDeleteConfirmations] = useState({}) // Track which encounters are in delete confirmation state
   const deleteTimeouts = useRef({}) // Track timeouts for each encounter
   const costFilterRef = useRef(null)
+  
+  // Handle editing custom adversaries
+  const handleEditAdversary = (adversary) => {
+    setEditingAdversary(adversary)
+    // Switch to create tab
+    if (onTabChange) {
+      onTabChange('create')
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingAdversary(null)
+  }
+
+  const handleSaveAdversary = async (adversaryData, id) => {
+    if (id) {
+      // Update existing adversary
+      updateCustomAdversary(id, adversaryData)
+    } else {
+      // Create new adversary
+      addCustomAdversary(adversaryData)
+    }
+  }
   
   // Handle two-stage delete
   const handleDeleteClick = (encounterId) => {
@@ -1623,9 +1684,11 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
 
       {activeTab === 'create' && (
         <CustomAdversaryCreator 
-          onSave={addCustomAdversary}
-          onRefresh={refreshData}
+          onSave={handleSaveAdversary}
+          onRefresh={() => {}} // No need to refresh since state updates automatically
           onAddItem={onAddItem}
+          editingAdversary={editingAdversary}
+          onCancelEdit={handleCancelEdit}
         />
       )}
 
@@ -1633,6 +1696,7 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
         <CustomAdversaryBrowser 
           selectedAdversaryId={selectedCustomAdversaryId}
           onSelectAdversary={onSelectCustomAdversary}
+          onEditAdversary={handleEditAdversary}
         />
       )}
 
@@ -2105,7 +2169,6 @@ const styles = {
 
 // Export custom content management functions
 export { 
-  addCustomAdversary, 
   addCustomEnvironment, 
   updateCustomContent, 
   deleteCustomContent,

@@ -839,6 +839,7 @@ const EncounterBuilder = ({
             activeTab={activeTab}
             selectedCustomAdversaryId={selectedCustomAdversaryId}
             onSelectCustomAdversary={setSelectedCustomAdversaryId}
+            onTabChange={setActiveTab}
           />
         </div>
         

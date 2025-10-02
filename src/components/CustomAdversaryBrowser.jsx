@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react'
-import { Search, X, Trash2 } from 'lucide-react'
+import { Search, X, Trash2, Edit } from 'lucide-react'
 import { useGameState } from '../state/state'
 
-const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId }) => {
+const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEditAdversary }) => {
   const { customContent, deleteCustomAdversary } = useGameState()
   const [searchTerm, setSearchTerm] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState(null) // Track which adversary is in delete confirmation state
@@ -48,6 +48,13 @@ const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId }) => {
   const handleRowClick = (adversary) => {
     if (onSelectAdversary) {
       onSelectAdversary(adversary.id)
+    }
+  }
+
+  const handleEditClick = (e, adversary) => {
+    e.stopPropagation()
+    if (onEditAdversary) {
+      onEditAdversary(adversary)
     }
   }
 
@@ -243,6 +250,24 @@ const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId }) => {
                   <td style={styles.td}>{adversary.hpMax || '-'}</td>
                   <td style={styles.td}>{adversary.stressMax || '-'}</td>
                   <td style={{ ...styles.td, display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      style={{
+                        ...styles.actionButton,
+                        color: 'var(--text-secondary)'
+                      }}
+                      onClick={(e) => handleEditClick(e, adversary)}
+                      onMouseEnter={(e) => {
+                        e.target.style.color = 'var(--purple)'
+                        e.target.style.backgroundColor = 'rgba(147, 51, 234, 0.1)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.color = 'var(--text-secondary)'
+                        e.target.style.backgroundColor = 'transparent'
+                      }}
+                      title="Edit adversary"
+                    >
+                      <Edit size={16} />
+                    </button>
                     <button
                       style={{
                         ...styles.actionButton,

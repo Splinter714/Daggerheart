@@ -1049,6 +1049,25 @@ const GameCard = ({
     const isDead = (item.hp || 0) >= (item.hpMax || 1)
     const isEditMode = mode === 'edit'
     
+    // Debug logging for custom adversaries
+    console.log('=== EXPANDED ADVERSARY CARD DEBUG ===')
+    console.log('Item data:', item)
+    console.log('Item ID:', item.id)
+    console.log('Item name:', item.name)
+    console.log('Item type:', item.type)
+    console.log('Item tier:', item.tier)
+    console.log('Item difficulty:', item.difficulty)
+    console.log('Item atk:', item.atk, 'Type:', typeof item.atk)
+    console.log('Item hpMax:', item.hpMax)
+    console.log('Item stressMax:', item.stressMax)
+    console.log('Item thresholds:', item.thresholds)
+    console.log('Item experience:', item.experience)
+    console.log('Item features:', item.features)
+    console.log('Item motives:', item.motives)
+    console.log('Item description:', item.description)
+    console.log('Is custom?', item.isCustom || item.source === 'Homebrew')
+    console.log('=====================================')
+    
 
     return (
       <div 
@@ -1336,24 +1355,29 @@ const GameCard = ({
                     {isEditMode ? (
                       <input
                         type="text"
-                        value={item.atk || ''}
+                        value={(() => {
+                          const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9\-]/g, '')) : (item.atk || 0)
+                          return atkValue >= 0 ? `+${atkValue}` : atkValue.toString()
+                        })()}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9+\-d]/g, '')
+                          const value = e.target.value.replace(/[^0-9+\-]/g, '')
                           if (value.length <= 4) {
-                            onUpdate && onUpdate(item.id, { atk: value })
+                            // Parse the value to store as number
+                            const numericValue = parseInt(value.replace(/[^0-9\-]/g, '')) || 0
+                            onUpdate && onUpdate(item.id, { atk: numericValue })
                           }
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'ArrowUp') {
                             e.preventDefault()
-                            const current = parseInt(item.atk) || 0
+                            const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9\-]/g, '')) : (item.atk || 0)
                             const newValue = current + 1
-                            onUpdate && onUpdate(item.id, { atk: newValue >= 0 ? `+${newValue}` : newValue.toString() })
+                            onUpdate && onUpdate(item.id, { atk: newValue })
                           } else if (e.key === 'ArrowDown') {
                             e.preventDefault()
-                            const current = parseInt(item.atk) || 0
+                            const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9\-]/g, '')) : (item.atk || 0)
                             const newValue = current - 1
-                            onUpdate && onUpdate(item.id, { atk: newValue >= 0 ? `+${newValue}` : newValue.toString() })
+                            onUpdate && onUpdate(item.id, { atk: newValue })
                           }
                         }}
                         style={{
@@ -1384,7 +1408,10 @@ const GameCard = ({
                         color: 'white',
                         pointerEvents: 'none'
                       }}>
-                        {item.atk >= 0 ? '+' : ''}{item.atk}
+                        {(() => {
+                          const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9\-]/g, '')) : item.atk
+                          return atkValue >= 0 ? `+${atkValue}` : atkValue
+                        })()}
                       </span>
                     )}
                   </div>
