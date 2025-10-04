@@ -1241,7 +1241,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 
 // Main Browser Component
 const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange }) => {
-  const { addCustomAdversary, updateCustomAdversary } = useGameState()
+  const { addCustomAdversary, updateCustomAdversary, customContent } = useGameState()
   const [editingAdversary, setEditingAdversary] = useState(null)
   const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
   const [showCostDropdown, setShowCostDropdown] = useState(false)
@@ -1249,6 +1249,101 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
   const [deleteConfirmations, setDeleteConfirmations] = useState({}) // Track which encounters are in delete confirmation state
   const deleteTimeouts = useRef({}) // Track timeouts for each encounter
   const costFilterRef = useRef(null)
+  
+  // Export custom adversaries to JSON file
+  const handleExportCustomAdversaries = () => {
+    try {
+      const exportData = {
+        version: '1.0',
+        exportDate: new Date().toISOString(),
+        customAdversaries: customContent.adversaries || []
+      }
+      
+      const dataStr = JSON.stringify(exportData, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `daggerheart-custom-adversaries-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      
+      // Show success message (you could add a toast notification here)
+      console.log('Custom adversaries exported successfully')
+    } catch (error) {
+      console.error('Failed to export custom adversaries:', error)
+      alert('Failed to export custom adversaries. Please try again.')
+    }
+  }
+  
+  // Import custom adversaries from JSON file
+  const handleImportCustomAdversaries = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+    
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const importData = JSON.parse(e.target.result)
+        
+        // Validate the import data structure
+        if (!importData.customAdversaries || !Array.isArray(importData.customAdversaries)) {
+          throw new Error('Invalid file format. Expected customAdversaries array.')
+        }
+        
+        // Check for duplicates and merge
+        const existingAdversaries = customContent.adversaries || []
+        const importedAdversaries = importData.customAdversaries
+        const mergedAdversaries = [...existingAdversaries]
+        
+        let addedCount = 0
+        let skippedCount = 0
+        
+        importedAdversaries.forEach(importedAdv => {
+          // Check if adversary with same name already exists
+          const exists = existingAdversaries.some(existing => 
+            existing.name === importedAdv.name && existing.source === importedAdv.source
+          )
+          
+          if (!exists) {
+            // Generate new ID to avoid conflicts
+            const newAdversary = {
+              ...importedAdv,
+              id: `custom-adv-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+            }
+            mergedAdversaries.push(newAdversary)
+            addedCount++
+          } else {
+            skippedCount++
+          }
+        })
+        
+        // Update the custom content
+        if (addedCount > 0) {
+          // Update localStorage directly
+          localStorage.setItem('daggerheart-custom-adversaries', JSON.stringify(mergedAdversaries))
+          
+          // Force a page reload to update the state
+          window.location.reload()
+          
+          alert(`Import successful! Added ${addedCount} new adversaries${skippedCount > 0 ? `, skipped ${skippedCount} duplicates` : ''}.`)
+        } else {
+          alert('No new adversaries were added. All imported adversaries already exist.')
+        }
+        
+      } catch (error) {
+        console.error('Failed to import custom adversaries:', error)
+        alert('Failed to import custom adversaries. Please check the file format and try again.')
+      }
+    }
+    
+    reader.readAsText(file)
+    // Reset the input so the same file can be selected again
+    event.target.value = ''
+  }
   
   // Handle editing custom adversaries
   const handleEditAdversary = (adversary) => {
@@ -1697,6 +1792,8 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
           selectedAdversaryId={selectedCustomAdversaryId}
           onSelectAdversary={onSelectCustomAdversary}
           onEditAdversary={handleEditAdversary}
+          onExportCustomAdversaries={handleExportCustomAdversaries}
+          onImportCustomAdversaries={handleImportCustomAdversaries}
         />
       )}
 

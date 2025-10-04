@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { Search, X, Trash2, Edit } from 'lucide-react'
 import { useGameState } from '../state/state'
 
-const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEditAdversary }) => {
+const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEditAdversary, onExportCustomAdversaries, onImportCustomAdversaries }) => {
   const { customContent, deleteCustomAdversary } = useGameState()
   const [searchTerm, setSearchTerm] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState(null) // Track which adversary is in delete confirmation state
@@ -164,35 +164,99 @@ const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEdit
 
   return (
     <div style={styles.container}>
-      {/* Header with Search */}
+      {/* Header with Search and Export/Import */}
       <div style={styles.header}>
-        <div style={styles.searchContainer}>
-          <Search size={16} style={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Search custom adversaries..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={styles.searchInput}
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              style={styles.clearButton}
-              onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-              onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
-        
-        <div style={{ 
-          marginTop: '0.75rem', 
-          fontSize: '0.875rem', 
-          color: 'var(--text-secondary)' 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem'
         }}>
-          {sortedAdversaries.length} custom {sortedAdversaries.length === 1 ? 'adversary' : 'adversaries'}
+          <div style={{ ...styles.searchContainer, flex: 1 }}>
+            <Search size={16} style={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search custom adversaries..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={styles.searchInput}
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                style={styles.clearButton}
+                onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+          
+          {/* Export/Import Buttons */}
+          <button
+            onClick={onExportCustomAdversaries}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-hover)'
+              e.target.style.borderColor = 'var(--purple)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-secondary)'
+              e.target.style.borderColor = 'var(--border)'
+            }}
+          >
+            <span>↓</span>
+            Export
+          </button>
+          
+          <button
+            onClick={() => document.getElementById('import-file-input').click()}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-hover)'
+              e.target.style.borderColor = 'var(--purple)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-secondary)'
+              e.target.style.borderColor = 'var(--border)'
+            }}
+          >
+            <span>↑</span>
+            Import
+          </button>
+          <input
+            id="import-file-input"
+            type="file"
+            accept=".json"
+            onChange={onImportCustomAdversaries}
+            style={{ display: 'none' }}
+          />
         </div>
       </div>
 
