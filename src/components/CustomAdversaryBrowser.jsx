@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
 import { useGameState } from '../state/state'
-import BrowserRow from './BrowserRow'
+import { BrowserRow } from './Browser'
 
 const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEditAdversary, onExportCustomAdversaries, onImportCustomAdversaries }) => {
   const { customContent, deleteCustomAdversary } = useGameState()
