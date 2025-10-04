@@ -777,7 +777,7 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
 }
 
 // Browser Header Component
-const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showExportImport = false, onExportCustomAdversaries, onImportCustomAdversaries, showCustomToggle = false, onToggleCustom, filterCustom = false }) => {
+const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showCustomToggle = false, onToggleCustom, filterCustom = false, onExportCustomAdversaries, onImportCustomAdversaries }) => {
   return (
     <div style={styles.browserHeader}>
       <input
@@ -788,6 +788,27 @@ const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showEx
         style={styles.searchInput}
       />
       
+      {partyControls && (
+        <div style={styles.partyControls}>
+          {partyControls}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Browser Button Row Component
+const BrowserButtonRow = ({ showCustomToggle = false, onToggleCustom, filterCustom = false, onExportCustomAdversaries, onImportCustomAdversaries }) => {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem',
+      padding: '0.75rem 1rem',
+      backgroundColor: 'var(--bg-secondary)',
+      borderBottom: '1px solid var(--border)',
+      flexShrink: 0
+    }}>
       {/* Custom Toggle Button */}
       {showCustomToggle && (
         <button
@@ -824,81 +845,72 @@ const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showEx
         </button>
       )}
       
-      {/* Export/Import Buttons for Custom Adversaries */}
-      {showExportImport && (
-        <>
-          <button
-            onClick={onExportCustomAdversaries}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              backgroundColor: 'var(--bg-secondary)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              color: 'var(--text-primary)',
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'var(--bg-hover)'
-              e.target.style.borderColor = 'var(--purple)'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'var(--bg-secondary)'
-              e.target.style.borderColor = 'var(--border)'
-            }}
-          >
-            <span>↓</span>
-            Export
-          </button>
-          
-          <button
-            onClick={() => document.getElementById('import-file-input').click()}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              backgroundColor: 'var(--bg-secondary)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              color: 'var(--text-primary)',
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'var(--bg-hover)'
-              e.target.style.borderColor = 'var(--purple)'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'var(--bg-secondary)'
-              e.target.style.borderColor = 'var(--border)'
-            }}
-          >
-            <span>↑</span>
-            Import
-          </button>
-          <input
-            id="import-file-input"
-            type="file"
-            accept=".json"
-            onChange={onImportCustomAdversaries}
-            style={{ display: 'none' }}
-          />
-        </>
-      )}
+      {/* Export/Import Buttons - Always Visible */}
+      <button
+        onClick={onExportCustomAdversaries}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          padding: '0.5rem 1rem',
+          backgroundColor: 'var(--bg-primary)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--text-primary)',
+          fontSize: '0.875rem',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          whiteSpace: 'nowrap'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = 'var(--bg-hover)'
+          e.target.style.borderColor = 'var(--purple)'
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = 'var(--bg-primary)'
+          e.target.style.borderColor = 'var(--border)'
+        }}
+      >
+        <span>↓</span>
+        Export
+      </button>
       
-      {partyControls && (
-        <div style={styles.partyControls}>
-          {partyControls}
-        </div>
-      )}
+      <button
+        onClick={() => document.getElementById('import-file-input').click()}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          padding: '0.5rem 1rem',
+          backgroundColor: 'var(--bg-primary)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--text-primary)',
+          fontSize: '0.875rem',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          whiteSpace: 'nowrap'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = 'var(--bg-hover)'
+          e.target.style.borderColor = 'var(--purple)'
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = 'var(--bg-primary)'
+          e.target.style.borderColor = 'var(--border)'
+        }}
+      >
+        <span>↑</span>
+        Import
+      </button>
+      
+      <input
+        id="import-file-input"
+        type="file"
+        accept=".json"
+        onChange={onImportCustomAdversaries}
+        style={{ display: 'none' }}
+      />
     </div>
   )
 }
@@ -1360,6 +1372,11 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
     setData(sourceData)
   }, [type, filterCustom])
   
+  // Refresh data when filterCustom changes
+  useEffect(() => {
+    refreshData()
+  }, [filterCustom, refreshData])
+  
   // Export custom adversaries to JSON file
   const handleExportCustomAdversaries = () => {
     try {
@@ -1638,12 +1655,14 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
             onSearchChange={setSearchTerm}
             type={type}
             partyControls={partyControls}
-            showExportImport={filterCustom}
-            onExportCustomAdversaries={handleExportCustomAdversaries}
-            onImportCustomAdversaries={handleImportCustomAdversaries}
+          />
+          
+          <BrowserButtonRow
             showCustomToggle={showCustomToggle}
             onToggleCustom={onToggleCustom}
             filterCustom={filterCustom}
+            onExportCustomAdversaries={handleExportCustomAdversaries}
+            onImportCustomAdversaries={handleImportCustomAdversaries}
           />
 
           {/* Scrollable Content with Sticky Header */}
