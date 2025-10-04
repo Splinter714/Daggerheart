@@ -1218,9 +1218,20 @@ const EncounterBuilder = ({
                     )
                     return selectedAdversary ? (
                       <GameCard
-                        item={selectedAdversary}
+                        item={{
+                          ...selectedAdversary,
+                          hp: 0,
+                          stress: 0,
+                          isVisible: true
+                        }}
                         type="adversary"
                         mode="expanded"
+                        instances={[{
+                          ...selectedAdversary,
+                          hp: 0,
+                          stress: 0,
+                          isVisible: true
+                        }]}
                         onUpdate={() => {}}
                         onDelete={() => {}}
                       />
