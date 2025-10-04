@@ -2243,3 +2243,4 @@ export {
 }
 
 export default Browser
+export { BrowserRow }

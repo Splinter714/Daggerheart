@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
-import { Search, X, Trash2, Edit } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { useGameState } from '../state/state'
+import BrowserRow from './BrowserRow'
 
 const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEditAdversary, onExportCustomAdversaries, onImportCustomAdversaries }) => {
   const { customContent, deleteCustomAdversary } = useGameState()
@@ -47,7 +48,12 @@ const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEdit
 
   const handleRowClick = (adversary) => {
     if (onSelectAdversary) {
-      onSelectAdversary(adversary.id)
+      // Toggle preview - close if same adversary clicked again
+      if (selectedAdversaryId && selectedAdversaryId === adversary.id) {
+        onSelectAdversary(null)
+      } else {
+        onSelectAdversary(adversary.id)
+      }
     }
   }
 
@@ -76,7 +82,7 @@ const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEdit
       position: 'relative',
       display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem'
+      gap: '0.75rem'
     },
     searchInput: {
       flex: 1,
@@ -130,27 +136,6 @@ const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEdit
       whiteSpace: 'nowrap',
       zIndex: 10
     },
-    td: {
-      padding: '0.75rem 1rem',
-      borderBottom: '1px solid var(--border)',
-      color: 'var(--text-secondary)'
-    },
-    row: {
-      cursor: 'pointer',
-      transition: 'background-color 0.1s ease'
-    },
-    actionButton: {
-      background: 'none',
-      border: 'none',
-      color: 'var(--text-secondary)',
-      cursor: 'pointer',
-      padding: '0.25rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'color 0.2s ease',
-      borderRadius: '4px'
-    },
     emptyState: {
       display: 'flex',
       flexDirection: 'column',
@@ -166,11 +151,7 @@ const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEdit
     <div style={styles.container}>
       {/* Header with Search and Export/Import */}
       <div style={styles.header}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem'
-        }}>
+        <div style={styles.searchContainer}>
           <div style={{ ...styles.searchContainer, flex: 1 }}>
             <Search size={16} style={styles.searchIcon} />
             <input
@@ -274,7 +255,7 @@ const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEdit
           </div>
         ) : (
           <table style={styles.table}>
-            <thead>
+            <thead style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'var(--bg-primary)' }}>
               <tr>
                 <th style={styles.th}>Name</th>
                 <th style={styles.th}>Type</th>
@@ -287,82 +268,24 @@ const CustomAdversaryBrowser = ({ onSelectAdversary, selectedAdversaryId, onEdit
             </thead>
             <tbody>
               {sortedAdversaries.map((adversary) => (
-                <tr
+                <BrowserRow
                   key={adversary.id}
-                  style={{
-                    ...styles.row,
-                    backgroundColor: selectedAdversaryId === adversary.id ? 'var(--bg-hover)' : 'transparent'
-                  }}
-                  onClick={() => handleRowClick(adversary)}
-                  onMouseEnter={(e) => {
-                    if (selectedAdversaryId !== adversary.id) {
-                      e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedAdversaryId !== adversary.id) {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }
-                  }}
-                >
-                  <td style={{ ...styles.td, fontWeight: 500, color: 'var(--text-primary)' }}>
-                    {adversary.name || 'Unnamed'}
-                  </td>
-                  <td style={styles.td}>{adversary.type || '-'}</td>
-                  <td style={styles.td}>{adversary.tier || '-'}</td>
-                  <td style={styles.td}>{adversary.difficulty || '-'}</td>
-                  <td style={styles.td}>{adversary.hpMax || '-'}</td>
-                  <td style={styles.td}>{adversary.stressMax || '-'}</td>
-                  <td style={{ ...styles.td, display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      style={{
-                        ...styles.actionButton,
-                        color: 'var(--text-secondary)'
-                      }}
-                      onClick={(e) => handleEditClick(e, adversary)}
-                      onMouseEnter={(e) => {
-                        e.target.style.color = 'var(--purple)'
-                        e.target.style.backgroundColor = 'rgba(147, 51, 234, 0.1)'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.color = 'var(--text-secondary)'
-                        e.target.style.backgroundColor = 'transparent'
-                      }}
-                      title="Edit adversary"
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button
-                      style={{
-                        ...styles.actionButton,
-                        backgroundColor: deleteConfirm === adversary.id ? 'var(--red)' : 'transparent',
-                        color: deleteConfirm === adversary.id ? 'white' : 'var(--text-secondary)'
-                      }}
-                      onClick={(e) => handleDeleteClick(e, adversary.id)}
-                      onMouseEnter={(e) => {
-                        if (deleteConfirm !== adversary.id) {
-                          e.target.style.color = 'var(--red)'
-                          e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (deleteConfirm !== adversary.id) {
-                          e.target.style.color = 'var(--text-secondary)'
-                          e.target.style.backgroundColor = 'transparent'
-                        }
-                      }}
-                      title={deleteConfirm === adversary.id ? 'Click again to confirm delete' : 'Delete adversary'}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
+                  item={adversary}
+                  onAdd={() => {}} // No add functionality for custom adversaries
+                  type="adversary"
+                  onRowClick={() => handleRowClick(adversary)}
+                  encounterItems={[]}
+                  pcCount={4}
+                  playerTier={1}
+                  remainingBudget={0}
+                  costFilter="all"
+                  onAdversaryClick={() => handleRowClick(adversary)}
+                />
               ))}
             </tbody>
           </table>
         )}
       </div>
-
     </div>
   )
 }
