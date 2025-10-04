@@ -1915,7 +1915,7 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
           style={{
             maxWidth: '600px',
             width: '90vw',
-            maxHeight: '80vh',
+            maxHeight: '95vh',
             overflowY: 'auto'
           }}
           onClick={(e) => e.stopPropagation()}
