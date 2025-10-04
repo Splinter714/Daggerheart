@@ -1577,7 +1577,12 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
                 costFilter={costFilter}
                 onAdversaryClick={(adversary) => {
                   if (type === 'adversary') {
-                    onSelectAdversary && onSelectAdversary(adversary)
+                    // Toggle preview - close if same adversary clicked again
+                    if (selectedAdversary && selectedAdversary.id === adversary.id) {
+                      onSelectAdversary && onSelectAdversary(null)
+                    } else {
+                      onSelectAdversary && onSelectAdversary(adversary)
+                    }
                   }
                 }}
               />
