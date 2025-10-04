@@ -777,7 +777,7 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
 }
 
 // Browser Header Component
-const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showExportImport = false, onExportCustomAdversaries, onImportCustomAdversaries }) => {
+const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showExportImport = false, onExportCustomAdversaries, onImportCustomAdversaries, showCustomToggle = false, onToggleCustom, filterCustom = false }) => {
   return (
     <div style={styles.browserHeader}>
       <input
@@ -787,6 +787,42 @@ const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showEx
         onChange={(e) => onSearchChange(e.target.value)}
         style={styles.searchInput}
       />
+      
+      {/* Custom Toggle Button */}
+      {showCustomToggle && (
+        <button
+          onClick={() => onToggleCustom && onToggleCustom(!filterCustom)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.5rem 1rem',
+            backgroundColor: filterCustom ? 'var(--purple)' : 'var(--bg-primary)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
+            color: filterCustom ? 'white' : 'var(--text-primary)',
+            fontSize: '0.875rem',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            whiteSpace: 'nowrap'
+          }}
+          onMouseEnter={(e) => {
+            if (!filterCustom) {
+              e.target.style.backgroundColor = 'var(--bg-hover)'
+              e.target.style.borderColor = 'var(--purple)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!filterCustom) {
+              e.target.style.backgroundColor = 'var(--bg-primary)'
+              e.target.style.borderColor = 'var(--border)'
+            }
+          }}
+        >
+          <span>{filterCustom ? '✓' : '○'}</span>
+          Custom Only
+        </button>
+      )}
       
       {/* Export/Import Buttons for Custom Adversaries */}
       {showExportImport && (
@@ -1294,7 +1330,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 }
 
 // Main Browser Component
-const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange, selectedAdversary, onSelectAdversary, filterCustom = false }) => {
+const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange, selectedAdversary, onSelectAdversary, filterCustom = false, showCustomToggle = false, onToggleCustom, onExportCustomAdversaries, onImportCustomAdversaries }) => {
   const { addCustomAdversary, updateCustomAdversary, customContent } = useGameState()
   const [editingAdversary, setEditingAdversary] = useState(null)
   const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
@@ -1605,6 +1641,9 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
             showExportImport={filterCustom}
             onExportCustomAdversaries={handleExportCustomAdversaries}
             onImportCustomAdversaries={handleImportCustomAdversaries}
+            showCustomToggle={showCustomToggle}
+            onToggleCustom={onToggleCustom}
+            filterCustom={filterCustom}
           />
 
           {/* Scrollable Content with Sticky Header */}

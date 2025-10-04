@@ -878,117 +878,6 @@ const EncounterBuilder = ({
         </button>
       </div>
 
-      {/* Button Row for Adversary Builder */}
-      {activeTab === 'adversaries' && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          padding: '0.75rem 1rem',
-          backgroundColor: 'var(--bg-secondary)',
-          borderBottom: '1px solid var(--border)',
-          flexShrink: 0
-        }}>
-          <button
-            onClick={() => setShowCustomOnly(!showCustomOnly)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              backgroundColor: showCustomOnly ? 'var(--purple)' : 'var(--bg-primary)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              color: showCustomOnly ? 'white' : 'var(--text-primary)',
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseEnter={(e) => {
-              if (!showCustomOnly) {
-                e.target.style.backgroundColor = 'var(--bg-hover)'
-                e.target.style.borderColor = 'var(--purple)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!showCustomOnly) {
-                e.target.style.backgroundColor = 'var(--bg-primary)'
-                e.target.style.borderColor = 'var(--border)'
-              }
-            }}
-          >
-            <span>{showCustomOnly ? '✓' : '○'}</span>
-            Custom Only
-          </button>
-          
-          <button
-            onClick={handleExportCustomAdversaries}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              backgroundColor: 'var(--bg-primary)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              color: 'var(--text-primary)',
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'var(--bg-hover)'
-              e.target.style.borderColor = 'var(--purple)'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'var(--bg-primary)'
-              e.target.style.borderColor = 'var(--border)'
-            }}
-          >
-            <span>↓</span>
-            Export
-          </button>
-          
-          <button
-            onClick={() => document.getElementById('import-file-input').click()}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              backgroundColor: 'var(--bg-primary)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              color: 'var(--text-primary)',
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'var(--bg-hover)'
-              e.target.style.borderColor = 'var(--purple)'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'var(--bg-primary)'
-              e.target.style.borderColor = 'var(--border)'
-            }}
-          >
-            <span>↑</span>
-            Import
-          </button>
-          
-          <input
-            id="import-file-input"
-            type="file"
-            accept=".json"
-            onChange={handleImportCustomAdversaries}
-            style={{ display: 'none' }}
-          />
-        </div>
-      )}
 
       {/* Main Content Area */}
       <div className="encounter-builder-content" style={{
@@ -1020,6 +909,10 @@ const EncounterBuilder = ({
             selectedAdversary={selectedAdversary}
             onSelectAdversary={setSelectedAdversary}
             filterCustom={showCustomOnly}
+            showCustomToggle={true}
+            onToggleCustom={setShowCustomOnly}
+            onExportCustomAdversaries={handleExportCustomAdversaries}
+            onImportCustomAdversaries={handleImportCustomAdversaries}
           />
         </div>
         
