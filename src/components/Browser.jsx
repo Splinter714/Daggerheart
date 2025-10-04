@@ -482,7 +482,7 @@ const addPlaytestEnvironment = (environmentData) => {
 }
 
 // Custom hook for browser functionality - all logic inline
-const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
+const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filterCustom = false) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortFields, setSortFields] = useState([{ field: 'tier', direction: 'asc' }, { field: 'name', direction: 'asc' }])
   const [data, setData] = useState([])
@@ -529,6 +529,32 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
       return String(a).localeCompare(String(b))
     })
   }
+
+  // Function to refresh data
+  const refreshData = useCallback(async () => {
+    _dataLoaded = false
+    await loadData()
+    
+    // Update data after reload
+    let sourceData = []
+    if (type === 'adversary') {
+      if (filterCustom) {
+        // Filter to only custom adversaries
+        sourceData = (adversariesData.adversaries || []).filter(adv => adv.source === 'Homebrew' || adv.id?.startsWith('custom-'))
+      } else {
+        sourceData = adversariesData.adversaries || []
+      }
+    } else if (type === 'environment') {
+      sourceData = environmentsData.environments || []
+    }
+    
+    setData(sourceData)
+  }, [type, filterCustom])
+
+  // Refresh data when filterCustom changes
+  useEffect(() => {
+    refreshData()
+  }, [filterCustom, refreshData])
 
   const uniqueTiers = getUniqueValues('tier')
   const uniqueTypes = getUniqueValues('type')
@@ -757,7 +783,7 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
     handleSort,
     filteredAndSortedData,
     loading,
-    // Advanced filtering
+    refreshData,    // Advanced filtering
     selectedTiers,
     selectedTypes,
     showTierDropdown,
@@ -1351,32 +1377,6 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
   const deleteTimeouts = useRef({}) // Track timeouts for each encounter
   const costFilterRef = useRef(null)
   
-  // Function to refresh data
-  const refreshData = useCallback(async () => {
-    _dataLoaded = false
-    await loadData()
-    
-    // Update data after reload
-    let sourceData = []
-    if (type === 'adversary') {
-      if (filterCustom) {
-        // Filter to only custom adversaries
-        sourceData = (adversariesData.adversaries || []).filter(adv => adv.source === 'Homebrew' || adv.id?.startsWith('custom-'))
-      } else {
-        sourceData = adversariesData.adversaries || []
-      }
-    } else if (type === 'environment') {
-      sourceData = environmentsData.environments || []
-    }
-    
-    setData(sourceData)
-  }, [type, filterCustom])
-  
-  // Refresh data when filterCustom changes
-  useEffect(() => {
-    refreshData()
-  }, [filterCustom, refreshData])
-  
   // Export custom adversaries to JSON file
   const handleExportCustomAdversaries = () => {
     try {
@@ -1566,7 +1566,7 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
     isTierFiltered,
     isTypeFiltered,
     getDropdownStyle
-  } = useBrowser(type, encounterItems, pcCount, playerTier)
+  } = useBrowser(type, encounterItems, pcCount, playerTier, filterCustom)
 
   // Calculate remaining battle points budget
   const calculateRemainingBudget = () => {
