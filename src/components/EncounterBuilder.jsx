@@ -66,6 +66,7 @@ const EncounterBuilder = ({
   const [loadedEncounterId, setLoadedEncounterId] = useState(null) // Track which encounter is loaded
   const [originalEncounterData, setOriginalEncounterData] = useState(null) // Track original data for change detection
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null) // Track selected custom adversary
+  const [selectedAdversary, setSelectedAdversary] = useState(null) // Track selected adversary for preview
   
   // Sync encounter name with global state
   useEffect(() => {
@@ -840,6 +841,8 @@ const EncounterBuilder = ({
             selectedCustomAdversaryId={selectedCustomAdversaryId}
             onSelectCustomAdversary={setSelectedCustomAdversaryId}
             onTabChange={setActiveTab}
+            selectedAdversary={selectedAdversary}
+            onSelectAdversary={setSelectedAdversary}
           />
         </div>
         
@@ -852,8 +855,80 @@ const EncounterBuilder = ({
           flexDirection: 'column',
           overflow: 'hidden'
           }}>
-            
-            {/* Encounter Name Field - At top of right panel */}
+          
+          {/* Adversary Preview */}
+          {selectedAdversary && (
+            <div style={{
+              padding: '0.75rem',
+              borderBottom: '1px solid var(--border)',
+              backgroundColor: 'var(--bg-primary)',
+              flexShrink: 0
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '0.75rem'
+              }}>
+                <h3 style={{
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  margin: 0
+                }}>
+                  Adversary Preview
+                </h3>
+                <button
+                  onClick={() => setSelectedAdversary(null)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    padding: '0.25rem',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                  title="Close preview"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div style={{
+                maxHeight: '400px',
+                overflowY: 'auto',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                backgroundColor: 'var(--bg-secondary)'
+              }}>
+                <GameCard
+                  item={{
+                    ...selectedAdversary,
+                    hp: 0,
+                    stress: 0,
+                    isVisible: true
+                  }}
+                  type="adversary"
+                  mode="expanded"
+                  instances={[{
+                    ...selectedAdversary,
+                    hp: 0,
+                    stress: 0,
+                    isVisible: true
+                  }]}
+                  onUpdate={() => {}}
+                  onDelete={() => {}}
+                />
+              </div>
+            </div>
+          )}
+          
+          {/* Encounter Name Field - At top of right panel */}
             {(activeTab === 'adversaries' || activeTab === 'encounters') && (
               <div style={{
                 padding: '0.75rem',

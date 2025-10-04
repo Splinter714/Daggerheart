@@ -1240,12 +1240,11 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 }
 
 // Main Browser Component
-const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange }) => {
+const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange, selectedAdversary, onSelectAdversary }) => {
   const { addCustomAdversary, updateCustomAdversary, customContent } = useGameState()
   const [editingAdversary, setEditingAdversary] = useState(null)
   const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
   const [showCostDropdown, setShowCostDropdown] = useState(false)
-  const [selectedAdversary, setSelectedAdversary] = useState(null)
   const [deleteConfirmations, setDeleteConfirmations] = useState({}) // Track which encounters are in delete confirmation state
   const deleteTimeouts = useRef({}) // Track timeouts for each encounter
   const costFilterRef = useRef(null)
@@ -1578,7 +1577,7 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
                 costFilter={costFilter}
                 onAdversaryClick={(adversary) => {
                   if (type === 'adversary') {
-                    setSelectedAdversary(adversary)
+                    onSelectAdversary && onSelectAdversary(adversary)
                   }
                 }}
               />
@@ -1892,54 +1891,6 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
         </div>
       )}
     </div>
-    
-    {/* Adversary Card Modal */}
-    {selectedAdversary && (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(8px)',
-        zIndex: 2000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem'
-      }}
-      onClick={() => setSelectedAdversary(null)}
-      >
-        <div 
-          style={{
-            maxWidth: '600px',
-            width: '90vw',
-            maxHeight: '95vh',
-            overflowY: 'auto'
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <GameCard
-            item={{
-              ...selectedAdversary,
-              hp: 0,
-              stress: 0,
-              isVisible: true
-            }}
-            type="adversary"
-            mode="expanded"
-            instances={[{
-              ...selectedAdversary,
-              hp: 0,
-              stress: 0,
-              isVisible: true
-            }]}
-            onClose={() => setSelectedAdversary(null)}
-          />
-        </div>
-      </div>
-    )}
     </>
   )
 }
