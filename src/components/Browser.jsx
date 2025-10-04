@@ -1921,9 +1921,20 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
           onClick={(e) => e.stopPropagation()}
         >
           <GameCard
-            item={selectedAdversary}
+            item={{
+              ...selectedAdversary,
+              hp: 0,
+              stress: 0,
+              isVisible: true
+            }}
             type="adversary"
             mode="expanded"
+            instances={[{
+              ...selectedAdversary,
+              hp: 0,
+              stress: 0,
+              isVisible: true
+            }]}
             onClose={() => setSelectedAdversary(null)}
           />
         </div>
