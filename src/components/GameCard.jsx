@@ -2823,7 +2823,7 @@ const GameCard = ({
         )}
 
         {/* Description Section */}
-        {isEditMode && (
+        {(isEditMode || mode === 'expanded') && (
           <div style={{
             padding: '0 8px'
           }}>
