@@ -853,22 +853,31 @@ const EncounterBuilder = ({
           borderLeft: '1px solid var(--border)',
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          position: 'relative'
           }}>
           
-          {/* Adversary Preview */}
+          {/* Adversary Preview Overlay */}
           {selectedAdversary && (
             <div style={{
-              padding: '0.75rem',
-              borderBottom: '1px solid var(--border)',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
               backgroundColor: 'var(--bg-primary)',
-              flexShrink: 0
+              zIndex: 10,
+              display: 'flex',
+              flexDirection: 'column'
             }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: '0.75rem'
+                padding: '0.75rem',
+                borderBottom: '1px solid var(--border)',
+                backgroundColor: 'var(--bg-primary)',
+                flexShrink: 0
               }}>
                 <h3 style={{
                   fontSize: '1rem',
@@ -900,11 +909,9 @@ const EncounterBuilder = ({
                 </button>
               </div>
               <div style={{
-                maxHeight: '400px',
+                flex: 1,
                 overflowY: 'auto',
-                border: '1px solid var(--border)',
-                borderRadius: '8px',
-                backgroundColor: 'var(--bg-secondary)'
+                padding: '0.75rem'
               }}>
                 <GameCard
                   item={{
