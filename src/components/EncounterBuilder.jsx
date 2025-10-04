@@ -1207,7 +1207,7 @@ const EncounterBuilder = ({
             {/* Show Selected Adversary Preview for My Adversaries tab */}
             {activeTab === 'myAdversaries' && (
               <div style={{
-                padding: '1.5rem',
+                padding: '0.75rem',
                 overflowY: 'auto',
                 height: '100%'
               }}>
