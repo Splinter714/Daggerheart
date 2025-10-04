@@ -506,12 +506,7 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
       // Set data after loading is complete
       let sourceData = []
       if (type === 'adversary') {
-        if (filterCustom) {
-          // Filter to only custom adversaries
-          sourceData = (adversariesData.adversaries || []).filter(adv => adv.source === 'Homebrew' || adv.id?.startsWith('custom-'))
-        } else {
-          sourceData = adversariesData.adversaries || []
-        }
+        sourceData = adversariesData.adversaries || []
       } else if (type === 'environment') {
         sourceData = environmentsData.environments || []
       }
@@ -522,26 +517,6 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
     initializeData()
   }, [type])
 
-  // Function to refresh data
-  const refreshData = useCallback(async () => {
-    _dataLoaded = false
-    await loadData()
-    
-    // Update data after reload
-    let sourceData = []
-    if (type === 'adversary') {
-      if (filterCustom) {
-        // Filter to only custom adversaries
-        sourceData = (adversariesData.adversaries || []).filter(adv => adv.source === 'Homebrew' || adv.id?.startsWith('custom-'))
-      } else {
-        sourceData = adversariesData.adversaries || []
-      }
-    } else if (type === 'environment') {
-      sourceData = environmentsData.environments || []
-    }
-    
-    setData(sourceData)
-  }, [type, filterCustom])
 
   // Get unique values for filtering
   const getUniqueValues = (field) => {
@@ -782,7 +757,6 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
     handleSort,
     filteredAndSortedData,
     loading,
-    refreshData,
     // Advanced filtering
     selectedTiers,
     selectedTypes,
@@ -1329,6 +1303,27 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
   const deleteTimeouts = useRef({}) // Track timeouts for each encounter
   const costFilterRef = useRef(null)
   
+  // Function to refresh data
+  const refreshData = useCallback(async () => {
+    _dataLoaded = false
+    await loadData()
+    
+    // Update data after reload
+    let sourceData = []
+    if (type === 'adversary') {
+      if (filterCustom) {
+        // Filter to only custom adversaries
+        sourceData = (adversariesData.adversaries || []).filter(adv => adv.source === 'Homebrew' || adv.id?.startsWith('custom-'))
+      } else {
+        sourceData = adversariesData.adversaries || []
+      }
+    } else if (type === 'environment') {
+      sourceData = environmentsData.environments || []
+    }
+    
+    setData(sourceData)
+  }, [type, filterCustom])
+  
   // Export custom adversaries to JSON file
   const handleExportCustomAdversaries = () => {
     try {
@@ -1502,7 +1497,6 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
     handleSort,
     filteredAndSortedData,
     loading,
-    refreshData,
     // Advanced filtering
     selectedTiers,
     selectedTypes,
