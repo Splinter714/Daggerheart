@@ -821,7 +821,7 @@ const EncounterBuilder = ({
             borderRight: '1px solid var(--border)'
           }}
         >
-          Encounter Builder
+          Builder
         </button>
         <button
           onClick={() => setActiveTab('encounters')}
