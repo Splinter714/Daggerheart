@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom'
 import { Filter, Square, CheckSquare, Plus, X } from 'lucide-react'
 import GameCard from './GameCard'
 import logoImage from '../assets/daggerheart-logo.svg'
-import CustomAdversaryBrowser from './CustomAdversaryBrowser'
 import { useGameState } from '../state/state'
 
 // Custom Adversary Creator Component - Editable Card Style
@@ -507,7 +506,12 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
       // Set data after loading is complete
       let sourceData = []
       if (type === 'adversary') {
-        sourceData = adversariesData.adversaries || []
+        if (filterCustom) {
+          // Filter to only custom adversaries
+          sourceData = (adversariesData.adversaries || []).filter(adv => adv.source === 'Homebrew' || adv.id?.startsWith('custom-'))
+        } else {
+          sourceData = adversariesData.adversaries || []
+        }
       } else if (type === 'environment') {
         sourceData = environmentsData.environments || []
       }
@@ -526,13 +530,18 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
     // Update data after reload
     let sourceData = []
     if (type === 'adversary') {
-      sourceData = adversariesData.adversaries || []
+      if (filterCustom) {
+        // Filter to only custom adversaries
+        sourceData = (adversariesData.adversaries || []).filter(adv => adv.source === 'Homebrew' || adv.id?.startsWith('custom-'))
+      } else {
+        sourceData = adversariesData.adversaries || []
+      }
     } else if (type === 'environment') {
       sourceData = environmentsData.environments || []
     }
     
     setData(sourceData)
-  }, [type])
+  }, [type, filterCustom])
 
   // Get unique values for filtering
   const getUniqueValues = (field) => {
@@ -794,7 +803,7 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1) => {
 }
 
 // Browser Header Component
-const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls }) => {
+const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showExportImport = false, onExportCustomAdversaries, onImportCustomAdversaries }) => {
   return (
     <div style={styles.browserHeader}>
       <input
@@ -804,6 +813,77 @@ const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls }) => {
         onChange={(e) => onSearchChange(e.target.value)}
         style={styles.searchInput}
       />
+      
+      {/* Export/Import Buttons for Custom Adversaries */}
+      {showExportImport && (
+        <>
+          <button
+            onClick={onExportCustomAdversaries}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-hover)'
+              e.target.style.borderColor = 'var(--purple)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-secondary)'
+              e.target.style.borderColor = 'var(--border)'
+            }}
+          >
+            <span>↓</span>
+            Export
+          </button>
+          
+          <button
+            onClick={() => document.getElementById('import-file-input').click()}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-hover)'
+              e.target.style.borderColor = 'var(--purple)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-secondary)'
+              e.target.style.borderColor = 'var(--border)'
+            }}
+          >
+            <span>↑</span>
+            Import
+          </button>
+          <input
+            id="import-file-input"
+            type="file"
+            accept=".json"
+            onChange={onImportCustomAdversaries}
+            style={{ display: 'none' }}
+          />
+        </>
+      )}
+      
       {partyControls && (
         <div style={styles.partyControls}>
           {partyControls}
@@ -1240,7 +1320,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 }
 
 // Main Browser Component
-const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange, selectedAdversary, onSelectAdversary }) => {
+const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange, selectedAdversary, onSelectAdversary, filterCustom = false }) => {
   const { addCustomAdversary, updateCustomAdversary, customContent } = useGameState()
   const [editingAdversary, setEditingAdversary] = useState(null)
   const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
@@ -1528,6 +1608,9 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
             onSearchChange={setSearchTerm}
             type={type}
             partyControls={partyControls}
+            showExportImport={filterCustom}
+            onExportCustomAdversaries={handleExportCustomAdversaries}
+            onImportCustomAdversaries={handleImportCustomAdversaries}
           />
 
           {/* Scrollable Content with Sticky Header */}
@@ -1792,12 +1875,31 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
       )}
 
       {activeTab === 'myAdversaries' && (
-        <CustomAdversaryBrowser 
-          selectedAdversaryId={selectedCustomAdversaryId}
-          onSelectAdversary={onSelectCustomAdversary}
-          onEditAdversary={handleEditAdversary}
-          onExportCustomAdversaries={handleExportCustomAdversaries}
-          onImportCustomAdversaries={handleImportCustomAdversaries}
+        <Browser
+          type="adversary"
+          onAddItem={() => {}} // No add functionality for custom adversaries
+          onRowClick={(adversary) => {
+            if (onSelectCustomAdversary) {
+              // Toggle preview - close if same adversary clicked again
+              if (selectedCustomAdversaryId && selectedCustomAdversaryId === adversary.id) {
+                onSelectCustomAdversary(null)
+              } else {
+                onSelectCustomAdversary(adversary.id)
+              }
+            }
+          }}
+          encounterItems={[]}
+          pcCount={4}
+          playerTier={1}
+          remainingBudget={0}
+          selectedAdversary={selectedCustomAdversaryId ? data.find(adv => adv.id === selectedCustomAdversaryId) : null}
+          onSelectAdversary={(adversary) => {
+            if (onSelectCustomAdversary) {
+              onSelectCustomAdversary(adversary?.id || null)
+            }
+          }}
+          filterCustom={true}
+          showContainer={false}
         />
       )}
 
