@@ -2825,7 +2825,7 @@ const GameCard = ({
         {/* Description Section */}
         {(isEditMode || (mode === 'expanded' && item.description && item.description.trim())) && (
           <div style={{
-            padding: '0.5rem 8px',
+            padding: '0 8px',
             textAlign: 'center'
           }}>
             <div style={{
@@ -2885,7 +2885,8 @@ const GameCard = ({
                 fontStyle: 'italic',
                 color: 'var(--text-secondary)',
                 lineHeight: 1.4,
-                whiteSpace: 'pre-wrap'
+                whiteSpace: 'pre-wrap',
+                padding: '0.5rem 0'
               }}>
                 {item.description}
               </div>
