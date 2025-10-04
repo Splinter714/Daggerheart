@@ -790,19 +790,7 @@ const GameCard = ({
     console.warn('adversaryLogic.handleDifficultyClick not available for type:', type)
   })
 
-  // Hover state management
-  const [isHovered, setIsHovered] = useState(false)
-  
   // Debug logging removed - selection styling working correctly
-
-  // Transition management with different speeds for hover in/out
-  const handleMouseEnter = () => {
-    setIsHovered(true)
-  }
-
-  const handleMouseLeave = () => {
-    setIsHovered(false)
-  }
 
   // ============================================================================
   // STYLING LOGIC
@@ -811,12 +799,11 @@ const GameCard = ({
   const getCardStyle = (isExpanded = false) => {
     let cardStyle = { ...styles.card }
     
-    // Use appropriate transition speed based on hover state
-    // Selection changes should be instant, hover changes should be smooth
+    // Use instant transitions for selection changes
     if (isSelected) {
       cardStyle.transition = 'none' // Instant for selection
     } else {
-      cardStyle.transition = isHovered ? styles.transitions.hoverIn : styles.transitions.hoverOut
+      cardStyle.transition = styles.transitions.hoverOut
     }
     
     // Remove top margin for expanded cards
@@ -825,8 +812,8 @@ const GameCard = ({
       cardStyle = cardStyleWithoutMargin
     }
     
-    // Apply hover effects for expanded cards or when selected
-    if ((isHovered && mode !== 'expanded') || isSelected) {
+    // Apply hover effects when selected
+    if (isSelected) {
       cardStyle = { ...cardStyle, ...styles.cardHover }
     }
     
@@ -845,8 +832,8 @@ const GameCard = ({
     
     let className = 'border rounded-lg'
     
-    // Apply border hover effect for hovered cards or when selected
-    if ((isHovered && mode !== 'expanded') || isSelected) {
+    // Apply border hover effect when selected
+    if (isSelected) {
       className += ' border-hover'
     }
     
@@ -1078,17 +1065,13 @@ const GameCard = ({
           minHeight: '400px',
           opacity: isDead ? 0.7 : 1,
           backgroundColor: isDead ? 'var(--gray-900)' : getCardStyle(true).backgroundColor,
-          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isSelected ? 'var(--purple)' : (isHovered && mode !== 'expanded' ? 'var(--border-hover)' : 'var(--border)')),
+          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isSelected ? 'var(--purple)' : 'var(--border)'),
           borderWidth: isSelected ? '2px' : '2px',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative'
         }}
         onClick={onClick}
-        {...(mode !== 'expanded' && {
-          onMouseEnter: handleMouseEnter,
-          onMouseLeave: handleMouseLeave
-        })}
       >
         {/* DEFEATED overlay */}
         {isDead && (
