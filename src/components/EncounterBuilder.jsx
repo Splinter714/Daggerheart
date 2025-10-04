@@ -846,7 +846,7 @@ const EncounterBuilder = ({
         {/* Right Panel - Receipt Below Buttons */}
         {activeTab !== 'info' && (
         <div className="encounter-right-panel" style={{
-          flex: '0 0 350px',
+          flex: '0 0 450px',
           borderLeft: '1px solid var(--border)',
           display: 'flex',
           flexDirection: 'column',
