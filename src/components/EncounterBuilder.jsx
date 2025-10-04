@@ -62,11 +62,12 @@ const EncounterBuilder = ({
   
   const [encounterItems, setEncounterItems] = useState([])
   const [encounterName, setEncounterName] = useState(currentEncounterName || 'Encounter')
-  const [activeTab, setActiveTab] = useState('adversaries') // 'adversaries', 'encounters', 'create', 'myAdversaries', 'info'
+  const [activeTab, setActiveTab] = useState('adversaries') // 'adversaries', 'encounters', 'create', 'info'
   const [loadedEncounterId, setLoadedEncounterId] = useState(null) // Track which encounter is loaded
   const [originalEncounterData, setOriginalEncounterData] = useState(null) // Track original data for change detection
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null) // Track selected custom adversary
   const [selectedAdversary, setSelectedAdversary] = useState(null) // Track selected adversary for preview
+  const [showCustomOnly, setShowCustomOnly] = useState(false) // Toggle to show only custom adversaries
   
   // Sync encounter name with global state
   useEffect(() => {
@@ -671,6 +672,87 @@ const EncounterBuilder = ({
     }
   }
 
+  // Export custom adversaries to JSON file
+  const handleExportCustomAdversaries = () => {
+    try {
+      const exportData = {
+        version: '1.0',
+        exportDate: new Date().toISOString(),
+        customAdversaries: customContent.adversaries || []
+      }
+      
+      const dataStr = JSON.stringify(exportData, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `daggerheart-custom-adversaries-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      
+      console.log('Custom adversaries exported successfully')
+    } catch (error) {
+      console.error('Failed to export custom adversaries:', error)
+      alert('Failed to export custom adversaries. Please try again.')
+    }
+  }
+  
+  // Import custom adversaries from JSON file
+  const handleImportCustomAdversaries = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+    
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const importData = JSON.parse(e.target.result)
+        
+        // Validate the import data structure
+        if (!importData.customAdversaries || !Array.isArray(importData.customAdversaries)) {
+          throw new Error('Invalid file format. Expected customAdversaries array.')
+        }
+        
+        // Check for duplicates and merge
+        const existingAdversaries = customContent.adversaries || []
+        const importedAdversaries = importData.customAdversaries
+        const mergedAdversaries = [...existingAdversaries]
+        
+        let addedCount = 0
+        importedAdversaries.forEach(importedAdv => {
+          const exists = existingAdversaries.some(existing => 
+            existing.name === importedAdv.name && existing.type === importedAdv.type
+          )
+          if (!exists) {
+            mergedAdversaries.push({
+              ...importedAdv,
+              id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+            })
+            addedCount++
+          }
+        })
+        
+        // Update custom content
+        updateCustomContent('adversary', null, mergedAdversaries)
+        
+        if (addedCount > 0) {
+          alert(`Successfully imported ${addedCount} custom adversaries.`)
+        } else {
+          alert('No new adversaries were added. All imported adversaries already exist.')
+        }
+      } catch (error) {
+        console.error('Failed to import custom adversaries:', error)
+        alert('Failed to import custom adversaries. Please check the file format and try again.')
+      }
+    }
+    
+    reader.readAsText(file)
+    // Reset the input so the same file can be selected again
+    event.target.value = ''
+  }
+
   
   if (!isOpen) return null
   
@@ -778,24 +860,6 @@ const EncounterBuilder = ({
           Create Adversary
         </button>
         <button
-          onClick={() => setActiveTab('myAdversaries')}
-          style={{
-            flex: 1,
-            background: activeTab === 'myAdversaries' ? 'var(--gray-900)' : 'transparent',
-            border: 'none',
-            color: 'var(--text-primary)',
-            padding: '0.75rem 1rem',
-            cursor: 'pointer',
-            fontSize: '0.875rem',
-            fontWeight: activeTab === 'myAdversaries' ? '500' : '400',
-            transition: 'all 0.2s ease',
-            position: 'relative',
-            borderRight: '1px solid var(--border)'
-          }}
-        >
-          My Adversaries
-        </button>
-        <button
           onClick={() => setActiveTab('info')}
           style={{
             flex: 1,
@@ -813,6 +877,118 @@ const EncounterBuilder = ({
           Info
         </button>
       </div>
+
+      {/* Button Row for Adversary Builder */}
+      {activeTab === 'adversaries' && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          padding: '0.75rem 1rem',
+          backgroundColor: 'var(--bg-secondary)',
+          borderBottom: '1px solid var(--border)',
+          flexShrink: 0
+        }}>
+          <button
+            onClick={() => setShowCustomOnly(!showCustomOnly)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: showCustomOnly ? 'var(--purple)' : 'var(--bg-primary)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              color: showCustomOnly ? 'white' : 'var(--text-primary)',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              if (!showCustomOnly) {
+                e.target.style.backgroundColor = 'var(--bg-hover)'
+                e.target.style.borderColor = 'var(--purple)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!showCustomOnly) {
+                e.target.style.backgroundColor = 'var(--bg-primary)'
+                e.target.style.borderColor = 'var(--border)'
+              }
+            }}
+          >
+            <span>{showCustomOnly ? '✓' : '○'}</span>
+            Custom Only
+          </button>
+          
+          <button
+            onClick={handleExportCustomAdversaries}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: 'var(--bg-primary)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-hover)'
+              e.target.style.borderColor = 'var(--purple)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-primary)'
+              e.target.style.borderColor = 'var(--border)'
+            }}
+          >
+            <span>↓</span>
+            Export
+          </button>
+          
+          <button
+            onClick={() => document.getElementById('import-file-input').click()}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: 'var(--bg-primary)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-primary)',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-hover)'
+              e.target.style.borderColor = 'var(--purple)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-primary)'
+              e.target.style.borderColor = 'var(--border)'
+            }}
+          >
+            <span>↑</span>
+            Import
+          </button>
+          
+          <input
+            id="import-file-input"
+            type="file"
+            accept=".json"
+            onChange={handleImportCustomAdversaries}
+            style={{ display: 'none' }}
+          />
+        </div>
+      )}
 
       {/* Main Content Area */}
       <div className="encounter-builder-content" style={{
@@ -843,6 +1019,7 @@ const EncounterBuilder = ({
             onTabChange={setActiveTab}
             selectedAdversary={selectedAdversary}
             onSelectAdversary={setSelectedAdversary}
+            filterCustom={showCustomOnly}
           />
         </div>
         

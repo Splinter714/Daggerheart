@@ -1868,34 +1868,6 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
         />
       )}
 
-      {activeTab === 'myAdversaries' && (
-        <Browser
-          type="adversary"
-          onAddItem={() => {}} // No add functionality for custom adversaries
-          onRowClick={(adversary) => {
-            if (onSelectCustomAdversary) {
-              // Toggle preview - close if same adversary clicked again
-              if (selectedCustomAdversaryId && selectedCustomAdversaryId === adversary.id) {
-                onSelectCustomAdversary(null)
-              } else {
-                onSelectCustomAdversary(adversary.id)
-              }
-            }
-          }}
-          encounterItems={[]}
-          pcCount={4}
-          playerTier={1}
-          remainingBudget={0}
-          selectedAdversary={selectedCustomAdversaryId ? data.find(adv => adv.id === selectedCustomAdversaryId) : null}
-          onSelectAdversary={(adversary) => {
-            if (onSelectCustomAdversary) {
-              onSelectCustomAdversary(adversary?.id || null)
-            }
-          }}
-          filterCustom={true}
-          showContainer={false}
-        />
-      )}
 
       {activeTab === 'info' && (
         <div style={{
