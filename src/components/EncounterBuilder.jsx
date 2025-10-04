@@ -738,7 +738,7 @@ const EncounterBuilder = ({
             borderRight: '1px solid var(--border)'
           }}
         >
-          Adversary Browser
+          Encounter Builder
         </button>
         <button
           onClick={() => setActiveTab('encounters')}
