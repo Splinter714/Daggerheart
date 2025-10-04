@@ -2881,8 +2881,10 @@ const GameCard = ({
             ) : (
               <div style={{
                 fontSize: '0.875rem',
-                lineHeight: 1.5,
+                fontStyle: 'italic',
                 color: 'var(--text-secondary)',
+                lineHeight: 1.4,
+                textAlign: 'center',
                 whiteSpace: 'pre-wrap'
               }}>
                 {item.description}
