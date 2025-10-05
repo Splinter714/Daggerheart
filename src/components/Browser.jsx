@@ -4,25 +4,29 @@ import { Filter, Square, CheckSquare, Plus, X } from 'lucide-react'
 import GameCard from './GameCard'
 import logoImage from '../assets/daggerheart-logo.svg'
 import { useGameState } from '../state/state'
+import { getDefaultAdversaryValues } from '../data/adversaryDefaults'
 
 // Custom Adversary Creator Component - Editable Card Style
 const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem, editingAdversary, onCancelEdit }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    tier: 1,
-    type: 'Standard',
-    description: '',
-    motives: '',
-    difficulty: 11,
-    thresholds: { major: 7, severe: 12 },
-    hpMax: 3,
-    stressMax: 1,
-    atk: 1,
-    weapon: '',
-    range: 'Melee',
-    damage: '',
-    experience: [],
-    features: []
+  const [formData, setFormData] = useState(() => {
+    const defaults = getDefaultAdversaryValues(1, 'Standard')
+    return {
+      name: '',
+      tier: 1,
+      type: 'Standard',
+      description: '',
+      motives: '',
+      difficulty: defaults.difficulty,
+      thresholds: defaults.thresholds,
+      hpMax: defaults.hpMax,
+      stressMax: defaults.stressMax,
+      atk: defaults.atk,
+      weapon: '',
+      range: defaults.range,
+      damage: defaults.damage,
+      experience: [],
+      features: []
+    }
   })
   
   const [isSaving, setIsSaving] = useState(false)
@@ -68,6 +72,23 @@ const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem, editingAdversary
       })
     }
   }, [editingAdversary])
+
+  // Update defaults when tier or type changes (only for new adversaries)
+  React.useEffect(() => {
+    if (!editingAdversary) {
+      const newDefaults = getDefaultAdversaryValues(formData.tier, formData.type)
+      setFormData(prev => ({
+        ...prev,
+        difficulty: newDefaults.difficulty,
+        thresholds: newDefaults.thresholds,
+        hpMax: newDefaults.hpMax,
+        stressMax: newDefaults.stressMax,
+        atk: newDefaults.atk,
+        range: newDefaults.range,
+        damage: newDefaults.damage
+      }))
+    }
+  }, [formData.tier, formData.type, editingAdversary])
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -121,20 +142,21 @@ const CustomAdversaryCreator = ({ onSave, onRefresh, onAddItem, editingAdversary
         }
         
         // Reset form
+        const defaults = getDefaultAdversaryValues(1, 'Standard')
         setFormData({
           name: '',
           tier: 1,
           type: 'Standard',
           description: '',
           motives: '',
-          difficulty: 11,
-          thresholds: { major: 7, severe: 12 },
-          hpMax: 3,
-          stressMax: 1,
-          atk: 1,
+          difficulty: defaults.difficulty,
+          thresholds: defaults.thresholds,
+          hpMax: defaults.hpMax,
+          stressMax: defaults.stressMax,
+          atk: defaults.atk,
           weapon: '',
-          range: 'Melee',
-          damage: '',
+          range: defaults.range,
+          damage: defaults.damage,
           experience: [],
           features: []
         })
