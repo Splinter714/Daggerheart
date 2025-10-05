@@ -2733,12 +2733,14 @@ const GameCard = ({
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem' }}>
                           <span style={{ color: 'var(--text-primary)', fontSize: '0.6875rem', fontWeight: '500', textTransform: 'uppercase' }}>Minor</span>
                           <input
-                            type="text"
-                            value={item.thresholds?.major || '7'}
+                            type="number"
+                            min="1"
+                            max="99"
+                            value={item.thresholds?.major || ''}
                             onChange={(e) => {
-                              const value = e.target.value.replace(/[^0-9]/g, '')
-                              if (value.length <= 2) {
-                                onUpdate && onUpdate(item.id, { thresholds: { ...item.thresholds, major: parseInt(value) || 7 } })
+                              const value = e.target.value
+                              if (value === '' || (parseInt(value) >= 1 && parseInt(value) <= 99)) {
+                                onUpdate && onUpdate(item.id, { thresholds: { ...item.thresholds, major: value === '' ? null : parseInt(value) } })
                               }
                             }}
                             style={{
@@ -2754,12 +2756,14 @@ const GameCard = ({
                           />
                           <span style={{ color: 'var(--text-primary)', fontSize: '0.6875rem', fontWeight: '500', textTransform: 'uppercase' }}>Major</span>
                           <input
-                            type="text"
-                            value={item.thresholds?.severe || '14'}
+                            type="number"
+                            min="1"
+                            max="99"
+                            value={item.thresholds?.severe || ''}
                             onChange={(e) => {
-                              const value = e.target.value.replace(/[^0-9]/g, '')
-                              if (value.length <= 2) {
-                                onUpdate && onUpdate(item.id, { thresholds: { ...item.thresholds, severe: parseInt(value) || 14 } })
+                              const value = e.target.value
+                              if (value === '' || (parseInt(value) >= 1 && parseInt(value) <= 99)) {
+                                onUpdate && onUpdate(item.id, { thresholds: { ...item.thresholds, severe: value === '' ? null : parseInt(value) } })
                               }
                             }}
                             style={{
@@ -2788,7 +2792,7 @@ const GameCard = ({
                           </span>
                           
                           {/* Major Threshold Number */}
-                          <ThresholdTag value={item.thresholds?.major || '7'} />
+                          <ThresholdTag value={item.thresholds?.major || 7} />
                           
                           {/* Major Threshold */}
                           <span style={{
@@ -2801,7 +2805,7 @@ const GameCard = ({
                           </span>
                           
                           {/* Severe Threshold Number */}
-                          <ThresholdTag value={item.thresholds?.severe || '14'} />
+                          <ThresholdTag value={item.thresholds?.severe || 14} />
                           
                           {/* Severe Threshold */}
                           <span style={{
