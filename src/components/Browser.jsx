@@ -955,7 +955,7 @@ const BrowserButtonRow = ({ showCustomToggle = false, onToggleCustom, filterCust
       <input
         id="import-file-input"
         type="file"
-        accept=".json"
+        accept=".csv,.json"
         onChange={onImportCustomAdversaries}
         style={{ display: 'none' }}
       />
@@ -1399,53 +1399,170 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
   const deleteTimeouts = useRef({}) // Track timeouts for each encounter
   const costFilterRef = useRef(null)
   
-  // Export custom adversaries to JSON file
+  // Export custom adversaries to CSV file
   const handleExportCustomAdversaries = () => {
     try {
-      const exportData = {
-        version: '1.0',
-        exportDate: new Date().toISOString(),
-        customAdversaries: customContent.adversaries || []
+      const adversaries = customContent.adversaries || []
+      
+      if (adversaries.length === 0) {
+        alert('No custom adversaries to export.')
+        return
       }
       
-      const dataStr = JSON.stringify(exportData, null, 2)
-      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      // Define CSV headers
+      const headers = [
+        'name', 'tier', 'type', 'difficulty', 'threshold_major', 'threshold_severe',
+        'hp_max', 'stress_max', 'atk', 'weapon', 'range', 'damage',
+        'description', 'motives'
+      ]
+      
+      // Convert adversaries to CSV rows
+      const rows = adversaries.map(adv => [
+        adv.name || '',
+        adv.tier || '',
+        adv.type || '',
+        adv.difficulty || '',
+        adv.thresholds?.major || '',
+        adv.thresholds?.severe || '',
+        adv.hpMax || '',
+        adv.stressMax || '',
+        adv.atk || '',
+        adv.weapon || '',
+        adv.range || '',
+        adv.damage || '',
+        adv.description || '',
+        adv.motives || ''
+      ])
+      
+      // Escape CSV values (handle commas, quotes, newlines)
+      const escapeCSV = (value) => {
+        const str = String(value)
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+          return `"${str.replace(/"/g, '""')}"`
+        }
+        return str
+      }
+      
+      // Build CSV content
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(escapeCSV).join(','))
+      ].join('\n')
+      
+      // Create and download file
+      const dataBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(dataBlob)
       
       const link = document.createElement('a')
       link.href = url
-      link.download = `daggerheart-custom-adversaries-${new Date().toISOString().split('T')[0]}.json`
+      link.download = `daggerheart-custom-adversaries-${new Date().toISOString().split('T')[0]}.csv`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
       
-      // Show success message (you could add a toast notification here)
-      console.log('Custom adversaries exported successfully')
+      console.log(`Exported ${adversaries.length} custom adversaries to CSV`)
     } catch (error) {
       console.error('Failed to export custom adversaries:', error)
       alert('Failed to export custom adversaries. Please try again.')
     }
   }
   
-  // Import custom adversaries from JSON file
+  // Import custom adversaries from CSV file
   const handleImportCustomAdversaries = (event) => {
     const file = event.target.files[0]
     if (!file) return
     
+    // Check file type
+    const isCSV = file.name.endsWith('.csv')
+    const isJSON = file.name.endsWith('.json')
+    
+    if (!isCSV && !isJSON) {
+      alert('Please upload a CSV or JSON file.')
+      event.target.value = ''
+      return
+    }
+    
     const reader = new FileReader()
     reader.onload = (e) => {
       try {
-        const importData = JSON.parse(e.target.result)
+        let importedAdversaries = []
         
-        // Validate the import data structure
-        if (!importData.customAdversaries || !Array.isArray(importData.customAdversaries)) {
-          throw new Error('Invalid file format. Expected customAdversaries array.')
+        if (isCSV) {
+          // Parse CSV
+          const csvText = e.target.result
+          const lines = csvText.split('\n').filter(line => line.trim())
+          
+          if (lines.length < 2) {
+            throw new Error('CSV file is empty or invalid.')
+          }
+          
+          // Parse header row
+          const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''))
+          
+          // Parse data rows
+          for (let i = 1; i < lines.length; i++) {
+            const values = []
+            let current = ''
+            let inQuotes = false
+            
+            // Handle CSV parsing with quoted values
+            for (let j = 0; j < lines[i].length; j++) {
+              const char = lines[i][j]
+              const nextChar = lines[i][j + 1]
+              
+              if (char === '"' && inQuotes && nextChar === '"') {
+                current += '"'
+                j++ // Skip next quote
+              } else if (char === '"') {
+                inQuotes = !inQuotes
+              } else if (char === ',' && !inQuotes) {
+                values.push(current.trim())
+                current = ''
+              } else {
+                current += char
+              }
+            }
+            values.push(current.trim())
+            
+            // Map values to adversary object
+            const adversary = {
+              name: values[headers.indexOf('name')] || '',
+              tier: parseInt(values[headers.indexOf('tier')]) || 1,
+              type: values[headers.indexOf('type')] || 'Standard',
+              difficulty: parseInt(values[headers.indexOf('difficulty')]) || 11,
+              thresholds: {
+                major: parseInt(values[headers.indexOf('threshold_major')]) || 7,
+                severe: parseInt(values[headers.indexOf('threshold_severe')]) || 12
+              },
+              hpMax: parseInt(values[headers.indexOf('hp_max')]) || 3,
+              stressMax: parseInt(values[headers.indexOf('stress_max')]) || 1,
+              atk: parseInt(values[headers.indexOf('atk')]) || 1,
+              weapon: values[headers.indexOf('weapon')] || '',
+              range: values[headers.indexOf('range')] || 'Melee',
+              damage: values[headers.indexOf('damage')] || '',
+              description: values[headers.indexOf('description')] || '',
+              motives: values[headers.indexOf('motives')] || '',
+              source: 'Homebrew'
+            }
+            
+            if (adversary.name) {
+              importedAdversaries.push(adversary)
+            }
+          }
+        } else if (isJSON) {
+          // Parse JSON (legacy format support)
+          const importData = JSON.parse(e.target.result)
+          
+          if (!importData.customAdversaries || !Array.isArray(importData.customAdversaries)) {
+            throw new Error('Invalid JSON format. Expected customAdversaries array.')
+          }
+          
+          importedAdversaries = importData.customAdversaries
         }
         
         // Check for duplicates and merge
         const existingAdversaries = customContent.adversaries || []
-        const importedAdversaries = importData.customAdversaries
         const mergedAdversaries = [...existingAdversaries]
         
         let addedCount = 0
@@ -1461,7 +1578,9 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
             // Generate new ID to avoid conflicts
             const newAdversary = {
               ...importedAdv,
-              id: `custom-adv-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+              id: `custom-adv-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+              hp: 0,
+              stress: 0
             }
             mergedAdversaries.push(newAdversary)
             addedCount++
@@ -1485,7 +1604,7 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
         
       } catch (error) {
         console.error('Failed to import custom adversaries:', error)
-        alert('Failed to import custom adversaries. Please check the file format and try again.')
+        alert(`Failed to import custom adversaries: ${error.message}`)
       }
     }
     

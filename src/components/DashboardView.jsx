@@ -192,17 +192,17 @@ const DashboardContent = () => {
       groups[baseName].instances.push(adversary)
     })
 
-    // Group environments by name
-    environments.forEach(environment => {
-      if (!groups[environment.name]) {
-        groups[environment.name] = {
-          type: 'environment',
-          baseName: environment.name,
-          instances: []
-        }
-      }
-      groups[environment.name].instances.push(environment)
-    })
+    // TODO: Group environments by name (not yet implemented)
+    // environments.forEach(environment => {
+    //   if (!groups[environment.name]) {
+    //     groups[environment.name] = {
+    //       type: 'environment',
+    //       baseName: environment.name,
+    //       instances: []
+    //     }
+    //   }
+    //   groups[environment.name].instances.push(environment)
+    // })
 
     // Add countdowns as individual columns
     countdowns.forEach(countdown => {
