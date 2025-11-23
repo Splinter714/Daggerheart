@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull, Plus, Minus } from 'lucide-react'
 import Pips from './Pips'
 
 // Reusable Threshold Tag Component
@@ -701,6 +701,9 @@ const GameCard = ({
   isEditMode = false, // Whether the app is in edit mode
   instances = [], // All instances to embed as mini-cards in expanded view
   isEmbedded = false, // Whether this is an embedded card (removes border)
+  showAddRemoveButtons = false, // Show +/- buttons when browser is open
+  onAddInstance = null, // Handler for adding an instance
+  onRemoveInstance = null, // Handler for removing an instance
 }) => {
   // State for two-stage delete functionality
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
@@ -1137,16 +1140,99 @@ const GameCard = ({
                 placeholder="Name"
               />
             ) : (
-            <h4 style={{
-              ...styles.rowTitle,
-              color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
-              textAlign: 'left',
-              margin: 0,
-              fontSize: '1.1rem',
-              paddingRight: '6px'
-            }}>
-              {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
-            </h4>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+              <h4 style={{
+                ...styles.rowTitle,
+                color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
+                textAlign: 'left',
+                margin: 0,
+                fontSize: '1.1rem',
+                paddingRight: '6px',
+                flex: 1
+              }}>
+                {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
+              </h4>
+              
+              {/* Add/Remove buttons - only show when browser is open */}
+              {showAddRemoveButtons && type === 'adversary' && !isEditMode && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onRemoveInstance && onRemoveInstance(item.id)
+                    }}
+                    style={{
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
+                      borderRadius: '3px',
+                      padding: '0',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minWidth: '20px',
+                      height: '20px',
+                      fontSize: '0.7rem',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'var(--bg-hover)'
+                      e.target.style.borderColor = 'var(--purple)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'var(--bg-secondary)'
+                      e.target.style.borderColor = 'var(--border)'
+                    }}
+                    title="Remove one"
+                  >
+                    <Minus size={12} />
+                  </button>
+                  <span style={{ 
+                    color: 'var(--text-secondary)', 
+                    fontSize: '0.875rem',
+                    minWidth: '20px',
+                    textAlign: 'center'
+                  }}>
+                    {instances.length}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onAddInstance && onAddInstance(item)
+                    }}
+                    style={{
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
+                      borderRadius: '3px',
+                      padding: '0',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minWidth: '20px',
+                      height: '20px',
+                      fontSize: '0.7rem',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'var(--purple)'
+                      e.target.style.borderColor = 'var(--purple)'
+                      e.target.style.color = 'white'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'var(--bg-secondary)'
+                      e.target.style.borderColor = 'var(--border)'
+                      e.target.style.color = 'var(--text-primary)'
+                    }}
+                    title="Add another"
+                  >
+                    <Plus size={12} />
+                  </button>
+                </div>
+              )}
+            </div>
             )}
             
             {/* Combined Type/Tier Badge */}

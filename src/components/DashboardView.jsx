@@ -8,7 +8,28 @@ import Browser from './Browser'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import Panel from './Panels'
 import EncounterBuilder from './EncounterBuilder'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, Minus } from 'lucide-react'
+
+// Battle Points calculation (from EncounterBuilder)
+const calculateBaseBattlePoints = (pcCount) => (3 * pcCount) + 2
+
+const BATTLE_POINT_COSTS = {
+  'Minion': 1,
+  'Social': 1,
+  'Support': 1,
+  'Horde': 2,
+  'Ranged': 2,
+  'Skulk': 2,
+  'Standard': 2,
+  'Leader': 3,
+  'Bruiser': 4,
+  'Solo': 5
+}
+
+const BATTLE_POINT_ADJUSTMENTS = {
+  twoOrMoreSolos: -2,
+  noBruisersHordesLeadersSolos: 1
+}
 
 // Simple Error Boundary for debugging
 class ErrorBoundary extends React.Component {
@@ -50,6 +71,7 @@ const DashboardContent = () => {
     countdowns,
     fear,
     savedEncounters,
+    partySize,
     updateFear,
     createAdversary,
     createAdversariesBulk,
@@ -66,6 +88,8 @@ const DashboardContent = () => {
     loadEncounter,
     deleteEncounter
   } = useGameState()
+  
+  const pcCount = partySize || 4
   
   // Dashboard state
   const [isMobile, setIsMobile] = useState(false)
@@ -180,6 +204,56 @@ const DashboardContent = () => {
     setLastAddedItemType('adversary')
     // Browser stays open as overlay, no need to manage scroll position
   }, [createAdversary])
+
+  // Convert adversaries to encounter items format for battle points calculation
+  const getEncounterItems = useCallback(() => {
+    const grouped = {}
+    adversaries.forEach(adversary => {
+      const baseName = adversary.baseName || adversary.name?.replace(/\s+\(\d+\)$/, '') || adversary.name
+      if (!grouped[baseName]) {
+        grouped[baseName] = {
+          type: 'adversary',
+          item: adversary,
+          quantity: 0
+        }
+      }
+      grouped[baseName].quantity += 1
+    })
+    return Object.values(grouped)
+  }, [adversaries])
+
+  // Calculate battle points for balance display
+  const encounterItems = getEncounterItems()
+  const baseBattlePoints = calculateBaseBattlePoints(pcCount)
+  
+  // Calculate automatic adjustments
+  const soloCount = encounterItems
+    .filter(item => item.item.type === 'Solo' && item.quantity > 0)
+    .reduce((sum, item) => sum + item.quantity, 0)
+  const hasMajorThreats = encounterItems.some(item => 
+    item.item.type && ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.item.type) && item.quantity > 0
+  )
+  
+  let automaticAdjustments = 0
+  if (soloCount >= 2) {
+    automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos
+  }
+  if (!hasMajorThreats) {
+    automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos
+  }
+  
+  const availableBattlePoints = baseBattlePoints + automaticAdjustments
+  
+  const spentBattlePoints = encounterItems.reduce((total, item) => {
+    if (item.type === 'adversary') {
+      const cost = BATTLE_POINT_COSTS[item.item.type] || 2
+      if (item.item.type === 'Minion') {
+        return total + (Math.ceil(item.quantity / pcCount) * cost)
+      }
+      return total + (cost * item.quantity)
+    }
+    return total
+  }, 0)
 
   // Scroll handling - just track position, let CSS handle snapping
   const handleScroll = useCallback((e) => {
@@ -357,6 +431,35 @@ const DashboardContent = () => {
                 searchPlaceholder="Search adversaries"
               />
             </div>
+            
+            {/* Balance display at bottom */}
+            <div style={{
+              flexShrink: 0,
+              borderTop: '1px solid var(--border)',
+              backgroundColor: 'var(--bg-primary)',
+              padding: '0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: '500' }}>
+                Balance
+              </span>
+              <span style={{
+                color: spentBattlePoints > availableBattlePoints ? 'var(--danger)' : 
+                       spentBattlePoints === availableBattlePoints ? 'var(--purple)' : 
+                       'var(--success)',
+                fontWeight: 600,
+                fontSize: '0.9rem'
+              }}>
+                {spentBattlePoints > availableBattlePoints ? 
+                  `+${spentBattlePoints - availableBattlePoints}` : 
+                  availableBattlePoints - spentBattlePoints === 0 ? 
+                    '0' : 
+                    `-${availableBattlePoints - spentBattlePoints}`
+                }
+              </span>
+            </div>
           </div>
         )}
         <div 
@@ -456,6 +559,19 @@ const DashboardContent = () => {
               onApplyStressChange={group.type === 'adversary' ? (id, stress) => updateAdversary(id, { stress: Math.max(0, Math.min(group.instances.find(i => i.id === id)?.stressMax || 6, (group.instances.find(i => i.id === id)?.stress || 0) + stress)) }) : undefined}
               onUpdate={group.type === 'adversary' ? updateAdversary : group.type === 'environment' ? updateEnvironment : updateCountdown}
               adversaries={adversaries}
+              showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary'}
+              onAddInstance={group.type === 'adversary' ? (item) => createAdversary(item) : undefined}
+              onRemoveInstance={group.type === 'adversary' ? (itemId) => {
+                // Find highest numbered instance and remove it
+                const instances = group.instances.sort((a, b) => {
+                  const aNum = a.duplicateNumber || 1
+                  const bNum = b.duplicateNumber || 1
+                  return bNum - aNum
+                })
+                if (instances.length > 0) {
+                  deleteAdversary(instances[0].id)
+                }
+              } : undefined}
             />
           </Panel>
         ))
