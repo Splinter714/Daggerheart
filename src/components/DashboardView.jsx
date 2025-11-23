@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, startTransition } from 'react'
+import React, { useState, useEffect, useCallback, startTransition, useRef } from 'react'
 import { useGameState } from '../state/state'
 import Pips from './Pips'
 import FloatingMenu from './FloatingMenu'
@@ -8,6 +8,7 @@ import Browser from './Browser'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import Panel from './Panels'
 import EncounterBuilder from './EncounterBuilder'
+import { Plus, X } from 'lucide-react'
 
 // Simple Error Boundary for debugging
 class ErrorBoundary extends React.Component {
@@ -73,11 +74,13 @@ const DashboardContent = () => {
   const [isClearMode, setIsClearMode] = useState(false)
   const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
   const [lastAddedItemType, setLastAddedItemType] = useState(null)
+  const [browserOpenAtPosition, setBrowserOpenAtPosition] = useState(null) // null or index where browser should appear
   
   // Column layout state
   const [containerWidth, setContainerWidth] = useState(0)
   const [scrollPosition, setScrollPosition] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
+  const scrollContainerRef = useRef(null)
 
   // Mobile detection
   useEffect(() => {
@@ -161,6 +164,23 @@ const DashboardContent = () => {
     setEncounterBuilderOpen(false)
   }, [])
 
+  // Handle opening browser at a specific position
+  const handleOpenBrowser = useCallback((position) => {
+    setBrowserOpenAtPosition(position)
+  }, [])
+
+  // Handle closing browser
+  const handleCloseBrowser = useCallback(() => {
+    setBrowserOpenAtPosition(null)
+  }, [])
+
+  // Handle adding adversary from browser
+  const handleAddAdversaryFromBrowser = useCallback((itemData) => {
+    createAdversary(itemData)
+    setLastAddedItemType('adversary')
+    // Browser stays open as overlay, no need to manage scroll position
+  }, [createAdversary])
+
   // Scroll handling - just track position, let CSS handle snapping
   const handleScroll = useCallback((e) => {
     setScrollPosition(e.target.scrollLeft)
@@ -235,6 +255,68 @@ const DashboardContent = () => {
       }}
     >
 
+      {/* Top Bar with Fear and Add Adversaries Button */}
+      <Bar position="top">
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          width: '100%',
+          justifyContent: 'space-between',
+          padding: '0 1rem'
+        }}>
+          <Pips
+            type="fear"
+            value={fear?.value || 0}
+            maxValue={12}
+            onChange={updateFear}
+            showTooltip={false}
+            enableBoundaryClick={true}
+            clickContainerWidth="100%"
+            centerPips={true}
+          />
+          <button
+            onClick={() => {
+              if (browserOpenAtPosition !== null) {
+                handleCloseBrowser()
+              } else {
+                handleOpenBrowser(entityGroups.length)
+              }
+            }}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: browserOpenAtPosition !== null ? 'var(--purple)' : 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              color: browserOpenAtPosition !== null ? 'white' : 'var(--text-primary)',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.2s ease',
+              flexShrink: 0
+            }}
+            onMouseEnter={(e) => {
+              if (browserOpenAtPosition === null) {
+                e.target.style.borderColor = 'var(--purple)'
+                e.target.style.backgroundColor = 'var(--bg-hover)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (browserOpenAtPosition === null) {
+                e.target.style.borderColor = 'var(--border)'
+                e.target.style.backgroundColor = 'var(--bg-secondary)'
+              }
+            }}
+          >
+            <Plus size={16} />
+            <span>Add Adversaries</span>
+          </button>
+        </div>
+      </Bar>
+
       {/* Floating Menu */}
       <FloatingMenu
         onToggle={handleToggleEncounterBuilder}
@@ -246,17 +328,51 @@ const DashboardContent = () => {
         position: 'relative',
         width: '100%'
       }}>
-        <div className="dashboard-scroll-container" style={{ 
-          display: 'flex', 
-          flexDirection: 'row', 
-          overflowX: 'auto', 
-          overflowY: 'hidden',
-          padding: `0 ${gap}px`,
-          scrollSnapType: 'x mandatory',
-          height: '100%',
-          width: '100%'
-        }}
-        onScroll={handleScroll}
+        {/* Browser Overlay - appears on top when open */}
+        {browserOpenAtPosition !== null && (
+          <div style={{
+            position: 'absolute',
+            top: `${gap}px`,
+            right: `${gap}px`,
+            bottom: `${gap}px`,
+            width: `${columnWidth}px`,
+            backgroundColor: 'var(--bg-primary)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
+            zIndex: 100,
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.3)',
+            overflow: 'hidden'
+          }}>
+            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+              <Browser
+                type="adversary"
+                onAddItem={handleAddAdversaryFromBrowser}
+                showContainer={false}
+                activeTab="adversaries"
+                autoFocus={true}
+                hideImportExport={true}
+                onClose={handleCloseBrowser}
+                searchPlaceholder="Search adversaries"
+              />
+            </div>
+          </div>
+        )}
+        <div 
+          ref={scrollContainerRef}
+          className="dashboard-scroll-container" 
+          style={{ 
+            display: 'flex', 
+            flexDirection: 'row', 
+            overflowX: 'auto', 
+            overflowY: 'hidden',
+            padding: `0 ${gap}px`,
+            scrollSnapType: 'x mandatory',
+            height: '100%',
+            width: '100%'
+          }}
+          onScroll={handleScroll}
         >
         {entityGroups.length === 0 ? (
           // Empty state when no entities exist
@@ -346,21 +462,6 @@ const DashboardContent = () => {
         )}
         </div>
       </div>
-      
-
-      {/* Bottom Bar with Fear */}
-      <Bar position="bottom">
-        <Pips
-          type="fear"
-          value={fear?.value || 0}
-          maxValue={12}
-          onChange={updateFear}
-          showTooltip={false}
-          enableBoundaryClick={true}
-          clickContainerWidth="100%"
-          centerPips={true}
-        />
-      </Bar>
 
       {/* Encounter Builder Modal */}
       <EncounterBuilder

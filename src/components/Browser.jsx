@@ -825,16 +825,54 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filt
 }
 
 // Browser Header Component
-const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showCustomToggle = false, onToggleCustom, filterCustom = false, onExportCustomAdversaries, onImportCustomAdversaries }) => {
+const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showCustomToggle = false, onToggleCustom, filterCustom = false, onExportCustomAdversaries, onImportCustomAdversaries, autoFocus = false, onClose = null, placeholder = "Search" }) => {
+  const searchInputRef = useRef(null)
+  
+  useEffect(() => {
+    if (autoFocus && searchInputRef.current) {
+      // Small delay to ensure the browser is fully rendered
+      setTimeout(() => {
+        searchInputRef.current?.focus()
+      }, 100)
+    }
+  }, [autoFocus])
+  
   return (
     <div style={styles.browserHeader}>
-      <input
-        type="text"
-        placeholder="Search"
-        value={searchTerm}
-        onChange={(e) => onSearchChange(e.target.value)}
-        style={styles.searchInput}
-      />
+      <div style={{ display: 'flex', alignItems: 'center', flex: 1, gap: '0.5rem' }}>
+        <input
+          ref={searchInputRef}
+          type="text"
+          placeholder={placeholder}
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          style={{ ...styles.searchInput, flex: 1, marginRight: 0 }}
+        />
+        
+        {onClose && (
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              padding: '0.25rem',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'color 0.2s ease',
+              flexShrink: 0
+            }}
+            onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+            onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+            title="Close browser"
+          >
+            <X size={16} />
+          </button>
+        )}
+      </div>
       
       {partyControls && (
         <div style={styles.partyControls}>
@@ -1390,7 +1428,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 }
 
 // Main Browser Component
-const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange, selectedAdversary, onSelectAdversary, filterCustom = false, showCustomToggle = false, onToggleCustom, onExportCustomAdversaries, onImportCustomAdversaries }) => {
+const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange, selectedAdversary, onSelectAdversary, filterCustom = false, showCustomToggle = false, onToggleCustom, onExportCustomAdversaries, onImportCustomAdversaries, autoFocus = false, hideImportExport = false, onClose = null, searchPlaceholder = "Search" }) => {
   const { addCustomAdversary, updateCustomAdversary, customContent } = useGameState()
   const [editingAdversary, setEditingAdversary] = useState(null)
   const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
@@ -1796,15 +1834,20 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
             onSearchChange={setSearchTerm}
             type={type}
             partyControls={partyControls}
+            autoFocus={autoFocus}
+            onClose={onClose}
+            placeholder={searchPlaceholder}
           />
           
-          <BrowserButtonRow
-            showCustomToggle={showCustomToggle}
-            onToggleCustom={onToggleCustom}
-            filterCustom={filterCustom}
-            onExportCustomAdversaries={handleExportCustomAdversaries}
-            onImportCustomAdversaries={handleImportCustomAdversaries}
-          />
+          {!hideImportExport && (
+            <BrowserButtonRow
+              showCustomToggle={showCustomToggle}
+              onToggleCustom={onToggleCustom}
+              filterCustom={filterCustom}
+              onExportCustomAdversaries={handleExportCustomAdversaries}
+              onImportCustomAdversaries={handleImportCustomAdversaries}
+            />
+          )}
 
           {/* Scrollable Content with Sticky Header */}
           <div className="browser-content invisible-scrollbar" style={styles.browserContent}>
