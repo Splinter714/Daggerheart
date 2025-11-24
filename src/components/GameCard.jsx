@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
-import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull, Plus, Minus } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull, Plus, Minus, Pencil } from 'lucide-react'
 import Pips from './Pips'
+import CustomAdversaryCreator from './CustomAdversaryCreator'
 
 // Reusable Threshold Tag Component
 const ThresholdTag = ({ value }) => (
@@ -703,6 +704,11 @@ const GameCard = ({
   showAddRemoveButtons = false, // Show +/- buttons when browser is open
   onAddInstance = null, // Handler for adding an instance
   onRemoveInstance = null, // Handler for removing an instance
+  onEdit = null, // Handler for editing this adversary
+  showCustomCreator = false, // Show CustomAdversaryCreator instead of normal card content
+  onSaveCustomAdversary = null, // Handler for saving custom adversary
+  onCancelEdit = null, // Handler for canceling edit
+  isStockAdversary = false, // Whether this is a stock adversary (needs Save As)
 }) => {
   // Ref for the scrollable content container
   const scrollableContentRef = useRef(null)
@@ -1340,7 +1346,7 @@ const GameCard = ({
                 {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
               </h4>
               
-              {/* Add/Remove buttons - only show when browser is open */}
+              {/* Add/Remove/Edit buttons - only show when browser is open */}
               {showAddRemoveButtons && type === 'adversary' && !isEditMode && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
                   <button
@@ -1417,6 +1423,43 @@ const GameCard = ({
                   >
                     <Plus size={12} />
                   </button>
+                  {onEdit && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onEdit(item.id)
+                      }}
+                      style={{
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                        borderRadius: '3px',
+                        padding: '0',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '20px',
+                        height: '20px',
+                        fontSize: '0.7rem',
+                        transition: 'all 0.2s ease',
+                        marginLeft: '0.25rem'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'var(--purple)'
+                        e.target.style.borderColor = 'var(--purple)'
+                        e.target.style.color = 'white'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'var(--bg-secondary)'
+                        e.target.style.borderColor = 'var(--border)'
+                        e.target.style.color = 'var(--text-primary)'
+                      }}
+                      title="Edit"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -3200,6 +3243,35 @@ const GameCard = ({
   // ============================================================================
   // MAIN RENDER
   // ============================================================================
+
+  // Render CustomAdversaryCreator if requested
+  if (showCustomCreator && (type === 'adversary' || type === 'adversaries')) {
+    return (
+      <div 
+        className={getCardClassName()}
+        style={{
+          ...getCardStyle(true),
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          height: 'auto',
+          overflow: 'hidden'
+        }}
+      >
+        <CustomAdversaryCreator
+          onSave={onSaveCustomAdversary || (() => {})}
+          onRefresh={() => {}}
+          editingAdversary={item}
+          onCancelEdit={onCancelEdit || (() => {})}
+          isStockAdversary={isStockAdversary}
+          autoFocus={true}
+          allAdversaries={[]} // Will load itself
+          embedded={true}
+        />
+      </div>
+    )
+  }
 
   // Render expanded view for adversaries
   if ((mode === 'expanded' || mode === 'edit') && (type === 'adversary' || type === 'adversaries')) {

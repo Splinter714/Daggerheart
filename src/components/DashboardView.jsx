@@ -8,7 +8,8 @@ import Browser from './Browser'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import Panel from './Panels'
 import EncounterBuilder from './EncounterBuilder'
-import { Plus, X, Minus } from 'lucide-react'
+import { Plus, X, Minus, Pencil } from 'lucide-react'
+import CustomAdversaryCreator from './CustomAdversaryCreator'
 
 // Battle Points calculation (from EncounterBuilder)
 const calculateBaseBattlePoints = (pcCount) => (3 * pcCount) + 2
@@ -99,6 +100,8 @@ const DashboardContent = () => {
   const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
   const [lastAddedItemType, setLastAddedItemType] = useState(null)
   const [browserOpenAtPosition, setBrowserOpenAtPosition] = useState(null) // null or index where browser should appear
+  const [editingAdversaryId, setEditingAdversaryId] = useState(null) // ID of adversary being edited, or null
+  const [creatingCustomAdversary, setCreatingCustomAdversary] = useState(false) // Whether creating a new custom adversary
   
   // Column layout state
   const [containerWidth, setContainerWidth] = useState(0)
@@ -415,7 +418,103 @@ const DashboardContent = () => {
         })
       })
     }, 50) // Small delay to ensure React has rendered
-  }, [createAdversary, entityGroups, columnWidth, gap, smoothScrollTo, getEntityGroups])
+  }, [createAdversary, entityGroups, columnWidth, gap, smoothScrollTo, getEntityGroups, browserOpenAtPosition])
+
+  // Handle creating a new custom adversary
+  const handleCreateCustomAdversary = useCallback(() => {
+    // Create a blank custom adversary and add it to the dashboard
+    const defaults = {
+      name: '',
+      baseName: '',
+      tier: 1,
+      type: 'Standard',
+      description: '',
+      motives: '',
+      difficulty: 11,
+      thresholds: { major: 7, severe: 12 },
+      hpMax: 3,
+      stressMax: 1,
+      atk: 1,
+      weapon: '',
+      range: 'Melee',
+      damage: '',
+      experience: [],
+      features: [],
+      source: 'Homebrew',
+      hp: 0,
+      stress: 0,
+      isVisible: true
+    }
+    
+    // Create the adversary
+    createAdversary(defaults)
+    
+    // After a brief delay, find the newly created adversary and set it to edit mode
+    // We look for an adversary with empty/Unknown name and Homebrew source
+    setTimeout(() => {
+      const updatedGroups = getEntityGroups()
+      // Find the adversary with empty name and Homebrew source (the one we just created)
+      for (const group of updatedGroups) {
+        if (group.type === 'adversary') {
+          const newAdversary = group.instances.find(i => 
+            i.source === 'Homebrew' && 
+            (!i.baseName || i.baseName.trim() === '' || i.baseName === 'Unknown')
+          )
+          if (newAdversary && !editingAdversaryId) {
+            setEditingAdversaryId(newAdversary.id)
+            
+            // Scroll to the new card
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                if (scrollContainerRef.current) {
+                  const container = scrollContainerRef.current
+                  const groupIndex = updatedGroups.findIndex(g => 
+                    g.instances.some(i => i.id === newAdversary.id)
+                  )
+                  if (groupIndex >= 0) {
+                    const cardPosition = groupIndex * (columnWidth + gap)
+                    smoothScrollTo(cardPosition, 600, 'new-custom-adversary')
+                  }
+                }
+              })
+            })
+            break
+          }
+        }
+      }
+    }, 100) // Small delay to ensure state has updated
+  }, [createAdversary, getEntityGroups, columnWidth, gap, smoothScrollTo, editingAdversaryId])
+
+  // Handle editing an adversary
+  const handleEditAdversary = useCallback((adversaryId) => {
+    setEditingAdversaryId(adversaryId)
+    setCreatingCustomAdversary(false)
+  }, [])
+
+  // Handle canceling edit/create
+  const handleCancelEdit = useCallback(() => {
+    setEditingAdversaryId(null)
+    setCreatingCustomAdversary(false)
+  }, [])
+
+  // Handle saving custom adversary (create or update)
+  const handleSaveCustomAdversary = useCallback(async (adversaryData, id) => {
+    if (id) {
+      // Update existing custom adversary
+      updateAdversary(id, adversaryData)
+      setEditingAdversaryId(null)
+    } else if (editingAdversaryId) {
+      // Editing a stock adversary - create new custom copy
+      const newId = createAdversary({ ...adversaryData, id: undefined })
+      setEditingAdversaryId(null)
+      return newId
+    } else {
+      // Creating new custom adversary
+      const newId = createAdversary({ ...adversaryData, id: undefined })
+      setCreatingCustomAdversary(false)
+      return newId
+    }
+  }, [editingAdversaryId, createAdversary, updateAdversary])
 
   // Convert adversaries to encounter items format for battle points calculation
   const getEncounterItems = useCallback(() => {
@@ -604,6 +703,40 @@ const DashboardContent = () => {
             overflow: 'hidden'
           }}>
             <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+              {/* Add Custom button */}
+              <div style={{
+                padding: '0.75rem',
+                borderBottom: '1px solid var(--border)',
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                <button
+                  onClick={handleCreateCustomAdversary}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    backgroundColor: 'var(--purple)',
+                    border: 'none',
+                    color: 'white',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    transition: 'opacity 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.opacity = '0.9'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.opacity = '1'
+                  }}
+                >
+                  <Plus size={16} />
+                  <span>Add Custom</span>
+                </button>
+              </div>
               <Browser
                 type="adversary"
                 onAddItem={handleAddAdversaryFromBrowser}
@@ -736,6 +869,11 @@ const DashboardContent = () => {
               }} // Use first instance as template but reset state
               mode="expanded"
               instances={group.instances} // Pass all instances to embed mini-cards
+              showCustomCreator={group.type === 'adversary' && editingAdversaryId && group.instances.some(i => i.id === editingAdversaryId)}
+              onSaveCustomAdversary={group.type === 'adversary' && editingAdversaryId && group.instances.some(i => i.id === editingAdversaryId) ? handleSaveCustomAdversary : undefined}
+              onCancelEdit={group.type === 'adversary' && editingAdversaryId && group.instances.some(i => i.id === editingAdversaryId) ? handleCancelEdit : undefined}
+              isStockAdversary={group.type === 'adversary' && editingAdversaryId && group.instances.some(i => i.id === editingAdversaryId) ? 
+                (!group.instances[0]?.source || group.instances[0]?.source !== 'Homebrew') : false}
               onApplyDamage={group.type === 'adversary' ? (id, damage, currentHp, maxHp) => {
                 const instance = group.instances.find(i => i.id === id)
                 if (instance) {
@@ -752,6 +890,7 @@ const DashboardContent = () => {
               onUpdate={group.type === 'adversary' ? updateAdversary : group.type === 'environment' ? updateEnvironment : updateCountdown}
               adversaries={adversaries}
               showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary'}
+              onEdit={group.type === 'adversary' ? (itemId) => handleEditAdversary(itemId) : undefined}
               onAddInstance={group.type === 'adversary' ? (item) => {
                 // Adding another instance - scroll to this card horizontally only if not visible
                 // The GameCard component will handle vertical scrolling automatically
