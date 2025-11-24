@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useLayoutEffect, useRef } from
 import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull, Plus, Minus, Pencil, Check } from 'lucide-react'
 import Pips from './Pips'
 import ContainerWithTab from './ContainerWithTab'
+import CustomAdversaryCreator from './CustomAdversaryCreator'
 
 // Reusable Threshold Tag Component
 const ThresholdTag = ({ value }) => (
@@ -718,6 +719,7 @@ const GameCard = ({
   const previousScrollTopRef = useRef(null)
   const scrollAnimationFrameRef = useRef(null) // Track ongoing scroll animation
   const nameInputRef = useRef(null) // Ref for name input in edit mode
+  const customCreatorRef = useRef(null) // Ref for CustomAdversaryCreator when showCustomCreator is true
   
   // Track scroll state continuously
   useEffect(() => {
@@ -3286,6 +3288,109 @@ const GameCard = ({
   // ============================================================================
   // MAIN RENDER
   // ============================================================================
+
+  // When showCustomCreator is true, render CustomAdversaryCreator instead
+  if (showCustomCreator && (type === 'adversary' || type === 'adversaries')) {
+    const shouldShowTab = (type === 'adversary')
+    
+    const tabContent = shouldShowTab ? (
+      // Tab buttons: Save and Cancel
+      <>
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            if (customCreatorRef.current?.handleSave) {
+              customCreatorRef.current.handleSave()
+            }
+          }}
+          style={{
+            background: 'var(--purple)',
+            border: '1px solid var(--purple)',
+            color: 'white',
+            borderRadius: '4px',
+            padding: '0.375rem 0.75rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.375rem',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = '0.9'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = '1'
+          }}
+          title="Save"
+        >
+          <Check size={16} />
+          <span>Save</span>
+        </button>
+        {onCancelEdit && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onCancelEdit()
+            }}
+            style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              borderRadius: '4px',
+              padding: '0.375rem 0.75rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.375rem',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--bg-hover)'
+              e.currentTarget.style.borderColor = 'var(--purple)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
+              e.currentTarget.style.borderColor = 'var(--border)'
+            }}
+            title="Cancel"
+          >
+            <X size={16} />
+            <span>Cancel</span>
+          </button>
+        )}
+      </>
+    ) : null
+
+    return (
+      <ContainerWithTab
+        tabContent={tabContent}
+        containerStyle={{
+          padding: 0,
+          height: 'auto',
+          maxHeight: shouldShowTab ? 'calc(100vh - 120px)' : 'calc(100vh - 68px)',
+          minHeight: 0
+        }}
+      >
+        <CustomAdversaryCreator
+          ref={customCreatorRef}
+          editingAdversary={item}
+          onSave={onSaveCustomAdversary}
+          onCancelEdit={onCancelEdit}
+          isStockAdversary={isStockAdversary}
+          embedded={true}
+          hideEmbeddedButtons={true} // Hide embedded buttons, use tab buttons instead
+          allAdversaries={adversaries}
+          autoFocus={!item.name || item.name.trim() === ''} // Auto-focus when creating new (empty name)
+        />
+      </ContainerWithTab>
+    )
+  }
 
   // When showCustomCreator is true, use edit mode instead
   // This eliminates the double container issue

@@ -60,6 +60,7 @@ const CustomAdversaryCreator = forwardRef(({
   hideEmbeddedButtons = false // Hide embedded save/cancel buttons when using external buttons
 }, ref) => {
   const nameInputRef = useRef(null)
+  const gameCardNameInputRef = useRef(null)
   const [formData, setFormData] = useState(() => {
     const defaults = getDefaultAdversaryValues(1, 'Standard')
     return {
@@ -103,19 +104,28 @@ const CustomAdversaryCreator = forwardRef(({
 
   // Auto-focus name field
   useEffect(() => {
-    if (autoFocus && nameInputRef.current) {
+    if (autoFocus) {
       // Small delay to ensure DOM is ready
       setTimeout(() => {
-        nameInputRef.current?.focus()
-      }, 100)
+        if (editingAdversary && gameCardNameInputRef.current) {
+          // When editing, focus the GameCard's name input
+          gameCardNameInputRef.current?.focus()
+          gameCardNameInputRef.current?.select()
+        } else if (nameInputRef.current) {
+          // When creating new, focus CustomAdversaryCreator's name input
+          nameInputRef.current?.focus()
+        }
+      }, 650) // Delay to match scroll animation
     }
-  }, [autoFocus])
+  }, [autoFocus, editingAdversary])
 
   // Initialize form data when editing
   useEffect(() => {
     if (editingAdversary) {
+      // Use baseName if available, otherwise strip duplicate number from name
+      const baseName = editingAdversary.baseName || editingAdversary.name?.replace(/\s+\(\d+\)$/, '') || editingAdversary.name || ''
       setFormData({
-        name: editingAdversary.name || '',
+        name: baseName,
         tier: editingAdversary.tier || 1,
         type: editingAdversary.type || 'Standard',
         description: editingAdversary.description || '',
@@ -251,8 +261,21 @@ const CustomAdversaryCreator = forwardRef(({
 
     setIsSaving(true)
     try {
+      // Filter out blank experiences (name is blank and modifier is 0)
+      const filterBlankExperiences = (experiences) => {
+        return (experiences || []).filter(exp => 
+          exp.name && exp.name.trim() !== '' || (exp.modifier !== undefined && exp.modifier !== 0)
+        )
+      }
+      
+      const baseName = formData.name.trim() || 'Unknown'
+      const filteredExperience = filterBlankExperiences(formData.experience || [])
+      
       const adversaryData = {
         ...formData,
+        experience: filteredExperience,
+        baseName: baseName,
+        name: baseName, // Will be updated by createAdversary/updateAdversary with duplicate number
         hp: editingAdversary ? editingAdversary.hp : 0,
         stress: editingAdversary ? editingAdversary.stress : 0,
         source: 'Homebrew'
@@ -261,12 +284,15 @@ const CustomAdversaryCreator = forwardRef(({
       if (editingAdversary) {
         if (isStockAdversary) {
           // Save As Custom - create new custom copy
-          await onSave(adversaryData)
+          // Remove id and name (will be set by createAdversary)
+          const { id, name, ...dataToSave } = adversaryData
+          await onSave(dataToSave)
           alert('Custom adversary created successfully!')
         } else {
           // Update existing custom adversary
-          adversaryData.id = editingAdversary.id
-          await onSave(adversaryData, editingAdversary.id)
+          // Remove name - updateAdversary will recalculate it from baseName and duplicateNumber
+          const { name, ...dataToUpdate } = adversaryData
+          await onSave(dataToUpdate, editingAdversary.id)
           alert('Adversary updated successfully!')
         }
         if (onCancelEdit) {
@@ -526,6 +552,8 @@ const CustomAdversaryCreator = forwardRef(({
         item={mockAdversary}
         type="adversary"
         mode="edit"
+        nameInputRef={editingAdversary ? gameCardNameInputRef : undefined}
+        autoFocusNameInput={autoFocus && editingAdversary}
         onUpdate={(id, updates) => {
           setFormData(prev => ({ ...prev, ...updates }))
         }}
