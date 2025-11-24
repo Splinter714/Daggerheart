@@ -717,6 +717,7 @@ const GameCard = ({
   const previousScrollHeightRef = useRef(null)
   const previousScrollTopRef = useRef(null)
   const scrollAnimationFrameRef = useRef(null) // Track ongoing scroll animation
+  const nameInputRef = useRef(null) // Ref for name input in edit mode
   
   // Track scroll state continuously
   useEffect(() => {
@@ -755,6 +756,19 @@ const GameCard = ({
   
   // State for two-stage delete functionality
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
+  
+  // Auto-focus name input when entering edit mode for newly created custom adversary
+  useEffect(() => {
+    if (showCustomCreator && nameInputRef.current) {
+      // Delay to ensure DOM is ready and scroll has completed (scroll animation is 600ms)
+      const timeoutId = setTimeout(() => {
+        nameInputRef.current?.focus()
+        nameInputRef.current?.select() // Select text if any
+      }, 650) // Wait for scroll animation to complete
+      
+      return () => clearTimeout(timeoutId)
+    }
+  }, [showCustomCreator])
   
   // Smooth scroll when instances are added or removed
   useLayoutEffect(() => {
@@ -843,6 +857,19 @@ const GameCard = ({
     return `experience-${index}-${typeof exp === 'string' ? exp : exp.name || 'blank'}`
   }
   
+  // Helper function to filter out blank experiences (name empty and modifier 0)
+  const filterBlankExperiences = (experiences) => {
+    if (!experiences || !Array.isArray(experiences)) return []
+    return experiences.filter(exp => {
+      if (typeof exp === 'string') {
+        return exp.trim().length > 0
+      }
+      const name = exp.name || ''
+      const modifier = exp.modifier || 0
+      return name.trim().length > 0 || modifier > 0
+    })
+  }
+  
   // Handle two-stage delete for features
   const handleFeatureDeleteClick = (featureToDelete) => {
     const featureKey = getFeatureKey(featureToDelete)
@@ -883,7 +910,8 @@ const GameCard = ({
       // Second click - actually delete
       const newExp = [...(item.experience || [])]
       newExp.splice(index, 1)
-      onUpdate && onUpdate(item.id, { experience: newExp })
+      const filteredExp = filterBlankExperiences(newExp)
+      onUpdate && onUpdate(item.id, { experience: filteredExp })
       
       setDeleteConfirmations(prev => {
         const newState = { ...prev }
@@ -1443,10 +1471,13 @@ const GameCard = ({
             }}>
               {isEditMode ? (
                 <input
+                  ref={nameInputRef}
                   type="text"
                   value={item.name || ''}
                   onChange={(e) => {
-                    onUpdate && onUpdate(item.id, { name: e.target.value })
+                    if (onUpdate && item.id) {
+                      onUpdate(item.id, { name: e.target.value })
+                    }
                   }}
                   style={{
                     backgroundColor: 'var(--bg-primary)',
@@ -1757,7 +1788,7 @@ const GameCard = ({
                       const experiences = item.experience || []
                       // Ensure at least one empty experience in edit mode
                       const experiencesToShow = experiences.length === 0 
-                        ? [{ name: '', modifier: 1 }]
+                        ? [{ name: '', modifier: 0 }]
                         : experiences
                       
                       return experiencesToShow.map((exp, index) => (
@@ -1779,33 +1810,37 @@ const GameCard = ({
                           }}>
                             <input
                               type="text"
-                              value={typeof exp === 'object' ? (exp.modifier >= 1 ? `+${exp.modifier}` : '+1') : '+1'}
+                              value={typeof exp === 'object' ? (exp.modifier > 0 ? `+${exp.modifier}` : '') : ''}
                               onChange={(e) => {
                                 const newExp = [...(item.experience || [])]
-                                const modifier = parseInt(e.target.value.replace(/[^0-9+-]/g, '')) || 1
-                                const clampedModifier = Math.max(1, modifier)
+                                const modifierValue = e.target.value.replace(/[^0-9+-]/g, '')
+                                const modifier = modifierValue === '' || modifierValue === '+' ? 0 : (parseInt(modifierValue) || 0)
+                                const clampedModifier = Math.max(0, modifier)
                                 newExp[index] = { name: typeof exp === 'string' ? exp : exp.name || '', modifier: clampedModifier }
-                                onUpdate && onUpdate(item.id, { experience: newExp })
+                                const filteredExp = filterBlankExperiences(newExp)
+                                onUpdate && onUpdate(item.id, { experience: filteredExp })
                               }}
                               onKeyDown={(e) => {
                                 if (e.key === 'ArrowUp') {
                                   e.preventDefault()
                                   const newExp = [...(item.experience || [])]
-                                  const currentModifier = typeof exp === 'object' ? Math.max(1, exp.modifier) : 1
+                                  const currentModifier = typeof exp === 'object' ? (exp.modifier || 0) : 0
                                   newExp[index] = { 
                                     name: typeof exp === 'string' ? exp : exp.name || '', 
                                     modifier: currentModifier + 1 
                                   }
-                                  onUpdate && onUpdate(item.id, { experience: newExp })
+                                  const filteredExp = filterBlankExperiences(newExp)
+                                  onUpdate && onUpdate(item.id, { experience: filteredExp })
                                 } else if (e.key === 'ArrowDown') {
                                   e.preventDefault()
                                   const newExp = [...(item.experience || [])]
-                                  const currentModifier = typeof exp === 'object' ? Math.max(1, exp.modifier) : 1
+                                  const currentModifier = typeof exp === 'object' ? (exp.modifier || 0) : 0
                                   newExp[index] = { 
                                     name: typeof exp === 'string' ? exp : exp.name || '', 
-                                    modifier: Math.max(1, currentModifier - 1)
+                                    modifier: Math.max(0, currentModifier - 1)
                                   }
-                                  onUpdate && onUpdate(item.id, { experience: newExp })
+                                  const filteredExp = filterBlankExperiences(newExp)
+                                  onUpdate && onUpdate(item.id, { experience: filteredExp })
                                 }
                               }}
                               style={{
@@ -1838,16 +1873,19 @@ const GameCard = ({
                               value={typeof exp === 'string' ? exp : exp.name || ''}
                               onChange={(e) => {
                                 const newExp = [...(item.experience || [])]
-                                const currentModifier = typeof exp === 'object' ? exp.modifier : 1
+                                const currentModifier = typeof exp === 'object' ? (exp.modifier || 0) : 0
                                 newExp[index] = { name: e.target.value, modifier: currentModifier }
                                 
-                                // Auto-add new experience if this was the last experience and name is filled
-                                const lastExperience = newExp[newExp.length - 1]
-                                if (lastExperience && lastExperience.name.trim()) {
-                                  newExp.push({ name: '', modifier: 1 })
+                                // Filter out blank experiences first
+                                let filteredExp = filterBlankExperiences(newExp)
+                                
+                                // Auto-add new blank experience if the last experience has a name
+                                const lastExperience = filteredExp[filteredExp.length - 1]
+                                if (lastExperience && (typeof lastExperience === 'string' ? lastExperience.trim() : lastExperience.name?.trim())) {
+                                  filteredExp.push({ name: '', modifier: 0 })
                                 }
                                 
-                                onUpdate && onUpdate(item.id, { experience: newExp })
+                                onUpdate && onUpdate(item.id, { experience: filteredExp })
                               }}
                               placeholder="Experience name"
                               style={{
@@ -1876,7 +1914,8 @@ const GameCard = ({
                                     // Swap with previous experience
                                     newExp[index] = prevExp
                                     newExp[index - 1] = exp
-                                    onUpdate && onUpdate(item.id, { experience: newExp })
+                                    const filteredExp = filterBlankExperiences(newExp)
+                                    onUpdate && onUpdate(item.id, { experience: filteredExp })
                                   }
                                 }}
                                 disabled={index === 0 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index - 1] === 'string' ? experiencesToShow[index - 1].trim() : experiencesToShow[index - 1].name?.trim())}
@@ -1915,7 +1954,8 @@ const GameCard = ({
                                     // Swap with next experience
                                     newExp[index] = nextExp
                                     newExp[index + 1] = exp
-                                    onUpdate && onUpdate(item.id, { experience: newExp })
+                                    const filteredExp = filterBlankExperiences(newExp)
+                                    onUpdate && onUpdate(item.id, { experience: filteredExp })
                                   }
                                 }}
                                 disabled={index === experiencesToShow.length - 1 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index + 1] === 'string' ? experiencesToShow[index + 1].trim() : experiencesToShow[index + 1].name?.trim())}

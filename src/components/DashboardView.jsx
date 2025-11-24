@@ -10,6 +10,7 @@ import Panel from './Panels'
 import EncounterBuilder from './EncounterBuilder'
 import { Plus, X, Minus, Pencil } from 'lucide-react'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
+import { getDefaultAdversaryValues } from '../data/adversaryDefaults'
 
 // Battle Points calculation (from EncounterBuilder)
 const calculateBaseBattlePoints = (pcCount) => (3 * pcCount) + 2
@@ -518,21 +519,26 @@ const DashboardContent = () => {
   // Handle creating a new custom adversary
   const handleCreateCustomAdversary = useCallback(() => {
     // Create a blank custom adversary and add it to the dashboard
+    // Use default stats based on tier and type
+    const tier = 1
+    const type = 'Standard'
+    const defaultStats = getDefaultAdversaryValues(tier, type)
+    
     const defaults = {
       name: '',
       baseName: '',
-      tier: 1,
-      type: 'Standard',
+      tier: tier,
+      type: type,
       description: '',
       motives: '',
-      difficulty: 11,
-      thresholds: { major: 7, severe: 12 },
-      hpMax: 3,
-      stressMax: 1,
-      atk: 1,
+      difficulty: defaultStats.difficulty,
+      thresholds: defaultStats.thresholds,
+      hpMax: defaultStats.hpMax,
+      stressMax: defaultStats.stressMax,
+      atk: defaultStats.atk,
       weapon: '',
-      range: 'Melee',
-      damage: '',
+      range: defaultStats.range,
+      damage: defaultStats.damage,
       experience: [],
       features: [],
       source: 'Homebrew',
@@ -983,7 +989,7 @@ const DashboardContent = () => {
               type={group.type}
               item={{ 
                 ...group.instances[0], 
-                name: group.baseName,
+                name: group.instances[0]?.name || group.baseName,
                 // Reset instance-specific state so the expanded card doesn't show defeated state
                 hp: 0,
                 stress: 0,
