@@ -4,6 +4,7 @@ import Pips from './Pips'
 import Bar from './Toolbars'
 import GameCard from './GameCard'
 import Browser from './Browser'
+import ContainerWithTab from './ContainerWithTab'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import Panel from './Panels'
 import EncounterBuilder from './EncounterBuilder'
@@ -190,8 +191,46 @@ const DashboardContent = () => {
 
   // Handle opening browser at a specific position
   const handleOpenBrowser = useCallback((position) => {
+    // Check if user is scrolled all the way right before opening browser
+    let wasAtMaxScroll = false
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current
+      const currentScroll = container.scrollLeft
+      const maxScroll = container.scrollWidth - container.clientWidth
+      wasAtMaxScroll = Math.abs(currentScroll - maxScroll) < 1 // Within 1px of max
+      
+      // Store this state on the container
+      if (wasAtMaxScroll) {
+        container._wasAtMaxScrollOnBrowserOpen = true
+      }
+    }
     setBrowserOpenAtPosition(position)
   }, [])
+
+  // Adjust scroll position when browser opens to prevent shift when spacer is added
+  useEffect(() => {
+    if (browserOpenAtPosition !== null && scrollContainerRef.current) {
+      const container = scrollContainerRef.current
+      const wasAtMaxScroll = container._wasAtMaxScrollOnBrowserOpen
+      
+      if (wasAtMaxScroll) {
+        // Wait for DOM to update with the spacer, then adjust scroll
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (scrollContainerRef.current) {
+              const container = scrollContainerRef.current
+              const spacerWidth = columnWidth + gap
+              const newMaxScroll = container.scrollWidth - container.clientWidth
+              // Set scroll to new max (which includes the spacer)
+              container.scrollLeft = newMaxScroll
+              // Clean up the flag
+              container._wasAtMaxScrollOnBrowserOpen = false
+            }
+          })
+        })
+      }
+    }
+  }, [browserOpenAtPosition, columnWidth, gap])
 
   // Handle closing browser
   const handleCloseBrowser = useCallback(() => {
@@ -674,94 +713,129 @@ const DashboardContent = () => {
         {browserOpenAtPosition !== null && (
           <div style={{
             position: 'absolute',
-            top: `${gap}px`,
+            top: `${gap}px`, // Start at gap - tab extends above
             right: `${gap}px`,
             bottom: `${gap}px`,
             width: `${columnWidth}px`,
-            backgroundColor: 'var(--bg-primary)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)',
             zIndex: 100,
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.3)',
-            overflow: 'hidden'
+            overflow: 'visible' // Allow tab to extend above
           }}>
-            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-              {/* Add Custom button */}
-              <div style={{
-                padding: '0.75rem',
-                borderBottom: '1px solid var(--border)',
-                display: 'flex',
-                justifyContent: 'center'
-              }}>
-                <button
-                  onClick={handleCreateCustomAdversary}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    backgroundColor: 'var(--purple)',
-                    border: 'none',
-                    color: 'white',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
+            <ContainerWithTab
+              tabContent={
+                <>
+                  {/* Add Custom button */}
+                  <button
+                    onClick={handleCreateCustomAdversary}
+                    style={{
+                      padding: '0.375rem 0.75rem',
+                      backgroundColor: 'var(--purple)',
+                      border: 'none',
+                      color: 'white',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      transition: 'opacity 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.opacity = '0.9'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.opacity = '1'
+                    }}
+                  >
+                    <Plus size={16} />
+                    <span>Add Custom</span>
+                  </button>
+                  {/* Balance display */}
+                  <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem',
-                    transition: 'opacity 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.opacity = '0.9'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.opacity = '1'
-                  }}
-                >
-                  <Plus size={16} />
-                  <span>Add Custom</span>
-                </button>
-              </div>
-              <Browser
-                type="adversary"
-                onAddItem={handleAddAdversaryFromBrowser}
-                showContainer={false}
-                activeTab="adversaries"
-                autoFocus={true}
-                hideImportExport={true}
-                onClose={handleCloseBrowser}
-                searchPlaceholder="Search adversaries"
-              />
-            </div>
-            
-            {/* Balance display at bottom */}
-            <div style={{
-              flexShrink: 0,
-              borderTop: '1px solid var(--border)',
-              backgroundColor: 'var(--bg-primary)',
-              padding: '0.75rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: '500' }}>
-                Balance
-              </span>
-              <span style={{
-                color: spentBattlePoints > availableBattlePoints ? 'var(--danger)' : 
-                       spentBattlePoints === availableBattlePoints ? 'var(--purple)' : 
-                       'var(--success)',
-                fontWeight: 600,
-                fontSize: '0.9rem'
+                    gap: '0.5rem'
+                  }}>
+                    <span style={{ color: 'var(--text-primary)', fontSize: '0.875rem', fontWeight: '500' }}>
+                      Balance:
+                    </span>
+                    <span style={{
+                      color: spentBattlePoints > availableBattlePoints ? 'var(--danger)' : 
+                             spentBattlePoints === availableBattlePoints ? 'var(--purple)' : 
+                             'var(--success)',
+                      fontWeight: 600,
+                      fontSize: '0.875rem'
+                    }}>
+                      {spentBattlePoints > availableBattlePoints ? 
+                        `+${spentBattlePoints - availableBattlePoints}` : 
+                        availableBattlePoints - spentBattlePoints === 0 ? 
+                          '0' : 
+                          `-${availableBattlePoints - spentBattlePoints}`
+                      }
+                    </span>
+                  </div>
+                  {/* Close button */}
+                  {handleCloseBrowser && (
+                    <button
+                      onClick={handleCloseBrowser}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        padding: '0.25rem',
+                        borderRadius: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'color 0.2s ease',
+                        flexShrink: 0
+                      }}
+                      onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
+                      onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                      title="Close browser"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </>
+              }
+              showTab={true}
+              tabBackgroundColor="var(--bg-primary)"
+              tabBorderColor="var(--border)"
+              tabJustifyContent="space-between"
+              containerBackgroundColor="var(--bg-primary)"
+              containerBorderColor="var(--border)"
+              containerBorderRadius="8px"
+              containerBoxShadow="-4px 0 12px rgba(0, 0, 0, 0.3)"
+              containerOverflow="hidden"
+              reserveTabSpace={true}
+              containerStyle={{
+                height: '100%' // Ensure container fills wrapper
+              }}
+            >
+              <div style={{ 
+                flex: 1, 
+                overflowY: 'auto', 
+                overflowX: 'hidden', 
+                minHeight: 0, 
+                display: 'flex', 
+                flexDirection: 'column',
+                width: '100%',
+                minWidth: 0
               }}>
-                {spentBattlePoints > availableBattlePoints ? 
-                  `+${spentBattlePoints - availableBattlePoints}` : 
-                  availableBattlePoints - spentBattlePoints === 0 ? 
-                    '0' : 
-                    `-${availableBattlePoints - spentBattlePoints}`
-                }
-              </span>
-            </div>
+                <Browser
+                  type="adversary"
+                  onAddItem={handleAddAdversaryFromBrowser}
+                  showContainer={false}
+                  activeTab="adversaries"
+                  autoFocus={true}
+                  hideImportExport={true}
+                  onClose={handleCloseBrowser}
+                  searchPlaceholder="Search adversaries"
+                />
+              </div>
+            </ContainerWithTab>
           </div>
         )}
         <div 
@@ -964,6 +1038,16 @@ const DashboardContent = () => {
             />
           </Panel>
         ))
+        )}
+        {/* Blank spacer column to allow scrolling one more column width - only when browser is open */}
+        {browserOpenAtPosition !== null && (
+          <div style={{
+            width: `${columnWidth + gap}px`,
+            flexShrink: 0,
+            flexGrow: 0,
+            flex: 'none',
+            height: '100%'
+          }} />
         )}
         </div>
       </div>

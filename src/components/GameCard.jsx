@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull, Plus, Minus, Pencil, Check } from 'lucide-react'
 import Pips from './Pips'
+import ContainerWithTab from './ContainerWithTab'
 
 // Reusable Threshold Tag Component
 const ThresholdTag = ({ value }) => (
@@ -448,7 +449,8 @@ const styles = {
     padding: '8px',
     cursor: 'pointer',
     transition: 'all 0.1s ease',
-    position: 'relative'
+    position: 'relative',
+    border: 'none' // Border is handled by ContainerWithTab
   },
   cardHover: {
     backgroundColor: 'var(--bg-card-hover)'
@@ -1248,262 +1250,257 @@ const GameCard = ({
     const isDead = (item.hp || 0) >= (item.hpMax || 1)
     const isEditMode = effectiveMode === 'edit' || showCustomCreator
     
+    // Determine if tab should be shown
+    const shouldShowTab = ((showAddRemoveButtons && type === 'adversary') || (showCustomCreator && type === 'adversary'))
+    
+    // Build tab content
+    const tabContent = shouldShowTab ? (
+      showCustomCreator ? (
+        // Edit mode buttons: Save and Cancel
+        <>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              if (onSaveCustomAdversary) {
+                onSaveCustomAdversary(item, item.id)
+                if (onCancelEdit) onCancelEdit()
+              }
+            }}
+            style={{
+              background: 'var(--purple)',
+              border: '1px solid var(--purple)',
+              color: 'white',
+              borderRadius: '4px',
+              padding: '0.375rem 0.75rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.375rem',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.opacity = '0.9'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.opacity = '1'
+            }}
+            title="Save"
+          >
+            <Check size={16} />
+            <span>Save</span>
+          </button>
+          {onCancelEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onCancelEdit()
+              }}
+              style={{
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
+                borderRadius: '4px',
+                padding: '0.375rem 0.75rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.375rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'var(--bg-hover)'
+                e.target.style.borderColor = 'var(--purple)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'var(--bg-secondary)'
+                e.target.style.borderColor = 'var(--border)'
+              }}
+              title="Cancel"
+            >
+              <X size={16} />
+              <span>Cancel</span>
+            </button>
+          )}
+        </>
+      ) : (
+        // Normal mode buttons: Add/Remove/Edit
+        <>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemoveInstance && onRemoveInstance(item.id)
+            }}
+            style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              borderRadius: '4px',
+              padding: '0',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              fontSize: '0.7rem',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-hover)'
+              e.target.style.borderColor = 'var(--purple)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-secondary)'
+              e.target.style.borderColor = 'var(--border)'
+            }}
+            title="Remove one"
+          >
+            <Minus size={16} />
+          </button>
+          <span style={{ 
+            color: 'var(--text-primary)', 
+            fontSize: '1rem',
+            fontWeight: '500',
+            minWidth: '24px',
+            textAlign: 'center'
+          }}>
+            {instances.length}
+          </span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onAddInstance && onAddInstance(item)
+            }}
+            style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              borderRadius: '4px',
+              padding: '0',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              fontSize: '0.7rem',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--purple)'
+              e.target.style.borderColor = 'var(--purple)'
+              e.target.style.color = 'white'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'var(--bg-secondary)'
+              e.target.style.borderColor = 'var(--border)'
+              e.target.style.color = 'var(--text-primary)'
+            }}
+            title="Add another"
+          >
+            <Plus size={16} />
+          </button>
+          {onEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit(item.id)
+              }}
+              style={{
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
+                borderRadius: '4px',
+                padding: '0',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                fontSize: '0.7rem',
+                transition: 'all 0.2s ease',
+                marginLeft: '0.25rem'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'var(--purple)'
+                e.target.style.borderColor = 'var(--purple)'
+                e.target.style.color = 'white'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'var(--bg-secondary)'
+                e.target.style.borderColor = 'var(--border)'
+                e.target.style.color = 'var(--text-primary)'
+              }}
+              title="Edit"
+            >
+              <Pencil size={16} />
+            </button>
+          )}
+        </>
+      )
+    ) : null
 
     return (
-      <div 
-        className={getCardClassName()}
-        style={{
-          ...getCardStyle(true),
+      <ContainerWithTab
+        tabContent={tabContent}
+        showTab={shouldShowTab}
+        tabBorderColor={isSelected ? 'var(--purple)' : 'var(--border)'}
+        containerBackgroundColor={isDead ? 'var(--gray-900)' : getCardStyle(true).backgroundColor}
+        containerBorderColor={isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isSelected ? 'var(--purple)' : 'var(--border)')}
+        containerBorderRadius="8px"
+        containerOverflow="hidden"
+        containerStyle={{
           padding: 0,
           opacity: isDead ? 0.7 : 1,
-          backgroundColor: isDead ? 'var(--gray-900)' : getCardStyle(true).backgroundColor,
-          borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isSelected ? 'var(--purple)' : 'var(--border)'),
-          borderWidth: isSelected ? '2px' : '2px',
-          display: 'flex',
-          flexDirection: 'column',
-          position: 'relative',
-          height: 'auto', // Let card size to content
-          minHeight: 0, // Allow card to shrink below content if needed
-          overflow: 'visible' // Allow buttons above card to be visible
+          height: 'auto',
+          maxHeight: 'calc(100vh - 120px)', // Constrain height to allow scrolling
+          minHeight: 0
         }}
-        onClick={onClick}
       >
-        {/* DEFEATED overlay */}
-        {isDead && (
-          <>
-            {/* Diagonal striping pattern */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: `repeating-linear-gradient(
-                45deg,
-                transparent,
-                transparent 8px,
-                var(--gray-600) 1px,
-                var(--gray-600) 9px
-              )`,
-              pointerEvents: 'none',
-              zIndex: 9999
-            }} />
-          </>
-        )}
-        {/* Add/Remove/Edit buttons row - positioned above card */}
-        {((showAddRemoveButtons && type === 'adversary') || (showCustomCreator && type === 'adversary')) && (
-          <div style={{ 
-            position: 'absolute',
-            top: '-52px',
-            left: '3px',
-            right: '3px',
-            width: 'calc(100% - 6px)',
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.5rem', 
-            justifyContent: 'center',
-            flexShrink: 0,
-            zIndex: 10,
-            padding: '0.5rem 0.75rem',
-            paddingBottom: 'calc(0.5rem + 1px)', // Extend padding to overlap border
-            backgroundColor: 'var(--bg-primary)',
-            border: `1.5px solid ${isSelected ? 'var(--purple)' : 'var(--border)'}`,
-            borderBottom: 'none',
-            borderRadius: '8px 8px 0 0',
-            boxSizing: 'border-box',
-            marginBottom: '-1px' // Overlap with card border
-          }}>
-            {showCustomCreator ? (
-              // Edit mode buttons: Save and Cancel
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    if (onSaveCustomAdversary) {
-                      onSaveCustomAdversary(item, item.id)
-                      if (onCancelEdit) onCancelEdit()
-                    }
-                  }}
-                  style={{
-                    background: 'var(--purple)',
-                    border: '1px solid var(--purple)',
-                    color: 'white',
-                    borderRadius: '4px',
-                    padding: '0.375rem 0.75rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.375rem',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.opacity = '0.9'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.opacity = '1'
-                  }}
-                  title="Save"
-                >
-                  <Check size={16} />
-                  <span>Save</span>
-                </button>
-                {onCancelEdit && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onCancelEdit()
-                    }}
-                    style={{
-                      background: 'var(--bg-secondary)',
-                      border: '1px solid var(--border)',
-                      color: 'var(--text-primary)',
-                      borderRadius: '4px',
-                      padding: '0.375rem 0.75rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.375rem',
-                      fontSize: '0.875rem',
-                      fontWeight: '500',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = 'var(--bg-hover)'
-                      e.target.style.borderColor = 'var(--purple)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'var(--bg-secondary)'
-                      e.target.style.borderColor = 'var(--border)'
-                    }}
-                    title="Cancel"
-                  >
-                    <X size={16} />
-                    <span>Cancel</span>
-                  </button>
-                )}
-              </>
-            ) : (
-              // Normal mode buttons: Add/Remove/Edit
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onRemoveInstance && onRemoveInstance(item.id)
-                  }}
-                  style={{
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text-primary)',
-                    borderRadius: '4px',
-                    padding: '0',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '32px',
-                    height: '32px',
-                    fontSize: '0.7rem',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'var(--bg-hover)'
-                    e.target.style.borderColor = 'var(--purple)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'var(--bg-secondary)'
-                    e.target.style.borderColor = 'var(--border)'
-                  }}
-                  title="Remove one"
-                >
-                  <Minus size={16} />
-                </button>
-                <span style={{ 
-                  color: 'var(--text-primary)', 
-                  fontSize: '1rem',
-                  fontWeight: '500',
-                  minWidth: '24px',
-                  textAlign: 'center'
-                }}>
-                  {instances.length}
-                </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onAddInstance && onAddInstance(item)
-                  }}
-                  style={{
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text-primary)',
-                    borderRadius: '4px',
-                    padding: '0',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '32px',
-                    height: '32px',
-                    fontSize: '0.7rem',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'var(--purple)'
-                    e.target.style.borderColor = 'var(--purple)'
-                    e.target.style.color = 'white'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'var(--bg-secondary)'
-                    e.target.style.borderColor = 'var(--border)'
-                    e.target.style.color = 'var(--text-primary)'
-                  }}
-                  title="Add another"
-                >
-                  <Plus size={16} />
-                </button>
-                {onEdit && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onEdit(item.id)
-                    }}
-                    style={{
-                      background: 'var(--bg-secondary)',
-                      border: '1px solid var(--border)',
-                      color: 'var(--text-primary)',
-                      borderRadius: '4px',
-                      padding: '0',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '32px',
-                      height: '32px',
-                      fontSize: '0.7rem',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = 'var(--purple)'
-                      e.target.style.borderColor = 'var(--purple)'
-                      e.target.style.color = 'white'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'var(--bg-secondary)'
-                      e.target.style.borderColor = 'var(--border)'
-                      e.target.style.color = 'var(--text-primary)'
-                    }}
-                    title="Edit"
-                  >
-                    <Pencil size={16} />
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        )}
+        <div 
+          className={getCardClassName()}
+          style={{
+            ...getCardStyle(true),
+            padding: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative',
+            height: '100%',
+            minHeight: 0,
+            border: 'none', // Border is handled by ContainerWithTab
+            borderRadius: 0 // Border radius is handled by ContainerWithTab
+          }}
+          onClick={onClick}
+        >
+          {/* DEFEATED overlay */}
+          {isDead && (
+            <>
+              {/* Diagonal striping pattern */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: `repeating-linear-gradient(
+                  45deg,
+                  transparent,
+                  transparent 8px,
+                  var(--gray-600) 1px,
+                  var(--gray-600) 9px
+                )`,
+                pointerEvents: 'none',
+                zIndex: 9999
+              }} />
+            </>
+          )}
         {/* Fixed Header Section - Identical to Compact View */}
         <div className="border-b" style={{
           padding: '8px',
@@ -3323,23 +3320,24 @@ const GameCard = ({
           </div>
         )}
 
-        {/* Temporary padding spacer for smooth scroll animation on instance removal */}
-        {temporaryPaddingHeight > 0 && (
-          <div 
-            ref={temporaryPaddingRef}
-            style={{
-              height: temporaryPaddingHeight,
-              width: '100%',
-              flexShrink: 0
-            }}
-          />
-        )}
+          {/* Temporary padding spacer for smooth scroll animation on instance removal */}
+          {temporaryPaddingHeight > 0 && (
+            <div 
+              ref={temporaryPaddingRef}
+              style={{
+                height: temporaryPaddingHeight,
+                width: '100%',
+                flexShrink: 0
+              }}
+            />
+          )}
 
+          </div>
+
+          {/* Damage Input Popup for Adversaries */}
+          {renderDamageInput()}
         </div>
-
-        {/* Damage Input Popup for Adversaries */}
-        {renderDamageInput()}
-      </div>
+      </ContainerWithTab>
     )
   }
 

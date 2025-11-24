@@ -613,29 +613,6 @@ const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showCu
           style={{ ...styles.searchInput, flex: 1, marginRight: 0 }}
       />
         
-        {onClose && (
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              padding: '0.25rem',
-              borderRadius: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'color 0.2s ease',
-              flexShrink: 0
-            }}
-            onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-            onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-            title="Close browser"
-          >
-            <X size={16} />
-          </button>
-        )}
       </div>
       
       {partyControls && (
@@ -2015,7 +1992,7 @@ const styles = {
   browserWrapperNoContainer: {
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden',
+    overflow: 'hidden', // Clip header to container's rounded border
     height: '100%',
     width: '100%',
     position: 'relative'
@@ -2027,7 +2004,8 @@ const styles = {
     padding: 0,
     width: '100%', // Ensure content uses full width
     scrollbarWidth: 'none', // Firefox
-    msOverflowStyle: 'none' // IE/Edge
+    msOverflowStyle: 'none', // IE/Edge
+    borderRadius: '0 0 8px 8px' // Clip content to bottom rounded corners, matching GameCard
   },
   tableHeaderContainer: {
     flexShrink: 0, // Prevent header from shrinking
