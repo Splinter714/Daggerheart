@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull, Plus, Minus } from 'lucide-react'
 import Pips from './Pips'
 
@@ -55,7 +55,6 @@ const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => 
     const context = canvas.getContext('2d')
     context.font = '600 11px system-ui, -apple-system, sans-serif' // Use px instead of rem
     const width = context.measureText(text.toUpperCase()).width
-    console.log('Text measurement:', { text, font: context.font, width })
     return width
   }
   
@@ -705,8 +704,213 @@ const GameCard = ({
   onAddInstance = null, // Handler for adding an instance
   onRemoveInstance = null, // Handler for removing an instance
 }) => {
+  // Ref for the scrollable content container
+  const scrollableContentRef = useRef(null)
+  const previousInstancesLengthRef = useRef(instances.length)
+  const previousScrollHeightRef = useRef(null)
+  const previousScrollTopRef = useRef(null)
+  const scrollAnimationFrameRef = useRef(null) // Track ongoing scroll animation
+  const temporaryPaddingRef = useRef(null) // Ref for temporary padding spacer
+  const [temporaryPaddingHeight, setTemporaryPaddingHeight] = useState(0) // Height of temporary padding
+  
+  // Track scroll state continuously
+  useEffect(() => {
+    const scrollContainer = scrollableContentRef.current
+    if (!scrollContainer) return
+    
+    const updateScrollState = () => {
+      previousScrollHeightRef.current = scrollContainer.scrollHeight
+      previousScrollTopRef.current = scrollContainer.scrollTop
+    }
+    
+    // Update on scroll
+    scrollContainer.addEventListener('scroll', updateScrollState, { passive: true })
+    
+    // Also update periodically to catch any programmatic changes
+    const interval = setInterval(updateScrollState, 100)
+    
+    // MutationObserver removed - useLayoutEffect handles scroll animations now
+    
+    return () => {
+      scrollContainer.removeEventListener('scroll', updateScrollState)
+      clearInterval(interval)
+    }
+  }, [])
+  
+  // Capture scroll state before instances change (cleanup runs before next effect)
+  useEffect(() => {
+    return () => {
+      // This cleanup runs before the next effect, so we capture state before DOM update
+      if (scrollableContentRef.current) {
+        previousScrollHeightRef.current = scrollableContentRef.current.scrollHeight
+        previousScrollTopRef.current = scrollableContentRef.current.scrollTop
+      }
+    }
+  }, [instances.length, instances])
+  
   // State for two-stage delete functionality
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
+  
+  // Smooth scroll when instances are added or removed
+  useLayoutEffect(() => {
+    const currentLength = instances.length
+    const previousLength = previousInstancesLengthRef.current
+    
+    if (currentLength !== previousLength && scrollableContentRef.current) {
+      // Use the stored previous scroll state (captured in cleanup before DOM update)
+      const oldScrollHeight = previousScrollHeightRef.current
+      const oldScrollTop = previousScrollTopRef.current
+      
+      if (!oldScrollHeight || oldScrollTop === null) {
+        // Fallback if state wasn't captured
+        previousInstancesLengthRef.current = currentLength
+        return
+      }
+      
+      const scrollContainer = scrollableContentRef.current
+      const newScrollHeight = scrollContainer.scrollHeight
+      const clientHeight = scrollContainer.clientHeight
+      
+      // Handle instance removal with smooth scroll
+      if (currentLength < previousLength) {
+        // Instance removed
+        const oldMaxScroll = oldScrollHeight - clientHeight
+        const wasAtBottom = oldScrollTop >= oldMaxScroll - 10 // Within 10px of bottom
+        
+        if (wasAtBottom && newScrollHeight > clientHeight) {
+          // Cancel any ongoing animation from previous removal
+          if (scrollAnimationFrameRef.current) {
+            cancelAnimationFrame(scrollAnimationFrameRef.current)
+            scrollAnimationFrameRef.current = null
+          }
+          
+          // Calculate height difference - this is the space we need to maintain
+          // If there's already temporary padding, we need to account for it
+          // The oldScrollHeight might include the padding, so we need to subtract it
+          const existingPadding = temporaryPaddingHeight
+          const actualOldHeight = oldScrollHeight - existingPadding
+          const heightDifference = actualOldHeight - newScrollHeight
+          
+          // Add temporary padding to maintain scrollable space
+          // If there's existing padding, add to it (for rapid removals)
+          setTemporaryPaddingHeight(existingPadding + heightDifference)
+          
+          // Wait for padding to be applied, then animate
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (!scrollContainer) return
+              
+              // Calculate the scroll position we should be at
+              // oldScrollTop was relative to oldScrollHeight (which may have included existing padding)
+              // We want to maintain the same visual position
+              // If there was existing padding, oldScrollHeight included it, so oldScrollTop is already correct
+              // We just need to use oldScrollTop directly since the padding maintains the same scrollHeight
+              const newPadding = existingPadding + heightDifference
+              
+              // Restore old scroll position (padding maintains the height, so position stays the same)
+              scrollContainer.scrollTop = oldScrollTop
+              void scrollContainer.offsetHeight
+              
+              // Calculate target scroll position (new bottom without padding)
+              const targetScroll = newScrollHeight - clientHeight
+              const currentScroll = scrollContainer.scrollTop
+              const distance = targetScroll - currentScroll
+              
+              // Only animate if there's meaningful distance to travel
+              if (Math.abs(distance) > 0.5) {
+                const duration = 400
+                const startTime = performance.now()
+                const startScroll = currentScroll
+                
+                const animateScroll = (currentTime) => {
+                  if (!scrollContainer) {
+                    scrollAnimationFrameRef.current = null
+                    return
+                  }
+                  
+                  const elapsed = currentTime - startTime
+                  const progress = Math.min(elapsed / duration, 1)
+                  
+                  // Optimized easing calculation
+                  const oneMinusProgress = 1 - progress
+                  const easeOut = 1 - (oneMinusProgress * oneMinusProgress * oneMinusProgress)
+                  
+                  // Target is the new bottom (without padding)
+                  const currentTarget = targetScroll
+                  const currentDistance = currentTarget - startScroll
+                  const newScroll = startScroll + (currentDistance * easeOut)
+                  
+                  scrollContainer.scrollTop = newScroll
+                  
+                  if (progress < 1) {
+                    scrollAnimationFrameRef.current = requestAnimationFrame(animateScroll)
+                  } else {
+                    scrollContainer.scrollTop = currentTarget
+                    scrollAnimationFrameRef.current = null
+                    // Remove temporary padding after animation completes
+                    setTemporaryPaddingHeight(0)
+                  }
+                }
+                
+                scrollAnimationFrameRef.current = requestAnimationFrame(animateScroll)
+              } else {
+                // No distance to travel, just remove padding
+                setTemporaryPaddingHeight(0)
+              }
+            })
+          })
+        }
+      } else if (currentLength > previousLength) {
+        // Instance added: scroll to bottom
+        const targetScroll = newScrollHeight - clientHeight
+        const startScroll = scrollContainer.scrollTop
+        const distance = targetScroll - startScroll
+        
+        if (Math.abs(distance) > 0.5) {
+          // Cancel any ongoing animation for additions
+          if (scrollAnimationFrameRef.current) {
+            cancelAnimationFrame(scrollAnimationFrameRef.current)
+            scrollAnimationFrameRef.current = null
+          }
+          
+          const duration = 400
+          const startTime = performance.now()
+          
+          const animateScroll = (currentTime) => {
+            if (!scrollContainer) {
+              scrollAnimationFrameRef.current = null
+              return
+            }
+            
+            const elapsed = currentTime - startTime
+            const progress = Math.min(elapsed / duration, 1)
+            
+            // Optimized easing calculation
+            const oneMinusProgress = 1 - progress
+            const easeOut = 1 - (oneMinusProgress * oneMinusProgress * oneMinusProgress)
+            
+            const newScroll = startScroll + (distance * easeOut)
+            scrollContainer.scrollTop = newScroll
+            
+            if (progress < 1) {
+              scrollAnimationFrameRef.current = requestAnimationFrame(animateScroll)
+            } else {
+              scrollContainer.scrollTop = targetScroll
+              scrollAnimationFrameRef.current = null
+            }
+          }
+          
+          scrollAnimationFrameRef.current = requestAnimationFrame(animateScroll)
+        }
+      }
+      
+      // Update the ref
+      previousInstancesLengthRef.current = currentLength
+    } else {
+      // Update ref even if we didn't scroll
+      previousInstancesLengthRef.current = currentLength
+    }
+  }, [instances.length, instances]) // Include instances in deps to catch reference changes
   
   // Helper function to generate unique keys for feature confirmations
   const getFeatureKey = (feature) => {
@@ -1039,25 +1243,6 @@ const GameCard = ({
     const isDead = (item.hp || 0) >= (item.hpMax || 1)
     const isEditMode = mode === 'edit'
     
-    // Debug logging for custom adversaries
-    console.log('=== EXPANDED ADVERSARY CARD DEBUG ===')
-    console.log('Item data:', item)
-    console.log('Item ID:', item.id)
-    console.log('Item name:', item.name)
-    console.log('Item type:', item.type)
-    console.log('Item tier:', item.tier)
-    console.log('Item difficulty:', item.difficulty)
-    console.log('Item atk:', item.atk, 'Type:', typeof item.atk)
-    console.log('Item hpMax:', item.hpMax)
-    console.log('Item stressMax:', item.stressMax)
-    console.log('Item thresholds:', item.thresholds)
-    console.log('Item experience:', item.experience)
-    console.log('Item features:', item.features)
-    console.log('Item motives:', item.motives)
-    console.log('Item description:', item.description)
-    console.log('Is custom?', item.isCustom || item.source === 'Homebrew')
-    console.log('=====================================')
-    
 
     return (
       <div 
@@ -1065,14 +1250,16 @@ const GameCard = ({
         style={{
           ...getCardStyle(true),
           padding: 0,
-          minHeight: '400px',
           opacity: isDead ? 0.7 : 1,
           backgroundColor: isDead ? 'var(--gray-900)' : getCardStyle(true).backgroundColor,
           borderColor: isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isSelected ? 'var(--purple)' : 'var(--border)'),
           borderWidth: isSelected ? '2px' : '2px',
           display: 'flex',
           flexDirection: 'column',
-          position: 'relative'
+          position: 'relative',
+          height: 'auto', // Let card size to content
+          minHeight: 0, // Allow card to shrink below content if needed
+          overflow: 'hidden' // Prevent card from scrolling, only content will scroll
         }}
         onClick={onClick}
       >
@@ -1248,10 +1435,18 @@ const GameCard = ({
           </div>
         </div>
 
-        {/* Expandable Content Section */}
-                  <div style={{
-          borderRadius: '0 0 8px 8px'
-        }}>
+        {/* Expandable Content Section - Scrollable */}
+                  <div 
+          ref={scrollableContentRef}
+          style={{
+          borderRadius: '0 0 8px 8px',
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          minHeight: 0 // Allow flex child to shrink below content size
+        }}
+        className="invisible-scrollbar"
+        >
 
 
 
@@ -2488,8 +2683,6 @@ const GameCard = ({
           </div>
         )}
 
-        </div>
-
         {/* Status Section */}
         {((instances && instances.length > 0) || (item.type !== 'Minion' && (item.thresholds || isEditMode))) && (
           <div style={{
@@ -2612,7 +2805,7 @@ const GameCard = ({
               instances.map((instance, index) => {
               const isInstanceDead = (instance.hp || 0) >= (instance.hpMax || 1)
               return (
-              <div key={instance.id} style={{ marginBottom: '0.5rem' }}>
+              <div key={instance.id} data-instance-id={instance.id} style={{ marginBottom: '0.5rem' }}>
                 <div
                   key={instance.id}
                   style={{
@@ -2983,6 +3176,20 @@ const GameCard = ({
             )}
           </div>
         )}
+
+        {/* Temporary padding spacer for smooth scroll animation on instance removal */}
+        {temporaryPaddingHeight > 0 && (
+          <div 
+            ref={temporaryPaddingRef}
+            style={{
+              height: temporaryPaddingHeight,
+              width: '100%',
+              flexShrink: 0
+            }}
+          />
+        )}
+
+        </div>
 
         {/* Damage Input Popup for Adversaries */}
         {renderDamageInput()}

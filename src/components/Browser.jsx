@@ -431,7 +431,6 @@ const loadData = async () => {
   }
   
   _dataLoaded = true
-  console.log(`Loaded ${adversariesData.adversaries.length} adversaries and ${environmentsData.environments.length} environments`)
 }
 
 // Functions to manage custom content

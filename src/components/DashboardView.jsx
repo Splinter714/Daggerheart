@@ -104,6 +104,8 @@ const DashboardContent = () => {
   const [containerWidth, setContainerWidth] = useState(0)
   const [scrollPosition, setScrollPosition] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
+  const [removingCards, setRemovingCards] = useState(new Set()) // Track cards being removed for animation
+  const [newCards, setNewCards] = useState(new Set()) // Track newly added cards for fade-in animation
   const scrollContainerRef = useRef(null)
 
   // Mobile detection
@@ -198,12 +200,222 @@ const DashboardContent = () => {
     setBrowserOpenAtPosition(null)
   }, [])
 
+  // Smooth scroll helper
+  const smoothScrollTo = useCallback((targetScrollLeft, duration = 600, reason = 'unknown') => {
+    console.log('[HORIZONTAL_SCROLL] smoothScrollTo called:', { targetScrollLeft, duration, reason, timestamp: performance.now() })
+    
+    if (!scrollContainerRef.current) {
+      console.log('[HORIZONTAL_SCROLL] No container ref, aborting')
+      return
+    }
+    
+    const container = scrollContainerRef.current
+    const startScrollLeft = container.scrollLeft
+    const distance = targetScrollLeft - startScrollLeft
+    
+    console.log('[HORIZONTAL_SCROLL] Scroll params:', { startScrollLeft, targetScrollLeft, distance, containerWidth: container.clientWidth, scrollWidth: container.scrollWidth })
+    
+    // If distance is very small, skip animation
+    if (Math.abs(distance) < 1) {
+      console.log('[HORIZONTAL_SCROLL] Distance too small, skipping animation')
+      return
+    }
+    
+    // Cancel any ongoing horizontal scroll animation
+    if (container._horizontalScrollAnimationId) {
+      console.log('[HORIZONTAL_SCROLL] Canceling existing animation')
+      cancelAnimationFrame(container._horizontalScrollAnimationId)
+      container._horizontalScrollAnimationId = null
+    }
+    
+    // Temporarily disable scroll-snap to allow smooth scrolling
+    const computedStyle = window.getComputedStyle(container)
+    const hasScrollSnap = computedStyle.scrollSnapType !== 'none'
+    const originalScrollSnapType = hasScrollSnap ? 'x mandatory' : null
+    
+    console.log('[HORIZONTAL_SCROLL] Scroll-snap state:', { hasScrollSnap, originalScrollSnapType })
+    
+    if (hasScrollSnap) {
+      container.style.scrollSnapType = 'none'
+    }
+    
+    const startTime = performance.now()
+    console.log('[HORIZONTAL_SCROLL] Starting animation at:', startTime)
+    
+    const animateScroll = (currentTime) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      
+      // Optimized easing calculation - cache (1 - progress)
+      const oneMinusProgress = 1 - progress
+      const easeOut = 1 - (oneMinusProgress * oneMinusProgress * oneMinusProgress)
+      
+      if (container) {
+        const newScrollLeft = startScrollLeft + (distance * easeOut)
+        container.scrollLeft = newScrollLeft
+      }
+      
+      if (progress < 1) {
+        container._horizontalScrollAnimationId = requestAnimationFrame(animateScroll)
+      } else {
+        console.log('[HORIZONTAL_SCROLL] Animation complete, final scrollLeft:', container.scrollLeft)
+        // Ensure we're exactly at target
+        if (container) {
+          container.scrollLeft = targetScrollLeft
+          container._horizontalScrollAnimationId = null
+        }
+        // Re-enable scroll-snap after animation completes
+        // Use a small delay to ensure scroll position is fully set
+        if (originalScrollSnapType) {
+          setTimeout(() => {
+            if (container) {
+              container.style.scrollSnapType = originalScrollSnapType
+              // Force a reflow to ensure scroll-snap takes effect
+              void container.offsetHeight
+              console.log('[HORIZONTAL_SCROLL] Scroll-snap re-enabled')
+            }
+          }, 50) // Small delay to ensure smooth scroll completes
+        }
+      }
+    }
+    
+    container._horizontalScrollAnimationId = requestAnimationFrame(animateScroll)
+    
+    // Return cleanup function
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId)
+      }
+      if (hasScrollSnap && container) {
+        container.style.scrollSnapType = originalScrollSnapType || ''
+      }
+    }
+  }, [])
+
+  // Group entities by type for dashboard columns
+  const getEntityGroups = useCallback(() => {
+    const groups = {}
+    
+    // Group adversaries by base name (excluding duplicate numbers)
+    adversaries.forEach(adversary => {
+      const baseName = adversary.baseName || adversary.name?.replace(/\s+\(\d+\)$/, '') || adversary.name
+      if (!groups[baseName]) {
+        groups[baseName] = {
+          type: 'adversary',
+          baseName: baseName,
+          instances: []
+        }
+      }
+      groups[baseName].instances.push(adversary)
+    })
+
+    // TODO: Group environments by name (not yet implemented)
+    // environments.forEach(environment => {
+    //   if (!groups[environment.name]) {
+    //     groups[environment.name] = {
+    //       type: 'environment',
+    //       baseName: environment.name,
+    //       instances: []
+    //     }
+    //   }
+    //   groups[environment.name].instances.push(environment)
+    // })
+
+    // Add countdowns as individual columns
+    countdowns.forEach(countdown => {
+      groups[`countdown-${countdown.id}`] = {
+        type: 'countdown',
+        baseName: countdown.name,
+        instances: [countdown]
+      }
+    })
+
+    return Object.values(groups)
+  }, [adversaries, countdowns])
+
+  const entityGroups = getEntityGroups()
+
   // Handle adding adversary from browser
   const handleAddAdversaryFromBrowser = useCallback((itemData) => {
+    // Check if this adversary already exists BEFORE adding
+    const baseName = itemData.baseName || itemData.name?.replace(/\s+\(\d+\)$/, '') || itemData.name
+    const existingGroup = entityGroups.find(g => g.baseName === baseName && g.type === 'adversary')
+    const isNewAdversary = !existingGroup
+    
     createAdversary(itemData)
     setLastAddedItemType('adversary')
-    // Browser stays open as overlay, no need to manage scroll position
-  }, [createAdversary])
+    
+    // If it's a new adversary, mark it for fade-in animation
+    if (isNewAdversary) {
+      const cardKey = `adversary-${baseName}`
+      // Start with opacity 0, then fade in
+      setNewCards(prev => new Set(prev).add(cardKey))
+      // After a brief moment, remove from newCards to trigger fade-in
+      setTimeout(() => {
+        setNewCards(prev => {
+          const next = new Set(prev)
+          next.delete(cardKey)
+          return next
+        })
+      }, 10) // Very short delay to ensure initial render at opacity 0
+    }
+    
+    // Smooth scroll after DOM updates - wait for React to render
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (!scrollContainerRef.current) return
+          
+          // Ensure container is ready and has correct dimensions
+          const container = scrollContainerRef.current
+          if (container.scrollWidth <= container.clientWidth) {
+            // No scrolling needed
+            return
+          }
+          
+          if (isNewAdversary) {
+            // New adversary - scroll far right
+            const maxScroll = container.scrollWidth - container.clientWidth
+            console.log('[HORIZONTAL_SCROLL] New adversary added, calculating maxScroll:', { maxScroll, scrollWidth: container.scrollWidth, clientWidth: container.clientWidth })
+            // Small delay to ensure DOM is fully updated
+            setTimeout(() => {
+              console.log('[HORIZONTAL_SCROLL] Calling smoothScrollTo for new adversary, maxScroll:', maxScroll)
+              smoothScrollTo(maxScroll, 600, 'new-adversary')
+            }, 10)
+          } else {
+            // Existing adversary - scroll to that card only if it's not already visible
+            // Recalculate groups after addition to get correct index
+            const updatedGroups = getEntityGroups()
+            const groupIndex = updatedGroups.findIndex(g => g.baseName === baseName && g.type === 'adversary')
+            if (groupIndex >= 0) {
+              const container = scrollContainerRef.current
+              const currentScroll = container.scrollLeft
+              const containerWidth = container.clientWidth
+              // Calculate scroll position - each panel is (columnWidth + gap) wide
+              const cardPosition = groupIndex * (columnWidth + gap)
+              const cardEnd = cardPosition + columnWidth + gap // Full panel width
+              
+              // Account for browser overlay if open (reduces visible area)
+              const browserWidth = browserOpenAtPosition !== null ? columnWidth + gap : 0
+              const visibleWidth = containerWidth - browserWidth
+              
+              // Check if card is fully visible (not hidden under browser)
+              const margin = 10 // Small margin for visibility check
+              const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + visibleWidth + margin)
+              
+              if (!isVisible) {
+                // Card is not visible, scroll to it
+                smoothScrollTo(cardPosition, 600)
+              }
+            }
+            
+            // Scroll the card vertically after instance is added
+            // The GameCard component will handle scrolling automatically when instances change
+          }
+        })
+      })
+    }, 50) // Small delay to ensure React has rendered
+  }, [createAdversary, entityGroups, columnWidth, gap, smoothScrollTo, getEntityGroups])
 
   // Convert adversaries to encounter items format for battle points calculation
   const getEncounterItems = useCallback(() => {
@@ -256,8 +468,23 @@ const DashboardContent = () => {
   }, 0)
 
   // Scroll handling - just track position, let CSS handle snapping
+  const scrollTimeoutRef = useRef(null)
+  
   const handleScroll = useCallback((e) => {
     setScrollPosition(e.target.scrollLeft)
+    
+    // Clear existing timeout
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current)
+    }
+    
+    // After scrolling stops, ensure scroll-snap is enabled
+    scrollTimeoutRef.current = setTimeout(() => {
+      const container = e.target
+      if (container && container.style.scrollSnapType === 'none') {
+        container.style.scrollSnapType = 'x mandatory'
+      }
+    }, 150) // Wait 150ms after last scroll event
   }, [])
 
   // Touch gesture handling - simplified
@@ -268,49 +495,6 @@ const DashboardContent = () => {
   const handleTouchEnd = useCallback(() => {
     setTimeout(() => setIsScrolling(false), 100)
   }, [])
-
-  // Group entities by type for dashboard columns
-  const getEntityGroups = () => {
-    const groups = {}
-    
-    // Group adversaries by base name (excluding duplicate numbers)
-    adversaries.forEach(adversary => {
-      const baseName = adversary.baseName || adversary.name?.replace(/\s+\(\d+\)$/, '') || adversary.name
-      if (!groups[baseName]) {
-        groups[baseName] = {
-          type: 'adversary',
-          baseName: baseName,
-          instances: []
-        }
-      }
-      groups[baseName].instances.push(adversary)
-    })
-
-    // TODO: Group environments by name (not yet implemented)
-    // environments.forEach(environment => {
-    //   if (!groups[environment.name]) {
-    //     groups[environment.name] = {
-    //       type: 'environment',
-    //       baseName: environment.name,
-    //       instances: []
-    //     }
-    //   }
-    //   groups[environment.name].instances.push(environment)
-    // })
-
-    // Add countdowns as individual columns
-    countdowns.forEach(countdown => {
-      groups[`countdown-${countdown.id}`] = {
-        type: 'countdown',
-        baseName: countdown.name,
-        instances: [countdown]
-      }
-    })
-
-    return Object.values(groups)
-  }
-
-  const entityGroups = getEntityGroups()
 
   // Remove auto-open encounter builder logic - replaced with empty state button
 
@@ -470,7 +654,8 @@ const DashboardContent = () => {
             flexDirection: 'row', 
             overflowX: 'auto', 
             overflowY: 'hidden',
-            padding: `0 ${gap}px`,
+            padding: `0 ${gap}px 0 0`, // Only right padding to avoid double padding on left
+            paddingRight: browserOpenAtPosition !== null ? `${columnWidth + gap * 2}px` : `${gap}px`, // Extra space when browser is open
             scrollSnapType: 'x mandatory',
             height: '100%',
             width: '100%'
@@ -517,7 +702,6 @@ const DashboardContent = () => {
           entityGroups.map((group, index) => (
           <Panel 
             key={`${group.type}-${group.baseName}`}
-            className="invisible-scrollbar"
             style={{ 
               width: `${columnWidth + gap}px`, // Include padding in width
               flexShrink: 0,
@@ -528,8 +712,16 @@ const DashboardContent = () => {
               paddingTop: `${gap}px`, // Space above each card
               paddingBottom: `${gap}px`, // Space below each card
               scrollSnapAlign: 'start',
-              overflowY: 'auto',
-              overflowX: 'hidden'
+              overflow: 'hidden', // Panel no longer scrolls, card handles it
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'stretch', // Ensure card stretches to full width
+              height: 'auto', // Let Panel size to card content
+              opacity: removingCards.has(`${group.type}-${group.baseName}`) ? 0 : 
+                       newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
+              transition: removingCards.has(`${group.type}-${group.baseName}`) ? 'opacity 0.4s ease' : 
+                         newCards.has(`${group.type}-${group.baseName}`) ? 'opacity 0.4s ease' : 
+                         'opacity 0.4s ease'
             }}
           >
             <GameCard
@@ -560,8 +752,52 @@ const DashboardContent = () => {
               onUpdate={group.type === 'adversary' ? updateAdversary : group.type === 'environment' ? updateEnvironment : updateCountdown}
               adversaries={adversaries}
               showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary'}
-              onAddInstance={group.type === 'adversary' ? (item) => createAdversary(item) : undefined}
+              onAddInstance={group.type === 'adversary' ? (item) => {
+                // Adding another instance - scroll to this card horizontally only if not visible
+                // The GameCard component will handle vertical scrolling automatically
+                createAdversary(item)
+                
+                // Horizontal scroll to card only if it's not already visible
+                setTimeout(() => {
+                  requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                      if (scrollContainerRef.current) {
+                        const container = scrollContainerRef.current
+                        const currentScroll = container.scrollLeft
+                        const containerWidth = container.clientWidth
+                        
+                        // Recalculate groups after addition to get correct index
+                        const updatedGroups = getEntityGroups()
+                        const groupIndex = updatedGroups.findIndex(g => g.baseName === group.baseName && g.type === 'adversary')
+                        if (groupIndex >= 0) {
+                          // Calculate scroll position - each panel is (columnWidth + gap) wide
+                          const cardPosition = groupIndex * (columnWidth + gap)
+                          const cardEnd = cardPosition + columnWidth + gap // Full panel width
+                          
+                          // Account for browser overlay if open (reduces visible area)
+                          const browserWidth = browserOpenAtPosition !== null ? columnWidth + gap : 0
+                          const visibleWidth = containerWidth - browserWidth
+                          
+                          // Check if card is fully visible (not hidden under browser)
+                          const margin = 10 // Small margin for visibility check
+                          const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + visibleWidth + margin)
+                          
+                          if (!isVisible) {
+                            // Card is not visible, scroll to it
+                            smoothScrollTo(cardPosition, 600)
+                          }
+                        }
+                      }
+                    })
+                  })
+                }, 50) // Small delay to ensure React has rendered
+              } : undefined}
               onRemoveInstance={group.type === 'adversary' ? (itemId) => {
+                // Check if this is the last instance
+                const isLastInstance = group.instances.length === 1
+                const isRightmost = entityGroups.length > 0 && entityGroups[entityGroups.length - 1].baseName === group.baseName
+                const cardKey = `${group.type}-${group.baseName}`
+                
                 // Find highest numbered instance and remove it
                 const instances = group.instances.sort((a, b) => {
                   const aNum = a.duplicateNumber || 1
@@ -569,7 +805,41 @@ const DashboardContent = () => {
                   return bNum - aNum
                 })
                 if (instances.length > 0) {
-                  deleteAdversary(instances[0].id)
+                  const instanceToRemove = instances[0]
+                  
+                  if (isLastInstance) {
+                    // Mark card as removing and animate out
+                    setRemovingCards(prev => new Set(prev).add(cardKey))
+                    
+                    // Only scroll left if removing the rightmost card AND it's the last instance
+                    if (isRightmost && entityGroups.length > 1) {
+                      setTimeout(() => {
+                        requestAnimationFrame(() => {
+                          requestAnimationFrame(() => {
+                            if (scrollContainerRef.current) {
+                              const currentScroll = scrollContainerRef.current.scrollLeft
+                              // Scroll to show one more column on the left
+                              const targetScroll = Math.max(0, currentScroll - (columnWidth + gap))
+                              smoothScrollTo(targetScroll, 500, 'remove-rightmost-card')
+                            }
+                          })
+                        })
+                      }, 100) // Start scroll after animation begins
+                    }
+                    
+                    // After animation, actually remove it
+                    setTimeout(() => {
+                      deleteAdversary(instanceToRemove.id)
+                      setRemovingCards(prev => {
+                        const next = new Set(prev)
+                        next.delete(cardKey)
+                        return next
+                      })
+                    }, 400) // Match CSS transition duration
+                  } else {
+                    // Not last instance, remove immediately
+                    deleteAdversary(instanceToRemove.id)
+                  }
                 }
               } : undefined}
             />
