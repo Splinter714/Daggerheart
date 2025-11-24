@@ -268,7 +268,7 @@ const addPlaytestEnvironment = (environmentData) => {
 }
 
 // Custom hook for browser functionality - all logic inline
-const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filterCustom = false) => {
+const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filterCustom = false, customContent = null) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortFields, setSortFields] = useState([{ field: 'tier', direction: 'asc' }, { field: 'name', direction: 'asc' }])
   const [data, setData] = useState([])
@@ -302,6 +302,26 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filt
     
     initializeData()
   }, [type])
+
+  // Refresh data when customContent changes (for adversary type)
+  useEffect(() => {
+    if (type === 'adversary' && customContent) {
+      const refreshData = async () => {
+        _dataLoaded = false
+        await loadData()
+        
+        let sourceData = []
+        if (filterCustom) {
+          sourceData = (adversariesData.adversaries || []).filter(adv => adv.source === 'Homebrew' || adv.id?.startsWith('custom-'))
+        } else {
+          sourceData = adversariesData.adversaries || []
+        }
+        
+        setData(sourceData)
+      }
+      refreshData()
+    }
+  }, [customContent, type, filterCustom])
 
 
   // Get unique values for filtering
@@ -348,7 +368,8 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filt
   const filteredAndSortedData = useMemo(() => {
     let filtered = data.filter(item => {
       // Search filter
-      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const itemName = item.name || item.baseName || ''
+      const matchesSearch = itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.description?.toLowerCase().includes(searchTerm.toLowerCase())
       
@@ -1069,7 +1090,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
               whiteSpace: 'nowrap',
               maxWidth: '100%'
             }}>
-              <div style={{ fontWeight: '600' }}>{item.name}</div>
+              <div style={{ fontWeight: '600' }}>{item.name || item.baseName || ''}</div>
               {item.description && (
                 <div style={{ 
                   fontSize: '0.85rem', 
@@ -1095,7 +1116,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
     } else if (type === 'environment') {
       return (
         <>
-          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left'}}>{item.name}</td>
+          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left'}}>{item.name || item.baseName || ''}</td>
           <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center'}}>{item.tier}</td>
           <td style={{...styles.rowCell, width: '100px', minWidth: '100px', maxWidth: '100px', textAlign: 'center'}}>{item.type}</td>
           <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center'}}>{item.difficulty}</td>
@@ -1453,7 +1474,7 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
     isTierFiltered,
     isTypeFiltered,
     getDropdownStyle
-  } = useBrowser(type, encounterItems, pcCount, playerTier, filterCustom)
+  } = useBrowser(type, encounterItems, pcCount, playerTier, filterCustom, customContent)
 
   // Calculate remaining battle points budget
   const calculateRemainingBudget = () => {

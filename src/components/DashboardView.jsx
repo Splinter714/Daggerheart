@@ -74,12 +74,15 @@ const DashboardContent = () => {
     fear,
     savedEncounters,
     partySize,
+    customContent,
     updatePartySize,
     updateFear,
     createAdversary,
     createAdversariesBulk,
     updateAdversary,
     deleteAdversary,
+    addCustomAdversary,
+    updateCustomAdversary,
     createEnvironment,
     updateEnvironment,
     deleteEnvironment,
@@ -692,21 +695,116 @@ const DashboardContent = () => {
   // Handle saving custom adversary (create or update)
   const handleSaveCustomAdversary = useCallback(async (adversaryData, id) => {
     if (id) {
-      // Update existing custom adversary
-      updateAdversary(id, adversaryData)
+      // Find the adversary being edited to check if it's a custom adversary
+      const editingAdversary = adversaries.find(a => a.id === id)
+      const isCustomAdversary = editingAdversary?.source === 'Homebrew' || editingAdversary?.isCustom
+      
+      if (isCustomAdversary) {
+        // Find the custom content entry by customContentId stored in dashboard instance, or by original baseName
+        const customContentId = editingAdversary?.customContentId
+        const originalBaseName = editingAdversary?.baseName // Original baseName before potential change
+        const customAdversary = customContentId 
+          ? customContent?.adversaries?.find(adv => adv.id === customContentId)
+          : customContent?.adversaries?.find(adv => 
+              adv.baseName === originalBaseName && (adv.source === 'Homebrew' || adv.isCustom)
+            )
+        
+        if (customAdversary) {
+          // Update custom adversary in custom content storage (for browser)
+          // Ensure name is set for custom content (use baseName, no duplicate numbers)
+          const customContentData = {
+            ...adversaryData,
+            name: adversaryData.baseName || adversaryData.name
+          }
+          updateCustomAdversary(customAdversary.id, customContentData)
+          
+          // Update all instances on dashboard with the same baseName (or customContentId)
+          const baseName = adversaryData.baseName || editingAdversary?.baseName
+          adversaries.forEach(adv => {
+            if (adv.customContentId === customContentId || 
+                (adv.baseName === baseName && (adv.source === 'Homebrew' || adv.isCustom))) {
+              updateAdversary(adv.id, { 
+                ...adversaryData, 
+                customContentId: customAdversary.id // Ensure customContentId is set
+              })
+            }
+          })
+        } else {
+          // Not found in custom content - might be a new custom adversary, add it
+          // Ensure name is set for custom content
+          const customContentData = {
+            ...adversaryData,
+            name: adversaryData.baseName || adversaryData.name
+          }
+          const newCustomId = addCustomAdversary(customContentData)
+          
+          // Update all instances on dashboard with the same baseName to include customContentId
+          const baseName = adversaryData.baseName || editingAdversary?.baseName
+          adversaries.forEach(adv => {
+            if (adv.baseName === baseName && (adv.source === 'Homebrew' || adv.isCustom)) {
+              updateAdversary(adv.id, { 
+                ...adversaryData, 
+                customContentId: newCustomId 
+              })
+            }
+          })
+        }
+      } else {
+        // Stock adversary - create new custom copy
+        // Ensure name is set for custom content
+        const customContentData = {
+          ...adversaryData,
+          name: adversaryData.baseName || adversaryData.name
+        }
+        const customId = addCustomAdversary(customContentData)
+        // Update the instance on dashboard to reference the new custom adversary
+        updateAdversary(id, { 
+          ...adversaryData, 
+          source: 'Homebrew', 
+          isCustom: true,
+          customContentId: customId 
+        })
+      }
       setEditingAdversaryId(null)
+      // Browser will auto-refresh via useEffect watching customContent
     } else if (editingAdversaryId) {
-      // Editing a stock adversary - create new custom copy
-      const newId = createAdversary({ ...adversaryData, id: undefined })
+      // Editing a stock adversary without id passed - create new custom copy
+      // Ensure name is set for custom content
+      const customContentData = {
+        ...adversaryData,
+        name: adversaryData.baseName || adversaryData.name
+      }
+      const customId = addCustomAdversary(customContentData)
+      const newId = createAdversary({ 
+        ...adversaryData, 
+        source: 'Homebrew', 
+        isCustom: true,
+        customContentId: customId 
+      })
       setEditingAdversaryId(null)
+      // Browser will auto-refresh via useEffect watching customContent
       return newId
     } else {
-      // Creating new custom adversary
-      const newId = createAdversary({ ...adversaryData, id: undefined })
+      // Creating new custom adversary from blank
+      // First save to custom content storage
+      // Ensure name is set for custom content
+      const customContentData = {
+        ...adversaryData,
+        name: adversaryData.baseName || adversaryData.name
+      }
+      const customId = addCustomAdversary(customContentData)
+      // Then create instance on dashboard (createAdversary will generate its own ID)
+      const newId = createAdversary({ 
+        ...adversaryData, 
+        source: 'Homebrew', 
+        isCustom: true,
+        customContentId: customId 
+      })
       setCreatingCustomAdversary(false)
+      // Browser will auto-refresh via useEffect watching customContent
       return newId
     }
-  }, [editingAdversaryId, createAdversary, updateAdversary])
+  }, [editingAdversaryId, adversaries, customContent, createAdversary, updateAdversary, addCustomAdversary, updateCustomAdversary])
 
   // Convert adversaries to encounter items format for battle points calculation
   const getEncounterItems = useCallback(() => {

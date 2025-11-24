@@ -3386,7 +3386,7 @@ const GameCard = ({
           embedded={true}
           hideEmbeddedButtons={true} // Hide embedded buttons, use tab buttons instead
           allAdversaries={adversaries}
-          autoFocus={!item.name || item.name.trim() === ''} // Auto-focus when creating new (empty name)
+          autoFocus={!item.baseName || item.baseName.trim() === '' || item.baseName === 'Unknown'} // Auto-focus when creating new (empty baseName)
         />
       </ContainerWithTab>
     )

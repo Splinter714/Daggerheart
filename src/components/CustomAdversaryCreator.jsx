@@ -290,8 +290,11 @@ const CustomAdversaryCreator = forwardRef(({
           alert('Custom adversary created successfully!')
         } else {
           // Update existing custom adversary
-          // Remove name - updateAdversary will recalculate it from baseName and duplicateNumber
-          const { name, ...dataToUpdate } = adversaryData
+          // Keep name for custom content (use baseName), but updateAdversary will recalculate it for dashboard instances
+          const dataToUpdate = {
+            ...adversaryData,
+            name: adversaryData.baseName // Custom content uses baseName as name (no duplicate numbers)
+          }
           await onSave(dataToUpdate, editingAdversary.id)
           alert('Adversary updated successfully!')
         }
