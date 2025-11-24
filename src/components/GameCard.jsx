@@ -1460,7 +1460,9 @@ const GameCard = ({
           padding: 0,
           opacity: isDead ? 0.7 : 1,
           height: 'auto',
-          maxHeight: 'calc(100vh - 120px)', // Constrain height to allow scrolling
+          // When tab is visible, reserve space for it (120px for bars + padding)
+          // When tab is not visible, add back the tab height (52px) to extend lower
+          maxHeight: shouldShowTab ? 'calc(100vh - 120px)' : 'calc(100vh - 68px)',
           minHeight: 0
         }}
       >
