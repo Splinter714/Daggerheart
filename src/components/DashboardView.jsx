@@ -918,42 +918,7 @@ const DashboardContent = () => {
           }}
           onScroll={handleScroll}
         >
-        {entityGroups.length === 0 ? (
-          // Empty state when no entities exist
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            width: '100%',
-            padding: '2rem'
-          }}>
-            <button
-              onClick={handleOpenEncounterBuilder}
-              style={{
-                backgroundColor: 'transparent',
-                color: 'var(--text-secondary)',
-                border: '2px dashed var(--border)',
-                borderRadius: 'var(--radius-md)',
-                padding: '1rem 2rem',
-                fontSize: '1rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.borderColor = 'var(--purple)'
-                e.target.style.color = 'var(--purple)'
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.borderColor = 'var(--border)'
-                e.target.style.color = 'var(--text-secondary)'
-              }}
-            >
-              Create Encounter
-            </button>
-          </div>
-        ) : (
+        {entityGroups.length === 0 ? null : (
           // Normal entity groups display
           (() => {
             const items = []
