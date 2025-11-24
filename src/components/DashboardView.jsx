@@ -488,13 +488,19 @@ const DashboardContent = () => {
               const container = scrollContainerRef.current
               const currentScroll = container.scrollLeft
               const containerWidth = container.clientWidth
+              
+              // Account for browser overlay covering part of the viewport
+              const effectiveWidth = browserOpenAtPosition !== null 
+                ? containerWidth - (columnWidth + gap) // Overlay takes up one column width
+                : containerWidth
+              
               // Calculate scroll position - each panel is (columnWidth + gap) wide
               const cardPosition = groupIndex * (columnWidth + gap)
               const cardEnd = cardPosition + columnWidth + gap // Full panel width
               
-              // Check if card is fully visible
+              // Check if card is fully visible (accounting for overlay)
               const margin = 10 // Small margin for visibility check
-              const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + containerWidth + margin)
+              const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + effectiveWidth + margin)
               
               if (!isVisible) {
                 // Card is not visible, scroll to it
@@ -1056,6 +1062,11 @@ const DashboardContent = () => {
                         const currentScroll = container.scrollLeft
                         const containerWidth = container.clientWidth
                         
+                        // Account for browser overlay covering part of the viewport
+                        const effectiveWidth = browserOpenAtPosition !== null 
+                          ? containerWidth - (columnWidth + gap) // Overlay takes up one column width
+                          : containerWidth
+                        
                         // Recalculate groups after addition to get correct index
                         const updatedGroups = getEntityGroups()
                         const groupIndex = updatedGroups.findIndex(g => g.baseName === group.baseName && g.type === 'adversary')
@@ -1064,9 +1075,9 @@ const DashboardContent = () => {
                           const cardPosition = groupIndex * (columnWidth + gap)
                           const cardEnd = cardPosition + columnWidth + gap // Full panel width
                           
-                          // Check if card is fully visible
+                          // Check if card is fully visible (accounting for overlay)
                           const margin = 10 // Small margin for visibility check
-                          const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + containerWidth + margin)
+                          const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + effectiveWidth + margin)
                           
                           if (!isVisible) {
                             // Card is not visible, scroll to it
