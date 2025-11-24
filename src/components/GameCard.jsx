@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
-import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull, Plus, Minus, Pencil } from 'lucide-react'
+import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull, Plus, Minus, Pencil, Check } from 'lucide-react'
 import Pips from './Pips'
-import CustomAdversaryCreator from './CustomAdversaryCreator'
 
 // Reusable Threshold Tag Component
 const ThresholdTag = ({ value }) => (
@@ -1247,7 +1246,7 @@ const GameCard = ({
   const renderExpandedAdversary = () => {
     const showDrag = false // Temporarily disabled drag handles
     const isDead = (item.hp || 0) >= (item.hpMax || 1)
-    const isEditMode = mode === 'edit'
+    const isEditMode = effectiveMode === 'edit' || showCustomCreator
     
 
     return (
@@ -1265,7 +1264,7 @@ const GameCard = ({
           position: 'relative',
           height: 'auto', // Let card size to content
           minHeight: 0, // Allow card to shrink below content if needed
-          overflow: 'hidden' // Prevent card from scrolling, only content will scroll
+          overflow: 'visible' // Allow buttons above card to be visible
         }}
         onClick={onClick}
       >
@@ -1291,82 +1290,85 @@ const GameCard = ({
             }} />
           </>
         )}
-        {/* Fixed Header Section - Identical to Compact View */}
-        <div className="border-b" style={{
-          padding: '8px',
-          flexShrink: 0,
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: '8px 8px 0 0',
-          position: 'relative',
-          zIndex: isDead ? 1 : 'auto',
-          borderBottomColor: isSelected ? 'var(--purple)' : 'var(--border)'
-        }}>
-          {/* Header with Name and Badges */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            position: 'relative',
-            zIndex: isDead ? 1 : 'auto',
-            padding: '2px',
-            minHeight: '40px'
+        {/* Add/Remove/Edit buttons row - positioned above card */}
+        {((showAddRemoveButtons && type === 'adversary') || (showCustomCreator && type === 'adversary')) && (
+          <div style={{ 
+            position: 'absolute',
+            top: '-52px',
+            left: '3px',
+            right: '3px',
+            width: 'calc(100% - 6px)',
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem', 
+            justifyContent: 'center',
+            flexShrink: 0,
+            zIndex: 10,
+            padding: '0.5rem 0.75rem',
+            paddingBottom: 'calc(0.5rem + 1px)', // Extend padding to overlap border
+            backgroundColor: 'var(--bg-primary)',
+            border: `1.5px solid ${isSelected ? 'var(--purple)' : 'var(--border)'}`,
+            borderBottom: 'none',
+            borderRadius: '8px 8px 0 0',
+            boxSizing: 'border-box',
+            marginBottom: '-1px' // Overlap with card border
           }}>
-            {isEditMode ? (
-              <input
-                type="text"
-                value={item.name || ''}
-                onChange={(e) => {
-                  onUpdate && onUpdate(item.id, { name: e.target.value })
-                }}
-                style={{
-                  backgroundColor: 'var(--bg-primary)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '4px',
-                  color: 'var(--text-primary)',
-                  fontSize: '1.1rem',
-                  fontWeight: '600',
-                  padding: '0.5rem',
-                  width: '100%',
-                  maxWidth: '300px',
-                  paddingRight: '0.625rem'
-                }}
-                placeholder="Name"
-              />
-            ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
-              <h4 style={{
-                ...styles.rowTitle,
-                color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
-                textAlign: 'left',
-                margin: 0,
-                fontSize: '1.1rem',
-                paddingRight: '6px',
-                flex: 1
-              }}>
-                {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
-              </h4>
-              
-              {/* Add/Remove/Edit buttons - only show when browser is open */}
-              {showAddRemoveButtons && type === 'adversary' && !isEditMode && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
+            {showCustomCreator ? (
+              // Edit mode buttons: Save and Cancel
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (onSaveCustomAdversary) {
+                      onSaveCustomAdversary(item, item.id)
+                      if (onCancelEdit) onCancelEdit()
+                    }
+                  }}
+                  style={{
+                    background: 'var(--purple)',
+                    border: '1px solid var(--purple)',
+                    color: 'white',
+                    borderRadius: '4px',
+                    padding: '0.375rem 0.75rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.375rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.opacity = '0.9'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.opacity = '1'
+                  }}
+                  title="Save"
+                >
+                  <Check size={16} />
+                  <span>Save</span>
+                </button>
+                {onCancelEdit && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      onRemoveInstance && onRemoveInstance(item.id)
+                      onCancelEdit()
                     }}
                     style={{
                       background: 'var(--bg-secondary)',
                       border: '1px solid var(--border)',
                       color: 'var(--text-primary)',
-                      borderRadius: '3px',
-                      padding: '0',
+                      borderRadius: '4px',
+                      padding: '0.375rem 0.75rem',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      minWidth: '20px',
-                      height: '20px',
-                      fontSize: '0.7rem',
+                      gap: '0.375rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
                       transition: 'all 0.2s ease'
                     }}
                     onMouseEnter={(e) => {
@@ -1377,35 +1379,109 @@ const GameCard = ({
                       e.target.style.backgroundColor = 'var(--bg-secondary)'
                       e.target.style.borderColor = 'var(--border)'
                     }}
-                    title="Remove one"
+                    title="Cancel"
                   >
-                    <Minus size={12} />
+                    <X size={16} />
+                    <span>Cancel</span>
                   </button>
-                  <span style={{ 
-                    color: 'var(--text-secondary)', 
-                    fontSize: '0.875rem',
-                    minWidth: '20px',
-                    textAlign: 'center'
-                  }}>
-                    {instances.length}
-                  </span>
+                )}
+              </>
+            ) : (
+              // Normal mode buttons: Add/Remove/Edit
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onRemoveInstance && onRemoveInstance(item.id)
+                  }}
+                  style={{
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '4px',
+                    padding: '0',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px',
+                    fontSize: '0.7rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'var(--bg-hover)'
+                    e.target.style.borderColor = 'var(--purple)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'var(--bg-secondary)'
+                    e.target.style.borderColor = 'var(--border)'
+                  }}
+                  title="Remove one"
+                >
+                  <Minus size={16} />
+                </button>
+                <span style={{ 
+                  color: 'var(--text-primary)', 
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  minWidth: '24px',
+                  textAlign: 'center'
+                }}>
+                  {instances.length}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onAddInstance && onAddInstance(item)
+                  }}
+                  style={{
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '4px',
+                    padding: '0',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px',
+                    fontSize: '0.7rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'var(--purple)'
+                    e.target.style.borderColor = 'var(--purple)'
+                    e.target.style.color = 'white'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'var(--bg-secondary)'
+                    e.target.style.borderColor = 'var(--border)'
+                    e.target.style.color = 'var(--text-primary)'
+                  }}
+                  title="Add another"
+                >
+                  <Plus size={16} />
+                </button>
+                {onEdit && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      onAddInstance && onAddInstance(item)
+                      onEdit(item.id)
                     }}
                     style={{
                       background: 'var(--bg-secondary)',
                       border: '1px solid var(--border)',
                       color: 'var(--text-primary)',
-                      borderRadius: '3px',
+                      borderRadius: '4px',
                       padding: '0',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      minWidth: '20px',
-                      height: '20px',
+                      width: '32px',
+                      height: '32px',
                       fontSize: '0.7rem',
                       transition: 'all 0.2s ease'
                     }}
@@ -1419,62 +1495,89 @@ const GameCard = ({
                       e.target.style.borderColor = 'var(--border)'
                       e.target.style.color = 'var(--text-primary)'
                     }}
-                    title="Add another"
+                    title="Edit"
                   >
-                    <Plus size={12} />
+                    <Pencil size={16} />
                   </button>
-                  {onEdit && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onEdit(item.id)
-                      }}
-                      style={{
-                        background: 'var(--bg-secondary)',
-                        border: '1px solid var(--border)',
-                        color: 'var(--text-primary)',
-                        borderRadius: '3px',
-                        padding: '0',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: '20px',
-                        height: '20px',
-                        fontSize: '0.7rem',
-                        transition: 'all 0.2s ease',
-                        marginLeft: '0.25rem'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = 'var(--purple)'
-                        e.target.style.borderColor = 'var(--purple)'
-                        e.target.style.color = 'white'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = 'var(--bg-secondary)'
-                        e.target.style.borderColor = 'var(--border)'
-                        e.target.style.color = 'var(--text-primary)'
-                      }}
-                      title="Edit"
-                    >
-                      <Pencil size={12} />
-                    </button>
-                  )}
+                )}
+              </>
+            )}
+          </div>
+        )}
+        {/* Fixed Header Section - Identical to Compact View */}
+        <div className="border-b" style={{
+          padding: '8px',
+          flexShrink: 0,
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: '8px 8px 0 0',
+          position: 'relative',
+          zIndex: isDead ? 1 : 'auto',
+          borderBottomColor: isSelected ? 'var(--purple)' : 'var(--border)'
+        }}>
+          {/* Header with Name and Badges */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative',
+            zIndex: isDead ? 1 : 'auto',
+            padding: '2px',
+            gap: 0
+          }}>
+            {/* Name and Badge row */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              minHeight: '40px'
+            }}>
+              {isEditMode ? (
+                <input
+                  type="text"
+                  value={item.name || ''}
+                  onChange={(e) => {
+                    onUpdate && onUpdate(item.id, { name: e.target.value })
+                  }}
+                  style={{
+                    backgroundColor: 'var(--bg-primary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '4px',
+                    color: 'var(--text-primary)',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    padding: '0.5rem',
+                    width: '100%',
+                    maxWidth: '300px',
+                    paddingRight: '0.625rem'
+                  }}
+                  placeholder="Name"
+                />
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                  <h4 style={{
+                    ...styles.rowTitle,
+                    color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
+                    textAlign: 'left',
+                    margin: 0,
+                    fontSize: '1.1rem',
+                    paddingRight: '6px',
+                    flex: 1
+                  }}>
+                    {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
+                  </h4>
                 </div>
               )}
+              
+              {/* Combined Type/Tier Badge */}
+              {(item.type || item.tier || isEditMode) && (
+                <CombinedTypeTierBadge 
+                  type={item.type}
+                  tier={item.tier}
+                  isEditMode={isEditMode}
+                  onUpdate={onUpdate}
+                  itemId={item.id}
+                />
+              )}
             </div>
-            )}
-            
-            {/* Combined Type/Tier Badge */}
-            {(item.type || item.tier || isEditMode) && (
-              <CombinedTypeTierBadge 
-                type={item.type}
-                tier={item.tier}
-                isEditMode={isEditMode}
-                onUpdate={onUpdate}
-                itemId={item.id}
-              />
-            )}
           </div>
         </div>
 
@@ -3244,37 +3347,12 @@ const GameCard = ({
   // MAIN RENDER
   // ============================================================================
 
-  // Render CustomAdversaryCreator if requested
-  if (showCustomCreator && (type === 'adversary' || type === 'adversaries')) {
-    return (
-      <div 
-        className={getCardClassName()}
-        style={{
-          ...getCardStyle(true),
-          padding: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          position: 'relative',
-          height: 'auto',
-          overflow: 'hidden'
-        }}
-      >
-        <CustomAdversaryCreator
-          onSave={onSaveCustomAdversary || (() => {})}
-          onRefresh={() => {}}
-          editingAdversary={item}
-          onCancelEdit={onCancelEdit || (() => {})}
-          isStockAdversary={isStockAdversary}
-          autoFocus={true}
-          allAdversaries={[]} // Will load itself
-          embedded={true}
-        />
-      </div>
-    )
-  }
+  // When showCustomCreator is true, use edit mode instead
+  // This eliminates the double container issue
+  const effectiveMode = showCustomCreator ? 'edit' : mode
 
   // Render expanded view for adversaries
-  if ((mode === 'expanded' || mode === 'edit') && (type === 'adversary' || type === 'adversaries')) {
+  if ((effectiveMode === 'expanded' || effectiveMode === 'edit') && (type === 'adversary' || type === 'adversaries')) {
     return renderExpandedAdversary()
   }
 

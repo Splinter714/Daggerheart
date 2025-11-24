@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
 import GameCard from './GameCard'
 import { getDefaultAdversaryValues } from '../data/adversaryDefaults'
 
@@ -47,7 +47,7 @@ const loadData = async () => {
   _dataLoaded = true
 }
 
-const CustomAdversaryCreator = ({ 
+const CustomAdversaryCreator = forwardRef(({ 
   onSave, 
   onRefresh, 
   onAddItem, 
@@ -56,8 +56,9 @@ const CustomAdversaryCreator = ({
   isStockAdversary = false, // Whether editing a stock adversary (needs Save As)
   autoFocus = false, // Auto-focus name field
   allAdversaries = [], // All adversaries for autocomplete (from Browser data or state)
-  embedded = false // Whether this is embedded in a card (affects styling)
-}) => {
+  embedded = false, // Whether this is embedded in a card (affects styling)
+  hideEmbeddedButtons = false // Hide embedded save/cancel buttons when using external buttons
+}, ref) => {
   const nameInputRef = useRef(null)
   const [formData, setFormData] = useState(() => {
     const defaults = getDefaultAdversaryValues(1, 'Standard')
@@ -311,6 +312,13 @@ const CustomAdversaryCreator = ({
     }
   }
 
+  // Expose handleSave via ref
+  useImperativeHandle(ref, () => ({
+    handleSave,
+    isSaving,
+    canSave: formData.name.trim().length > 0
+  }))
+
   // Create a mock adversary object for the GameCard
   const mockAdversary = {
     ...formData,
@@ -334,22 +342,11 @@ const CustomAdversaryCreator = ({
     return 'Create'
   }
 
+  // Always return just content, no container
   return (
-    <div style={{
-      flex: 1,
-      overflowY: 'auto',
-      padding: embedded ? '0.5rem' : '1rem',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'flex-start',
-      height: '100%'
-    }}>
-      <div style={{
-        maxWidth: embedded ? '100%' : '600px',
-        width: '100%'
-      }}>
-        {/* Header */}
-        {!embedded && (
+    <>
+      {/* Header */}
+      {!embedded && (
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -387,7 +384,7 @@ const CustomAdversaryCreator = ({
         )}
         
         {/* Embedded header with save button */}
-        {embedded && (
+        {embedded && !hideEmbeddedButtons && (
           <div style={{
             display: 'flex',
             justifyContent: 'flex-end',
@@ -436,29 +433,26 @@ const CustomAdversaryCreator = ({
 
         {/* Name input with autocomplete - show when creating new (not editing) */}
         {!editingAdversary && (
-          <div style={{
-            position: 'relative',
-            marginBottom: '1rem'
-          }}>
+          <div style={{ marginBottom: '1rem', position: 'relative' }}>
             <input
               ref={nameInputRef}
               type="text"
               value={formData.name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="Type adversary name to pull stats, or enter type/tier manually"
+              onChange={(e) => {
+                const value = e.target.value
+                setFormData(prev => ({ ...prev, name: value }))
+                handleNameChange(value)
+              }}
+              placeholder="Adversary name"
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                fontSize: '1rem',
                 border: '1px solid var(--border)',
                 borderRadius: '8px',
                 backgroundColor: 'var(--bg-primary)',
                 color: 'var(--text-primary)',
+                fontSize: '1rem',
                 outline: 'none'
-              }}
-              onBlur={() => {
-                // Delay hiding suggestions to allow click
-                setTimeout(() => setShowSuggestions(false), 200)
               }}
             />
             {showSuggestions && nameSuggestions.length > 0 && (
@@ -467,26 +461,51 @@ const CustomAdversaryCreator = ({
                 top: '100%',
                 left: 0,
                 right: 0,
-                backgroundColor: 'var(--bg-card)',
+                backgroundColor: 'var(--bg-primary)',
                 border: '1px solid var(--border)',
-                borderRadius: '8px',
-                marginTop: '4px',
+                borderRadius: '0 0 8px 8px',
+                borderTop: 'none',
                 maxHeight: '200px',
                 overflowY: 'auto',
                 zIndex: 1000,
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
               }}>
                 {nameSuggestions.map((adv, idx) => {
-                  const baseName = adv.name?.replace(/\s+\(\d+\)$/, '') || adv.name || 'Unknown'
+                  const baseName = adv.baseName || adv.name?.replace(/\s+\(\d+\)$/, '') || adv.name
                   return (
                     <div
-                      key={adv.id || idx}
-                      onClick={() => handleSelectAdversary(adv)}
+                      key={idx}
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          name: baseName,
+                          tier: adv.tier || prev.tier,
+                          type: adv.type || prev.type,
+                          difficulty: adv.difficulty || prev.difficulty,
+                          thresholds: adv.thresholds || prev.thresholds,
+                          hpMax: adv.hpMax || prev.hpMax,
+                          stressMax: adv.stressMax || prev.stressMax,
+                          atk: adv.atk || prev.atk,
+                          range: adv.range || prev.range,
+                          damage: adv.damage || prev.damage
+                        }))
+                        setShowSuggestions(false)
+                        setStatsPulledFromExisting(true)
+                        if (nameInputRef.current) {
+                          nameInputRef.current.blur()
+                        }
+                      }}
                       style={{
                         padding: '0.75rem',
                         cursor: 'pointer',
                         borderBottom: idx < nameSuggestions.length - 1 ? '1px solid var(--border)' : 'none',
-                        color: 'var(--text-primary)'
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'var(--bg-secondary)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent'
                       }}
                       onMouseDown={(e) => e.preventDefault()} // Prevent onBlur from firing
                     >
@@ -502,19 +521,20 @@ const CustomAdversaryCreator = ({
           </div>
         )}
 
-        {/* Editable Adversary Card */}
-        <GameCard
-          item={mockAdversary}
-          type="adversary"
-          mode="edit"
-          onUpdate={(id, updates) => {
-            setFormData(prev => ({ ...prev, ...updates }))
-          }}
-        />
-      </div>
-    </div>
+      {/* Editable Adversary Card */}
+      <GameCard
+        item={mockAdversary}
+        type="adversary"
+        mode="edit"
+        onUpdate={(id, updates) => {
+          setFormData(prev => ({ ...prev, ...updates }))
+        }}
+      />
+    </>
   )
-}
+})
+
+CustomAdversaryCreator.displayName = 'CustomAdversaryCreator'
 
 export default CustomAdversaryCreator
 

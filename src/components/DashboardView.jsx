@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, startTransition, useRef } from 'react'
 import { useGameState } from '../state/state'
 import Pips from './Pips'
-import FloatingMenu from './FloatingMenu'
 import Bar from './Toolbars'
 import GameCard from './GameCard'
 import Browser from './Browser'
@@ -183,10 +182,6 @@ const DashboardContent = () => {
   // Encounter Builder handlers
   const handleOpenEncounterBuilder = () => {
     setEncounterBuilderOpen(true)
-  }
-
-  const handleToggleEncounterBuilder = () => {
-    setEncounterBuilderOpen(!encounterBuilderOpen)
   }
 
   const handleCloseEncounterBuilder = useCallback(() => {
@@ -398,13 +393,9 @@ const DashboardContent = () => {
               const cardPosition = groupIndex * (columnWidth + gap)
               const cardEnd = cardPosition + columnWidth + gap // Full panel width
               
-              // Account for browser overlay if open (reduces visible area)
-              const browserWidth = browserOpenAtPosition !== null ? columnWidth + gap : 0
-              const visibleWidth = containerWidth - browserWidth
-              
-              // Check if card is fully visible (not hidden under browser)
+              // Check if card is fully visible
               const margin = 10 // Small margin for visibility check
-              const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + visibleWidth + margin)
+              const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + containerWidth + margin)
               
               if (!isVisible) {
                 // Card is not visible, scroll to it
@@ -640,45 +631,39 @@ const DashboardContent = () => {
                 handleOpenBrowser(entityGroups.length)
               }
             }}
+            title={browserOpenAtPosition !== null ? 'Close Browser' : 'Add Adversaries'}
             style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: browserOpenAtPosition !== null ? 'var(--purple)' : 'var(--bg-secondary)',
+              width: '36px',
+              height: '36px',
+              padding: 0,
+              backgroundColor: browserOpenAtPosition !== null ? 'var(--purple)' : 'transparent',
               border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
+              borderRadius: '50%',
               color: browserOpenAtPosition !== null ? 'white' : 'var(--text-primary)',
               cursor: 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: '500',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              justifyContent: 'center',
               transition: 'all 0.2s ease',
               flexShrink: 0
             }}
             onMouseEnter={(e) => {
               if (browserOpenAtPosition === null) {
                 e.target.style.borderColor = 'var(--purple)'
-                e.target.style.backgroundColor = 'var(--bg-hover)'
+                e.target.style.backgroundColor = 'var(--bg-secondary)'
               }
             }}
             onMouseLeave={(e) => {
               if (browserOpenAtPosition === null) {
                 e.target.style.borderColor = 'var(--border)'
-                e.target.style.backgroundColor = 'var(--bg-secondary)'
+                e.target.style.backgroundColor = 'transparent'
               }
             }}
           >
-            <Plus size={16} />
-            <span>Add Adversaries</span>
+            <Plus size={18} />
           </button>
         </div>
       </Bar>
-
-      {/* Floating Menu */}
-      <FloatingMenu
-        onToggle={handleToggleEncounterBuilder}
-        isOpen={encounterBuilderOpen}
-      />
 
       {/* Main Dashboard Content */}
       <div className="main-content" style={{ 
@@ -788,7 +773,6 @@ const DashboardContent = () => {
             overflowX: 'auto', 
             overflowY: 'hidden',
             padding: `0 ${gap}px 0 0`, // Only right padding to avoid double padding on left
-            paddingRight: browserOpenAtPosition !== null ? `${columnWidth + gap * 2}px` : `${gap}px`, // Extra space when browser is open
             scrollSnapType: 'x mandatory',
             height: '100%',
             width: '100%'
@@ -842,10 +826,10 @@ const DashboardContent = () => {
               flex: 'none',
               paddingLeft: `${gap}px`, // Space before each card
               paddingRight: '0',
-              paddingTop: `${gap}px`, // Space above each card
+              paddingTop: `${browserOpenAtPosition !== null && group.type === 'adversary' ? gap + 52 : gap}px`, // Extra space for buttons above card (32px button + 16px padding + 4px margin)
               paddingBottom: `${gap}px`, // Space below each card
               scrollSnapAlign: 'start',
-              overflow: 'hidden', // Panel no longer scrolls, card handles it
+              overflow: browserOpenAtPosition !== null && group.type === 'adversary' ? 'visible' : 'hidden', // Allow buttons above card to be visible
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'stretch', // Ensure card stretches to full width
@@ -913,13 +897,9 @@ const DashboardContent = () => {
                           const cardPosition = groupIndex * (columnWidth + gap)
                           const cardEnd = cardPosition + columnWidth + gap // Full panel width
                           
-                          // Account for browser overlay if open (reduces visible area)
-                          const browserWidth = browserOpenAtPosition !== null ? columnWidth + gap : 0
-                          const visibleWidth = containerWidth - browserWidth
-                          
-                          // Check if card is fully visible (not hidden under browser)
+                          // Check if card is fully visible
                           const margin = 10 // Small margin for visibility check
-                          const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + visibleWidth + margin)
+                          const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + containerWidth + margin)
                           
                           if (!isVisible) {
                             // Card is not visible, scroll to it

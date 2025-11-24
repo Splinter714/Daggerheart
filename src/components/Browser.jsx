@@ -604,14 +604,14 @@ const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showCu
   return (
     <div style={styles.browserHeader}>
       <div style={{ display: 'flex', alignItems: 'center', flex: 1, gap: '0.5rem' }}>
-        <input
+      <input
           ref={searchInputRef}
-          type="text"
+        type="text"
           placeholder={placeholder}
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
+        value={searchTerm}
+        onChange={(e) => onSearchChange(e.target.value)}
           style={{ ...styles.searchInput, flex: 1, marginRight: 0 }}
-        />
+      />
         
         {onClose && (
           <button
@@ -1604,13 +1604,13 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
           />
           
           {!hideImportExport && (
-            <BrowserButtonRow
-              showCustomToggle={showCustomToggle}
-              onToggleCustom={onToggleCustom}
-              filterCustom={filterCustom}
-              onExportCustomAdversaries={handleExportCustomAdversaries}
-              onImportCustomAdversaries={handleImportCustomAdversaries}
-            />
+          <BrowserButtonRow
+            showCustomToggle={showCustomToggle}
+            onToggleCustom={onToggleCustom}
+            filterCustom={filterCustom}
+            onExportCustomAdversaries={handleExportCustomAdversaries}
+            onImportCustomAdversaries={handleImportCustomAdversaries}
+          />
           )}
 
           {/* Scrollable Content with Sticky Header */}
@@ -1865,13 +1865,38 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
       )}
 
       {activeTab === 'create' && (
-        <CustomAdversaryCreator 
-          onSave={handleSaveAdversary}
-          onRefresh={() => {}} // No need to refresh since state updates automatically
-          onAddItem={onAddItem}
-          editingAdversary={editingAdversary}
-          onCancelEdit={handleCancelEdit}
-        />
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          padding: '1rem',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          height: '100%',
+          minHeight: 0
+        }}>
+          <div style={{
+            maxWidth: '600px',
+            width: '100%',
+            height: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '0',
+            overflowY: 'visible',
+            overflowX: 'hidden',
+            minHeight: 0
+          }}>
+            <CustomAdversaryCreator 
+              onSave={handleSaveAdversary}
+              onRefresh={() => {}} // No need to refresh since state updates automatically
+              onAddItem={onAddItem}
+              editingAdversary={editingAdversary}
+              onCancelEdit={handleCancelEdit}
+              embedded={false}
+            />
+          </div>
+        </div>
       )}
 
 
