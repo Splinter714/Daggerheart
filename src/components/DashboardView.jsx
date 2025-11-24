@@ -238,7 +238,7 @@ const DashboardContent = () => {
   }, [])
 
   // Smooth scroll helper
-  const smoothScrollTo = useCallback((targetScrollLeft, duration = 600, reason = 'unknown') => {
+  const smoothScrollTo = useCallback((targetScrollLeft, duration = 500, reason = 'unknown') => {
     console.log('[HORIZONTAL_SCROLL] smoothScrollTo called:', { targetScrollLeft, duration, reason, timestamp: performance.now() })
     
     if (!scrollContainerRef.current) {
@@ -301,18 +301,8 @@ const DashboardContent = () => {
           container.scrollLeft = targetScrollLeft
           container._horizontalScrollAnimationId = null
         }
-        // Re-enable scroll-snap after animation completes
-        // Use a small delay to ensure scroll position is fully set
-        if (originalScrollSnapType) {
-          setTimeout(() => {
-            if (container) {
-              container.style.scrollSnapType = originalScrollSnapType
-              // Force a reflow to ensure scroll-snap takes effect
-              void container.offsetHeight
-              console.log('[HORIZONTAL_SCROLL] Scroll-snap re-enabled')
-            }
-          }, 50) // Small delay to ensure smooth scroll completes
-        }
+        // Don't re-enable scroll-snap here - let handleScroll re-enable it when user scrolls
+        // This prevents jitter and interference with subsequent programmatic scrolls
       }
     }
     
@@ -379,6 +369,33 @@ const DashboardContent = () => {
     const existingGroup = entityGroups.find(g => g.baseName === baseName && g.type === 'adversary')
     const isNewAdversary = !existingGroup
     
+    const addTimestamp = performance.now()
+    // Capture scrollWidth BEFORE adding the adversary, so we can detect if it increased
+    const scrollWidthBeforeAdd = scrollContainerRef.current?.scrollWidth ?? 0
+    const scrollLeftBeforeAdd = scrollContainerRef.current?.scrollLeft ?? 0
+    
+    // Disable scroll-snap BEFORE adding the adversary to prevent browser auto-scrolling
+    // when new content is added
+    const container = scrollContainerRef.current
+    let scrollSnapWasDisabled = false
+    if (container && isNewAdversary) {
+      const computedStyle = window.getComputedStyle(container)
+      if (computedStyle.scrollSnapType !== 'none') {
+        container.style.scrollSnapType = 'none'
+        scrollSnapWasDisabled = true
+        console.log('[ADVERSARY_ADD] Disabled scroll-snap before adding adversary to prevent auto-scroll')
+      }
+    }
+    
+    console.log('[ADVERSARY_ADD] handleAddAdversaryFromBrowser called:', {
+      baseName,
+      isNewAdversary,
+      timestamp: addTimestamp,
+      currentScroll: scrollLeftBeforeAdd,
+      scrollWidth: scrollWidthBeforeAdd,
+      scrollSnapDisabled: scrollSnapWasDisabled
+    })
+    
     createAdversary(itemData)
     setLastAddedItemType('adversary')
     
@@ -412,12 +429,53 @@ const DashboardContent = () => {
           
           if (isNewAdversary) {
             // New adversary - scroll far right
-            const maxScroll = container.scrollWidth - container.clientWidth
-            console.log('[HORIZONTAL_SCROLL] New adversary added, calculating maxScroll:', { maxScroll, scrollWidth: container.scrollWidth, clientWidth: container.clientWidth })
-            // Small delay to ensure DOM is fully updated
+            // Wait for DOM to update, then check if scrollWidth has stabilized
+            const initialScrollWidth = container.scrollWidth
             setTimeout(() => {
-              console.log('[HORIZONTAL_SCROLL] Calling smoothScrollTo for new adversary, maxScroll:', maxScroll)
-              smoothScrollTo(maxScroll, 600, 'new-adversary')
+              if (!scrollContainerRef.current) return
+              const updatedContainer = scrollContainerRef.current
+              
+              // Check if scrollWidth has changed - if so, wait a bit more
+              const currentScrollWidth = updatedContainer.scrollWidth
+              if (currentScrollWidth !== initialScrollWidth) {
+                // scrollWidth is still updating, wait another frame
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => {
+                    if (!scrollContainerRef.current) return
+                    const finalContainer = scrollContainerRef.current
+                    const maxScroll = finalContainer.scrollWidth - finalContainer.clientWidth
+                    const currentScroll = finalContainer.scrollLeft
+                    // Calculate distance from the scroll position BEFORE adding the adversary
+                    const distance = maxScroll - scrollLeftBeforeAdd
+                    const scrollWidthIncreased = finalContainer.scrollWidth > scrollWidthBeforeAdd
+                    console.log('[HORIZONTAL_SCROLL] New adversary added, scrollWidth stabilized:', { maxScroll, scrollWidth: finalContainer.scrollWidth, clientWidth: finalContainer.clientWidth, scrollWidthBeforeAdd, scrollLeftBeforeAdd, currentScroll, scrollChanged: currentScroll !== scrollLeftBeforeAdd, scrollWidthIncreased, distance })
+                    // Always scroll if scrollWidth increased (new content added), even if current position is at max
+                    // If scrollWidth increased but we're already at maxScroll, scroll slightly past to ensure distance > 1
+                    if (scrollWidthIncreased && Math.abs(distance) < 1) {
+                      // Scroll slightly past maxScroll to ensure animation triggers (browser will clamp)
+                      smoothScrollTo(maxScroll + 10, 500, 'new-adversary')
+                    } else if (Math.abs(distance) > 1) {
+                      smoothScrollTo(maxScroll, 500, 'new-adversary')
+                    }
+                  })
+                })
+              } else {
+                // scrollWidth is stable, proceed
+                const maxScroll = updatedContainer.scrollWidth - updatedContainer.clientWidth
+                const currentScroll = updatedContainer.scrollLeft
+                // Calculate distance from the scroll position BEFORE adding the adversary
+                const distance = maxScroll - scrollLeftBeforeAdd
+                const scrollWidthIncreased = updatedContainer.scrollWidth > scrollWidthBeforeAdd
+                console.log('[HORIZONTAL_SCROLL] New adversary added, scrollWidth stable:', { maxScroll, scrollWidth: updatedContainer.scrollWidth, clientWidth: updatedContainer.clientWidth, scrollWidthBeforeAdd, scrollLeftBeforeAdd, currentScroll, scrollChanged: currentScroll !== scrollLeftBeforeAdd, scrollWidthIncreased, distance })
+                // Always scroll if scrollWidth increased (new content added), even if current position is at max
+                // If scrollWidth increased but we're already at maxScroll, scroll slightly past to ensure distance > 1
+                if (scrollWidthIncreased && Math.abs(distance) < 1) {
+                  // Scroll slightly past maxScroll to ensure animation triggers (browser will clamp)
+                  smoothScrollTo(maxScroll + 10, 500, 'new-adversary')
+                } else if (Math.abs(distance) > 1) {
+                  smoothScrollTo(maxScroll, 500, 'new-adversary')
+                }
+              }
             }, 10)
           } else {
             // Existing adversary - scroll to that card only if it's not already visible
@@ -438,7 +496,7 @@ const DashboardContent = () => {
               
               if (!isVisible) {
                 // Card is not visible, scroll to it
-                smoothScrollTo(cardPosition, 600)
+                smoothScrollTo(cardPosition, 500)
               }
             }
             
@@ -908,11 +966,8 @@ const DashboardContent = () => {
               flexDirection: 'column',
               alignItems: 'stretch', // Ensure card stretches to full width
               height: 'auto', // Let Panel size to card content
-              opacity: removingCards.has(`${group.type}-${group.baseName}`) ? 0 : 
-                       newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
-              transition: removingCards.has(`${group.type}-${group.baseName}`) ? 'opacity 0.4s ease' : 
-                         newCards.has(`${group.type}-${group.baseName}`) ? 'opacity 0.4s ease' : 
-                         'opacity 0.4s ease'
+              opacity: newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
+              transition: newCards.has(`${group.type}-${group.baseName}`) ? 'opacity 0.2s ease' : 'opacity 0.2s ease'
             }}
           >
             <GameCard
@@ -977,7 +1032,7 @@ const DashboardContent = () => {
                           
                           if (!isVisible) {
                             // Card is not visible, scroll to it
-                            smoothScrollTo(cardPosition, 600)
+                            smoothScrollTo(cardPosition, 500)
                           }
                         }
                       }
@@ -1001,8 +1056,8 @@ const DashboardContent = () => {
                   const instanceToRemove = instances[0]
                   
                   if (isLastInstance) {
-                    // Mark card as removing and animate out
-                    setRemovingCards(prev => new Set(prev).add(cardKey))
+                    // Remove immediately (no fade-out animation)
+                    deleteAdversary(instanceToRemove.id)
                     
                     // Only scroll left if removing the rightmost card AND it's the last instance
                     if (isRightmost && entityGroups.length > 1) {
@@ -1017,18 +1072,8 @@ const DashboardContent = () => {
                             }
                           })
                         })
-                      }, 100) // Start scroll after animation begins
+                      }, 100) // Small delay to ensure DOM updates
                     }
-                    
-                    // After animation, actually remove it
-                    setTimeout(() => {
-                      deleteAdversary(instanceToRemove.id)
-                      setRemovingCards(prev => {
-                        const next = new Set(prev)
-                        next.delete(cardKey)
-                        return next
-                      })
-                    }, 400) // Match CSS transition duration
                   } else {
                     // Not last instance, remove immediately
                     deleteAdversary(instanceToRemove.id)

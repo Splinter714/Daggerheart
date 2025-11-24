@@ -1864,14 +1864,14 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
             overflowX: 'hidden',
             minHeight: 0
           }}>
-            <CustomAdversaryCreator 
-              onSave={handleSaveAdversary}
-              onRefresh={() => {}} // No need to refresh since state updates automatically
-              onAddItem={onAddItem}
-              editingAdversary={editingAdversary}
-              onCancelEdit={handleCancelEdit}
+        <CustomAdversaryCreator 
+          onSave={handleSaveAdversary}
+          onRefresh={() => {}} // No need to refresh since state updates automatically
+          onAddItem={onAddItem}
+          editingAdversary={editingAdversary}
+          onCancelEdit={handleCancelEdit}
               embedded={false}
-            />
+        />
           </div>
         </div>
       )}
