@@ -1190,8 +1190,8 @@ const GameCard = ({
     const isDead = (item.hp || 0) >= (item.hpMax || 1)
     const isEditMode = effectiveMode === 'edit' || showCustomCreator
     
-    // Determine if tab should be shown
-    const shouldShowTab = ((showAddRemoveButtons && type === 'adversary') || (showCustomCreator && type === 'adversary'))
+    // Determine if tab should be shown - always show for adversaries
+    const shouldShowTab = (type === 'adversary')
     
     // Build tab content
     const tabContent = shouldShowTab ? (
@@ -1292,12 +1292,12 @@ const GameCard = ({
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'var(--bg-hover)'
-              e.target.style.borderColor = 'var(--purple)'
+              e.currentTarget.style.backgroundColor = 'var(--bg-hover)'
+              e.currentTarget.style.borderColor = 'var(--purple)'
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'var(--bg-secondary)'
-              e.target.style.borderColor = 'var(--border)'
+              e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
+              e.currentTarget.style.borderColor = 'var(--border)'
             }}
             title="Remove one"
           >
@@ -1333,14 +1333,14 @@ const GameCard = ({
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'var(--purple)'
-              e.target.style.borderColor = 'var(--purple)'
-              e.target.style.color = 'white'
+              e.currentTarget.style.backgroundColor = 'var(--purple)'
+              e.currentTarget.style.borderColor = 'var(--purple)'
+              e.currentTarget.style.color = 'white'
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'var(--bg-secondary)'
-              e.target.style.borderColor = 'var(--border)'
-              e.target.style.color = 'var(--text-primary)'
+              e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
+              e.currentTarget.style.borderColor = 'var(--border)'
+              e.currentTarget.style.color = 'var(--text-primary)'
             }}
             title="Add another"
           >
@@ -1369,14 +1369,14 @@ const GameCard = ({
                 marginLeft: '0.25rem'
               }}
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--purple)'
-                e.target.style.borderColor = 'var(--purple)'
-                e.target.style.color = 'white'
+                e.currentTarget.style.backgroundColor = 'var(--purple)'
+                e.currentTarget.style.borderColor = 'var(--purple)'
+                e.currentTarget.style.color = 'white'
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'var(--bg-secondary)'
-                e.target.style.borderColor = 'var(--border)'
-                e.target.style.color = 'var(--text-primary)'
+                e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
+                e.currentTarget.style.borderColor = 'var(--border)'
+                e.currentTarget.style.color = 'var(--text-primary)'
               }}
               title="Edit"
             >

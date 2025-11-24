@@ -780,16 +780,14 @@ const BrowserTableHeader = ({
         { key: 'tier', label: 'Tier', hasFilter: true },
         { key: 'type', label: 'Type', hasFilter: true },
         { key: 'cost', label: 'Cost', hasFilter: true },
-        { key: 'difficulty', label: 'Diff' },
-        { key: 'action', label: '' } // Empty label for action column
+        { key: 'difficulty', label: 'Diff' }
       ]
     } else if (type === 'environment') {
       return [
         { key: 'name', label: 'Name' },
         { key: 'tier', label: 'Tier', hasFilter: true },
         { key: 'type', label: 'Type', hasFilter: true },
-        { key: 'difficulty', label: 'Diff' },
-        { key: 'action', label: '' } // Empty label for action column
+        { key: 'difficulty', label: 'Diff' }
       ]
     }
     return []
@@ -929,8 +927,7 @@ const BrowserTableHeader = ({
             ...(column.key === 'tier' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {}),
             ...(column.key === 'type' ? { width: '80px', minWidth: '80px', maxWidth: '80px' } : {}),
             ...(column.key === 'difficulty' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {}),
-            ...(column.key === 'cost' ? { width: '50px', minWidth: '50px', maxWidth: '50px' } : {}),
-            ...(column.key === 'action' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {})
+            ...(column.key === 'cost' ? { width: '50px', minWidth: '50px', maxWidth: '50px' } : {})
           }}
           onClick={() => onSort(column.key)}
           onMouseEnter={() => setHoveredColumn(column.key)}
@@ -1000,7 +997,7 @@ const BrowserTableHeader = ({
 }
 
 // Browser Row Component
-const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0, costFilter = 'auto-grey', onAdversaryClick }) => {
+const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0, costFilter = 'auto-grey' }) => {
   const [isHovered, setIsHovered] = useState(false)
 
   const handleAdd = () => {
@@ -1123,8 +1120,8 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
           ...(isHovered ? styles.rowHover : {})
         }}
         onClick={() => {
-          if (type === 'adversary' && onAdversaryClick) {
-            onAdversaryClick(item)
+          if (type === 'adversary') {
+            handleAdd()
           } else if (onRowClick) {
             onRowClick(item, type)
           }
@@ -1133,36 +1130,6 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
         onMouseLeave={() => setIsHovered(false)}
       >
         {content}
-        <td style={{ 
-          width: '40px', 
-          minWidth: '40px', 
-          maxWidth: '40px', 
-          textAlign: 'center', 
-          padding: '0', 
-          margin: '0', 
-          border: 'none', 
-          verticalAlign: 'middle',
-          boxSizing: 'border-box',
-          overflow: 'visible',
-          textOverflow: 'unset',
-          whiteSpace: 'nowrap'
-        }}>
-          <button
-            style={styles.addButton}
-            onClick={(e) => {
-              e.stopPropagation()
-              handleAdd()
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'var(--bg-secondary)'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'var(--purple)'
-            }}
-          >
-            +
-          </button>
-        </td>
       </tr>
     </>
   )
@@ -1635,16 +1602,6 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
                 playerTier={playerTier}
                 remainingBudget={remainingBudget}
                 costFilter={costFilter}
-                onAdversaryClick={(adversary) => {
-                  if (type === 'adversary') {
-                    // Toggle preview - close if same adversary clicked again
-                    if (selectedAdversary && selectedAdversary.id === adversary.id) {
-                      onSelectAdversary && onSelectAdversary(null)
-                    } else {
-                      onSelectAdversary && onSelectAdversary(adversary)
-                    }
-                  }
-                }}
               />
             ))}
           </tbody>

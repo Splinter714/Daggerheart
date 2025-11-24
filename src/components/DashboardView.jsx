@@ -74,6 +74,7 @@ const DashboardContent = () => {
     fear,
     savedEncounters,
     partySize,
+    updatePartySize,
     updateFear,
     createAdversary,
     createAdversariesBulk,
@@ -103,6 +104,8 @@ const DashboardContent = () => {
   const [browserOpenAtPosition, setBrowserOpenAtPosition] = useState(null) // null or index where browser should appear
   const [editingAdversaryId, setEditingAdversaryId] = useState(null) // ID of adversary being edited, or null
   const [creatingCustomAdversary, setCreatingCustomAdversary] = useState(false) // Whether creating a new custom adversary
+  const [browserActiveTab, setBrowserActiveTab] = useState('adversaries') // Active tab in browser overlay
+  const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null) // Selected custom adversary in browser
   
   // Column layout state
   const [containerWidth, setContainerWidth] = useState(0)
@@ -113,6 +116,67 @@ const DashboardContent = () => {
   const [removingCardSpacer, setRemovingCardSpacer] = useState(null) // Track card being removed with spacer: { baseName, groupIndex }
   const [spacerShrinking, setSpacerShrinking] = useState(false) // Track if spacer should shrink
   const scrollContainerRef = useRef(null)
+  const prevPartySizeRef = useRef(pcCount)
+
+  // Adjust minion quantities when party size changes
+  useEffect(() => {
+    const prevPcCount = prevPartySizeRef.current
+    
+    if (prevPcCount !== pcCount && prevPcCount > 0) {
+      // Group adversaries by base name to get minion groups
+      const groups = {}
+      adversaries.forEach(adversary => {
+        const baseName = adversary.baseName || adversary.name?.replace(/\s+\(\d+\)$/, '') || adversary.name
+        if (!groups[baseName]) {
+          groups[baseName] = {
+            type: 'adversary',
+            baseName: baseName,
+            instances: []
+          }
+        }
+        groups[baseName].instances.push(adversary)
+      })
+      
+      Object.values(groups).forEach(group => {
+        if (group.type === 'adversary' && group.instances.length > 0) {
+          const firstInstance = group.instances[0]
+          
+          // Only adjust minions
+          if (firstInstance.type === 'Minion') {
+            const currentInstanceCount = group.instances.length
+            // Calculate how many groups we had with the previous party size
+            const currentGroups = Math.ceil(currentInstanceCount / prevPcCount)
+            // Calculate new instance count to maintain the same number of groups
+            const newInstanceCount = currentGroups * pcCount
+            
+            if (newInstanceCount !== currentInstanceCount) {
+              if (newInstanceCount > currentInstanceCount) {
+                // Need to add instances
+                const instancesToAdd = newInstanceCount - currentInstanceCount
+                const newInstances = Array(instancesToAdd).fill(null).map(() => ({ ...firstInstance }))
+                createAdversariesBulk(newInstances)
+              } else {
+                // Need to remove instances
+                const instancesToRemove = currentInstanceCount - newInstanceCount
+                // Remove from the end
+                const instancesToDelete = group.instances.slice(-instancesToRemove)
+                instancesToDelete.forEach(instance => {
+                  deleteAdversary(instance.id)
+                })
+              }
+            }
+          }
+        }
+      })
+      
+      // Update the ref for next time
+      prevPartySizeRef.current = pcCount
+    } else if (prevPcCount === 0 || prevPartySizeRef.current === 0) {
+      // First render - just set the ref
+      prevPartySizeRef.current = pcCount
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pcCount]) // Only run when pcCount changes. Uses current adversaries, createAdversariesBulk, deleteAdversary from closure
 
   // Mobile detection
   useEffect(() => {
@@ -138,33 +202,47 @@ const DashboardContent = () => {
     if (width <= 0) return { visibleColumns: 1, columnWidth: getMinColumnWidth(1) }
     
     const padding = gap * 2
-    const availableWidth = width - padding
-    
-    // Try different column counts to find the best fit
+    // Always reserve space for browser overlay (one column width + gap) even when closed
+    // Use iterative calculation to account for browser overlay width depending on columnWidth
+    let availableWidth = width - padding
+    let browserOverlayWidth = 0
     let bestLayout = { visibleColumns: 1, columnWidth: availableWidth }
     
-    for (let columns = 1; columns <= 5; columns++) {
-      const totalGapWidth = (columns - 1) * gap
-      const columnWidth = (availableWidth - totalGapWidth) / columns
+    // Iterate until browser overlay width stabilizes (usually converges in 2-3 iterations)
+    for (let iteration = 0; iteration < 5; iteration++) {
+      const widthForCards = availableWidth - browserOverlayWidth
       
-      // Check if this column width meets our minimum requirement AND fits perfectly
-      if (columnWidth >= getMinColumnWidth(columns)) {
-        // Calculate the total width this layout would take
-        const totalWidth = columns * columnWidth + totalGapWidth
+      // Try different column counts to find the best fit
+      let layout = { visibleColumns: 1, columnWidth: widthForCards }
+      
+      for (let columns = 1; columns <= 5; columns++) {
+        const totalGapWidth = (columns - 1) * gap
+        const columnWidth = (widthForCards - totalGapWidth) / columns
         
-        // Only use this layout if it fits exactly within available width
-        if (totalWidth <= availableWidth) {
-          // Prefer more columns (narrower panels) - keep the last valid layout
-          bestLayout = { visibleColumns: columns, columnWidth }
+        if (columnWidth >= getMinColumnWidth(columns)) {
+          const totalWidth = columns * columnWidth + totalGapWidth
+          if (totalWidth <= widthForCards) {
+            layout = { visibleColumns: columns, columnWidth }
+          }
         }
       }
-    }
-    
-    // Ensure we never exceed the available width
-    const totalWidth = bestLayout.visibleColumns * bestLayout.columnWidth + (bestLayout.visibleColumns - 1) * gap
-    if (totalWidth > availableWidth) {
-      // Fall back to fewer columns
-      bestLayout = { visibleColumns: 1, columnWidth: availableWidth }
+      
+      // Ensure we never exceed the available width
+      const totalWidth = layout.visibleColumns * layout.columnWidth + (layout.visibleColumns - 1) * gap
+      if (totalWidth > widthForCards) {
+        layout = { visibleColumns: 1, columnWidth: widthForCards }
+      }
+      
+      // Calculate new browser overlay width
+      const newBrowserOverlayWidth = layout.columnWidth + gap
+      
+      // Check if converged (browser overlay width hasn't changed significantly)
+      if (Math.abs(newBrowserOverlayWidth - browserOverlayWidth) < 0.1) {
+        return layout
+      }
+      
+      browserOverlayWidth = newBrowserOverlayWidth
+      bestLayout = layout
     }
     
     return bestLayout
@@ -238,6 +316,7 @@ const DashboardContent = () => {
   // Handle closing browser
   const handleCloseBrowser = useCallback(() => {
     setBrowserOpenAtPosition(null)
+    setBrowserActiveTab('adversaries') // Reset to adversaries tab when closing
   }, [])
 
   // Smooth scroll helper
@@ -372,6 +451,10 @@ const DashboardContent = () => {
     const existingGroup = entityGroups.find(g => g.baseName === baseName && g.type === 'adversary')
     const isNewAdversary = !existingGroup
     
+    // Special handling for Minions: add in increments of party size
+    const isMinion = itemData.type === 'Minion'
+    const instancesToAdd = isMinion ? pcCount : 1
+    
     const addTimestamp = performance.now()
     // Capture scrollWidth BEFORE adding the adversary, so we can detect if it increased
     const scrollWidthBeforeAdd = scrollContainerRef.current?.scrollWidth ?? 0
@@ -393,13 +476,21 @@ const DashboardContent = () => {
     console.log('[ADVERSARY_ADD] handleAddAdversaryFromBrowser called:', {
       baseName,
       isNewAdversary,
+      isMinion,
+      instancesToAdd,
       timestamp: addTimestamp,
       currentScroll: scrollLeftBeforeAdd,
       scrollWidth: scrollWidthBeforeAdd,
       scrollSnapDisabled: scrollSnapWasDisabled
     })
     
-    createAdversary(itemData)
+    // Create multiple instances for minions, single instance for others
+    if (isMinion && instancesToAdd > 1) {
+      const minionArray = Array(instancesToAdd).fill(null).map(() => ({ ...itemData }))
+      createAdversariesBulk(minionArray)
+    } else {
+      createAdversary(itemData)
+    }
     setLastAddedItemType('adversary')
     
     // If it's a new adversary, mark it for fade-in animation
@@ -821,6 +912,83 @@ const DashboardContent = () => {
                     <Plus size={16} />
                     <span>Add Custom</span>
                   </button>
+                  {/* Party Size Controls */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <span style={{ color: 'var(--text-primary)', fontSize: '0.875rem', fontWeight: '500' }}>
+                      Party Size:
+                    </span>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.25rem',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      padding: '0.125rem 0.25rem',
+                      backgroundColor: 'var(--bg-secondary)'
+                    }}>
+                      <button
+                        onClick={() => updatePartySize(Math.max(1, pcCount - 1))}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'var(--text-primary)',
+                          cursor: 'pointer',
+                          padding: '0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: '18px',
+                          height: '18px',
+                          fontSize: '0.7rem'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.color = 'var(--purple)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.color = 'var(--text-primary)'
+                        }}
+                      >
+                        <Minus size={12} />
+                      </button>
+                      <span style={{ 
+                        color: 'var(--text-primary)', 
+                        fontSize: '0.875rem', 
+                        fontWeight: '500',
+                        minWidth: '1.5rem',
+                        textAlign: 'center'
+                      }}>
+                        {pcCount}
+                      </span>
+                      <button
+                        onClick={() => updatePartySize(pcCount + 1)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'var(--text-primary)',
+                          cursor: 'pointer',
+                          padding: '0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: '18px',
+                          height: '18px',
+                          fontSize: '0.7rem'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.color = 'var(--purple)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.color = 'var(--text-primary)'
+                        }}
+                      >
+                        <Plus size={12} />
+                      </button>
+                    </div>
+                  </div>
                   {/* Balance display */}
                   <div style={{
                     display: 'flex',
@@ -899,7 +1067,14 @@ const DashboardContent = () => {
                   type="adversary"
                   onAddItem={handleAddAdversaryFromBrowser}
                   showContainer={false}
-                  activeTab="adversaries"
+                  activeTab={browserActiveTab}
+                  onTabChange={setBrowserActiveTab}
+                  pcCount={pcCount}
+                  savedEncounters={savedEncounters}
+                  onLoadEncounter={loadEncounter}
+                  onDeleteEncounter={deleteEncounter}
+                  selectedCustomAdversaryId={selectedCustomAdversaryId}
+                  onSelectCustomAdversary={setSelectedCustomAdversaryId}
                   autoFocus={true}
                   hideImportExport={true}
                   onClose={handleCloseBrowser}
@@ -973,10 +1148,10 @@ const DashboardContent = () => {
                 flex: 'none',
                 paddingLeft: `${gap}px`, // Space before each card
                 paddingRight: '0',
-                paddingTop: `${browserOpenAtPosition !== null && group.type === 'adversary' ? gap + 52 : gap}px`, // Extra space for buttons above card (32px button + 16px padding + 4px margin)
+                paddingTop: `${group.type === 'adversary' ? gap + 52 : gap}px`, // Extra space for buttons above card (always reserve space for tab buttons)
                 paddingBottom: `${gap}px`, // Space below each card
                 scrollSnapAlign: 'start',
-                overflow: browserOpenAtPosition !== null && group.type === 'adversary' ? 'visible' : 'hidden', // Allow buttons above card to be visible
+                overflow: group.type === 'adversary' ? 'visible' : 'hidden', // Allow tab buttons above card to be visible
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'stretch', // Ensure card stretches to full width
@@ -1020,9 +1195,17 @@ const DashboardContent = () => {
               showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary'}
               onEdit={group.type === 'adversary' ? (itemId) => handleEditAdversary(itemId) : undefined}
               onAddInstance={group.type === 'adversary' ? (item) => {
-                // Adding another instance - scroll to this card horizontally only if not visible
-                // Vertical scrolling disabled - no automatic scroll when instances are added
-                createAdversary(item)
+                // Special handling for Minions: add in increments of party size
+                const isMinion = item.type === 'Minion'
+                const instancesToAdd = isMinion ? pcCount : 1
+                
+                // Add instances
+                if (isMinion && instancesToAdd > 1) {
+                  const instancesArray = Array(instancesToAdd).fill(null).map(() => ({ ...item }))
+                  createAdversariesBulk(instancesArray)
+                } else {
+                  createAdversary(item)
+                }
                 
                 // Horizontal scroll to card only if it's not already visible
                 setTimeout(() => {
@@ -1061,19 +1244,26 @@ const DashboardContent = () => {
                 }, 50) // Small delay to ensure React has rendered
               } : undefined}
               onRemoveInstance={group.type === 'adversary' ? (itemId) => {
-                // Check if this is the last instance
-                const isLastInstance = group.instances.length === 1
-                const isRightmost = entityGroups.length > 0 && entityGroups[entityGroups.length - 1].baseName === group.baseName
-                const cardKey = `${group.type}-${group.baseName}`
+                // Get the first instance to check type
+                const firstInstance = group.instances[0]
+                const isMinion = firstInstance?.type === 'Minion'
+                // Special handling for Minions: remove in increments of party size
+                const instancesToRemove = isMinion ? pcCount : 1
                 
-                // Find highest numbered instance and remove it
+                // Sort instances by duplicate number (highest first)
                 const instances = group.instances.sort((a, b) => {
                   const aNum = a.duplicateNumber || 1
                   const bNum = b.duplicateNumber || 1
                   return bNum - aNum
                 })
+                
+                // Determine how many instances we'll have after removal
+                const instancesAfterRemoval = Math.max(0, instances.length - instancesToRemove)
+                const isLastInstance = instancesAfterRemoval === 0
+                
                 if (instances.length > 0) {
-                  const instanceToRemove = instances[0]
+                  // Remove the specified number of instances (highest numbered ones)
+                  const instancesToDelete = instances.slice(0, instancesToRemove)
                   
                   if (isLastInstance) {
                     // Add temporary spacer before removing to prevent browser auto-scroll
@@ -1082,10 +1272,12 @@ const DashboardContent = () => {
                     setRemovingCardSpacer({ baseName: group.baseName, groupIndex })
                     setSpacerShrinking(false) // Start at full width
                     
-                    // Wait for React to render spacer, then remove the adversary
+                    // Wait for React to render spacer, then remove the adversaries
                     requestAnimationFrame(() => {
                       requestAnimationFrame(() => {
-                        deleteAdversary(instanceToRemove.id)
+                        instancesToDelete.forEach(instance => {
+                          deleteAdversary(instance.id)
+                        })
                         
                         // After card is removed, start shrinking spacer
                         requestAnimationFrame(() => {
@@ -1102,8 +1294,10 @@ const DashboardContent = () => {
                       })
                     })
                   } else {
-                    // Not last instance - just remove immediately without spacer
-                    deleteAdversary(instanceToRemove.id)
+                    // Not last instance - remove the specified number of instances
+                    instancesToDelete.forEach(instance => {
+                      deleteAdversary(instance.id)
+                    })
                   }
                 }
               } : undefined}
