@@ -759,9 +759,14 @@ const GameCard = ({
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
   
   // Smooth scroll when instances are added or removed
+  // DISABLED: No automatic vertical scrolling when instances are added/removed
   useLayoutEffect(() => {
     const currentLength = instances.length
     const previousLength = previousInstancesLengthRef.current
+    
+    // Update ref but don't perform any scrolling
+    previousInstancesLengthRef.current = currentLength
+    return
     
     if (currentLength !== previousLength && scrollableContentRef.current) {
       // Use the stored previous scroll state (captured in cleanup before DOM update)

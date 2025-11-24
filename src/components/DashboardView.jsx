@@ -500,8 +500,7 @@ const DashboardContent = () => {
               }
             }
             
-            // Scroll the card vertically after instance is added
-            // The GameCard component will handle scrolling automatically when instances change
+            // Vertical scrolling disabled - instances are added/removed without auto-scrolling
           }
         })
       })
@@ -1006,7 +1005,7 @@ const DashboardContent = () => {
               onEdit={group.type === 'adversary' ? (itemId) => handleEditAdversary(itemId) : undefined}
               onAddInstance={group.type === 'adversary' ? (item) => {
                 // Adding another instance - scroll to this card horizontally only if not visible
-                // The GameCard component will handle vertical scrolling automatically
+                // Vertical scrolling disabled - no automatic scroll when instances are added
                 createAdversary(item)
                 
                 // Horizontal scroll to card only if it's not already visible
