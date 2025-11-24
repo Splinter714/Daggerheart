@@ -109,6 +109,8 @@ const DashboardContent = () => {
   const [isScrolling, setIsScrolling] = useState(false)
   const [removingCards, setRemovingCards] = useState(new Set()) // Track cards being removed for animation
   const [newCards, setNewCards] = useState(new Set()) // Track newly added cards for fade-in animation
+  const [removingCardSpacer, setRemovingCardSpacer] = useState(null) // Track card being removed with spacer: { baseName, groupIndex }
+  const [spacerShrinking, setSpacerShrinking] = useState(false) // Track if spacer should shrink
   const scrollContainerRef = useRef(null)
 
   // Mobile detection
@@ -947,28 +949,65 @@ const DashboardContent = () => {
           </div>
         ) : (
           // Normal entity groups display
-          entityGroups.map((group, index) => (
-          <Panel 
-            key={`${group.type}-${group.baseName}`}
-            style={{ 
-              width: `${columnWidth + gap}px`, // Include padding in width
-              flexShrink: 0,
-              flexGrow: 0,
-              flex: 'none',
-              paddingLeft: `${gap}px`, // Space before each card
-              paddingRight: '0',
-              paddingTop: `${browserOpenAtPosition !== null && group.type === 'adversary' ? gap + 52 : gap}px`, // Extra space for buttons above card (32px button + 16px padding + 4px margin)
-              paddingBottom: `${gap}px`, // Space below each card
-              scrollSnapAlign: 'start',
-              overflow: browserOpenAtPosition !== null && group.type === 'adversary' ? 'visible' : 'hidden', // Allow buttons above card to be visible
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'stretch', // Ensure card stretches to full width
-              height: 'auto', // Let Panel size to card content
-              opacity: newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
-              transition: newCards.has(`${group.type}-${group.baseName}`) ? 'opacity 0.2s ease' : 'opacity 0.2s ease'
-            }}
-          >
+          (() => {
+            const items = []
+            
+            entityGroups.forEach((group, index) => {
+              // Check if this card should be replaced with a spacer
+              // Match by baseName since groupIndex becomes invalid after removal
+              const isSpacerPosition = removingCardSpacer && removingCardSpacer.baseName === group.baseName && group.type === 'adversary'
+              
+              if (isSpacerPosition) {
+                // Render spacer instead of card
+                items.push(
+                  <Panel 
+                    key={`spacer-${removingCardSpacer.baseName}`}
+                    style={{ 
+                      width: spacerShrinking ? '0px' : `${columnWidth + gap}px`, // Start at full width, shrink to 0
+                      flexShrink: 0,
+                      flexGrow: 0,
+                      flex: 'none',
+                      paddingLeft: spacerShrinking ? '0px' : `${gap}px`,
+                      paddingRight: '0',
+                      paddingTop: spacerShrinking ? '0px' : `${gap}px`,
+                      paddingBottom: spacerShrinking ? '0px' : `${gap}px`,
+                      scrollSnapAlign: 'none',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'stretch',
+                      height: '100%',
+                      opacity: 0,
+                      transition: 'width 0.3s ease, padding-left 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease'
+                    }}
+                  />
+                )
+                return // Skip rendering the card
+              }
+              
+              // Render the card normally
+              items.push(
+            <Panel 
+              key={`${group.type}-${group.baseName}`}
+              style={{ 
+                width: `${columnWidth + gap}px`, // Include padding in width
+                flexShrink: 0,
+                flexGrow: 0,
+                flex: 'none',
+                paddingLeft: `${gap}px`, // Space before each card
+                paddingRight: '0',
+                paddingTop: `${browserOpenAtPosition !== null && group.type === 'adversary' ? gap + 52 : gap}px`, // Extra space for buttons above card (32px button + 16px padding + 4px margin)
+                paddingBottom: `${gap}px`, // Space below each card
+                scrollSnapAlign: 'start',
+                overflow: browserOpenAtPosition !== null && group.type === 'adversary' ? 'visible' : 'hidden', // Allow buttons above card to be visible
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'stretch', // Ensure card stretches to full width
+                height: 'auto', // Let Panel size to card content
+                opacity: newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
+                transition: newCards.has(`${group.type}-${group.baseName}`) ? 'opacity 0.2s ease' : 'opacity 0.2s ease'
+              }}
+            >
             <GameCard
               type={group.type}
               item={{ 
@@ -1055,33 +1094,73 @@ const DashboardContent = () => {
                   const instanceToRemove = instances[0]
                   
                   if (isLastInstance) {
-                    // Remove immediately (no fade-out animation)
-                    deleteAdversary(instanceToRemove.id)
+                    // Add temporary spacer before removing to prevent browser auto-scroll
+                    const groupIndex = entityGroups.findIndex(g => g.baseName === group.baseName && g.type === 'adversary')
+                    // Set spacer BEFORE removing so it's in place when card disappears
+                    setRemovingCardSpacer({ baseName: group.baseName, groupIndex })
+                    setSpacerShrinking(false) // Start at full width
                     
-                    // Only scroll left if removing the rightmost card AND it's the last instance
-                    if (isRightmost && entityGroups.length > 1) {
-                      setTimeout(() => {
+                    // Wait for React to render spacer, then remove the adversary
+                    requestAnimationFrame(() => {
+                      requestAnimationFrame(() => {
+                        deleteAdversary(instanceToRemove.id)
+                        
+                        // After card is removed, start shrinking spacer
                         requestAnimationFrame(() => {
                           requestAnimationFrame(() => {
-                            if (scrollContainerRef.current) {
-                              const currentScroll = scrollContainerRef.current.scrollLeft
-                              // Scroll to show one more column on the left
-                              const targetScroll = Math.max(0, currentScroll - (columnWidth + gap))
-                              smoothScrollTo(targetScroll, 500, 'remove-rightmost-card')
-                            }
+                            setSpacerShrinking(true) // Trigger shrink animation
+                            
+                            // Remove spacer after animation completes
+                            setTimeout(() => {
+                              setRemovingCardSpacer(null)
+                              setSpacerShrinking(false)
+                            }, 300) // Match CSS transition duration
                           })
                         })
-                      }, 100) // Small delay to ensure DOM updates
-                    }
+                      })
+                    })
                   } else {
-                    // Not last instance, remove immediately
+                    // Not last instance - just remove immediately without spacer
                     deleteAdversary(instanceToRemove.id)
                   }
                 }
               } : undefined}
             />
           </Panel>
-        ))
+              )
+            })
+            
+            // If spacer wasn't matched (card already removed), insert it at the stored index
+            if (removingCardSpacer && !items.some(item => item?.key === `spacer-${removingCardSpacer.baseName}`)) {
+              // Insert spacer at the original groupIndex position
+              const insertIndex = Math.min(removingCardSpacer.groupIndex, items.length)
+              items.splice(insertIndex, 0,
+                <Panel 
+                  key={`spacer-${removingCardSpacer.baseName}`}
+                  style={{ 
+                    width: spacerShrinking ? '0px' : `${columnWidth + gap}px`,
+                    flexShrink: 0,
+                    flexGrow: 0,
+                    flex: 'none',
+                    paddingLeft: spacerShrinking ? '0px' : `${gap}px`,
+                    paddingRight: '0',
+                    paddingTop: spacerShrinking ? '0px' : `${gap}px`,
+                    paddingBottom: spacerShrinking ? '0px' : `${gap}px`,
+                    scrollSnapAlign: 'none',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                    height: '100%',
+                    opacity: 0,
+                    transition: 'width 0.3s ease, padding-left 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease'
+                  }}
+                />
+              )
+            }
+            
+            return items
+          })()
         )}
         {/* Blank spacer column to allow scrolling one more column width - only when browser is open */}
         {browserOpenAtPosition !== null && (

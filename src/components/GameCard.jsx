@@ -717,8 +717,6 @@ const GameCard = ({
   const previousScrollHeightRef = useRef(null)
   const previousScrollTopRef = useRef(null)
   const scrollAnimationFrameRef = useRef(null) // Track ongoing scroll animation
-  const temporaryPaddingRef = useRef(null) // Ref for temporary padding spacer
-  const [temporaryPaddingHeight, setTemporaryPaddingHeight] = useState(0) // Height of temporary padding
   
   // Track scroll state continuously
   useEffect(() => {
@@ -759,14 +757,9 @@ const GameCard = ({
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
   
   // Smooth scroll when instances are added or removed
-  // DISABLED: No automatic vertical scrolling when instances are added/removed
   useLayoutEffect(() => {
     const currentLength = instances.length
     const previousLength = previousInstancesLengthRef.current
-    
-    // Update ref but don't perform any scrolling
-    previousInstancesLengthRef.current = currentLength
-    return
     
     if (currentLength !== previousLength && scrollableContentRef.current) {
       // Use the stored previous scroll state (captured in cleanup before DOM update)
@@ -783,95 +776,9 @@ const GameCard = ({
       const newScrollHeight = scrollContainer.scrollHeight
       const clientHeight = scrollContainer.clientHeight
       
-      // Handle instance removal with smooth scroll
+      // Handle instance removal - let browser adjust scroll naturally
       if (currentLength < previousLength) {
-        // Instance removed
-        const oldMaxScroll = oldScrollHeight - clientHeight
-        const wasAtBottom = oldScrollTop >= oldMaxScroll - 10 // Within 10px of bottom
-        
-        if (wasAtBottom && newScrollHeight > clientHeight) {
-          // Cancel any ongoing animation from previous removal
-          if (scrollAnimationFrameRef.current) {
-            cancelAnimationFrame(scrollAnimationFrameRef.current)
-            scrollAnimationFrameRef.current = null
-          }
-          
-          // Calculate height difference - this is the space we need to maintain
-          // If there's already temporary padding, we need to account for it
-          // The oldScrollHeight might include the padding, so we need to subtract it
-          const existingPadding = temporaryPaddingHeight
-          const actualOldHeight = oldScrollHeight - existingPadding
-          const heightDifference = actualOldHeight - newScrollHeight
-          
-          // Add temporary padding to maintain scrollable space
-          // If there's existing padding, add to it (for rapid removals)
-          setTemporaryPaddingHeight(existingPadding + heightDifference)
-          
-          // Wait for padding to be applied, then animate
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              if (!scrollContainer) return
-              
-              // Calculate the scroll position we should be at
-              // oldScrollTop was relative to oldScrollHeight (which may have included existing padding)
-              // We want to maintain the same visual position
-              // If there was existing padding, oldScrollHeight included it, so oldScrollTop is already correct
-              // We just need to use oldScrollTop directly since the padding maintains the same scrollHeight
-              const newPadding = existingPadding + heightDifference
-              
-              // Restore old scroll position (padding maintains the height, so position stays the same)
-              scrollContainer.scrollTop = oldScrollTop
-              void scrollContainer.offsetHeight
-              
-              // Calculate target scroll position (new bottom without padding)
-              const targetScroll = newScrollHeight - clientHeight
-              const currentScroll = scrollContainer.scrollTop
-              const distance = targetScroll - currentScroll
-              
-              // Only animate if there's meaningful distance to travel
-              if (Math.abs(distance) > 0.5) {
-                const duration = 400
-                const startTime = performance.now()
-                const startScroll = currentScroll
-                
-                const animateScroll = (currentTime) => {
-                  if (!scrollContainer) {
-                    scrollAnimationFrameRef.current = null
-                    return
-                  }
-                  
-                  const elapsed = currentTime - startTime
-                  const progress = Math.min(elapsed / duration, 1)
-                  
-                  // Optimized easing calculation
-                  const oneMinusProgress = 1 - progress
-                  const easeOut = 1 - (oneMinusProgress * oneMinusProgress * oneMinusProgress)
-                  
-                  // Target is the new bottom (without padding)
-                  const currentTarget = targetScroll
-                  const currentDistance = currentTarget - startScroll
-                  const newScroll = startScroll + (currentDistance * easeOut)
-                  
-                  scrollContainer.scrollTop = newScroll
-                  
-                  if (progress < 1) {
-                    scrollAnimationFrameRef.current = requestAnimationFrame(animateScroll)
-                  } else {
-                    scrollContainer.scrollTop = currentTarget
-                    scrollAnimationFrameRef.current = null
-                    // Remove temporary padding after animation completes
-                    setTemporaryPaddingHeight(0)
-                  }
-                }
-                
-                scrollAnimationFrameRef.current = requestAnimationFrame(animateScroll)
-              } else {
-                // No distance to travel, just remove padding
-                setTemporaryPaddingHeight(0)
-              }
-            })
-          })
-        }
+        // Instance removed - no special handling, browser will adjust scroll naturally
       } else if (currentLength > previousLength) {
         // Instance added: scroll to bottom
         const targetScroll = newScrollHeight - clientHeight
@@ -3326,18 +3233,6 @@ const GameCard = ({
             )}
           </div>
         )}
-
-          {/* Temporary padding spacer for smooth scroll animation on instance removal */}
-          {temporaryPaddingHeight > 0 && (
-            <div 
-              ref={temporaryPaddingRef}
-              style={{
-                height: temporaryPaddingHeight,
-                width: '100%',
-                flexShrink: 0
-              }}
-            />
-          )}
 
           </div>
 
