@@ -11,6 +11,7 @@ import EncounterBuilder from './EncounterBuilder'
 import { Plus, X, Minus, Pencil } from 'lucide-react'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
 import { getDefaultAdversaryValues } from '../data/adversaryDefaults'
+import { useAppKeyboardShortcuts } from '../hooks/useAppKeyboardShortcuts'
 
 // Battle Points calculation (from EncounterBuilder)
 const calculateBaseBattlePoints = (pcCount) => (3 * pcCount) + 2
@@ -446,6 +447,16 @@ const DashboardContent = () => {
   }, [adversaries, countdowns])
 
   const entityGroups = getEntityGroups()
+
+  // Keyboard shortcuts
+  useAppKeyboardShortcuts({
+    browserOpenAtPosition,
+    handleCloseBrowser,
+    handleOpenBrowser,
+    getEntityGroups,
+    fear,
+    updateFear
+  })
 
   // Handle adding adversary from browser
   const handleAddAdversaryFromBrowser = useCallback((itemData) => {
