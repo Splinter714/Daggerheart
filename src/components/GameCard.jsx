@@ -1408,43 +1408,43 @@ const GameCard = ({
           minHeight: 0
         }}
       >
-        <div 
-          className={getCardClassName()}
-          style={{
-            ...getCardStyle(true),
-            padding: 0,
-            display: 'flex',
-            flexDirection: 'column',
+      <div 
+        className={getCardClassName()}
+        style={{
+          ...getCardStyle(true),
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'column',
             position: 'relative',
             height: '100%',
             minHeight: 0,
             border: 'none', // Border is handled by ContainerWithTab
             borderRadius: 0 // Border radius is handled by ContainerWithTab
-          }}
-          onClick={onClick}
-        >
-          {/* DEFEATED overlay */}
-          {isDead && (
-            <>
-              {/* Diagonal striping pattern */}
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: `repeating-linear-gradient(
-                  45deg,
-                  transparent,
-                  transparent 8px,
-                  var(--gray-600) 1px,
-                  var(--gray-600) 9px
-                )`,
-                pointerEvents: 'none',
-                zIndex: 9999
-              }} />
-            </>
-          )}
+        }}
+        onClick={onClick}
+      >
+        {/* DEFEATED overlay */}
+        {isDead && (
+          <>
+            {/* Diagonal striping pattern */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: `repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 8px,
+                var(--gray-600) 1px,
+                var(--gray-600) 9px
+              )`,
+              pointerEvents: 'none',
+              zIndex: 9999
+            }} />
+          </>
+        )}
         {/* Fixed Header Section - Identical to Compact View */}
         <div className="border-b" style={{
           padding: '8px',
@@ -1469,58 +1469,58 @@ const GameCard = ({
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              minHeight: '40px'
-            }}>
-              {isEditMode ? (
-                <input
+            minHeight: '40px'
+          }}>
+            {isEditMode ? (
+              <input
                   ref={nameInputRef}
-                  type="text"
-                  value={item.name || ''}
-                  onChange={(e) => {
+                type="text"
+                value={item.name || ''}
+                onChange={(e) => {
                     if (onUpdate && item.id) {
                       onUpdate(item.id, { name: e.target.value })
                     }
-                  }}
-                  style={{
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '4px',
-                    color: 'var(--text-primary)',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    padding: '0.5rem',
-                    width: '100%',
-                    maxWidth: '300px',
-                    paddingRight: '0.625rem'
-                  }}
-                  placeholder="Name"
-                />
-              ) : (
+                }}
+                style={{
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  color: 'var(--text-primary)',
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  padding: '0.5rem',
+                  width: '100%',
+                  maxWidth: '300px',
+                  paddingRight: '0.625rem'
+                }}
+                placeholder="Name"
+              />
+            ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
-                  <h4 style={{
-                    ...styles.rowTitle,
+            <h4 style={{
+              ...styles.rowTitle,
                     color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
-                    textAlign: 'left',
-                    margin: 0,
-                    fontSize: '1.1rem',
+              textAlign: 'left',
+              margin: 0,
+              fontSize: '1.1rem',
                     paddingRight: '6px',
                     flex: 1
-                  }}>
-                    {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
-                  </h4>
+            }}>
+              {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
+            </h4>
                 </div>
-              )}
-              
-              {/* Combined Type/Tier Badge */}
-              {(item.type || item.tier || isEditMode) && (
-                <CombinedTypeTierBadge 
-                  type={item.type}
-                  tier={item.tier}
-                  isEditMode={isEditMode}
-                  onUpdate={onUpdate}
-                  itemId={item.id}
-                />
-              )}
+            )}
+            
+            {/* Combined Type/Tier Badge */}
+            {(item.type || item.tier || isEditMode) && (
+              <CombinedTypeTierBadge 
+                type={item.type}
+                tier={item.tier}
+                isEditMode={isEditMode}
+                onUpdate={onUpdate}
+                itemId={item.id}
+              />
+            )}
             </div>
           </div>
         </div>
@@ -3278,9 +3278,9 @@ const GameCard = ({
 
           </div>
 
-          {/* Damage Input Popup for Adversaries */}
-          {renderDamageInput()}
-        </div>
+        {/* Damage Input Popup for Adversaries */}
+        {renderDamageInput()}
+      </div>
       </ContainerWithTab>
     )
   }

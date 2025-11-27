@@ -623,7 +623,7 @@ const BrowserHeader = ({ searchTerm, onSearchChange, type, partyControls, showCu
   }, [autoFocus])
   
   return (
-    <div style={styles.browserHeader}>
+    <div className="browser-header" style={styles.browserHeader}>
       <div style={{ display: 'flex', alignItems: 'center', flex: 1, gap: '0.5rem' }}>
       <input
           ref={searchInputRef}
@@ -1018,7 +1018,7 @@ const BrowserTableHeader = ({
 }
 
 // Browser Row Component
-const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0, costFilter = 'auto-grey' }) => {
+const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0, costFilter = 'auto-grey', isFocused = false, rowRef = null }) => {
   const [isHovered, setIsHovered] = useState(false)
 
   const handleAdd = () => {
@@ -1136,9 +1136,11 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
   return (
     <>
       <tr 
+        ref={rowRef}
         style={{
           ...styles.row,
-          ...(isHovered ? styles.rowHover : {})
+          ...(isHovered ? styles.rowHover : {}),
+          ...(isFocused ? styles.rowFocused : {})
         }}
         onClick={() => {
           if (type === 'adversary') {
@@ -1165,6 +1167,11 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
   const [deleteConfirmations, setDeleteConfirmations] = useState({}) // Track which encounters are in delete confirmation state
   const deleteTimeouts = useRef({}) // Track timeouts for each encounter
   const costFilterRef = useRef(null)
+  
+  // Keyboard navigation state - track by item ID for stability
+  const [focusedRowIndex, setFocusedRowIndex] = useState(-1)
+  const [focusedItemId, setFocusedItemId] = useState(null)
+  const rowRefs = useRef({}) // Refs for each row to scroll into view
   
   // Export custom adversaries to CSV file
   const handleExportCustomAdversaries = () => {
@@ -1476,6 +1483,108 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
     getDropdownStyle
   } = useBrowser(type, encounterItems, pcCount, playerTier, filterCustom, customContent)
 
+  // Reset focused row only when search/filters actually change
+  const prevSearchRef = useRef(searchTerm)
+  const prevTiersRef = useRef(JSON.stringify(selectedTiers))
+  const prevTypesRef = useRef(JSON.stringify(selectedTypes))
+  
+  useEffect(() => {
+    const searchChanged = prevSearchRef.current !== searchTerm
+    const tiersChanged = prevTiersRef.current !== JSON.stringify(selectedTiers)
+    const typesChanged = prevTypesRef.current !== JSON.stringify(selectedTypes)
+    
+    if (searchChanged || tiersChanged || typesChanged) {
+      setFocusedRowIndex(-1)
+      setFocusedItemId(null)
+      prevSearchRef.current = searchTerm
+      prevTiersRef.current = JSON.stringify(selectedTiers)
+      prevTypesRef.current = JSON.stringify(selectedTypes)
+    }
+  }, [searchTerm, selectedTiers, selectedTypes])
+  
+  // Keyboard navigation handler (after useBrowser hook)
+  useEffect(() => {
+    if (activeTab !== 'adversaries') return // Only enable keyboard nav on adversaries tab
+    
+    const handleKeyDown = (event) => {
+      // Don't handle if user is typing in an input
+      const activeElement = document.activeElement
+      if (activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName)) {
+        // Allow arrow keys and enter to work from search input, but clear focus first
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Enter') {
+          // Blur the input so keyboard nav can work
+          if (event.key !== 'Enter' || activeElement.tagName !== 'INPUT') {
+            activeElement.blur()
+          }
+        } else {
+          return
+        }
+      }
+      
+      const maxIndex = filteredAndSortedData.length - 1
+      
+      if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        setFocusedRowIndex(prev => {
+          const next = prev < maxIndex ? prev + 1 : prev
+          // Update focused item ID
+          if (next >= 0 && next < filteredAndSortedData.length) {
+            setFocusedItemId(filteredAndSortedData[next]?.id || null)
+            // Scroll row into view - only if needed (nearest)
+            if (rowRefs.current[next]) {
+              setTimeout(() => {
+                rowRefs.current[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+              }, 0)
+            }
+          }
+          return next
+        })
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        setFocusedRowIndex(prev => {
+          // If at top or going above top, focus search input
+          if (prev <= 0) {
+            setFocusedItemId(null)
+            // Focus search input
+            setTimeout(() => {
+              const searchInput = document.querySelector('.browser-header input[type="text"]')
+              searchInput?.focus()
+            }, 0)
+            return -1
+          }
+          
+          const next = prev - 1
+          // Update focused item ID
+          if (next >= 0 && next < filteredAndSortedData.length) {
+            setFocusedItemId(filteredAndSortedData[next]?.id || null)
+            // Scroll row into view - only if needed (nearest)
+            if (rowRefs.current[next]) {
+              setTimeout(() => {
+                rowRefs.current[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+              }, 0)
+            }
+          } else {
+            setFocusedItemId(null)
+          }
+          return next
+        })
+      } else if (event.key === 'Enter' && focusedRowIndex >= 0 && focusedRowIndex <= maxIndex) {
+        event.preventDefault()
+        const focusedItem = filteredAndSortedData[focusedRowIndex]
+        if (focusedItem && onAddItem) {
+          onAddItem(focusedItem)
+          // Keep focus on the same row after adding
+          // Focus stays where it is
+        }
+      }
+    }
+    
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [activeTab, filteredAndSortedData, focusedRowIndex, onAddItem])
+
   // Calculate remaining battle points budget
   const calculateRemainingBudget = () => {
     const baseBattlePoints = (3 * pcCount) + 2
@@ -1611,20 +1720,32 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
             />
           </thead>
           <tbody>
-            {filteredAndSortedData.map(item => (
-              <BrowserRow
-                key={item.id}
-                item={item}
-                onAdd={onAddItem}
-                type={type}
-                onRowClick={onRowClick}
-                encounterItems={encounterItems}
-                pcCount={pcCount}
-                playerTier={playerTier}
-                remainingBudget={remainingBudget}
-                costFilter={costFilter}
-              />
-            ))}
+            {filteredAndSortedData.map((item, index) => {
+              // Filter out rows that should be hidden (cost filter auto-hide)
+              // We'll let BrowserRow handle the visibility, but we need to track visible indices
+              return (
+                <BrowserRow
+                  key={item.id}
+                  item={item}
+                  onAdd={onAddItem}
+                  type={type}
+                  onRowClick={onRowClick}
+                  encounterItems={encounterItems}
+                  pcCount={pcCount}
+                  playerTier={playerTier}
+                  remainingBudget={remainingBudget}
+                  costFilter={costFilter}
+                  isFocused={focusedItemId === item.id || focusedRowIndex === index}
+                  rowRef={(el) => {
+                    if (el) {
+                      rowRefs.current[index] = el
+                    } else {
+                      delete rowRefs.current[index]
+                    }
+                  }}
+                />
+              )
+            })}
           </tbody>
         </table>
       </div>
@@ -2097,6 +2218,11 @@ const styles = {
   },
   rowHover: {
     backgroundColor: 'var(--bg-secondary)'
+  },
+  rowFocused: {
+    backgroundColor: 'var(--bg-secondary)',
+    outline: '2px solid var(--purple)',
+    outlineOffset: '-2px'
   },
   expandedRow: {
     backgroundColor: 'var(--bg-secondary)'
