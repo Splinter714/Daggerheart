@@ -750,20 +750,53 @@ const DashboardContent = () => {
           })
         }
       } else {
-        // Stock adversary - create new custom copy
+        // Stock adversary - create new custom copy (Save As)
+        // Find all instances of this stock adversary to replace them
+        const originalBaseName = editingAdversary?.baseName
+        const stockInstances = adversaries.filter(adv => {
+          // Match by baseName
+          const matchesBaseName = adv.baseName === originalBaseName
+          // Stock adversaries don't have source='Homebrew' or isCustom=true
+          const isStock = !adv.source || (adv.source !== 'Homebrew' && !adv.isCustom)
+          return matchesBaseName && isStock
+        })
+        
+        console.log('[SAVE_AS] Found stock instances to replace:', {
+          originalBaseName,
+          stockInstancesCount: stockInstances.length,
+          stockInstanceIds: stockInstances.map(s => s.id)
+        })
+        
         // Ensure name is set for custom content
         const customContentData = {
           ...adversaryData,
           name: adversaryData.baseName || adversaryData.name
         }
         const customId = addCustomAdversary(customContentData)
-        // Update the instance on dashboard to reference the new custom adversary
-        updateAdversary(id, { 
-          ...adversaryData, 
-          source: 'Homebrew', 
-          isCustom: true,
-          customContentId: customId 
+        
+        // Delete all stock instances
+        stockInstances.forEach(stockInstance => {
+          console.log('[SAVE_AS] Deleting stock instance:', stockInstance.id, stockInstance.name)
+          deleteAdversary(stockInstance.id)
         })
+        
+        // Create new custom instances to replace them (same quantity)
+        // Use setTimeout to ensure deletes complete before creating new ones
+        setTimeout(() => {
+          const instancesToCreate = stockInstances.map(() => ({
+            ...adversaryData,
+            source: 'Homebrew',
+            isCustom: true,
+            customContentId: customId,
+            hp: 0,
+            stress: 0
+          }))
+          
+          if (instancesToCreate.length > 0) {
+            console.log('[SAVE_AS] Creating', instancesToCreate.length, 'custom instances to replace stock ones')
+            createAdversariesBulk(instancesToCreate)
+          }
+        }, 0)
       }
       setEditingAdversaryId(null)
       // Browser will auto-refresh via useEffect watching customContent
