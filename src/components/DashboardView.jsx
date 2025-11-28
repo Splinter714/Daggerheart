@@ -206,50 +206,31 @@ const DashboardContent = () => {
     if (width <= 0) return { visibleColumns: 1, columnWidth: getMinColumnWidth(1) }
     
     const padding = gap * 2
-    // Always reserve space for browser overlay (one column width + gap) even when closed
-    // Use iterative calculation to account for browser overlay width depending on columnWidth
-    let availableWidth = width - padding
-    let browserOverlayWidth = 0
-    let bestLayout = { visibleColumns: 1, columnWidth: availableWidth }
+    // Don't reserve space for browser overlay - it overlays on top
+    const availableWidth = width - padding
     
-    // Iterate until browser overlay width stabilizes (usually converges in 2-3 iterations)
-    for (let iteration = 0; iteration < 5; iteration++) {
-      const widthForCards = availableWidth - browserOverlayWidth
+    // Try different column counts to find the best fit
+    let layout = { visibleColumns: 1, columnWidth: availableWidth }
+    
+    for (let columns = 1; columns <= 5; columns++) {
+      const totalGapWidth = (columns - 1) * gap
+      const columnWidth = (availableWidth - totalGapWidth) / columns
       
-      // Try different column counts to find the best fit
-      let layout = { visibleColumns: 1, columnWidth: widthForCards }
-      
-      for (let columns = 1; columns <= 5; columns++) {
-        const totalGapWidth = (columns - 1) * gap
-        const columnWidth = (widthForCards - totalGapWidth) / columns
-        
-        if (columnWidth >= getMinColumnWidth(columns)) {
-          const totalWidth = columns * columnWidth + totalGapWidth
-          if (totalWidth <= widthForCards) {
-            layout = { visibleColumns: columns, columnWidth }
-          }
+      if (columnWidth >= getMinColumnWidth(columns)) {
+        const totalWidth = columns * columnWidth + totalGapWidth
+        if (totalWidth <= availableWidth) {
+          layout = { visibleColumns: columns, columnWidth }
         }
       }
-      
-      // Ensure we never exceed the available width
-      const totalWidth = layout.visibleColumns * layout.columnWidth + (layout.visibleColumns - 1) * gap
-      if (totalWidth > widthForCards) {
-        layout = { visibleColumns: 1, columnWidth: widthForCards }
-      }
-      
-      // Calculate new browser overlay width
-      const newBrowserOverlayWidth = layout.columnWidth + gap
-      
-      // Check if converged (browser overlay width hasn't changed significantly)
-      if (Math.abs(newBrowserOverlayWidth - browserOverlayWidth) < 0.1) {
-        return layout
-      }
-      
-      browserOverlayWidth = newBrowserOverlayWidth
-      bestLayout = layout
     }
     
-    return bestLayout
+    // Ensure we never exceed the available width
+    const totalWidth = layout.visibleColumns * layout.columnWidth + (layout.visibleColumns - 1) * gap
+    if (totalWidth > availableWidth) {
+      layout = { visibleColumns: 1, columnWidth: availableWidth }
+    }
+    
+    return layout
   }
   
   const { visibleColumns, columnWidth } = calculateColumnLayout(containerWidth)
@@ -276,59 +257,80 @@ const DashboardContent = () => {
 
   // Handle opening browser at a specific position
   const handleOpenBrowser = useCallback((position) => {
-    // Check if user is scrolled all the way right before opening browser
-    let wasAtMaxScroll = false
+    // Capture scroll position before opening browser
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current
       const currentScroll = container.scrollLeft
       const maxScroll = container.scrollWidth - container.clientWidth
-      wasAtMaxScroll = Math.abs(currentScroll - maxScroll) < 1 // Within 1px of max
+      const wasAtMaxScroll = Math.abs(currentScroll - maxScroll) < 1 // Within 1px of max
       
-      // Store this state on the container
-      if (wasAtMaxScroll) {
-        container._wasAtMaxScrollOnBrowserOpen = true
-      }
+      // Store scroll state on container
+      container._scrollBeforeBrowserOpen = currentScroll
+      container._scrollWidthBeforeOpen = container.scrollWidth
+      container._wasAtMaxScrollBeforeBrowserOpen = wasAtMaxScroll
     }
     setBrowserOpenAtPosition(position)
   }, [])
 
-  // Adjust scroll position when browser opens to prevent shift when spacer is added
+  // Adjust scroll position when browser opens/closes to prevent shift
   useEffect(() => {
-    if (browserOpenAtPosition !== null && scrollContainerRef.current) {
-      const container = scrollContainerRef.current
-      const wasAtMaxScroll = container._wasAtMaxScrollOnBrowserOpen
-      
-      if (wasAtMaxScroll) {
-        // Wait for DOM to update with the spacer, then adjust scroll
+    if (!scrollContainerRef.current) return
+    
+    const container = scrollContainerRef.current
+    
+    if (browserOpenAtPosition !== null) {
+      // Browser is opening - wait for DOM to update with spacer
+      requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (scrollContainerRef.current) {
-              const container = scrollContainerRef.current
-              const spacerWidth = columnWidth + gap
-              const newMaxScroll = container.scrollWidth - container.clientWidth
-              // Set scroll to new max (which includes the spacer)
-              container.scrollLeft = newMaxScroll
-              // Clean up the flag
-              container._wasAtMaxScrollOnBrowserOpen = false
-            }
-          })
+          if (!scrollContainerRef.current) return
+          const updatedContainer = scrollContainerRef.current
+          
+          const wasAtMaxScroll = updatedContainer._wasAtMaxScrollBeforeBrowserOpen
+          const scrollBeforeOpen = updatedContainer._scrollBeforeBrowserOpen || 0
+          
+          // Maintain same scroll position (content doesn't move, only scrollable area expands)
+          updatedContainer.scrollLeft = scrollBeforeOpen
+          
+          // Clean up
+          delete updatedContainer._scrollBeforeBrowserOpen
+          delete updatedContainer._wasAtMaxScrollBeforeBrowserOpen
         })
-      }
+      })
+    } else {
+      // Browser is closing - wait for DOM to update (spacer removed)
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (!scrollContainerRef.current) return
+          const updatedContainer = scrollContainerRef.current
+          const scrollBeforeClose = updatedContainer._scrollBeforeBrowserClose || 0
+          const newMaxScroll = updatedContainer.scrollWidth - updatedContainer.clientWidth
+          
+          // Clamp to new max scroll (spacer removed, so max scroll is lower)
+          const targetScroll = Math.min(scrollBeforeClose, newMaxScroll)
+          updatedContainer.scrollLeft = targetScroll
+          
+          // Clean up
+          delete updatedContainer._scrollBeforeBrowserClose
+        })
+      })
     }
   }, [browserOpenAtPosition, columnWidth, gap])
 
   // Handle closing browser
   const handleCloseBrowser = useCallback(() => {
+    // Capture scroll position before closing browser
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current
+      container._scrollBeforeBrowserClose = container.scrollLeft
+      container._scrollWidthBeforeClose = container.scrollWidth
+    }
     setBrowserOpenAtPosition(null)
     setBrowserActiveTab('adversaries') // Reset to adversaries tab when closing
   }, [])
 
   // Smooth scroll helper
   const smoothScrollTo = useCallback((targetScrollLeft, duration = 500, reason = 'unknown') => {
-    console.log('[HORIZONTAL_SCROLL] smoothScrollTo called:', { targetScrollLeft, duration, reason, timestamp: performance.now() })
-    
     if (!scrollContainerRef.current) {
-      console.log('[HORIZONTAL_SCROLL] No container ref, aborting')
       return
     }
     
@@ -336,17 +338,13 @@ const DashboardContent = () => {
     const startScrollLeft = container.scrollLeft
     const distance = targetScrollLeft - startScrollLeft
     
-    console.log('[HORIZONTAL_SCROLL] Scroll params:', { startScrollLeft, targetScrollLeft, distance, containerWidth: container.clientWidth, scrollWidth: container.scrollWidth })
-    
     // If distance is very small, skip animation
     if (Math.abs(distance) < 1) {
-      console.log('[HORIZONTAL_SCROLL] Distance too small, skipping animation')
       return
     }
     
     // Cancel any ongoing horizontal scroll animation
     if (container._horizontalScrollAnimationId) {
-      console.log('[HORIZONTAL_SCROLL] Canceling existing animation')
       cancelAnimationFrame(container._horizontalScrollAnimationId)
       container._horizontalScrollAnimationId = null
     }
@@ -356,14 +354,11 @@ const DashboardContent = () => {
     const hasScrollSnap = computedStyle.scrollSnapType !== 'none'
     const originalScrollSnapType = hasScrollSnap ? 'x mandatory' : null
     
-    console.log('[HORIZONTAL_SCROLL] Scroll-snap state:', { hasScrollSnap, originalScrollSnapType })
-    
     if (hasScrollSnap) {
       container.style.scrollSnapType = 'none'
     }
     
     const startTime = performance.now()
-    console.log('[HORIZONTAL_SCROLL] Starting animation at:', startTime)
     
     const animateScroll = (currentTime) => {
       const elapsed = currentTime - startTime
@@ -381,7 +376,6 @@ const DashboardContent = () => {
       if (progress < 1) {
         container._horizontalScrollAnimationId = requestAnimationFrame(animateScroll)
       } else {
-        console.log('[HORIZONTAL_SCROLL] Animation complete, final scrollLeft:', container.scrollLeft)
         // Ensure we're exactly at target
         if (container) {
           container.scrollLeft = targetScrollLeft
@@ -483,20 +477,8 @@ const DashboardContent = () => {
       if (computedStyle.scrollSnapType !== 'none') {
         container.style.scrollSnapType = 'none'
         scrollSnapWasDisabled = true
-        console.log('[ADVERSARY_ADD] Disabled scroll-snap before adding adversary to prevent auto-scroll')
       }
     }
-    
-    console.log('[ADVERSARY_ADD] handleAddAdversaryFromBrowser called:', {
-      baseName,
-      isNewAdversary,
-      isMinion,
-      instancesToAdd,
-      timestamp: addTimestamp,
-      currentScroll: scrollLeftBeforeAdd,
-      scrollWidth: scrollWidthBeforeAdd,
-      scrollSnapDisabled: scrollSnapWasDisabled
-    })
     
     // Create multiple instances for minions, single instance for others
     if (isMinion && instancesToAdd > 1) {
@@ -556,7 +538,6 @@ const DashboardContent = () => {
                     // Calculate distance from the scroll position BEFORE adding the adversary
                     const distance = maxScroll - scrollLeftBeforeAdd
                     const scrollWidthIncreased = finalContainer.scrollWidth > scrollWidthBeforeAdd
-                    console.log('[HORIZONTAL_SCROLL] New adversary added, scrollWidth stabilized:', { maxScroll, scrollWidth: finalContainer.scrollWidth, clientWidth: finalContainer.clientWidth, scrollWidthBeforeAdd, scrollLeftBeforeAdd, currentScroll, scrollChanged: currentScroll !== scrollLeftBeforeAdd, scrollWidthIncreased, distance })
                     // Always scroll if scrollWidth increased (new content added), even if current position is at max
                     // If scrollWidth increased but we're already at maxScroll, scroll slightly past to ensure distance > 1
                     if (scrollWidthIncreased && Math.abs(distance) < 1) {
@@ -574,7 +555,6 @@ const DashboardContent = () => {
                 // Calculate distance from the scroll position BEFORE adding the adversary
                 const distance = maxScroll - scrollLeftBeforeAdd
                 const scrollWidthIncreased = updatedContainer.scrollWidth > scrollWidthBeforeAdd
-                console.log('[HORIZONTAL_SCROLL] New adversary added, scrollWidth stable:', { maxScroll, scrollWidth: updatedContainer.scrollWidth, clientWidth: updatedContainer.clientWidth, scrollWidthBeforeAdd, scrollLeftBeforeAdd, currentScroll, scrollChanged: currentScroll !== scrollLeftBeforeAdd, scrollWidthIncreased, distance })
                 // Always scroll if scrollWidth increased (new content added), even if current position is at max
                 // If scrollWidth increased but we're already at maxScroll, scroll slightly past to ensure distance > 1
                 if (scrollWidthIncreased && Math.abs(distance) < 1) {
@@ -772,12 +752,6 @@ const DashboardContent = () => {
           return matchesBaseName && isStock
         })
         
-        console.log('[SAVE_AS] Found stock instances to replace:', {
-          originalBaseName,
-          stockInstancesCount: stockInstances.length,
-          stockInstanceIds: stockInstances.map(s => s.id)
-        })
-        
         // Ensure name is set for custom content
         const customContentData = {
           ...adversaryData,
@@ -787,7 +761,6 @@ const DashboardContent = () => {
         
         // Delete all stock instances
         stockInstances.forEach(stockInstance => {
-          console.log('[SAVE_AS] Deleting stock instance:', stockInstance.id, stockInstance.name)
           deleteAdversary(stockInstance.id)
         })
         
@@ -804,7 +777,6 @@ const DashboardContent = () => {
           }))
           
           if (instancesToCreate.length > 0) {
-            console.log('[SAVE_AS] Creating', instancesToCreate.length, 'custom instances to replace stock ones')
             createAdversariesBulk(instancesToCreate)
           }
         }, 0)
@@ -1541,7 +1513,7 @@ const DashboardContent = () => {
             return items
           })()
         )}
-        {/* Blank spacer column to allow scrolling one more column width - only when browser is open */}
+        {/* Spacer to allow scrolling rightmost card into view when browser overlay is open */}
         {browserOpenAtPosition !== null && (
           <div style={{
             width: `${columnWidth + gap}px`,
