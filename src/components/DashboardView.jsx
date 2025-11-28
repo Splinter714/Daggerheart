@@ -264,6 +264,15 @@ const DashboardContent = () => {
       const maxScroll = container.scrollWidth - container.clientWidth
       const wasAtMaxScroll = Math.abs(currentScroll - maxScroll) < 1 // Within 1px of max
       
+      console.log('[BROWSER_OPEN] Capturing scroll state:', {
+        currentScroll,
+        maxScroll,
+        scrollWidth: container.scrollWidth,
+        clientWidth: container.clientWidth,
+        wasAtMaxScroll,
+        position
+      })
+      
       // Store scroll state on container
       container._scrollBeforeBrowserOpen = currentScroll
       container._scrollWidthBeforeOpen = container.scrollWidth
@@ -272,14 +281,30 @@ const DashboardContent = () => {
     setBrowserOpenAtPosition(position)
   }, [])
 
+  // Log spacer state changes
+  useEffect(() => {
+    if (browserOpenAtPosition !== null) {
+      console.log('[SPACER] Spacer added, dimensions:', {
+        width: columnWidth + gap,
+        columnWidth,
+        gap
+      })
+    } else {
+      console.log('[SPACER] Spacer removed')
+    }
+  }, [browserOpenAtPosition, columnWidth, gap])
+
   // Adjust scroll position when browser opens/closes to prevent shift
   useEffect(() => {
     if (!scrollContainerRef.current) return
     
     const container = scrollContainerRef.current
     
+    console.log('[SCROLL_ADJUST] useEffect triggered, browserOpenAtPosition:', browserOpenAtPosition, 'columnWidth:', columnWidth, 'gap:', gap)
+    
     if (browserOpenAtPosition !== null) {
       // Browser is opening - wait for DOM to update with spacer
+      console.log('[BROWSER_OPEN] useEffect triggered, waiting for DOM update...')
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (!scrollContainerRef.current) return
@@ -287,9 +312,32 @@ const DashboardContent = () => {
           
           const wasAtMaxScroll = updatedContainer._wasAtMaxScrollBeforeBrowserOpen
           const scrollBeforeOpen = updatedContainer._scrollBeforeBrowserOpen || 0
+          const currentScroll = updatedContainer.scrollLeft
+          const newMaxScroll = updatedContainer.scrollWidth - updatedContainer.clientWidth
           
-          // Maintain same scroll position (content doesn't move, only scrollable area expands)
-          updatedContainer.scrollLeft = scrollBeforeOpen
+          console.log('[BROWSER_OPEN] After DOM update:', {
+            wasAtMaxScroll,
+            scrollBeforeOpen,
+            currentScroll,
+            newMaxScroll,
+            scrollWidth: updatedContainer.scrollWidth,
+            clientWidth: updatedContainer.clientWidth,
+            scrollDelta: currentScroll - scrollBeforeOpen,
+            expectedSpacerWidth: columnWidth + gap,
+            actualWidthIncrease: updatedContainer.scrollWidth - (updatedContainer._scrollWidthBeforeOpen || updatedContainer.scrollWidth)
+          })
+          
+          if (wasAtMaxScroll) {
+            // User was at max scroll - maintain same scroll position
+            // Content doesn't move, only scrollable area expands, so we should NOT scroll
+            console.log('[BROWSER_OPEN] Was at max scroll, maintaining position to prevent shift:', scrollBeforeOpen)
+            updatedContainer.scrollLeft = scrollBeforeOpen
+            console.log('[BROWSER_OPEN] After maintaining position, scrollLeft:', updatedContainer.scrollLeft)
+          } else {
+            // Not at max scroll - maintain same scroll position (content doesn't move)
+            console.log('[BROWSER_OPEN] Not at max scroll, maintaining position:', scrollBeforeOpen)
+            updatedContainer.scrollLeft = scrollBeforeOpen
+          }
           
           // Clean up
           delete updatedContainer._scrollBeforeBrowserOpen
@@ -298,16 +346,31 @@ const DashboardContent = () => {
       })
     } else {
       // Browser is closing - wait for DOM to update (spacer removed)
+      console.log('[BROWSER_CLOSE] useEffect triggered, waiting for DOM update...')
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (!scrollContainerRef.current) return
           const updatedContainer = scrollContainerRef.current
           const scrollBeforeClose = updatedContainer._scrollBeforeBrowserClose || 0
+          const currentScroll = updatedContainer.scrollLeft
           const newMaxScroll = updatedContainer.scrollWidth - updatedContainer.clientWidth
+          
+          console.log('[BROWSER_CLOSE] After DOM update:', {
+            scrollBeforeClose,
+            currentScroll,
+            newMaxScroll,
+            scrollWidth: updatedContainer.scrollWidth,
+            clientWidth: updatedContainer.clientWidth,
+            scrollDelta: currentScroll - scrollBeforeClose,
+            expectedSpacerWidth: columnWidth + gap,
+            actualWidthDecrease: (updatedContainer._scrollWidthBeforeClose || updatedContainer.scrollWidth) - updatedContainer.scrollWidth
+          })
           
           // Clamp to new max scroll (spacer removed, so max scroll is lower)
           const targetScroll = Math.min(scrollBeforeClose, newMaxScroll)
+          console.log('[BROWSER_CLOSE] Setting scroll to:', targetScroll, '(min of', scrollBeforeClose, 'and', newMaxScroll, ')')
           updatedContainer.scrollLeft = targetScroll
+          console.log('[BROWSER_CLOSE] After adjustment, scrollLeft:', updatedContainer.scrollLeft)
           
           // Clean up
           delete updatedContainer._scrollBeforeBrowserClose
@@ -321,7 +384,17 @@ const DashboardContent = () => {
     // Capture scroll position before closing browser
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current
-      container._scrollBeforeBrowserClose = container.scrollLeft
+      const currentScroll = container.scrollLeft
+      const maxScroll = container.scrollWidth - container.clientWidth
+      
+      console.log('[BROWSER_CLOSE] Capturing scroll state:', {
+        currentScroll,
+        maxScroll,
+        scrollWidth: container.scrollWidth,
+        clientWidth: container.clientWidth
+      })
+      
+      container._scrollBeforeBrowserClose = currentScroll
       container._scrollWidthBeforeClose = container.scrollWidth
     }
     setBrowserOpenAtPosition(null)
