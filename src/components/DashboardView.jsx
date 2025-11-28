@@ -1410,27 +1410,88 @@ const DashboardContent = () => {
                   if (isLastInstance) {
                     // Add temporary spacer before removing to prevent browser auto-scroll
                     const groupIndex = entityGroups.findIndex(g => g.baseName === group.baseName && g.type === 'adversary')
+                    const isLeftmostColumn = groupIndex === 0
+                    
+                    // Check if at max scroll - maintain scroll position as spacer shrinks
+                    let wasAtMaxScroll = false
+                    if (scrollContainerRef.current) {
+                      const container = scrollContainerRef.current
+                      const currentScroll = container.scrollLeft
+                      const maxScroll = container.scrollWidth - container.clientWidth
+                      wasAtMaxScroll = Math.abs(currentScroll - maxScroll) < 1 // Within 1px of max
+                    }
+                    
                     // Set spacer BEFORE removing so it's in place when card disappears
                     setRemovingCardSpacer({ baseName: group.baseName, groupIndex })
                     setSpacerShrinking(false) // Start at full width
                     
-                    // Wait for React to render spacer, then remove the adversaries
+                    // For leftmost column, temporarily disable scroll-snap to prevent interference
+                    if (isLeftmostColumn && scrollContainerRef.current) {
+                      scrollContainerRef.current.style.scrollSnapType = 'none'
+                    }
+                    
+                    // Wait for React to render spacer with initial width, then remove the adversaries
                     requestAnimationFrame(() => {
                       requestAnimationFrame(() => {
+                        // Force layout recalculation to ensure spacer is rendered
+                        if (scrollContainerRef.current) {
+                          scrollContainerRef.current.offsetHeight // Force reflow
+                        }
+                        
                         instancesToDelete.forEach(instance => {
                           deleteAdversary(instance.id)
                         })
                         
-                        // After card is removed, start shrinking spacer
+                        // After card is removed and DOM has updated, start shrinking spacer
                         requestAnimationFrame(() => {
                           requestAnimationFrame(() => {
-                            setSpacerShrinking(true) // Trigger shrink animation
+                            // Force another reflow to ensure spacer is in DOM with correct width
+                            if (scrollContainerRef.current) {
+                              scrollContainerRef.current.offsetHeight // Force reflow
+                            }
                             
-                            // Remove spacer after animation completes
+                            // Small delay to ensure browser has rendered spacer at full width
                             setTimeout(() => {
-                              setRemovingCardSpacer(null)
-                              setSpacerShrinking(false)
-                            }, 300) // Match CSS transition duration
+                              setSpacerShrinking(true) // Trigger shrink animation
+                              
+                              // Maintain max scroll position as spacer shrinks to prevent blank space
+                              if (wasAtMaxScroll && scrollContainerRef.current) {
+                                const startTime = performance.now()
+                                const duration = 300 // Match CSS transition duration
+                                
+                                const maintainScroll = () => {
+                                  if (!scrollContainerRef.current) return
+                                  
+                                  const container = scrollContainerRef.current
+                                  const newMaxScroll = container.scrollWidth - container.clientWidth
+                                  // Continuously maintain max scroll as content shrinks
+                                  container.scrollLeft = newMaxScroll
+                                  
+                                  if (performance.now() - startTime < duration) {
+                                    requestAnimationFrame(maintainScroll)
+                                  }
+                                }
+                                
+                                requestAnimationFrame(maintainScroll)
+                              }
+                              
+                              // Remove spacer after animation completes and re-enable scroll-snap if needed
+                              setTimeout(() => {
+                                setRemovingCardSpacer(null)
+                                setSpacerShrinking(false)
+                                
+                                // Re-enable scroll-snap for leftmost column
+                                if (isLeftmostColumn && scrollContainerRef.current) {
+                                  scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+                                }
+                                
+                                // Final scroll adjustment to ensure we're at max scroll
+                                if (wasAtMaxScroll && scrollContainerRef.current) {
+                                  const container = scrollContainerRef.current
+                                  container.scrollLeft = container.scrollWidth - container.clientWidth
+                                }
+                              }, 300) // Match CSS transition duration
+                            }, 50) // Small delay to ensure spacer rendered at full width
                           })
                         })
                       })
