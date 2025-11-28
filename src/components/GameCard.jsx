@@ -1710,18 +1710,34 @@ const GameCard = ({
                       <input
                         type="text"
                         value={(() => {
+                          // If it's a string with dice notation, display as-is
+                          if (typeof item.atk === 'string' && item.atk.includes('d')) {
+                            return item.atk
+                          }
+                          // Otherwise, treat as number
                           const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9\-]/g, '')) : (item.atk || 0)
                           return atkValue >= 0 ? `+${atkValue}` : atkValue.toString()
                         })()}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9+\-]/g, '')
-                          if (value.length <= 4) {
-                            // Parse the value to store as number
-                            const numericValue = parseInt(value.replace(/[^0-9\-]/g, '')) || 0
-                            onUpdate && onUpdate(item.id, { atk: numericValue })
+                          const value = e.target.value
+                          // Allow dice notation (contains 'd') or numeric values
+                          if (value.includes('d')) {
+                            // Store dice notation as string
+                            onUpdate && onUpdate(item.id, { atk: value })
+                          } else {
+                            // Handle numeric values
+                            const cleanValue = value.replace(/[^0-9+\-]/g, '')
+                            if (cleanValue.length <= 4) {
+                              const numericValue = parseInt(cleanValue.replace(/[^0-9\-]/g, '')) || 0
+                              onUpdate && onUpdate(item.id, { atk: numericValue })
+                            }
                           }
                         }}
                         onKeyDown={(e) => {
+                          // Only allow arrow key increment/decrement for numeric values
+                          if (typeof item.atk === 'string' && item.atk.includes('d')) {
+                            return // Don't allow increment/decrement for dice notation
+                          }
                           if (e.key === 'ArrowUp') {
                             e.preventDefault()
                             const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9\-]/g, '')) : (item.atk || 0)
@@ -1763,6 +1779,11 @@ const GameCard = ({
                         pointerEvents: 'none'
                       }}>
                         {(() => {
+                          // If it's a string with dice notation (contains 'd'), display as-is
+                          if (typeof item.atk === 'string' && item.atk.includes('d')) {
+                            return item.atk
+                          }
+                          // Otherwise, treat as number
                           const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9\-]/g, '')) : item.atk
                           return atkValue >= 0 ? `+${atkValue}` : atkValue
                         })()}

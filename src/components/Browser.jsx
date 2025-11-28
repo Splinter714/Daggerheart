@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useRef, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { Filter, Square, CheckSquare, Plus, X } from 'lucide-react'
+import { Filter, Square, CheckSquare, Plus, X, Trash2, BookOpen, Hammer, HelpCircle } from 'lucide-react'
 import GameCard from './GameCard'
 import logoImage from '../assets/daggerheart-logo.svg'
 import { useGameState } from '../state/state'
@@ -374,8 +374,7 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filt
         item.description?.toLowerCase().includes(searchTerm.toLowerCase())
       
       // Tier filter
-      const matchesTier = selectedTiers.length === 0 || 
-        (selectedTiers.includes('party-tier') ? item.tier === playerTier : selectedTiers.includes(item.tier.toString()))
+      const matchesTier = selectedTiers.length === 0 || selectedTiers.includes(item.tier.toString())
       
       // Type filter
       const matchesType = selectedTypes.length === 0 || selectedTypes.includes(item.type)
@@ -391,6 +390,9 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filt
         let bValue = b[field]
         
         if (field === 'tier') {
+          aValue = parseInt(aValue) || 0
+          bValue = parseInt(bValue) || 0
+        } else if (field === 'atk') {
           aValue = parseInt(aValue) || 0
           bValue = parseInt(bValue) || 0
         } else if (field === 'cost') {
@@ -512,9 +514,6 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filt
   const handleTierSelect = (tier) => {
     if (tier === 'clear') {
       setSelectedTiers([])
-    } else if (tier === 'party-tier') {
-      // Special case: only show party tier
-      setSelectedTiers(['party-tier'])
     } else {
       setSelectedTiers(prev => 
         prev.includes(tier) 
@@ -799,9 +798,8 @@ const BrowserTableHeader = ({
       return [
         { key: 'name', label: 'Name' },
         { key: 'tier', label: 'Tier', hasFilter: true },
-        { key: 'type', label: 'Type', hasFilter: true },
-        { key: 'cost', label: 'Cost', hasFilter: true },
-        { key: 'difficulty', label: 'Diff' }
+        { key: 'type', label: 'Type', hasFilter: true, hasCostFilter: true },
+        { key: 'source', label: 'Src' }
       ]
     } else if (type === 'environment') {
       return [
@@ -897,20 +895,6 @@ const BrowserTableHeader = ({
           </span>
           <span style={styles.filterLabel}>All</span>
         </div>
-        {filterType === 'tier' && (
-          <div 
-            style={{
-              ...styles.filterOption,
-              ...(selected.includes('party-tier') ? styles.filterOptionSelected : {})
-            }}
-            onClick={() => onSelect('party-tier')}
-          >
-            <span style={styles.checkIcon}>
-              {selected.includes('party-tier') ? <CheckSquare size={16}/> : <Square size={16}/>}
-            </span>
-            <span style={styles.filterLabel}>Party Tier</span>
-          </div>
-        )}
         {values.map(value => {
           const isSelected = selected.includes(value.toString())
           return (
@@ -947,8 +931,7 @@ const BrowserTableHeader = ({
             ...(column.key === 'name' ? { width: 'auto', minWidth: '0' } : {}),
             ...(column.key === 'tier' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {}),
             ...(column.key === 'type' ? { width: '80px', minWidth: '80px', maxWidth: '80px' } : {}),
-            ...(column.key === 'difficulty' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {}),
-            ...(column.key === 'cost' ? { width: '50px', minWidth: '50px', maxWidth: '50px' } : {})
+            ...(column.key === 'source' ? { width: '40px', minWidth: '40px', maxWidth: '40px' } : {})
           }}
           onClick={() => onSort(column.key)}
           onMouseEnter={() => setHoveredColumn(column.key)}
@@ -966,11 +949,11 @@ const BrowserTableHeader = ({
                 {column.label}
               </span>
               <button
-                ref={column.key === 'tier' ? tierFilterRef : column.key === 'type' ? typeFilterRef : costFilterRef}
+                ref={column.key === 'tier' ? tierFilterRef : (column.key === 'type' && column.hasCostFilter) ? costFilterRef : (column.key === 'type' ? typeFilterRef : costFilterRef)}
                 style={{
                   ...styles.headerFilterIcon,
                   ...(column.key === 'tier' && isTierFiltered ? styles.headerFilterIconActive : {}),
-                  ...(column.key === 'type' && isTypeFiltered ? styles.headerFilterIconActive : {}),
+                  ...(column.key === 'type' && (isTypeFiltered || isCostFiltered) ? styles.headerFilterIconActive : {}),
                   ...(column.key === 'cost' && isCostFiltered ? styles.headerFilterIconActive : {})
                 }}
                 className="header-filter-icon"
@@ -981,18 +964,21 @@ const BrowserTableHeader = ({
                     setShowTypeDropdown(false)
                     setShowCostDropdown(false)
                   } else if (column.key === 'type') {
-                    setShowTypeDropdown(!showTypeDropdown)
-                    setShowTierDropdown(false)
-                    setShowCostDropdown(false)
-                  } else if (column.key === 'cost') {
-                    setShowCostDropdown(!showCostDropdown)
-                    setShowTierDropdown(false)
-                    setShowTypeDropdown(false)
+                    // If type column has cost filter, show cost filter dropdown
+                    if (column.hasCostFilter) {
+                      setShowCostDropdown(!showCostDropdown)
+                      setShowTierDropdown(false)
+                      setShowTypeDropdown(false)
+                    } else {
+                      setShowTypeDropdown(!showTypeDropdown)
+                      setShowTierDropdown(false)
+                      setShowCostDropdown(false)
+                    }
                   }
                 }}
               >
                 <Filter size={14} />
-                {(column.key === 'tier' && isTierFiltered) || (column.key === 'type' && isTypeFiltered) || (column.key === 'cost' && isCostFiltered) ? (
+                {(column.key === 'tier' && isTierFiltered) || (column.key === 'type' && (isTypeFiltered || isCostFiltered)) || (column.key === 'cost' && isCostFiltered) ? (
                   <span style={styles.filterActiveDot}></span>
                 ) : null}
               </button>
@@ -1006,11 +992,11 @@ const BrowserTableHeader = ({
             'tier', uniqueTiers, selectedTiers, handleTierSelect,
             showTierDropdown, setShowTierDropdown, tierFilterRef, isTierFiltered
           )}
-          {column.key === 'type' && renderFilterDropdown(
+          {column.key === 'type' && !column.hasCostFilter && renderFilterDropdown(
             'type', uniqueTypes, selectedTypes, handleTypeSelect,
             showTypeDropdown, setShowTypeDropdown, typeFilterRef, isTypeFiltered
           )}
-          {column.key === 'cost' && renderCostFilterDropdown()}
+          {column.key === 'type' && column.hasCostFilter && renderCostFilterDropdown()}
         </th>
       ))}
     </tr>
@@ -1018,7 +1004,7 @@ const BrowserTableHeader = ({
 }
 
 // Browser Row Component
-const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0, costFilter = 'auto-grey', isFocused = false, rowRef = null }) => {
+const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0, costFilter = 'auto-grey', isFocused = false, rowRef = null, onDeleteCustomAdversary = null, isDeleteConfirmed = false }) => {
   const [isHovered, setIsHovered] = useState(false)
 
   const handleAdd = () => {
@@ -1081,36 +1067,212 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
         color: 'var(--text-secondary)'
       } : {}
       
+      // If there's a description or motives, return array of two rows
+      if (item.description || item.motives) {
+        return [
+          // First row: name, tier, type, source (with rowspan)
+          [
+            <td key="name" style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left', ...deEmphasizedStyle, borderBottom: 'none', padding: '0.25rem 0.25rem 0 0.5rem', outline: 'none'}}>
+              <div style={{ 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis', 
+                whiteSpace: 'nowrap',
+                maxWidth: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <div style={{ 
+                  flex: 1,
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  <div style={{ fontWeight: '600' }}>{item.name || item.baseName || ''}</div>
+                </div>
+              </div>
+            </td>,
+            <td key="tier" style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', ...deEmphasizedStyle, borderBottom: 'none', padding: '0.25rem 0.25rem 0 0.25rem', outline: 'none'}}>{item.tier}</td>,
+            <td key="type" style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center', ...deEmphasizedStyle, borderBottom: 'none', padding: '0.25rem 0.25rem 0 0.25rem', outline: 'none'}}>{item.type}</td>,
+            <td key="source" style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', ...deEmphasizedStyle, borderBottom: 'none', outline: 'none'}} rowSpan={2}>
+              {(item.source === 'Homebrew' || item.isCustom) ? (
+                (isHovered || isFocused || isDeleteConfirmed) && onDeleteCustomAdversary ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDeleteCustomAdversary(item.id)
+                    }}
+                    style={{
+                      background: isDeleteConfirmed ? 'var(--danger)' : 'var(--bg-secondary)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      padding: '0.25rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: isDeleteConfirmed ? 'var(--text-primary)' : 'var(--danger)',
+                      transition: 'all 0.2s ease',
+                      flexShrink: 0,
+                      width: '24px',
+                      height: '24px',
+                      margin: '0 auto'
+                    }}
+                    title={isDeleteConfirmed ? 'Click again to confirm delete' : 'Delete custom adversary'}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                ) : (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '24px',
+                    height: '24px',
+                    margin: '0 auto'
+                  }}>
+                    <Hammer 
+                      size={14} 
+                      style={{ 
+                        color: 'var(--text-secondary)',
+                        opacity: 0.7
+                      }} 
+                      title="Custom adversary"
+                    />
+                  </div>
+                )
+              ) : (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '24px',
+                  height: '24px',
+                  margin: '0 auto'
+                }}>
+                  <BookOpen 
+                    size={14} 
+                    style={{ 
+                      color: 'var(--text-secondary)',
+                      opacity: 0.7
+                    }} 
+                    title="Stock adversary"
+                  />
+                </div>
+              )}
+            </td>
+          ],
+          // Second row: description spanning name, tier, type
+          [
+            <td key="desc" colSpan={3} style={{...styles.rowCell, textAlign: 'left', ...deEmphasizedStyle, padding: '0 0.25rem 0.25rem 0.5rem', borderTop: 'none', borderBottom: 'none', outline: 'none'}}>
+              <div style={{ 
+                fontSize: '0.85rem', 
+                color: 'var(--text-secondary)', 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis', 
+                whiteSpace: 'nowrap'
+              }}>
+                {item.description || item.motives || ''}
+              </div>
+            </td>
+          ]
+        ]
+      }
+      
+      // Single row (no description)
       return (
         <>
-          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left', ...deEmphasizedStyle}}>
+          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left', ...deEmphasizedStyle, paddingLeft: '0.5rem'}}>
             <div style={{ 
               overflow: 'hidden', 
               textOverflow: 'ellipsis', 
               whiteSpace: 'nowrap',
-              maxWidth: '100%'
+              maxWidth: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
             }}>
-              <div style={{ fontWeight: '600' }}>{item.name || item.baseName || ''}</div>
-              {item.description && (
-                <div style={{ 
-                  fontSize: '0.85rem', 
-                  color: 'var(--text-secondary)', 
-                  marginTop: '0.125rem',
-                  overflow: 'hidden', 
-                  textOverflow: 'ellipsis', 
-                  whiteSpace: 'nowrap'
-                }}>
-                  {item.description}
-                </div>
-              )}
+              <div style={{ 
+                flex: 1,
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                <div style={{ fontWeight: '600' }}>{item.name || item.baseName || ''}</div>
+              </div>
             </div>
           </td>
           <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', ...deEmphasizedStyle}}>{item.tier}</td>
           <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center', ...deEmphasizedStyle}}>{item.type}</td>
-          <td style={{...styles.rowCell, width: '50px', minWidth: '50px', maxWidth: '50px', textAlign: 'center', ...deEmphasizedStyle}}>
-            {dynamicCost}
+          <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', ...deEmphasizedStyle}}>
+            {(item.source === 'Homebrew' || item.isCustom) ? (
+              (isHovered || isFocused || isDeleteConfirmed) && onDeleteCustomAdversary ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDeleteCustomAdversary(item.id)
+                  }}
+                  style={{
+                    background: isDeleteConfirmed ? 'var(--danger)' : 'var(--bg-secondary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '4px',
+                    padding: '0.25rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: isDeleteConfirmed ? 'var(--text-primary)' : 'var(--danger)',
+                    transition: 'all 0.2s ease',
+                    flexShrink: 0,
+                    width: '24px',
+                    height: '24px',
+                    margin: '0 auto'
+                  }}
+                  title={isDeleteConfirmed ? 'Click again to confirm delete' : 'Delete custom adversary'}
+                >
+                  <Trash2 size={14} />
+                </button>
+              ) : (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '24px',
+                  height: '24px',
+                  margin: '0 auto'
+                }}>
+                  <Hammer 
+                    size={14} 
+                    style={{ 
+                      color: 'var(--text-secondary)',
+                      opacity: 0.7
+                    }} 
+                    title="Custom adversary"
+                  />
+                </div>
+              )
+            ) : (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '24px',
+                height: '24px',
+                margin: '0 auto'
+              }}>
+                <BookOpen 
+                  size={14} 
+                  style={{ 
+                    color: 'var(--text-secondary)',
+                    opacity: 0.7
+                  }} 
+                  title="Stock adversary"
+                />
+              </div>
+            )}
           </td>
-          <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', ...deEmphasizedStyle}}>{item.difficulty}</td>
         </>
       )
     } else if (type === 'environment') {
@@ -1133,6 +1295,39 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
     return null
   }
 
+  // If content is an array (multiple rows), render them separately
+  if (Array.isArray(content)) {
+    return (
+      <>
+        {content.map((rowContent, index) => (
+          <tr 
+            key={index}
+            ref={index === 0 ? rowRef : null}
+            style={{
+              ...styles.row,
+              ...(isHovered ? styles.rowHover : {}),
+              ...(isFocused ? styles.rowFocused : {}),
+              ...(index === 0 ? { borderBottom: 'none' } : {}),
+              ...(index === 1 ? { borderTop: 'none', height: 'auto', outline: 'none' } : {})
+            }}
+            onClick={() => {
+              if (type === 'adversary') {
+                handleAdd()
+              } else if (onRowClick) {
+                onRowClick(item, type)
+              }
+            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            {rowContent}
+          </tr>
+        ))}
+      </>
+    )
+  }
+
+  // Single row (no description or non-adversary type)
   return (
     <>
       <tr 
@@ -1160,12 +1355,14 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 
 // Main Browser Component
 const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange, selectedAdversary, onSelectAdversary, filterCustom = false, showCustomToggle = false, onToggleCustom, onExportCustomAdversaries, onImportCustomAdversaries, autoFocus = false, hideImportExport = false, onClose = null, searchPlaceholder = "Search" }) => {
-  const { addCustomAdversary, updateCustomAdversary, customContent } = useGameState()
+  const { addCustomAdversary, updateCustomAdversary, deleteCustomAdversary, customContent, adversaries, deleteAdversary } = useGameState()
   const [editingAdversary, setEditingAdversary] = useState(null)
   const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
   const [showCostDropdown, setShowCostDropdown] = useState(false)
   const [deleteConfirmations, setDeleteConfirmations] = useState({}) // Track which encounters are in delete confirmation state
+  const [deleteAdversaryConfirmations, setDeleteAdversaryConfirmations] = useState({}) // Track which custom adversaries are in delete confirmation state
   const deleteTimeouts = useRef({}) // Track timeouts for each encounter
+  const deleteAdversaryTimeouts = useRef({}) // Track timeouts for each custom adversary
   const costFilterRef = useRef(null)
   
   // Keyboard navigation state - track by item ID for stability
@@ -1449,10 +1646,62 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
     }
   }
   
+  // Handle two-stage delete for custom adversaries
+  const handleDeleteCustomAdversary = (adversaryId) => {
+    if (deleteAdversaryConfirmations[adversaryId]) {
+      // Second click - actually delete
+      // First, find and delete all dashboard instances that reference this custom adversary
+      const dashboardInstances = adversaries.filter(adv => adv.customContentId === adversaryId)
+      dashboardInstances.forEach(adv => {
+        deleteAdversary(adv.id)
+      })
+      
+      // Then delete from custom content
+      deleteCustomAdversary(adversaryId)
+      
+      // Clear confirmation state
+      setDeleteAdversaryConfirmations(prev => {
+        const newState = { ...prev }
+        delete newState[adversaryId]
+        return newState
+      })
+      
+      // Clear timeout
+      if (deleteAdversaryTimeouts.current[adversaryId]) {
+        clearTimeout(deleteAdversaryTimeouts.current[adversaryId])
+        delete deleteAdversaryTimeouts.current[adversaryId]
+      }
+    } else {
+      // First click - show confirmation state
+      setDeleteAdversaryConfirmations(prev => ({
+        ...prev,
+        [adversaryId]: true
+      }))
+      
+      // Clear any existing timeout
+      if (deleteAdversaryTimeouts.current[adversaryId]) {
+        clearTimeout(deleteAdversaryTimeouts.current[adversaryId])
+      }
+      
+      // Set timeout to revert after 3 seconds
+      deleteAdversaryTimeouts.current[adversaryId] = setTimeout(() => {
+        setDeleteAdversaryConfirmations(prev => {
+          const newState = { ...prev }
+          delete newState[adversaryId]
+          return newState
+        })
+        delete deleteAdversaryTimeouts.current[adversaryId]
+      }, 3000)
+    }
+  }
+  
   // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       Object.values(deleteTimeouts.current).forEach(timeout => {
+        clearTimeout(timeout)
+      })
+      Object.values(deleteAdversaryTimeouts.current).forEach(timeout => {
         clearTimeout(timeout)
       })
     }
@@ -1530,10 +1779,57 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
           // Update focused item ID
           if (next >= 0 && next < filteredAndSortedData.length) {
             setFocusedItemId(filteredAndSortedData[next]?.id || null)
-            // Scroll row into view - only if needed (nearest)
+            // Scroll row into view - align bottom of focused row with bottom of container (ArrowDown)
             if (rowRefs.current[next]) {
               setTimeout(() => {
-                rowRefs.current[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                const rowElement = rowRefs.current[next]
+                if (rowElement) {
+                  const container = rowElement.closest('.browser-content')
+                  if (container) {
+                    const containerRect = container.getBoundingClientRect()
+                    const rowRect = rowElement.getBoundingClientRect()
+                    
+                    // Check if this is a two-part row (has description)
+                    const nextSibling = rowElement.nextElementSibling
+                    const isTwoPartRow = nextSibling && nextSibling.tagName === 'TR' && 
+                                       nextSibling.querySelector('td[colspan]')
+                    
+                    // Calculate total row height (including description row if present)
+                    let totalRowHeight = rowRect.height
+                    if (isTwoPartRow) {
+                      totalRowHeight += nextSibling.getBoundingClientRect().height
+                    }
+                    
+                    // Check if row is at or near the bottom of visible area
+                    const rowBottomRelativeToViewport = rowRect.bottom - containerRect.top
+                    const containerHeight = containerRect.height
+                    const isAtBottom = rowBottomRelativeToViewport >= containerHeight - 1 // Allow 1px tolerance
+                    const isBelowView = rowRect.bottom > containerRect.bottom
+                    
+                    // Only scroll if row is at bottom or below viewport
+                    if (isAtBottom || isBelowView) {
+                      // Get the row's offset from the top of the table
+                      const rowOffsetTop = rowElement.offsetTop
+                      
+                      // Position row so its bottom aligns with container bottom
+                      // rowOffsetTop + totalRowHeight = scrollTop + containerHeight
+                      // Therefore: scrollTop = rowOffsetTop + totalRowHeight - containerHeight
+                      let targetScroll = rowOffsetTop + totalRowHeight - containerHeight
+                      
+                      // Ensure we don't scroll past the bottom
+                      const maxScroll = container.scrollHeight - containerHeight
+                      targetScroll = Math.min(targetScroll, maxScroll)
+                      
+                      // Ensure we don't scroll past the top
+                      targetScroll = Math.max(0, targetScroll)
+                      
+                      container.scrollTo({ top: targetScroll, behavior: 'smooth' })
+                    }
+                  } else {
+                    // Fallback to scrollIntoView if container not found
+                    rowElement.scrollIntoView({ behavior: 'smooth', block: 'end' })
+                  }
+                }
               }, 0)
             }
           }
@@ -1557,10 +1853,63 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
           // Update focused item ID
           if (next >= 0 && next < filteredAndSortedData.length) {
             setFocusedItemId(filteredAndSortedData[next]?.id || null)
-            // Scroll row into view - only if needed (nearest)
+            // Scroll row into view with custom logic (ArrowUp)
             if (rowRefs.current[next]) {
               setTimeout(() => {
-                rowRefs.current[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                const rowElement = rowRefs.current[next]
+                if (rowElement) {
+                  const container = rowElement.closest('.browser-content')
+                  if (container) {
+                    const containerRect = container.getBoundingClientRect()
+                    const rowRect = rowElement.getBoundingClientRect()
+                    
+                    // Get header height to account for sticky header
+                    const headerHeight = (() => {
+                      const table = rowElement.closest('table')
+                      const thead = table?.querySelector('thead')
+                      return thead ? thead.getBoundingClientRect().height : 0
+                    })()
+                    
+                    // Check if row is at or near the top of visible area (below header)
+                    const rowTopRelativeToViewport = rowRect.top - containerRect.top
+                    const isAtTop = Math.abs(rowTopRelativeToViewport - headerHeight) <= 1 // Allow 1px tolerance
+                    const isAboveView = rowRect.top < containerRect.top
+                    
+                    // Only scroll if row is above viewport or at/near the top
+                    if (isAboveView || isAtTop) {
+                      // Check if this is a two-part row (has description)
+                      const nextSibling = rowElement.nextElementSibling
+                      const isTwoPartRow = nextSibling && nextSibling.tagName === 'TR' && 
+                                         nextSibling.querySelector('td[colspan]')
+                      
+                      // Calculate total row height (including description row if present)
+                      let totalRowHeight = rowRect.height
+                      if (isTwoPartRow) {
+                        totalRowHeight += nextSibling.getBoundingClientRect().height
+                      }
+                      
+                      // Get the row's offset from the top of the table
+                      const rowOffsetTop = rowElement.offsetTop
+                      
+                      // Position row so its top aligns with container top (below header)
+                      // rowOffsetTop = scrollTop + headerHeight
+                      // Therefore: scrollTop = rowOffsetTop - headerHeight
+                      let targetScroll = rowOffsetTop - headerHeight
+                      
+                      // Ensure we don't scroll past the bottom
+                      const maxScroll = container.scrollHeight - container.clientHeight
+                      targetScroll = Math.min(targetScroll, maxScroll)
+                      
+                      // Ensure we don't scroll past the top
+                      targetScroll = Math.max(0, targetScroll)
+                      
+                      container.scrollTo({ top: targetScroll, behavior: 'smooth' })
+                    }
+                  } else {
+                    // Fallback to scrollIntoView if container not found
+                    rowElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                }
               }, 0)
             }
           } else {
@@ -1736,6 +2085,8 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
                   remainingBudget={remainingBudget}
                   costFilter={costFilter}
                   isFocused={focusedItemId === item.id || focusedRowIndex === index}
+                  onDeleteCustomAdversary={type === 'adversary' ? handleDeleteCustomAdversary : null}
+                  isDeleteConfirmed={deleteAdversaryConfirmations[item.id] || false}
                   rowRef={(el) => {
                     if (el) {
                       rowRefs.current[index] = el
@@ -2210,7 +2561,8 @@ const styles = {
     backgroundColor: 'var(--bg-primary)'
   },
   row: {
-    height: '35px',
+    height: 'auto',
+    minHeight: '35px',
     borderBottom: '1px solid var(--border)',
     transition: 'background-color 0.2s ease',
     cursor: 'pointer',
@@ -2221,8 +2573,7 @@ const styles = {
   },
   rowFocused: {
     backgroundColor: 'var(--bg-secondary)',
-    outline: '2px solid var(--purple)',
-    outlineOffset: '-2px'
+    boxShadow: 'inset 0 0 0 2px var(--purple)'
   },
   expandedRow: {
     backgroundColor: 'var(--bg-secondary)'
