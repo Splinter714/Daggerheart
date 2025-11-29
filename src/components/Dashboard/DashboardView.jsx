@@ -1,12 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react'
 import { useGameState } from '../../state/state'
-import Pips from '../Shared/Pips'
-import Bar from './Toolbars'
-import GameCard from '../Adversaries/GameCard'
-import Browser from '../Browser/Browser'
-import ContainerWithTab from './ContainerWithTab'
 import PWAInstallPrompt from './PWAInstallPrompt'
-import Panel from './Panels'
 import EncounterBuilder from './EncounterBuilder'
 import { Plus, X, Minus, Pencil } from 'lucide-react'
 import CustomAdversaryCreator from '../Adversaries/CustomAdversaryCreator'
@@ -17,6 +11,9 @@ import {
   calculateSpentBattlePoints, 
   calculateAutomaticAdjustments
 } from './BattlePointsCalculator'
+import TopBarControls from './TopBarControls'
+import BrowserOverlay from './BrowserOverlay'
+import EntityColumns from './EntityColumns'
 
 // Simple Error Boundary for debugging
 class ErrorBoundary extends React.Component {
@@ -945,612 +942,70 @@ const DashboardContent = () => {
       }}
     >
 
-      {/* Top Bar with Fear and Add Adversaries Button */}
-      <Bar position="top">
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          width: '100%',
-          justifyContent: 'space-between',
-          padding: '0 1rem'
-        }}>
-          <Pips
-            type="fear"
-            value={fear?.value || 0}
-            maxValue={12}
-            onChange={updateFear}
-            showTooltip={false}
-            enableBoundaryClick={true}
-            clickContainerWidth="100%"
-            centerPips={true}
-          />
-          <button
-            onClick={() => {
-              if (browserOpenAtPosition !== null) {
-                handleCloseBrowser()
-              } else {
-                handleOpenBrowser(entityGroups.length)
-              }
-            }}
-            title={browserOpenAtPosition !== null ? 'Close Browser' : 'Add Adversaries'}
-            style={{
-              width: '36px',
-              height: '36px',
-              padding: 0,
-              backgroundColor: browserOpenAtPosition !== null ? 'var(--purple)' : 'transparent',
-              border: '1px solid var(--border)',
-              borderRadius: '50%',
-              color: browserOpenAtPosition !== null ? 'white' : 'var(--text-primary)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s ease',
-              flexShrink: 0
-            }}
-            onMouseEnter={(e) => {
-              if (browserOpenAtPosition === null) {
-                e.target.style.borderColor = 'var(--purple)'
-                e.target.style.backgroundColor = 'var(--bg-secondary)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (browserOpenAtPosition === null) {
-                e.target.style.borderColor = 'var(--border)'
-                e.target.style.backgroundColor = 'transparent'
-              }
-            }}
-          >
-            <Plus size={18} />
-          </button>
-        </div>
-      </Bar>
+      <TopBarControls
+        fearValue={fear?.value || 0}
+        onUpdateFear={updateFear}
+        isBrowserOpen={browserOpenAtPosition !== null}
+        onToggleBrowser={() => {
+          if (browserOpenAtPosition !== null) {
+            handleCloseBrowser()
+          } else {
+            handleOpenBrowser(entityGroups.length)
+          }
+        }}
+      />
 
       {/* Main Dashboard Content */}
       <div className="main-content" style={{ 
         position: 'relative',
         width: '100%'
       }}>
-        {/* Browser Overlay - appears on top when open */}
-        {browserOpenAtPosition !== null && (
-          <div style={{
-            position: 'absolute',
-            top: `${gap}px`, // Start at gap - tab extends above
-            right: `${gap}px`,
-            bottom: `${gap}px`,
-            width: `${columnWidth}px`,
-            zIndex: 100,
-            overflow: 'visible' // Allow tab to extend above
-          }}>
-            <ContainerWithTab
-              tabContent={
-                <>
-                  {/* Add Custom button */}
-                  <button
-                    onClick={handleCreateCustomAdversary}
-                    style={{
-                      padding: '0.375rem 0.75rem',
-                      backgroundColor: 'var(--purple)',
-                      border: 'none',
-                      color: 'white',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem',
-                      fontWeight: '600',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      transition: 'opacity 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.opacity = '0.9'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.opacity = '1'
-                    }}
-                  >
-                    <Plus size={16} />
-                    <span>Add Custom</span>
-                  </button>
-                  {/* Party Size Controls */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <span style={{ color: 'var(--text-primary)', fontSize: '0.875rem', fontWeight: '500' }}>
-                      Party Size:
-                    </span>
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '0.25rem',
-                      border: '1px solid var(--border)',
-                      borderRadius: '4px',
-                      padding: '0.125rem 0.25rem',
-                      backgroundColor: 'var(--bg-secondary)'
-                    }}>
-                      <button
-                        onClick={() => updatePartySize(Math.max(1, pcCount - 1))}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: 'var(--text-primary)',
-                          cursor: 'pointer',
-                          padding: '0',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minWidth: '18px',
-                          height: '18px',
-                          fontSize: '0.7rem'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.color = 'var(--purple)'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.color = 'var(--text-primary)'
-                        }}
-                      >
-                        <Minus size={12} />
-                      </button>
-                      <span style={{ 
-                        color: 'var(--text-primary)', 
-                        fontSize: '0.875rem', 
-                        fontWeight: '500',
-                        minWidth: '1.5rem',
-                        textAlign: 'center'
-                      }}>
-                        {pcCount}
-                      </span>
-                      <button
-                        onClick={() => updatePartySize(pcCount + 1)}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: 'var(--text-primary)',
-                          cursor: 'pointer',
-                          padding: '0',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minWidth: '18px',
-                          height: '18px',
-                          fontSize: '0.7rem'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.color = 'var(--purple)'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.color = 'var(--text-primary)'
-                        }}
-                      >
-                        <Plus size={12} />
-                      </button>
-                    </div>
-                  </div>
-                  {/* Balance display */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <span style={{ color: 'var(--text-primary)', fontSize: '0.875rem', fontWeight: '500' }}>
-                      Balance:
-                    </span>
-                    <span style={{
-                      color: spentBattlePoints > availableBattlePoints ? 'var(--danger)' : 
-                             spentBattlePoints === availableBattlePoints ? 'var(--purple)' : 
-                             'var(--success)',
-                      fontWeight: 600,
-                      fontSize: '0.875rem'
-                    }}>
-                      {spentBattlePoints > availableBattlePoints ? 
-                        `+${spentBattlePoints - availableBattlePoints}` : 
-                        availableBattlePoints - spentBattlePoints === 0 ? 
-                          '0' : 
-                          `-${availableBattlePoints - spentBattlePoints}`
-                      }
-                    </span>
-                  </div>
-                  {/* Close button */}
-                  {handleCloseBrowser && (
-                    <button
-                      onClick={handleCloseBrowser}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--text-secondary)',
-                        cursor: 'pointer',
-                        padding: '0.25rem',
-                        borderRadius: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'color 0.2s ease',
-                        flexShrink: 0
-                      }}
-                      onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-                      onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                      title="Close browser"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                </>
-              }
-              showTab={true}
-              tabBackgroundColor="var(--bg-primary)"
-              tabBorderColor="var(--border)"
-              tabJustifyContent="space-between"
-              containerBackgroundColor="var(--bg-primary)"
-              containerBorderColor="var(--border)"
-              containerBorderRadius="8px"
-              containerBoxShadow="-4px 0 12px rgba(0, 0, 0, 0.3)"
-              containerOverflow="hidden"
-              reserveTabSpace={true}
-              containerStyle={{
-                height: '100%' // Ensure container fills wrapper
-              }}
-            >
-              <div style={{ 
-                flex: 1, 
-                overflowY: 'auto', 
-                overflowX: 'hidden', 
-                minHeight: 0, 
-                display: 'flex', 
-                flexDirection: 'column',
-                width: '100%',
-                minWidth: 0
-              }}>
-                <Browser
-                  type="adversary"
-                  onAddItem={handleAddAdversaryFromBrowser}
-                  showContainer={false}
-                  activeTab={browserActiveTab}
-                  onTabChange={setBrowserActiveTab}
-                  pcCount={pcCount}
-                  savedEncounters={savedEncounters}
-                  onLoadEncounter={loadEncounter}
-                  onDeleteEncounter={deleteEncounter}
-                  selectedCustomAdversaryId={selectedCustomAdversaryId}
-                  onSelectCustomAdversary={setSelectedCustomAdversaryId}
-                  autoFocus={true}
-                  hideImportExport={true}
-                  onClose={handleCloseBrowser}
-                  searchPlaceholder="Search adversaries"
-                />
-              </div>
-            </ContainerWithTab>
-          </div>
-        )}
-        <div 
-          ref={scrollContainerRef}
-          className="dashboard-scroll-container" 
-          style={{ 
-            display: 'flex', 
-            flexDirection: 'row', 
-            overflowX: 'auto', 
-            overflowY: 'hidden',
-            padding: `0 ${gap}px 0 0`, // Only right padding to avoid double padding on left
-            scrollSnapType: 'x mandatory',
-            height: '100%',
-            width: '100%'
-          }}
+        <BrowserOverlay
+          isOpen={browserOpenAtPosition !== null}
+          columnWidth={columnWidth}
+          gap={gap}
+          onClose={handleCloseBrowser}
+          onCreateCustomAdversary={handleCreateCustomAdversary}
+          pcCount={pcCount}
+          updatePartySize={updatePartySize}
+          availableBattlePoints={availableBattlePoints}
+          spentBattlePoints={spentBattlePoints}
+          browserActiveTab={browserActiveTab}
+          onTabChange={setBrowserActiveTab}
+          savedEncounters={savedEncounters}
+          loadEncounter={loadEncounter}
+          deleteEncounter={deleteEncounter}
+          selectedCustomAdversaryId={selectedCustomAdversaryId}
+          onSelectCustomAdversary={setSelectedCustomAdversaryId}
+          onAddAdversaryFromBrowser={handleAddAdversaryFromBrowser}
+        />
+        <EntityColumns
+          entityGroups={entityGroups}
+          columnWidth={columnWidth}
+          gap={gap}
+          scrollContainerRef={scrollContainerRef}
           onScroll={handleScroll}
-        >
-        {entityGroups.length === 0 ? null : (
-          // Normal entity groups display
-          (() => {
-            const items = []
-            
-            entityGroups.forEach((group, index) => {
-              // Check if this card should be replaced with a spacer
-              // Match by baseName since groupIndex becomes invalid after removal
-              const isSpacerPosition = removingCardSpacer && removingCardSpacer.baseName === group.baseName && group.type === 'adversary'
-              
-              if (isSpacerPosition) {
-                // Render spacer instead of card
-                items.push(
-                  <Panel 
-                    key={`spacer-${removingCardSpacer.baseName}`}
-                    style={{ 
-                      width: spacerShrinking ? '0px' : `${columnWidth + gap}px`, // Start at full width, shrink to 0
-                      flexShrink: 0,
-                      flexGrow: 0,
-                      flex: 'none',
-                      paddingLeft: spacerShrinking ? '0px' : `${gap}px`,
-                      paddingRight: '0',
-                      paddingTop: spacerShrinking ? '0px' : `${gap}px`,
-                      paddingBottom: spacerShrinking ? '0px' : `${gap}px`,
-                      scrollSnapAlign: 'none',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'stretch',
-                      height: '100%',
-                      opacity: 0,
-                      transition: 'width 0.3s ease, padding-left 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease'
-                    }}
-                  />
-                )
-                return // Skip rendering the card
-              }
-              
-              // Render the card normally
-              items.push(
-            <Panel 
-              key={`${group.type}-${group.baseName}`}
-              style={{ 
-                width: `${columnWidth + gap}px`, // Include padding in width
-                flexShrink: 0,
-                flexGrow: 0,
-                flex: 'none',
-                paddingLeft: `${gap}px`, // Space before each card
-                paddingRight: '0',
-                paddingTop: `${group.type === 'adversary' ? gap + 52 : gap}px`, // Extra space for buttons above card (always reserve space for tab buttons)
-                paddingBottom: `${gap}px`, // Space below each card
-                scrollSnapAlign: 'start',
-                overflow: group.type === 'adversary' ? 'visible' : 'hidden', // Allow tab buttons above card to be visible
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'stretch', // Ensure card stretches to full width
-                height: 'auto', // Let Panel size to card content
-                opacity: newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
-                transition: newCards.has(`${group.type}-${group.baseName}`) ? 'opacity 0.2s ease' : 'opacity 0.2s ease'
-              }}
-            >
-            <GameCard
-              type={group.type}
-              item={{ 
-                ...group.instances[0], 
-                name: group.instances[0]?.name || group.baseName,
-                // Reset instance-specific state so the expanded card doesn't show defeated state
-                hp: 0,
-                stress: 0,
-                isDead: false
-              }} // Use first instance as template but reset state
-              mode="expanded"
-              instances={group.instances} // Pass all instances to embed mini-cards
-              showCustomCreator={group.type === 'adversary' && editingAdversaryId && group.instances.some(i => i.id === editingAdversaryId)}
-              onSaveCustomAdversary={group.type === 'adversary' && editingAdversaryId && group.instances.some(i => i.id === editingAdversaryId) ? handleSaveCustomAdversary : undefined}
-              onCancelEdit={group.type === 'adversary' && editingAdversaryId && group.instances.some(i => i.id === editingAdversaryId) ? handleCancelEdit : undefined}
-              isStockAdversary={group.type === 'adversary' && editingAdversaryId && group.instances.some(i => i.id === editingAdversaryId) ? 
-                (!group.instances[0]?.source || group.instances[0]?.source !== 'Homebrew') : false}
-              onApplyDamage={group.type === 'adversary' ? (id, damage, currentHp, maxHp) => {
-                const instance = group.instances.find(i => i.id === id)
-                if (instance) {
-                  updateAdversary(id, { hp: Math.min(instance.hpMax || 1, (instance.hp || 0) + damage) })
-                }
-              } : undefined}
-              onApplyHealing={group.type === 'adversary' ? (id, healing, currentHp) => {
-                const instance = group.instances.find(i => i.id === id)
-                if (instance) {
-                  updateAdversary(id, { hp: Math.max(0, (instance.hp || 0) - healing) })
-                }
-              } : undefined}
-              onApplyStressChange={group.type === 'adversary' ? (id, stress) => updateAdversary(id, { stress: Math.max(0, Math.min(group.instances.find(i => i.id === id)?.stressMax || 6, (group.instances.find(i => i.id === id)?.stress || 0) + stress)) }) : undefined}
-              onUpdate={group.type === 'adversary' ? updateAdversary : group.type === 'environment' ? updateEnvironment : updateCountdown}
-              adversaries={adversaries}
-              showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary'}
-              onEdit={group.type === 'adversary' ? (itemId) => handleEditAdversary(itemId) : undefined}
-              onAddInstance={group.type === 'adversary' ? (item) => {
-                // Special handling for Minions: add in increments of party size
-                const isMinion = item.type === 'Minion'
-                const instancesToAdd = isMinion ? pcCount : 1
-                
-                // Add instances
-                if (isMinion && instancesToAdd > 1) {
-                  const instancesArray = Array(instancesToAdd).fill(null).map(() => ({ ...item }))
-                  createAdversariesBulk(instancesArray)
-                } else {
-                  createAdversary(item)
-                }
-                
-                // Horizontal scroll to card only if it's not already visible
-                setTimeout(() => {
-                  requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                      if (scrollContainerRef.current) {
-                        const container = scrollContainerRef.current
-                        const currentScroll = container.scrollLeft
-                        const containerWidth = container.clientWidth
-                        
-                        // Account for browser overlay covering part of the viewport
-                        const effectiveWidth = browserOpenAtPosition !== null 
-                          ? containerWidth - (columnWidth + gap) // Overlay takes up one column width
-                          : containerWidth
-                        
-                        // Recalculate groups after addition to get correct index
-                        const updatedGroups = getEntityGroups()
-                        const groupIndex = updatedGroups.findIndex(g => g.baseName === group.baseName && g.type === 'adversary')
-                        if (groupIndex >= 0) {
-                          // Calculate scroll position - each panel is (columnWidth + gap) wide
-                          const cardPosition = groupIndex * (columnWidth + gap)
-                          const cardEnd = cardPosition + columnWidth + gap // Full panel width
-                          
-                          // Check if card is fully visible (accounting for overlay)
-                          const margin = 10 // Small margin for visibility check
-                          const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + effectiveWidth + margin)
-                          
-                          if (!isVisible) {
-                            // Card is not visible, scroll to it
-                            smoothScrollTo(cardPosition, 500)
-                          }
-                        }
-                      }
-                    })
-                  })
-                }, 50) // Small delay to ensure React has rendered
-              } : undefined}
-              onRemoveInstance={group.type === 'adversary' ? (itemId) => {
-                // Get the first instance to check type
-                const firstInstance = group.instances[0]
-                const isMinion = firstInstance?.type === 'Minion'
-                // Special handling for Minions: remove in increments of party size
-                const instancesToRemove = isMinion ? pcCount : 1
-                
-                // Sort instances by duplicate number (highest first)
-                const instances = group.instances.sort((a, b) => {
-                  const aNum = a.duplicateNumber || 1
-                  const bNum = b.duplicateNumber || 1
-                  return bNum - aNum
-                })
-                
-                // Determine how many instances we'll have after removal
-                const instancesAfterRemoval = Math.max(0, instances.length - instancesToRemove)
-                const isLastInstance = instancesAfterRemoval === 0
-                
-                if (instances.length > 0) {
-                  // Remove the specified number of instances (highest numbered ones)
-                  const instancesToDelete = instances.slice(0, instancesToRemove)
-                  
-                  if (isLastInstance) {
-                    // Add temporary spacer before removing to prevent browser auto-scroll
-                    const groupIndex = entityGroups.findIndex(g => g.baseName === group.baseName && g.type === 'adversary')
-                    const isLeftmostColumn = groupIndex === 0
-                    
-                    // Check if at max scroll - maintain scroll position as spacer shrinks
-                    let wasAtMaxScroll = false
-                    if (scrollContainerRef.current) {
-                      const container = scrollContainerRef.current
-                      const currentScroll = container.scrollLeft
-                      const maxScroll = container.scrollWidth - container.clientWidth
-                      wasAtMaxScroll = Math.abs(currentScroll - maxScroll) < 1 // Within 1px of max
-                    }
-                    
-                    // Set spacer BEFORE removing so it's in place when card disappears
-                    setRemovingCardSpacer({ baseName: group.baseName, groupIndex })
-                    setSpacerShrinking(false) // Start at full width
-                    
-                    // For leftmost column, temporarily disable scroll-snap to prevent interference
-                    if (isLeftmostColumn && scrollContainerRef.current) {
-                      scrollContainerRef.current.style.scrollSnapType = 'none'
-                    }
-                    
-                    // Wait for React to render spacer with initial width, then remove the adversaries
-                    requestAnimationFrame(() => {
-                      requestAnimationFrame(() => {
-                        // Force layout recalculation to ensure spacer is rendered
-                        if (scrollContainerRef.current) {
-                          scrollContainerRef.current.offsetHeight // Force reflow
-                        }
-                        
-                        instancesToDelete.forEach(instance => {
-                          deleteAdversary(instance.id)
-                        })
-                        
-                        // After card is removed and DOM has updated, start shrinking spacer
-                        requestAnimationFrame(() => {
-                          requestAnimationFrame(() => {
-                            // Force another reflow to ensure spacer is in DOM with correct width
-                            if (scrollContainerRef.current) {
-                              scrollContainerRef.current.offsetHeight // Force reflow
-                            }
-                            
-                            // Small delay to ensure browser has rendered spacer at full width
-                            setTimeout(() => {
-                              setSpacerShrinking(true) // Trigger shrink animation
-                              
-                              // Maintain max scroll position as spacer shrinks to prevent blank space
-                              if (wasAtMaxScroll && scrollContainerRef.current) {
-                                const startTime = performance.now()
-                                const duration = 300 // Match CSS transition duration
-                                
-                                const maintainScroll = () => {
-                                  if (!scrollContainerRef.current) return
-                                  
-                                  const container = scrollContainerRef.current
-                                  const newMaxScroll = container.scrollWidth - container.clientWidth
-                                  // Continuously maintain max scroll as content shrinks
-                                  container.scrollLeft = newMaxScroll
-                                  
-                                  if (performance.now() - startTime < duration) {
-                                    requestAnimationFrame(maintainScroll)
-                                  }
-                                }
-                                
-                                requestAnimationFrame(maintainScroll)
-                              }
-                              
-                              // Remove spacer after animation completes and re-enable scroll-snap if needed
-                              setTimeout(() => {
-                                setRemovingCardSpacer(null)
-                                setSpacerShrinking(false)
-                                
-                                // Re-enable scroll-snap for leftmost column
-                                if (isLeftmostColumn && scrollContainerRef.current) {
-                                  scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
-                                }
-                                
-                                // Final scroll adjustment to ensure we're at max scroll
-                                if (wasAtMaxScroll && scrollContainerRef.current) {
-                                  const container = scrollContainerRef.current
-                                  container.scrollLeft = container.scrollWidth - container.clientWidth
-                                }
-                              }, 300) // Match CSS transition duration
-                            }, 50) // Small delay to ensure spacer rendered at full width
-                          })
-                        })
-                      })
-                    })
-                  } else {
-                    // Not last instance - remove the specified number of instances
-                    instancesToDelete.forEach(instance => {
-                      deleteAdversary(instance.id)
-                    })
-                  }
-                }
-              } : undefined}
-            />
-          </Panel>
-              )
-            })
-            
-            // If spacer wasn't matched (card already removed), insert it at the stored index
-            if (removingCardSpacer && !items.some(item => item?.key === `spacer-${removingCardSpacer.baseName}`)) {
-              // Insert spacer at the original groupIndex position
-              const insertIndex = Math.min(removingCardSpacer.groupIndex, items.length)
-              items.splice(insertIndex, 0,
-                <Panel 
-                  key={`spacer-${removingCardSpacer.baseName}`}
-                  style={{ 
-                    width: spacerShrinking ? '0px' : `${columnWidth + gap}px`,
-                    flexShrink: 0,
-                    flexGrow: 0,
-                    flex: 'none',
-                    paddingLeft: spacerShrinking ? '0px' : `${gap}px`,
-                    paddingRight: '0',
-                    paddingTop: spacerShrinking ? '0px' : `${gap}px`,
-                    paddingBottom: spacerShrinking ? '0px' : `${gap}px`,
-                    scrollSnapAlign: 'none',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'stretch',
-                    height: '100%',
-                    opacity: 0,
-                    transition: 'width 0.3s ease, padding-left 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease'
-                  }}
-                />
-              )
-            }
-            
-            return items
-          })()
-        )}
-        {/* Spacer to allow scrolling rightmost card into view when browser overlay is open */}
-        {browserOpenAtPosition !== null && (
-          <div style={{
-            width: `${columnWidth + gap}px`,
-            flexShrink: 0,
-            flexGrow: 0,
-            flex: 'none',
-            height: '100%'
-          }} />
-        )}
-        </div>
+          newCards={newCards}
+          removingCardSpacer={removingCardSpacer}
+          spacerShrinking={spacerShrinking}
+          browserOpenAtPosition={browserOpenAtPosition}
+          editingAdversaryId={editingAdversaryId}
+          handleSaveCustomAdversary={handleSaveCustomAdversary}
+          handleCancelEdit={handleCancelEdit}
+          updateAdversary={updateAdversary}
+          updateEnvironment={updateEnvironment}
+          updateCountdown={updateCountdown}
+          adversaries={adversaries}
+          handleEditAdversary={handleEditAdversary}
+          createAdversary={createAdversary}
+          createAdversariesBulk={createAdversariesBulk}
+          pcCount={pcCount}
+          smoothScrollTo={smoothScrollTo}
+          getEntityGroups={getEntityGroups}
+          deleteAdversary={deleteAdversary}
+          setRemovingCardSpacer={setRemovingCardSpacer}
+          setSpacerShrinking={setSpacerShrinking}
+        />
       </div>
 
       {/* Encounter Builder Modal */}
