@@ -1,239 +1,18 @@
-import React, { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
-import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull, Plus, Minus, Pencil, Check } from 'lucide-react'
-import Pips from '../Shared/Pips'
+import React, { useState, useEffect, useRef } from 'react'
+import { X, Hexagon, Locate, Check } from 'lucide-react'
 import ContainerWithTab from '../Dashboard/ContainerWithTab'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
 import FeaturesSection from './GameCard/FeaturesSection'
 import StandardAttackSection from './GameCard/StandardAttackSection'
 import StatusSection from './GameCard/StatusSection'
 import DescriptionSection from './GameCard/DescriptionSection'
-
-// Combined Type/Tier Badge Component with Custom SVG
-const CombinedTypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => {
-  // Calculate width based on actual text content width
-  const getTextWidth = (text) => {
-    if (!text) return 0
-    // Create a temporary canvas to measure text width
-    const canvas = document.createElement('canvas')
-    const context = canvas.getContext('2d')
-    context.font = '600 11px system-ui, -apple-system, sans-serif' // Use px instead of rem
-    const width = context.measureText(text.toUpperCase()).width
-    return width
-  }
-  
-  const textWidth = getTextWidth(type)
-  const leftPadding = 4
-  const rightPadding = 18 // Fixed right padding to clear diamond
-  const typeWidth = Math.max(50, textWidth + leftPadding + rightPadding)
-  const totalWidth = typeWidth + 15 // Slightly reduced from 20 to 15
-  
-  
-  if (isEditMode) {
-    return (
-      <div style={{
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        height: '32px'
-      }}>
-        {/* Type Select */}
-        <select
-          value={type || ''}
-          onChange={(e) => {
-            onUpdate && onUpdate(itemId, { type: e.target.value })
-          }}
-          style={{
-            backgroundColor: 'var(--bg-primary)',
-            border: '1px solid var(--text-secondary)',
-            color: 'var(--text-primary)',
-            fontSize: '0.6875rem',
-            fontWeight: '500',
-            textTransform: 'uppercase',
-            outline: 'none',
-            borderRadius: '4px',
-            padding: '4px 8px',
-            width: '95px',
-            height: '24px'
-          }}
-        >
-          <option value="Standard">Standard</option>
-          <option value="Solo">Solo</option>
-          <option value="Bruiser">Bruiser</option>
-          <option value="Horde">Horde</option>
-          <option value="Minion">Minion</option>
-          <option value="Ranged">Ranged</option>
-          <option value="Leader">Leader</option>
-          <option value="Skulk">Skulk</option>
-          <option value="Social">Social</option>
-          <option value="Support">Support</option>
-        </select>
-        
-        {/* Tier Input */}
-        <div style={{
-          position: 'relative',
-          width: '24px',
-          height: '24px'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) rotate(45deg)',
-            width: '20px',
-            height: '20px',
-            backgroundColor: 'var(--bg-primary)',
-            border: '1px solid var(--text-secondary)',
-            borderRadius: '2px'
-          }} />
-          <input
-            type="text"
-            value={tier || ''}
-            onChange={(e) => {
-              const value = e.target.value.replace(/[^1-4]/g, '')
-              if (value.length <= 1) {
-                onUpdate && onUpdate(itemId, { tier: value === '' ? '' : parseInt(value) })
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'ArrowUp') {
-                e.preventDefault()
-                const current = parseInt(tier) || 1
-                onUpdate && onUpdate(itemId, { tier: Math.min(current + 1, 4) })
-              } else if (e.key === 'ArrowDown') {
-                e.preventDefault()
-                const current = parseInt(tier) || 1
-                onUpdate && onUpdate(itemId, { tier: Math.max(current - 1, 1) })
-              }
-            }}
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: 'var(--text-primary)',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              width: '24px',
-              height: '24px',
-              textAlign: 'center',
-              outline: 'none',
-              zIndex: 1
-            }}
-            maxLength="1"
-          />
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div style={{
-      position: 'relative',
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '32px',
-      width: `${totalWidth}px`
-    }}>
-      {/* Custom SVG Badge */}
-      <svg 
-        width={totalWidth} 
-        height="32" 
-        viewBox={`0 0 ${totalWidth} 32`}
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 1
-        }}
-      >
-        {/* Rectangle background - extends behind diamond but stops at diamond's center */}
-        <rect 
-          x="1" 
-          y="6" 
-          width={typeWidth - 1} 
-          height="20" 
-          fill="var(--bg-primary)" 
-          stroke="var(--text-secondary)" 
-          strokeWidth="1" 
-          rx="4"
-          ry="4"
-        />
-        {/* Diamond - rounded rectangle rotated 45 degrees */}
-        <rect 
-          x={typeWidth - 10} 
-          y="6" 
-          width="20" 
-          height="20" 
-          fill="var(--bg-primary)" 
-          stroke="var(--text-secondary)" 
-          strokeWidth="1"
-          rx="2"
-          ry="2"
-          transform={`rotate(45 ${typeWidth - 1} 16)`}
-        />
-      </svg>
-      
-      {/* Type Text */}
-      <span style={{
-        position: 'absolute',
-        top: '50%',
-        left: '4px',
-        transform: 'translateY(-50%)',
-        fontSize: '0.6875rem',
-        fontWeight: '500',
-        textTransform: 'uppercase',
-        color: 'var(--text-primary)',
-        zIndex: 2,
-        pointerEvents: 'none'
-      }}>
-        {type}
-      </span>
-      
-      {/* Tier Text */}
-      <span style={{
-        position: 'absolute',
-        top: '50%',
-        left: `${typeWidth - 0.5}px`,
-        transform: 'translate(-50%, -50%)',
-        fontSize: '0.8rem',
-        fontWeight: 600,
-        color: 'white',
-        zIndex: 2,
-        pointerEvents: 'none',
-        textAlign: 'center',
-        lineHeight: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '20px',
-        height: '20px'
-      }}>
-        {tier}
-      </span>
-    </div>
-  )
-}
-
+import TypeTierBadge from './GameCard/TypeTierBadge'
+import ExperienceSection from './GameCard/ExperienceSection'
+import TabButtons from './GameCard/TabButtons'
+import useCardScroll from './GameCard/hooks/useCardScroll'
 // ============================================================================
 // Reusable Components
 // ============================================================================
-
-// ============================================================================
-// UTILITIES
-// ============================================================================
-
-function generateId(prefix) {
-  const base = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
-  return prefix ? `${prefix}-${base}` : base
-}
-
-
-
 
 // ============================================================================
 // STYLES - All CSS consolidated into inline styles
@@ -306,186 +85,7 @@ const styles = {
   },
 
   // Damage input styles
-  damageInputPopup: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-    borderRadius: '8px'
-  },
-  damageInputContent: {
-    backgroundColor: 'var(--gray-900)',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: 'var(--border)',
-    borderRadius: '8px',
-    padding: '8px',
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '8px',
-    minWidth: '200px',
-    alignItems: 'center',
-    position: 'absolute',
-    right: '1rem',
-    top: '50%',
-    transform: 'translateY(-50%)'
-  },
-  damageInput: {
-    backgroundColor: 'var(--gray-900)',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: 'var(--border)',
-    borderRadius: '4px',
-    padding: '4px 6px',
-    color: 'var(--text-primary)',
-    fontSize: '16px',
-    width: '80px',
-    textAlign: 'center'
-  },
-  damageIndicators: {
-    display: 'flex',
-    gap: '8px',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  damageDrop: {
-    fontSize: '16px',
-    color: 'var(--text-secondary)',
-    cursor: 'pointer',
-    transition: 'color 0.1s ease'
-  },
-  applyButton: {
-    backgroundColor: 'var(--gray-600)',
-    color: 'white',
-    borderWidth: '0',
-    borderStyle: 'none',
-    borderRadius: '4px',
-    padding: '4px 8px',
-    fontSize: '14px',
-    cursor: 'pointer',
-    transition: 'background-color 0.1s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: '32px',
-    minHeight: '32px'
-  }
 }
-
-// ============================================================================
-// HOOKS
-// ============================================================================
-
-// Adversary-specific logic
-const useAdversaryLogic = (item, onApplyDamage, onApplyHealing, onApplyStressChange) => {
-  const [showDamageInput, setShowDamageInput] = useState(false)
-  const [damageValue, setDamageValue] = useState('')
-
-  // Close damage input when clicking outside
-  useEffect(() => {
-    if (showDamageInput) {
-      const handleClickOutside = (event) => {
-        if (!event.target.closest('.damage-input-popup')) {
-          setShowDamageInput(false)
-          setDamageValue('')
-        }
-      }
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [showDamageInput])
-
-  const handleHpClick = (e) => {
-    e.stopPropagation()
-    e.preventDefault()
-    const currentHp = item.hp || 0
-    const hpMax = item.hpMax || 1
-    const symbolsRect = e.currentTarget.getBoundingClientRect()
-    const clickX = e.clientX - symbolsRect.left
-    const symbolWidth = symbolsRect.width / hpMax
-    const clickedIndex = Math.floor(clickX / symbolWidth)
-    
-    if (clickedIndex < currentHp) {
-      onApplyHealing && onApplyHealing(item.id, 1, item.hp)
-    } else {
-      onApplyDamage && onApplyDamage(item.id, 1, item.hp, item.hpMax)
-    }
-  }
-
-  const handleStressClick = (e) => {
-    e.stopPropagation()
-    e.preventDefault()
-    const currentStress = item.stress || 0
-    const stressMax = item.stressMax || 1
-    const symbolsRect = e.currentTarget.getBoundingClientRect()
-    const clickX = e.clientX - symbolsRect.left
-    const symbolWidth = symbolsRect.width / stressMax
-    const clickedIndex = Math.floor(clickX / symbolWidth)
-    
-    if (clickedIndex < currentStress) {
-      onApplyStressChange && onApplyStressChange(item.id, -1, item.stress, item.stressMax)
-    } else {
-      onApplyStressChange && onApplyStressChange(item.id, 1, item.stress, item.stressMax)
-    }
-  }
-
-  const handleDifficultyClick = (e) => {
-    e.stopPropagation()
-    if ((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion') {
-      setShowDamageInput(true)
-      setDamageValue(item.type === 'Minion' ? '1' : '')
-    }
-  }
-
-  const applyDamage = () => {
-    const damage = parseInt(damageValue)
-    if (damage > 0) {
-      if (item.type === 'Minion') {
-        onApplyDamage && onApplyDamage(item.id, damage, item.hp, item.hpMax)
-      } else {
-        let hpDamage = 0
-        if (damage >= item.thresholds.severe) {
-          hpDamage = 3
-        } else if (damage >= item.thresholds.major) {
-          hpDamage = 2
-        } else if (damage >= 1) {
-          hpDamage = 1
-        }
-        onApplyDamage && onApplyDamage(item.id, hpDamage, item.hp, item.hpMax)
-      }
-      setShowDamageInput(false)
-      setDamageValue('')
-    }
-  }
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      applyDamage()
-    } else if (e.key === 'Escape') {
-      setShowDamageInput(false)
-      setDamageValue('')
-    }
-  }
-
-  return {
-    showDamageInput,
-    damageValue,
-    setDamageValue,
-    setShowDamageInput,
-    handleHpClick,
-    handleStressClick,
-    handleDifficultyClick,
-    applyDamage,
-    handleKeyDown
-  }
-}
-
 
 // ============================================================================
 // MAIN COMPONENT
@@ -496,17 +96,14 @@ const GameCard = ({
   type, // 'adversary'
   mode = 'expanded', // 'expanded', 'edit'
   onClick,
-  onDelete,
   onApplyDamage,
   onApplyHealing,
   onApplyStressChange,
   onUpdate,
   adversaries = [], // All adversaries for duplicate checking
   isSelected = false, // Whether this card is currently selected
-  isEditMode = false, // Whether the app is in edit mode
   instances = [], // All instances to embed as mini-cards in expanded view
   isEmbedded = false, // Whether this is an embedded card (removes border)
-  showAddRemoveButtons = false, // Show +/- buttons when browser is open
   onAddInstance = null, // Handler for adding an instance
   onRemoveInstance = null, // Handler for removing an instance
   onEdit = null, // Handler for editing this adversary
@@ -515,49 +112,9 @@ const GameCard = ({
   onCancelEdit = null, // Handler for canceling edit
   isStockAdversary = false, // Whether this is a stock adversary (needs Save As)
 }) => {
-  // Ref for the scrollable content container
-  const scrollableContentRef = useRef(null)
-  const previousInstancesLengthRef = useRef(instances.length)
-  const previousScrollHeightRef = useRef(null)
-  const previousScrollTopRef = useRef(null)
-  const scrollAnimationFrameRef = useRef(null) // Track ongoing scroll animation
+  const { scrollableContentRef } = useCardScroll(instances)
   const nameInputRef = useRef(null) // Ref for name input in edit mode
   const customCreatorRef = useRef(null) // Ref for CustomAdversaryCreator when showCustomCreator is true
-  
-  // Track scroll state continuously
-  useEffect(() => {
-    const scrollContainer = scrollableContentRef.current
-    if (!scrollContainer) return
-    
-    const updateScrollState = () => {
-      previousScrollHeightRef.current = scrollContainer.scrollHeight
-      previousScrollTopRef.current = scrollContainer.scrollTop
-    }
-    
-    // Update on scroll
-    scrollContainer.addEventListener('scroll', updateScrollState, { passive: true })
-    
-    // Also update periodically to catch any programmatic changes
-    const interval = setInterval(updateScrollState, 100)
-    
-    // MutationObserver removed - useLayoutEffect handles scroll animations now
-    
-    return () => {
-      scrollContainer.removeEventListener('scroll', updateScrollState)
-      clearInterval(interval)
-    }
-  }, [])
-  
-  // Capture scroll state before instances change (cleanup runs before next effect)
-  useEffect(() => {
-    return () => {
-      // This cleanup runs before the next effect, so we capture state before DOM update
-      if (scrollableContentRef.current) {
-        previousScrollHeightRef.current = scrollableContentRef.current.scrollHeight
-        previousScrollTopRef.current = scrollableContentRef.current.scrollTop
-      }
-    }
-  }, [instances.length, instances])
   
   // State for two-stage delete functionality
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
@@ -574,82 +131,6 @@ const GameCard = ({
       return () => clearTimeout(timeoutId)
     }
   }, [showCustomCreator])
-  
-  // Smooth scroll when instances are added or removed
-  useLayoutEffect(() => {
-    const currentLength = instances.length
-    const previousLength = previousInstancesLengthRef.current
-    
-    if (currentLength !== previousLength && scrollableContentRef.current) {
-      // Use the stored previous scroll state (captured in cleanup before DOM update)
-      const oldScrollHeight = previousScrollHeightRef.current
-      const oldScrollTop = previousScrollTopRef.current
-      
-      if (!oldScrollHeight || oldScrollTop === null) {
-        // Fallback if state wasn't captured
-        previousInstancesLengthRef.current = currentLength
-        return
-      }
-      
-      const scrollContainer = scrollableContentRef.current
-      const newScrollHeight = scrollContainer.scrollHeight
-      const clientHeight = scrollContainer.clientHeight
-      
-      // Handle instance removal - let browser adjust scroll naturally
-      if (currentLength < previousLength) {
-        // Instance removed - no special handling, browser will adjust scroll naturally
-      } else if (currentLength > previousLength) {
-        // Instance added: scroll to bottom
-        const targetScroll = newScrollHeight - clientHeight
-        const startScroll = scrollContainer.scrollTop
-        const distance = targetScroll - startScroll
-        
-        if (Math.abs(distance) > 0.5) {
-          // Cancel any ongoing animation for additions
-          if (scrollAnimationFrameRef.current) {
-            cancelAnimationFrame(scrollAnimationFrameRef.current)
-            scrollAnimationFrameRef.current = null
-          }
-          
-          const duration = 400
-          const startTime = performance.now()
-          
-          const animateScroll = (currentTime) => {
-            if (!scrollContainer) {
-              scrollAnimationFrameRef.current = null
-              return
-            }
-            
-            const elapsed = currentTime - startTime
-            const progress = Math.min(elapsed / duration, 1)
-            
-            // Optimized easing calculation
-            const oneMinusProgress = 1 - progress
-            const easeOut = 1 - (oneMinusProgress * oneMinusProgress * oneMinusProgress)
-            
-            const newScroll = startScroll + (distance * easeOut)
-            scrollContainer.scrollTop = newScroll
-            
-            if (progress < 1) {
-              scrollAnimationFrameRef.current = requestAnimationFrame(animateScroll)
-            } else {
-              scrollContainer.scrollTop = targetScroll
-              scrollAnimationFrameRef.current = null
-            }
-          }
-          
-          scrollAnimationFrameRef.current = requestAnimationFrame(animateScroll)
-        }
-      }
-      
-      // Update the ref
-      previousInstancesLengthRef.current = currentLength
-    } else {
-      // Update ref even if we didn't scroll
-      previousInstancesLengthRef.current = currentLength
-    }
-  }, [instances.length, instances]) // Include instances in deps to catch reference changes
-  
   // Helper function to generate unique keys for feature confirmations
   const getFeatureKey = (feature) => {
     const typeFeatures = (item.features || []).filter(f => f.type === feature.type)
@@ -658,23 +139,6 @@ const GameCard = ({
   }
   
   // Helper function to generate unique keys for experience confirmations
-  const getExperienceKey = (exp, index) => {
-    return `experience-${index}-${typeof exp === 'string' ? exp : exp.name || 'blank'}`
-  }
-  
-  // Helper function to filter out blank experiences (name empty and modifier 0)
-  const filterBlankExperiences = (experiences) => {
-    if (!experiences || !Array.isArray(experiences)) return []
-    return experiences.filter(exp => {
-      if (typeof exp === 'string') {
-        return exp.trim().length > 0
-      }
-      const name = exp.name || ''
-      const modifier = exp.modifier || 0
-      return name.trim().length > 0 || modifier > 0
-    })
-  }
-  
   // Handle two-stage delete for features
   const handleFeatureDeleteClick = (featureToDelete) => {
     const featureKey = getFeatureKey(featureToDelete)
@@ -707,48 +171,7 @@ const GameCard = ({
     }
   }
   
-  // Handle two-stage delete for experiences
-  const handleExperienceDeleteClick = (expToDelete, index) => {
-    const experienceKey = getExperienceKey(expToDelete, index)
-    
-    if (deleteConfirmations[experienceKey]) {
-      // Second click - actually delete
-      const newExp = [...(item.experience || [])]
-      newExp.splice(index, 1)
-      const filteredExp = filterBlankExperiences(newExp)
-      onUpdate && onUpdate(item.id, { experience: filteredExp })
-      
-      setDeleteConfirmations(prev => {
-        const newState = { ...prev }
-        delete newState[experienceKey]
-        return newState
-      })
-    } else {
-      // First click - show confirmation state
-      setDeleteConfirmations(prev => ({
-        ...prev,
-        [experienceKey]: true
-      }))
-      
-      // Auto-reset after 3 seconds
-      setTimeout(() => {
-        setDeleteConfirmations(prev => {
-          const newState = { ...prev }
-          delete newState[experienceKey]
-          return newState
-        })
-      }, 3000)
-    }
-  }
-
   // Get adversary-specific logic
-  const adversaryLogic = useAdversaryLogic(item, onApplyDamage, onApplyHealing, onApplyStressChange)
-  
-  // Create fallback handlers for when logic is not applicable to current type
-  const handleDifficultyClick = (type === 'adversary' || type === 'adversaries') ? adversaryLogic.handleDifficultyClick : (() => {
-    console.warn('adversaryLogic.handleDifficultyClick not available for type:', type)
-  })
-
   // Debug logging removed - selection styling working correctly
 
   // ============================================================================
@@ -767,7 +190,7 @@ const GameCard = ({
     
     // Remove top margin for expanded cards
     if (isExpanded) {
-      const { marginTop, ...cardStyleWithoutMargin } = cardStyle
+      const { marginTop: _marginTop, ...cardStyleWithoutMargin } = cardStyle
       cardStyle = cardStyleWithoutMargin
     }
     
@@ -846,152 +269,11 @@ const GameCard = ({
   }
 
 
-  const renderDamageInput = () => {
-    if (type !== 'adversary' || !adversaryLogic.showDamageInput || !((item.thresholds && item.thresholds.major && item.thresholds.severe) || item.type === 'Minion')) {
-      return null
-    }
-
-    return (
-      <div 
-        className="damage-input-popup"
-        style={styles.damageInputPopup}
-        onClick={(e) => {
-          e.stopPropagation()
-          if (e.target === e.currentTarget) {
-            if (type === 'adversary' || type === 'adversaries') {
-              adversaryLogic.setShowDamageInput(false)
-              adversaryLogic.setDamageValue('')
-            }
-          }
-        }}
-      >
-        <div 
-          className="border rounded-lg"
-          style={{
-            ...styles.damageInputContent,
-            borderColor: 'var(--border)'
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <input
-            type="number"
-            inputMode="numeric"
-            enterKeyHint="done"
-            placeholder="dmg"
-            min={item.type === 'Minion' ? "0" : "0"}
-            value={(type === 'adversary' || type === 'adversaries') ? adversaryLogic.damageValue : ''}
-            onChange={(e) => {
-              if (type === 'adversary' || type === 'adversaries') {
-                adversaryLogic.setDamageValue(e.target.value)
-              }
-            }}
-            onKeyDown={(type === 'adversary' || type === 'adversaries') ? adversaryLogic.handleKeyDown : undefined}
-            className="border rounded-sm"
-            style={{
-              ...styles.damageInput,
-              borderColor: 'var(--border)'
-            }}
-            autoFocus
-          />
-          <div style={styles.damageIndicators}>
-            {item.type === 'Minion' ? (
-              (() => {
-                const damage = parseInt((type === 'adversary' || type === 'adversaries') ? adversaryLogic.damageValue : '0') || 0
-                const minionFeature = item.features?.find(f => f.name?.startsWith('Minion ('))
-                const minionThreshold = minionFeature ? parseInt(minionFeature.name.match(/\((\d+)\)/)?.[1] || '1') : 1
-                const additionalMinions = Math.floor(damage / minionThreshold)
-                
-                if (damage >= minionThreshold && additionalMinions > 0) {
-                  return (
-                    <span 
-                      style={{
-                        ...styles.damageDrop,
-                        color: 'var(--red)'
-                      }}
-                      title={`${damage} damage can defeat ${additionalMinions + 1} minion${additionalMinions + 1 !== 1 ? 's' : ''} (1 + ${additionalMinions} additional)`}
-                    >
-                      +{additionalMinions} additional minion(s)
-                    </span>
-                  )
-                } else {
-                  return (
-                    <span 
-                      style={styles.damageDrop}
-                      title={`${damage} damage defeats this minion only`}
-                    >
-                      +0 additional minion(s)
-                    </span>
-                  )
-                }
-              })()
-            ) : (
-              [1, 2, 3].map((level) => {
-                const damage = parseInt((type === 'adversary' || type === 'adversaries') ? adversaryLogic.damageValue : '0') || 0
-                let isActive = false
-                if (level === 1 && damage >= 1) isActive = true
-                if (level === 2 && damage >= item.thresholds.major) isActive = true
-                if (level === 3 && damage >= item.thresholds.severe) isActive = true
-                
-                return (
-                  <span 
-                    key={level}
-                    style={{
-                      ...styles.damageDrop,
-                      color: isActive ? 'var(--red)' : 'var(--text-secondary)'
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (type === 'adversary' || type === 'adversaries') {
-                        if (level === 1) {
-                          adversaryLogic.setDamageValue('1')
-                        } else if (level === 2) {
-                          adversaryLogic.setDamageValue(item.thresholds.major.toString())
-                        } else if (level === 3) {
-                          adversaryLogic.setDamageValue(item.thresholds.severe.toString())
-                        }
-                      }
-                    }}
-                    title={`Click to set damage to ${level === 1 ? '1' : level === 2 ? item.thresholds.major : item.thresholds.severe}`}
-                  >
-                    <Droplet size={16} />
-                  </span>
-                )
-              })
-            )}
-            <button
-              style={{
-                ...styles.applyButton,
-                backgroundColor: 'var(--gray-600)'
-              }}
-              onClick={(e) => {
-                e.stopPropagation()
-                if (type === 'adversary' || type === 'adversaries') {
-                  if (!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) {
-                    // Close damage input if no damage entered
-                    adversaryLogic.setShowDamageInput(false)
-                    adversaryLogic.setDamageValue('')
-                  } else {
-                    // Apply damage if damage entered
-                    adversaryLogic.applyDamage()
-                  }
-                }
-              }}
-              title={(!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? 'Close damage input' : 'Apply damage'}
-            >
-              {(!adversaryLogic.damageValue || parseInt(adversaryLogic.damageValue) < 1) ? <X size={16} /> : <CheckCircle size={16} />}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   // ============================================================================
   // EXPANDED VIEW RENDERERS
   // ============================================================================
 
   const renderExpandedAdversary = () => {
-    const showDrag = false // Temporarily disabled drag handles
     const isDead = (item.hp || 0) >= (item.hpMax || 1)
     const isEditMode = effectiveMode === 'edit' || showCustomCreator
     
@@ -1000,196 +282,16 @@ const GameCard = ({
     
     // Build tab content
     const tabContent = shouldShowTab ? (
-      showCustomCreator ? (
-        // Edit mode buttons: Save and Cancel
-        <>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              if (onSaveCustomAdversary) {
-                onSaveCustomAdversary(item, item.id)
-                if (onCancelEdit) onCancelEdit()
-              }
-            }}
-            style={{
-              background: 'var(--purple)',
-              border: '1px solid var(--purple)',
-              color: 'white',
-              borderRadius: '4px',
-              padding: '0.375rem 0.75rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.375rem',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.opacity = '0.9'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.opacity = '1'
-            }}
-            title="Save"
-          >
-            <Check size={16} />
-            <span>Save</span>
-          </button>
-          {onCancelEdit && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onCancelEdit()
-              }}
-              style={{
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-primary)',
-                borderRadius: '4px',
-                padding: '0.375rem 0.75rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.375rem',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--bg-hover)'
-                e.target.style.borderColor = 'var(--purple)'
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'var(--bg-secondary)'
-                e.target.style.borderColor = 'var(--border)'
-              }}
-              title="Cancel"
-            >
-              <X size={16} />
-              <span>Cancel</span>
-            </button>
-          )}
-        </>
-      ) : (
-        // Normal mode buttons: Add/Remove/Edit
-        <>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onRemoveInstance && onRemoveInstance(item.id)
-            }}
-            style={{
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-              borderRadius: '4px',
-              padding: '0',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '32px',
-              height: '32px',
-              fontSize: '0.7rem',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--bg-hover)'
-              e.currentTarget.style.borderColor = 'var(--purple)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
-              e.currentTarget.style.borderColor = 'var(--border)'
-            }}
-            title="Remove one"
-          >
-            <Minus size={16} />
-          </button>
-          <span style={{ 
-            color: 'var(--text-primary)', 
-            fontSize: '1rem',
-            fontWeight: '500',
-            minWidth: '24px',
-            textAlign: 'center'
-          }}>
-            {instances.length}
-          </span>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onAddInstance && onAddInstance(item)
-            }}
-            style={{
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-              borderRadius: '4px',
-              padding: '0',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '32px',
-              height: '32px',
-              fontSize: '0.7rem',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--purple)'
-              e.currentTarget.style.borderColor = 'var(--purple)'
-              e.currentTarget.style.color = 'white'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
-              e.currentTarget.style.borderColor = 'var(--border)'
-              e.currentTarget.style.color = 'var(--text-primary)'
-            }}
-            title="Add another"
-          >
-            <Plus size={16} />
-          </button>
-          {onEdit && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onEdit(item.id)
-              }}
-              style={{
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-primary)',
-                borderRadius: '4px',
-                padding: '0',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '32px',
-                height: '32px',
-                fontSize: '0.7rem',
-                transition: 'all 0.2s ease',
-                marginLeft: '0.25rem'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--purple)'
-                e.currentTarget.style.borderColor = 'var(--purple)'
-                e.currentTarget.style.color = 'white'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
-                e.currentTarget.style.borderColor = 'var(--border)'
-                e.currentTarget.style.color = 'var(--text-primary)'
-              }}
-              title="Edit"
-            >
-              <Pencil size={16} />
-            </button>
-          )}
-        </>
-      )
+      <TabButtons
+        showCustomCreator={showCustomCreator}
+        onSaveCustomAdversary={onSaveCustomAdversary}
+        item={item}
+        onCancelEdit={onCancelEdit}
+        onRemoveInstance={onRemoveInstance}
+        onAddInstance={onAddInstance}
+        instances={instances}
+        onEdit={onEdit}
+      />
     ) : null
 
     return (
@@ -1316,7 +418,7 @@ const GameCard = ({
             
             {/* Combined Type/Tier Badge */}
             {(item.type || item.tier || isEditMode) && (
-              <CombinedTypeTierBadge 
+              <TypeTierBadge
                 type={item.type}
                 tier={item.tier}
                 isEditMode={isEditMode}
@@ -1518,7 +620,7 @@ const GameCard = ({
                             return item.atk
                           }
                           // Otherwise, treat as number
-                          const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9\-]/g, '')) : (item.atk || 0)
+                          const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0)
                           return atkValue >= 0 ? `+${atkValue}` : atkValue.toString()
                         })()}
                         onChange={(e) => {
@@ -1529,9 +631,9 @@ const GameCard = ({
                             onUpdate && onUpdate(item.id, { atk: value })
                           } else {
                             // Handle numeric values
-                            const cleanValue = value.replace(/[^0-9+\-]/g, '')
+                            const cleanValue = value.replace(/[^0-9+-]/g, '')
                             if (cleanValue.length <= 4) {
-                              const numericValue = parseInt(cleanValue.replace(/[^0-9\-]/g, '')) || 0
+                              const numericValue = parseInt(cleanValue.replace(/[^0-9-]/g, '')) || 0
                               onUpdate && onUpdate(item.id, { atk: numericValue })
                             }
                           }
@@ -1543,12 +645,12 @@ const GameCard = ({
                           }
                           if (e.key === 'ArrowUp') {
                             e.preventDefault()
-                            const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9\-]/g, '')) : (item.atk || 0)
+                            const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0)
                             const newValue = current + 1
                             onUpdate && onUpdate(item.id, { atk: newValue })
                           } else if (e.key === 'ArrowDown') {
                             e.preventDefault()
-                            const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9\-]/g, '')) : (item.atk || 0)
+                            const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0)
                             const newValue = current - 1
                             onUpdate && onUpdate(item.id, { atk: newValue })
                           }
@@ -1587,7 +689,7 @@ const GameCard = ({
                             return item.atk
                           }
                           // Otherwise, treat as number
-                          const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9\-]/g, '')) : item.atk
+                          const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : item.atk
                           return atkValue >= 0 ? `+${atkValue}` : atkValue
                         })()}
                       </span>
@@ -1607,351 +709,15 @@ const GameCard = ({
                 </div>
 
             {/* Right Column - Experiences */}
-            <div style={{ paddingTop: '0' }}>
-                {isEditMode ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', marginTop: '-0.25rem' }}>
-                    {(() => {
-                      const experiences = item.experience || []
-                      // Ensure at least one empty experience in edit mode
-                      const experiencesToShow = experiences.length === 0 
-                        ? [{ name: '', modifier: 0 }]
-                        : experiences
-                      
-                      return experiencesToShow.map((exp, index) => (
-                        <div key={index} style={{ 
-                          position: 'relative',
-                          marginBottom: '0.5rem'
-                        }}>
-                          <div style={{
-                            position: 'absolute',
-                            left: 0,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            paddingTop: '1px',
-                            width: '24px',
-                            height: '24px'
-                          }}>
-                            <input
-                              type="text"
-                              value={typeof exp === 'object' ? (exp.modifier > 0 ? `+${exp.modifier}` : '') : ''}
-                              onChange={(e) => {
-                                const newExp = [...(item.experience || [])]
-                                const modifierValue = e.target.value.replace(/[^0-9+-]/g, '')
-                                const modifier = modifierValue === '' || modifierValue === '+' ? 0 : (parseInt(modifierValue) || 0)
-                                const clampedModifier = Math.max(0, modifier)
-                                newExp[index] = { name: typeof exp === 'string' ? exp : exp.name || '', modifier: clampedModifier }
-                                const filteredExp = filterBlankExperiences(newExp)
-                                onUpdate && onUpdate(item.id, { experience: filteredExp })
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'ArrowUp') {
-                                  e.preventDefault()
-                                  const newExp = [...(item.experience || [])]
-                                  const currentModifier = typeof exp === 'object' ? (exp.modifier || 0) : 0
-                                  newExp[index] = { 
-                                    name: typeof exp === 'string' ? exp : exp.name || '', 
-                                    modifier: currentModifier + 1 
-                                  }
-                                  const filteredExp = filterBlankExperiences(newExp)
-                                  onUpdate && onUpdate(item.id, { experience: filteredExp })
-                                } else if (e.key === 'ArrowDown') {
-                                  e.preventDefault()
-                                  const newExp = [...(item.experience || [])]
-                                  const currentModifier = typeof exp === 'object' ? (exp.modifier || 0) : 0
-                                  newExp[index] = { 
-                                    name: typeof exp === 'string' ? exp : exp.name || '', 
-                                    modifier: Math.max(0, currentModifier - 1)
-                                  }
-                                  const filteredExp = filterBlankExperiences(newExp)
-                                  onUpdate && onUpdate(item.id, { experience: filteredExp })
-                                }
-                              }}
-                              style={{
-                                width: '24px',
-                                height: '24px',
-                                border: '1px solid var(--text-secondary)',
-                                borderRadius: '4px',
-                                backgroundColor: 'transparent',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                paddingTop: '1px',
-                                fontSize: '0.8rem',
-                                fontWeight: 600,
-                                color: 'var(--text-primary)',
-                                textAlign: 'center',
-                                outline: 'none'
-                              }}
-                            />
-                          </div>
-                          
-                          <div style={{
-                            marginLeft: '32px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                          }}>
-                            <input
-                              type="text"
-                              value={typeof exp === 'string' ? exp : exp.name || ''}
-                              onChange={(e) => {
-                                const newExp = [...(item.experience || [])]
-                                const currentModifier = typeof exp === 'object' ? (exp.modifier || 0) : 0
-                                newExp[index] = { name: e.target.value, modifier: currentModifier }
-                                
-                                // Filter out blank experiences first
-                                let filteredExp = filterBlankExperiences(newExp)
-                                
-                                // Auto-add new blank experience if the last experience has a name
-                                const lastExperience = filteredExp[filteredExp.length - 1]
-                                if (lastExperience && (typeof lastExperience === 'string' ? lastExperience.trim() : lastExperience.name?.trim())) {
-                                  filteredExp.push({ name: '', modifier: 0 })
-                                }
-                                
-                                onUpdate && onUpdate(item.id, { experience: filteredExp })
-                              }}
-                              placeholder="Experience name"
-                              style={{
-                                flex: 1,
-                                padding: '0.25rem 0.5rem',
-                                border: '1px solid var(--border)',
-                                borderRadius: '4px',
-                                backgroundColor: 'var(--bg-primary)',
-                                color: 'var(--text-primary)',
-                                fontSize: '0.875rem',
-                                transition: 'background-color 0.2s'
-                              }}
-                            />
-                            
-                            {/* Control Buttons */}
-                            <div style={{ display: 'flex', gap: '0.125rem' }}>
-                              {/* Up Button */}
-                              <button
-                                onClick={() => {
-                                  const newExp = [...(item.experience || [])]
-                                  const currentExpName = typeof exp === 'string' ? exp.trim() : exp.name?.trim()
-                                  const prevExp = newExp[index - 1]
-                                  const prevExpName = typeof prevExp === 'string' ? prevExp.trim() : prevExp.name?.trim()
-                                  
-                                  if (index > 0 && index < newExp.length && currentExpName && prevExpName) {
-                                    // Swap with previous experience
-                                    newExp[index] = prevExp
-                                    newExp[index - 1] = exp
-                                    const filteredExp = filterBlankExperiences(newExp)
-                                    onUpdate && onUpdate(item.id, { experience: filteredExp })
-                                  }
-                                }}
-                                disabled={index === 0 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index - 1] === 'string' ? experiencesToShow[index - 1].trim() : experiencesToShow[index - 1].name?.trim())}
-                                style={{
-                                  width: '22px',
-                                  height: '22px',
-                                  padding: '0',
-                                  border: '1px solid var(--border)',
-                                  borderRadius: '3px',
-                                  backgroundColor: (index === 0 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index - 1] === 'string' ? experiencesToShow[index - 1].trim() : experiencesToShow[index - 1].name?.trim())) ? 'var(--gray-800)' : 'var(--gray-700)',
-                                  color: (index === 0 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index - 1] === 'string' ? experiencesToShow[index - 1].trim() : experiencesToShow[index - 1].name?.trim())) ? 'var(--text-secondary)' : 'white',
-                                  cursor: (index === 0 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index - 1] === 'string' ? experiencesToShow[index - 1].trim() : experiencesToShow[index - 1].name?.trim())) ? 'not-allowed' : 'pointer',
-                                  opacity: (index === 0 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index - 1] === 'string' ? experiencesToShow[index - 1].trim() : experiencesToShow[index - 1].name?.trim())) ? 0.5 : 1,
-                                  fontWeight: '600',
-                                  fontSize: '12px',
-                                  lineHeight: '1',
-                                  transition: 'background-color 0.2s',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
-                                title="Move up"
-                              >
-                                ↑
-                              </button>
-                              
-                              {/* Down Button */}
-                              <button
-                                onClick={() => {
-                                  const newExp = [...(item.experience || [])]
-                                  const currentExpName = typeof exp === 'string' ? exp.trim() : exp.name?.trim()
-                                  const nextExp = newExp[index + 1]
-                                  const nextExpName = typeof nextExp === 'string' ? nextExp.trim() : nextExp.name?.trim()
-                                  
-                                  if (index < newExp.length - 1 && index >= 0 && currentExpName && nextExpName) {
-                                    // Swap with next experience
-                                    newExp[index] = nextExp
-                                    newExp[index + 1] = exp
-                                    const filteredExp = filterBlankExperiences(newExp)
-                                    onUpdate && onUpdate(item.id, { experience: filteredExp })
-                                  }
-                                }}
-                                disabled={index === experiencesToShow.length - 1 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index + 1] === 'string' ? experiencesToShow[index + 1].trim() : experiencesToShow[index + 1].name?.trim())}
-                                style={{
-                                  width: '22px',
-                                  height: '22px',
-                                  padding: '0',
-                                  border: '1px solid var(--border)',
-                                  borderRadius: '3px',
-                                  backgroundColor: (index === experiencesToShow.length - 1 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index + 1] === 'string' ? experiencesToShow[index + 1].trim() : experiencesToShow[index + 1].name?.trim())) ? 'var(--gray-800)' : 'var(--gray-700)',
-                                  color: (index === experiencesToShow.length - 1 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index + 1] === 'string' ? experiencesToShow[index + 1].trim() : experiencesToShow[index + 1].name?.trim())) ? 'var(--text-secondary)' : 'white',
-                                  cursor: (index === experiencesToShow.length - 1 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index + 1] === 'string' ? experiencesToShow[index + 1].trim() : experiencesToShow[index + 1].name?.trim())) ? 'not-allowed' : 'pointer',
-                                  opacity: (index === experiencesToShow.length - 1 || !(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) || !(typeof experiencesToShow[index + 1] === 'string' ? experiencesToShow[index + 1].trim() : experiencesToShow[index + 1].name?.trim())) ? 0.5 : 1,
-                                  fontWeight: '600',
-                                  fontSize: '12px',
-                                  lineHeight: '1',
-                                  transition: 'background-color 0.2s',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
-                                title="Move down"
-                              >
-                                ↓
-                              </button>
-                              
-                              {/* Delete Button */}
-                              <button
-                                onClick={() => handleExperienceDeleteClick(exp, index)}
-                                disabled={!(typeof exp === 'string' ? exp.trim() : exp.name?.trim())}
-                                style={{
-                                  width: '22px',
-                                  height: '22px',
-                                  padding: '0',
-                                  border: '1px solid var(--border)',
-                                  borderRadius: '3px',
-                                  backgroundColor: deleteConfirmations[getExperienceKey(exp, index)] ? 'var(--danger)' : (!(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) ? 'var(--gray-800)' : 'var(--gray-700)'),
-                                  color: (!(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) ? 'var(--text-secondary)' : 'white'),
-                                  cursor: (!(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) ? 'not-allowed' : 'pointer'),
-                                  opacity: (!(typeof exp === 'string' ? exp.trim() : exp.name?.trim()) ? 0.5 : 1),
-                                  fontWeight: '600',
-                                  fontSize: '12px',
-                                  lineHeight: '1',
-                                  transition: 'background-color 0.2s',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
-                                title={deleteConfirmations[getExperienceKey(exp, index)] ? "Click again to confirm delete" : "Delete experience"}
-                              >
-                                ×
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    })()}
-                  </div>
-                ) : (
-              <div style={{
-                fontSize: '0.875rem',
-                  lineHeight: 1.4,
-                color: 'var(--text-secondary)'
-              }}>
-                  {item.experience && item.experience.length > 0 ? (
-                    item.experience.map((exp, index) => {
-                      if (typeof exp === 'string') {
-                        // Handle string format - try to parse bonus from the end
-                        const match = exp.match(/^(.+?)\s*([+-]?\d+)$/)
-                        if (match) {
-                          const [, name, bonus] = match
-                          return (
-                            <div key={index} style={{ 
-                              position: 'relative',
-                              marginBottom: '0.75rem' 
-                            }}>
-                              <div style={{
-                                position: 'absolute',
-                                left: 0,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-            paddingTop: '1px',
-                                width: '24px',
-                                height: '24px'
-                              }}>
-                                <div style={{
-                                  width: '24px',
-                                  height: '24px',
-                                  border: '1px solid var(--text-secondary)',
-                                  borderRadius: '4px',
-                                  backgroundColor: 'transparent',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-            paddingTop: '1px'
-                                }}>
-                                  <span style={{
-                                    fontSize: '0.8rem',
-                                    fontWeight: 600,
-                                    color: 'var(--text-primary)'
-                                  }}>
-                                    {bonus}
-                                  </span>
-                                </div>
-                              </div>
-                              <span style={{ marginLeft: '32px' }}>{name}</span>
-                            </div>
-                          )
-                        } else {
-                          // No bonus found, just show the string
-                          return (
-                  <div key={index} style={{ marginBottom: '0.25rem' }}>
-                              {exp}
-                  </div>
-                          )
-                        }
-                      } else {
-                        // Handle object format
-                        return (
-                          <div key={index} style={{ 
-                            position: 'relative',
-                            marginBottom: '0.75rem' 
-                          }}>
-                            <div style={{
-                              position: 'absolute',
-                              left: 0,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-            paddingTop: '1px',
-                              width: '24px',
-                              height: '24px'
-                            }}>
-                              <div style={{
-                                width: '24px',
-                                height: '24px',
-                                border: '1px solid var(--text-secondary)',
-                                borderRadius: '4px',
-                                backgroundColor: 'transparent',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-            paddingTop: '1px'
-                              }}>
-                                <span style={{
-                                  fontSize: '0.8rem',
-                                  fontWeight: 600,
-                                  color: 'var(--text-primary)'
-                                }}>
-                                  {exp.modifier >= 0 ? '+' : ''}{exp.modifier}
-                                </span>
-              </div>
-                            </div>
-                            <span style={{ marginLeft: '32px' }}>{exp.name}</span>
-                          </div>
-                        )
-                      }
-                    })
-                  ) : null}
-              </div>
-            )}
-            </div>
+            <ExperienceSection
+              item={item}
+              isEditMode={isEditMode}
+              onUpdate={onUpdate}
+              deleteConfirmations={deleteConfirmations}
+              setDeleteConfirmations={setDeleteConfirmations}
+            />
           </div>
         )}
-
         <StandardAttackSection item={item} isEditMode={isEditMode} onUpdate={onUpdate} />
 
         <FeaturesSection
@@ -1978,8 +744,6 @@ const GameCard = ({
 
           </div>
 
-        {/* Damage Input Popup for Adversaries */}
-        {renderDamageInput()}
       </div>
       </ContainerWithTab>
     )
