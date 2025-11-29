@@ -45,11 +45,10 @@ const EntityColumns = ({
                   <Panel
                     key={`spacer-${removingCardSpacer.baseName}`}
                     style={{
-                      width: spacerShrinking ? '0px' : `${columnWidth + gap}px`,
+                      width: spacerShrinking ? '0px' : `${columnWidth}px`,
                       flexShrink: 0,
                       flexGrow: 0,
                       flex: 'none',
-                      paddingLeft: spacerShrinking ? '0px' : `${gap}px`,
                       paddingRight: '0',
                       paddingTop: spacerShrinking ? '0px' : `${gap}px`,
                       paddingBottom: spacerShrinking ? '0px' : `${gap}px`,
@@ -60,7 +59,7 @@ const EntityColumns = ({
                       alignItems: 'stretch',
                       height: '100%',
                       opacity: 0,
-                      transition: 'width 0.3s ease, padding-left 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease',
+                      transition: 'width 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease',
                     }}
                   />,
                 )
@@ -71,11 +70,10 @@ const EntityColumns = ({
                 <Panel
                   key={`${group.type}-${group.baseName}`}
                   style={{
-                    width: `${columnWidth + gap}px`,
+                    width: `${columnWidth}px`,
                     flexShrink: 0,
                     flexGrow: 0,
                     flex: 'none',
-                    paddingLeft: `${gap}px`,
                     paddingRight: '0',
                     paddingTop: `${group.type === 'adversary' ? gap + 52 : gap}px`,
                     paddingBottom: `${gap}px`,
@@ -192,8 +190,9 @@ const EntityColumns = ({
                                     (g) => g.baseName === group.baseName && g.type === 'adversary',
                                   )
                                   if (groupIndex >= 0) {
-                                    const cardPosition = groupIndex * (columnWidth + gap)
-                                    const cardEnd = cardPosition + columnWidth + gap
+                                    // Account for left padding: gap + groupIndex * (columnWidth + gap)
+                                    const cardPosition = gap + groupIndex * (columnWidth + gap)
+                                    const cardEnd = cardPosition + columnWidth
                                     const margin = 10
                                     const isVisible =
                                       cardPosition >= currentScroll - margin &&
@@ -326,11 +325,10 @@ const EntityColumns = ({
                 <Panel
                   key={`spacer-${removingCardSpacer.baseName}`}
                   style={{
-                    width: spacerShrinking ? '0px' : `${columnWidth + gap}px`,
+                    width: spacerShrinking ? '0px' : `${columnWidth}px`,
                     flexShrink: 0,
                     flexGrow: 0,
                     flex: 'none',
-                    paddingLeft: spacerShrinking ? '0px' : `${gap}px`,
                     paddingRight: '0',
                     paddingTop: spacerShrinking ? '0px' : `${gap}px`,
                     paddingBottom: spacerShrinking ? '0px' : `${gap}px`,
@@ -341,7 +339,7 @@ const EntityColumns = ({
                     alignItems: 'stretch',
                     height: '100%',
                     opacity: 0,
-                    transition: 'width 0.3s ease, padding-left 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease',
+                    transition: 'width 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease',
                   }}
                 />,
               )
@@ -352,7 +350,7 @@ const EntityColumns = ({
       {browserOpenAtPosition !== null && (
         <div
           style={{
-            width: `${columnWidth + gap}px`,
+            width: `${columnWidth}px`,
             flexShrink: 0,
             flexGrow: 0,
             flex: 'none',

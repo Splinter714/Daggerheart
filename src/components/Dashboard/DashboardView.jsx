@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import { useGameState } from '../../state/state'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import EncounterBuilder from './EncounterBuilder'
-import { Plus, X, Minus, Pencil } from 'lucide-react'
-import CustomAdversaryCreator from '../Adversaries/CustomAdversaryCreator'
 import { getDefaultAdversaryValues } from '../Adversaries/adversaryDefaults'
 import { useAppKeyboardShortcuts } from './useAppKeyboardShortcuts'
 import { 
@@ -16,39 +14,12 @@ import BrowserOverlay from './BrowserOverlay'
 import EntityColumns from './EntityColumns'
 import { useMinionSync } from './hooks/useMinionSync'
 import { useColumnLayout } from './hooks/useColumnLayout'
+import ErrorBoundary from './ErrorBoundary'
+import { useBrowserOverlay } from './hooks/useBrowserOverlay'
+import { useSmoothScroll } from './hooks/useSmoothScroll'
+import { useEntityGroups } from './hooks/useEntityGroups'
+import { useAdversaryAddition } from './hooks/useAdversaryAddition'
 import './DashboardView.css'
-
-// Simple Error Boundary for debugging
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { hasError: false, error: null }
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error }
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="p-md text-red">
-          <h3>Something went wrong:</h3>
-          <pre>{this.state.error?.toString()}</pre>
-          <button className="btn-base btn-text" onClick={() => this.setState({ hasError: false, error: null })}>
-            Try again
-          </button>
-        </div>
-      )
-    }
-
-    return this.props.children
-  }
-}
 
 // Main Dashboard View Component
 const DashboardContent = () => {
@@ -71,10 +42,8 @@ const DashboardContent = () => {
     createEnvironment,
     updateEnvironment,
     deleteEnvironment,
-    createCountdown,
     updateCountdown,
     deleteCountdown,
-    advanceCountdown,
     saveEncounter,
     loadEncounter,
     deleteEncounter
@@ -84,9 +53,7 @@ const DashboardContent = () => {
   
   // Dashboard state
   const [encounterBuilderOpen, setEncounterBuilderOpen] = useState(false)
-  const [browserOpenAtPosition, setBrowserOpenAtPosition] = useState(null) // null or index where browser should appear
   const [editingAdversaryId, setEditingAdversaryId] = useState(null) // ID of adversary being edited, or null
-  const [creatingCustomAdversary, setCreatingCustomAdversary] = useState(false) // Whether creating a new custom adversary
   const [browserActiveTab, setBrowserActiveTab] = useState('adversaries') // Active tab in browser overlay
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null) // Selected custom adversary in browser
   
@@ -100,274 +67,21 @@ const DashboardContent = () => {
 
   const { columnWidth, gap } = useColumnLayout(scrollContainerRef)
 
-  // Encounter Builder handlers
-  const handleOpenEncounterBuilder = () => {
-    setEncounterBuilderOpen(true)
-  }
+  const { browserOpenAtPosition, handleOpenBrowser, handleCloseBrowser } = useBrowserOverlay({
+    scrollContainerRef,
+    columnWidth,
+    gap,
+    onCloseReset: () => setBrowserActiveTab('adversaries')
+  })
+
+  const smoothScrollTo = useSmoothScroll(scrollContainerRef)
 
   const handleCloseEncounterBuilder = useCallback(() => {
     setEncounterBuilderOpen(false)
   }, [])
 
-  // Handle opening browser at a specific position
-  const handleOpenBrowser = useCallback((position) => {
-    // Capture scroll position before opening browser
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current
-      const currentScroll = container.scrollLeft
-      const maxScroll = container.scrollWidth - container.clientWidth
-      const wasAtMaxScroll = Math.abs(currentScroll - maxScroll) < 1 // Within 1px of max
-      
-      console.log('[BROWSER_OPEN] Capturing scroll state:', {
-        currentScroll,
-        maxScroll,
-        scrollWidth: container.scrollWidth,
-        clientWidth: container.clientWidth,
-        wasAtMaxScroll,
-        position
-      })
-      
-      // Store scroll state on container
-      container._scrollBeforeBrowserOpen = currentScroll
-      container._scrollWidthBeforeOpen = container.scrollWidth
-      container._wasAtMaxScrollBeforeBrowserOpen = wasAtMaxScroll
-    }
-    setBrowserOpenAtPosition(position)
-  }, [])
 
-  // Log spacer state changes
-  useEffect(() => {
-    if (browserOpenAtPosition !== null) {
-      console.log('[SPACER] Spacer added, dimensions:', {
-        width: columnWidth + gap,
-        columnWidth,
-        gap
-      })
-    } else {
-      console.log('[SPACER] Spacer removed')
-    }
-  }, [browserOpenAtPosition, columnWidth, gap])
-
-  // Adjust scroll position when browser opens/closes to prevent shift
-  useEffect(() => {
-    if (!scrollContainerRef.current) return
-    
-    const container = scrollContainerRef.current
-    
-    console.log('[SCROLL_ADJUST] useEffect triggered, browserOpenAtPosition:', browserOpenAtPosition, 'columnWidth:', columnWidth, 'gap:', gap)
-    
-    if (browserOpenAtPosition !== null) {
-      // Browser is opening - wait for DOM to update with spacer
-      console.log('[BROWSER_OPEN] useEffect triggered, waiting for DOM update...')
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (!scrollContainerRef.current) return
-          const updatedContainer = scrollContainerRef.current
-          
-          const wasAtMaxScroll = updatedContainer._wasAtMaxScrollBeforeBrowserOpen
-          const scrollBeforeOpen = updatedContainer._scrollBeforeBrowserOpen || 0
-          const currentScroll = updatedContainer.scrollLeft
-          const newMaxScroll = updatedContainer.scrollWidth - updatedContainer.clientWidth
-          
-          console.log('[BROWSER_OPEN] After DOM update:', {
-            wasAtMaxScroll,
-            scrollBeforeOpen,
-            currentScroll,
-            newMaxScroll,
-            scrollWidth: updatedContainer.scrollWidth,
-            clientWidth: updatedContainer.clientWidth,
-            scrollDelta: currentScroll - scrollBeforeOpen,
-            expectedSpacerWidth: columnWidth + gap,
-            actualWidthIncrease: updatedContainer.scrollWidth - (updatedContainer._scrollWidthBeforeOpen || updatedContainer.scrollWidth)
-          })
-          
-          if (wasAtMaxScroll) {
-            // User was at max scroll - maintain same scroll position
-            // Content doesn't move, only scrollable area expands, so we should NOT scroll
-            console.log('[BROWSER_OPEN] Was at max scroll, maintaining position to prevent shift:', scrollBeforeOpen)
-            updatedContainer.scrollLeft = scrollBeforeOpen
-            console.log('[BROWSER_OPEN] After maintaining position, scrollLeft:', updatedContainer.scrollLeft)
-          } else {
-            // Not at max scroll - maintain same scroll position (content doesn't move)
-            console.log('[BROWSER_OPEN] Not at max scroll, maintaining position:', scrollBeforeOpen)
-            updatedContainer.scrollLeft = scrollBeforeOpen
-          }
-          
-          // Clean up
-          delete updatedContainer._scrollBeforeBrowserOpen
-          delete updatedContainer._wasAtMaxScrollBeforeBrowserOpen
-        })
-      })
-    } else {
-      // Browser is closing - wait for DOM to update (spacer removed)
-      console.log('[BROWSER_CLOSE] useEffect triggered, waiting for DOM update...')
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (!scrollContainerRef.current) return
-          const updatedContainer = scrollContainerRef.current
-          const scrollBeforeClose = updatedContainer._scrollBeforeBrowserClose || 0
-          const currentScroll = updatedContainer.scrollLeft
-          const newMaxScroll = updatedContainer.scrollWidth - updatedContainer.clientWidth
-          
-          console.log('[BROWSER_CLOSE] After DOM update:', {
-            scrollBeforeClose,
-            currentScroll,
-            newMaxScroll,
-            scrollWidth: updatedContainer.scrollWidth,
-            clientWidth: updatedContainer.clientWidth,
-            scrollDelta: currentScroll - scrollBeforeClose,
-            expectedSpacerWidth: columnWidth + gap,
-            actualWidthDecrease: (updatedContainer._scrollWidthBeforeClose || updatedContainer.scrollWidth) - updatedContainer.scrollWidth
-          })
-          
-          // Clamp to new max scroll (spacer removed, so max scroll is lower)
-          const targetScroll = Math.min(scrollBeforeClose, newMaxScroll)
-          console.log('[BROWSER_CLOSE] Setting scroll to:', targetScroll, '(min of', scrollBeforeClose, 'and', newMaxScroll, ')')
-          updatedContainer.scrollLeft = targetScroll
-          console.log('[BROWSER_CLOSE] After adjustment, scrollLeft:', updatedContainer.scrollLeft)
-          
-          // Clean up
-          delete updatedContainer._scrollBeforeBrowserClose
-        })
-      })
-    }
-  }, [browserOpenAtPosition, columnWidth, gap])
-
-  // Handle closing browser
-  const handleCloseBrowser = useCallback(() => {
-    // Capture scroll position before closing browser
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current
-      const currentScroll = container.scrollLeft
-      const maxScroll = container.scrollWidth - container.clientWidth
-      
-      console.log('[BROWSER_CLOSE] Capturing scroll state:', {
-        currentScroll,
-        maxScroll,
-        scrollWidth: container.scrollWidth,
-        clientWidth: container.clientWidth
-      })
-      
-      container._scrollBeforeBrowserClose = currentScroll
-      container._scrollWidthBeforeClose = container.scrollWidth
-    }
-    setBrowserOpenAtPosition(null)
-    setBrowserActiveTab('adversaries') // Reset to adversaries tab when closing
-  }, [])
-
-  // Smooth scroll helper
-  const smoothScrollTo = useCallback((targetScrollLeft, duration = 500, reason = 'unknown') => {
-    if (!scrollContainerRef.current) {
-      return
-    }
-    
-    const container = scrollContainerRef.current
-    const startScrollLeft = container.scrollLeft
-    const distance = targetScrollLeft - startScrollLeft
-    
-    // If distance is very small, skip animation
-    if (Math.abs(distance) < 1) {
-      return
-    }
-    
-    // Cancel any ongoing horizontal scroll animation
-    if (container._horizontalScrollAnimationId) {
-      cancelAnimationFrame(container._horizontalScrollAnimationId)
-      container._horizontalScrollAnimationId = null
-    }
-    
-    // Temporarily disable scroll-snap to allow smooth scrolling
-    const computedStyle = window.getComputedStyle(container)
-    const hasScrollSnap = computedStyle.scrollSnapType !== 'none'
-    const originalScrollSnapType = hasScrollSnap ? 'x mandatory' : null
-    
-    if (hasScrollSnap) {
-      container.style.scrollSnapType = 'none'
-    }
-    
-    const startTime = performance.now()
-    
-    const animateScroll = (currentTime) => {
-      const elapsed = currentTime - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      
-      // Optimized easing calculation - cache (1 - progress)
-      const oneMinusProgress = 1 - progress
-      const easeOut = 1 - (oneMinusProgress * oneMinusProgress * oneMinusProgress)
-      
-      if (container) {
-        const newScrollLeft = startScrollLeft + (distance * easeOut)
-        container.scrollLeft = newScrollLeft
-      }
-      
-      if (progress < 1) {
-        container._horizontalScrollAnimationId = requestAnimationFrame(animateScroll)
-      } else {
-        // Ensure we're exactly at target
-        if (container) {
-          container.scrollLeft = targetScrollLeft
-          container._horizontalScrollAnimationId = null
-        }
-        // Don't re-enable scroll-snap here - let handleScroll re-enable it when user scrolls
-        // This prevents jitter and interference with subsequent programmatic scrolls
-      }
-    }
-    
-    container._horizontalScrollAnimationId = requestAnimationFrame(animateScroll)
-    
-    // Return cleanup function
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
-      if (hasScrollSnap && container) {
-        container.style.scrollSnapType = originalScrollSnapType || ''
-      }
-    }
-  }, [])
-
-  // Group entities by type for dashboard columns
-  const getEntityGroups = useCallback(() => {
-    const groups = {}
-    
-    // Group adversaries by base name (excluding duplicate numbers)
-    adversaries.forEach(adversary => {
-      const baseName = adversary.baseName || adversary.name?.replace(/\s+\(\d+\)$/, '') || adversary.name
-      if (!groups[baseName]) {
-        groups[baseName] = {
-          type: 'adversary',
-          baseName: baseName,
-          instances: []
-        }
-      }
-      groups[baseName].instances.push(adversary)
-    })
-
-    // TODO: Group environments by name (not yet implemented)
-    // environments.forEach(environment => {
-    //   if (!groups[environment.name]) {
-    //     groups[environment.name] = {
-    //       type: 'environment',
-    //       baseName: environment.name,
-    //       instances: []
-    //     }
-    //   }
-    //   groups[environment.name].instances.push(environment)
-    // })
-
-    // Add countdowns as individual columns
-    countdowns.forEach(countdown => {
-      groups[`countdown-${countdown.id}`] = {
-        type: 'countdown',
-        baseName: countdown.name,
-        instances: [countdown]
-      }
-    })
-
-    return Object.values(groups)
-  }, [adversaries, countdowns])
-
-  const entityGroups = getEntityGroups()
+  const { entityGroups, getEntityGroups } = useEntityGroups(adversaries, countdowns)
 
   // Keyboard shortcuts
   useAppKeyboardShortcuts({
@@ -379,153 +93,19 @@ const DashboardContent = () => {
     updateFear
   })
 
-  // Handle adding adversary from browser
-  const handleAddAdversaryFromBrowser = useCallback((itemData) => {
-    // Check if this adversary already exists BEFORE adding
-    const baseName = itemData.baseName || itemData.name?.replace(/\s+\(\d+\)$/, '') || itemData.name
-    const existingGroup = entityGroups.find(g => g.baseName === baseName && g.type === 'adversary')
-    const isNewAdversary = !existingGroup
-    
-    // Special handling for Minions: add in increments of party size
-    const isMinion = itemData.type === 'Minion'
-    const instancesToAdd = isMinion ? pcCount : 1
-    
-    const addTimestamp = performance.now()
-    // Capture scrollWidth BEFORE adding the adversary, so we can detect if it increased
-    const scrollWidthBeforeAdd = scrollContainerRef.current?.scrollWidth ?? 0
-    const scrollLeftBeforeAdd = scrollContainerRef.current?.scrollLeft ?? 0
-    
-    // Disable scroll-snap BEFORE adding the adversary to prevent browser auto-scrolling
-    // when new content is added
-    const container = scrollContainerRef.current
-    let scrollSnapWasDisabled = false
-    if (container && isNewAdversary) {
-      const computedStyle = window.getComputedStyle(container)
-      if (computedStyle.scrollSnapType !== 'none') {
-        container.style.scrollSnapType = 'none'
-        scrollSnapWasDisabled = true
-      }
-    }
-    
-    // Create multiple instances for minions, single instance for others
-    if (isMinion && instancesToAdd > 1) {
-      const minionArray = Array(instancesToAdd).fill(null).map(() => ({ ...itemData }))
-      createAdversariesBulk(minionArray)
-    } else {
-      createAdversary(itemData)
-    }
-    
-    // If it's a new adversary, mark it for fade-in animation
-    if (isNewAdversary) {
-      const cardKey = `adversary-${baseName}`
-      // Start with opacity 0, then fade in
-      setNewCards(prev => new Set(prev).add(cardKey))
-      // After a brief moment, remove from newCards to trigger fade-in
-      setTimeout(() => {
-        setNewCards(prev => {
-          const next = new Set(prev)
-          next.delete(cardKey)
-          return next
-        })
-      }, 10) // Very short delay to ensure initial render at opacity 0
-    }
-    
-    // Smooth scroll after DOM updates - wait for React to render
-    setTimeout(() => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (!scrollContainerRef.current) return
-          
-          // Ensure container is ready and has correct dimensions
-          const container = scrollContainerRef.current
-          if (container.scrollWidth <= container.clientWidth) {
-            // No scrolling needed
-            return
-          }
-          
-          if (isNewAdversary) {
-            // New adversary - scroll far right
-            // Wait for DOM to update, then check if scrollWidth has stabilized
-            const initialScrollWidth = container.scrollWidth
-            setTimeout(() => {
-              if (!scrollContainerRef.current) return
-              const updatedContainer = scrollContainerRef.current
-              
-              // Check if scrollWidth has changed - if so, wait a bit more
-              const currentScrollWidth = updatedContainer.scrollWidth
-              if (currentScrollWidth !== initialScrollWidth) {
-                // scrollWidth is still updating, wait another frame
-                requestAnimationFrame(() => {
-                  requestAnimationFrame(() => {
-                    if (!scrollContainerRef.current) return
-                    const finalContainer = scrollContainerRef.current
-                    const maxScroll = finalContainer.scrollWidth - finalContainer.clientWidth
-                    const currentScroll = finalContainer.scrollLeft
-                    // Calculate distance from the scroll position BEFORE adding the adversary
-                    const distance = maxScroll - scrollLeftBeforeAdd
-                    const scrollWidthIncreased = finalContainer.scrollWidth > scrollWidthBeforeAdd
-                    // Always scroll if scrollWidth increased (new content added), even if current position is at max
-                    // If scrollWidth increased but we're already at maxScroll, scroll slightly past to ensure distance > 1
-                    if (scrollWidthIncreased && Math.abs(distance) < 1) {
-                      // Scroll slightly past maxScroll to ensure animation triggers (browser will clamp)
-                      smoothScrollTo(maxScroll + 10, 500, 'new-adversary')
-                    } else if (Math.abs(distance) > 1) {
-                      smoothScrollTo(maxScroll, 500, 'new-adversary')
-                    }
-                  })
-                })
-              } else {
-                // scrollWidth is stable, proceed
-                const maxScroll = updatedContainer.scrollWidth - updatedContainer.clientWidth
-                const currentScroll = updatedContainer.scrollLeft
-                // Calculate distance from the scroll position BEFORE adding the adversary
-                const distance = maxScroll - scrollLeftBeforeAdd
-                const scrollWidthIncreased = updatedContainer.scrollWidth > scrollWidthBeforeAdd
-                // Always scroll if scrollWidth increased (new content added), even if current position is at max
-                // If scrollWidth increased but we're already at maxScroll, scroll slightly past to ensure distance > 1
-                if (scrollWidthIncreased && Math.abs(distance) < 1) {
-                  // Scroll slightly past maxScroll to ensure animation triggers (browser will clamp)
-                  smoothScrollTo(maxScroll + 10, 500, 'new-adversary')
-                } else if (Math.abs(distance) > 1) {
-                  smoothScrollTo(maxScroll, 500, 'new-adversary')
-                }
-              }
-            }, 10)
-          } else {
-            // Existing adversary - scroll to that card only if it's not already visible
-            // Recalculate groups after addition to get correct index
-            const updatedGroups = getEntityGroups()
-            const groupIndex = updatedGroups.findIndex(g => g.baseName === baseName && g.type === 'adversary')
-            if (groupIndex >= 0) {
-              const container = scrollContainerRef.current
-              const currentScroll = container.scrollLeft
-              const containerWidth = container.clientWidth
-              
-              // Account for browser overlay covering part of the viewport
-              const effectiveWidth = browserOpenAtPosition !== null 
-                ? containerWidth - (columnWidth + gap) // Overlay takes up one column width
-                : containerWidth
-              
-              // Calculate scroll position - each panel is (columnWidth + gap) wide
-              const cardPosition = groupIndex * (columnWidth + gap)
-              const cardEnd = cardPosition + columnWidth + gap // Full panel width
-              
-              // Check if card is fully visible (accounting for overlay)
-              const margin = 10 // Small margin for visibility check
-              const isVisible = cardPosition >= (currentScroll - margin) && cardEnd <= (currentScroll + effectiveWidth + margin)
-              
-              if (!isVisible) {
-                // Card is not visible, scroll to it
-                smoothScrollTo(cardPosition, 500)
-              }
-            }
-            
-            // Vertical scrolling disabled - instances are added/removed without auto-scrolling
-          }
-        })
-      })
-    }, 50) // Small delay to ensure React has rendered
-  }, [createAdversary, entityGroups, columnWidth, gap, smoothScrollTo, getEntityGroups, browserOpenAtPosition])
+  const handleAddAdversaryFromBrowser = useAdversaryAddition({
+    entityGroups,
+    pcCount,
+    scrollContainerRef,
+    createAdversariesBulk,
+    createAdversary,
+    setNewCards,
+    getEntityGroups,
+    smoothScrollTo,
+    browserOpenAtPosition,
+    columnWidth,
+    gap
+  })
 
   // Handle creating a new custom adversary
   const handleCreateCustomAdversary = useCallback(() => {
@@ -579,12 +159,12 @@ const DashboardContent = () => {
             requestAnimationFrame(() => {
               requestAnimationFrame(() => {
                 if (scrollContainerRef.current) {
-                  const container = scrollContainerRef.current
                   const groupIndex = updatedGroups.findIndex(g => 
                     g.instances.some(i => i.id === newAdversary.id)
                   )
                   if (groupIndex >= 0) {
-                    const cardPosition = groupIndex * (columnWidth + gap)
+                    // Account for left padding: gap + groupIndex * (columnWidth + gap)
+                    const cardPosition = gap + groupIndex * (columnWidth + gap)
                     smoothScrollTo(cardPosition, 600, 'new-custom-adversary')
                   }
                 }
@@ -600,13 +180,11 @@ const DashboardContent = () => {
   // Handle editing an adversary
   const handleEditAdversary = useCallback((adversaryId) => {
     setEditingAdversaryId(adversaryId)
-    setCreatingCustomAdversary(false)
   }, [])
 
   // Handle canceling edit/create
   const handleCancelEdit = useCallback(() => {
     setEditingAdversaryId(null)
-    setCreatingCustomAdversary(false)
   }, [])
 
   // Handle saving custom adversary (create or update)
@@ -742,11 +320,20 @@ const DashboardContent = () => {
         isCustom: true,
         customContentId: customId 
       })
-      setCreatingCustomAdversary(false)
       // Browser will auto-refresh via useEffect watching customContent
       return newId
     }
-  }, [editingAdversaryId, adversaries, customContent, createAdversary, updateAdversary, addCustomAdversary, updateCustomAdversary])
+  }, [
+    editingAdversaryId,
+    adversaries,
+    customContent,
+    createAdversary,
+    updateAdversary,
+    addCustomAdversary,
+    updateCustomAdversary,
+    createAdversariesBulk,
+    deleteAdversary
+  ])
 
   // Convert adversaries to encounter items format for battle points calculation
   const getEncounterItems = useCallback(() => {

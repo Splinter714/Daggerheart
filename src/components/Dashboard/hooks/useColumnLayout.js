@@ -40,7 +40,8 @@ const getInitialWidth = () => {
 }
 
 export const useColumnLayout = (scrollContainerRef) => {
-  const [containerWidth, setContainerWidth] = useState(getInitialWidth)
+  // Start with 0 to avoid initial layout shift - will be measured in useLayoutEffect
+  const [containerWidth, setContainerWidth] = useState(0)
 
   const layout = useMemo(() => calculateColumnLayout(containerWidth), [containerWidth])
 
