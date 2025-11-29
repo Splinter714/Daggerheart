@@ -1,38 +1,22 @@
-import React, { useState, useEffect, useCallback, startTransition, useRef } from 'react'
-import { useGameState } from '../state/state'
-import Pips from './Pips'
+import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react'
+import { useGameState } from '../../state/state'
+import Pips from '../Shared/Pips'
 import Bar from './Toolbars'
-import GameCard from './GameCard'
-import Browser from './Browser'
+import GameCard from '../Adversaries/GameCard'
+import Browser from '../Browser/Browser'
 import ContainerWithTab from './ContainerWithTab'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import Panel from './Panels'
 import EncounterBuilder from './EncounterBuilder'
 import { Plus, X, Minus, Pencil } from 'lucide-react'
-import CustomAdversaryCreator from './CustomAdversaryCreator'
-import { getDefaultAdversaryValues } from '../data/adversaryDefaults'
-import { useAppKeyboardShortcuts } from '../hooks/useAppKeyboardShortcuts'
-
-// Battle Points calculation (from EncounterBuilder)
-const calculateBaseBattlePoints = (pcCount) => (3 * pcCount) + 2
-
-const BATTLE_POINT_COSTS = {
-  'Minion': 1,
-  'Social': 1,
-  'Support': 1,
-  'Horde': 2,
-  'Ranged': 2,
-  'Skulk': 2,
-  'Standard': 2,
-  'Leader': 3,
-  'Bruiser': 4,
-  'Solo': 5
-}
-
-const BATTLE_POINT_ADJUSTMENTS = {
-  twoOrMoreSolos: -2,
-  noBruisersHordesLeadersSolos: 1
-}
+import CustomAdversaryCreator from '../Adversaries/CustomAdversaryCreator'
+import { getDefaultAdversaryValues } from '../Adversaries/adversaryDefaults'
+import { useAppKeyboardShortcuts } from './useAppKeyboardShortcuts'
+import { 
+  calculateBaseBattlePoints, 
+  calculateSpentBattlePoints, 
+  calculateAutomaticAdjustments
+} from './BattlePointsCalculator'
 
 // Simple Error Boundary for debugging
 class ErrorBoundary extends React.Component {
@@ -99,12 +83,7 @@ const DashboardContent = () => {
   const pcCount = partySize || 4
   
   // Dashboard state
-  const [isMobile, setIsMobile] = useState(false)
   const [encounterBuilderOpen, setEncounterBuilderOpen] = useState(false)
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [isClearMode, setIsClearMode] = useState(false)
-  const [showLongTermCountdowns, setShowLongTermCountdowns] = useState(true)
-  const [lastAddedItemType, setLastAddedItemType] = useState(null)
   const [browserOpenAtPosition, setBrowserOpenAtPosition] = useState(null) // null or index where browser should appear
   const [editingAdversaryId, setEditingAdversaryId] = useState(null) // ID of adversary being edited, or null
   const [creatingCustomAdversary, setCreatingCustomAdversary] = useState(false) // Whether creating a new custom adversary
@@ -112,10 +91,11 @@ const DashboardContent = () => {
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null) // Selected custom adversary in browser
   
   // Column layout state
-  const [containerWidth, setContainerWidth] = useState(0)
-  const [scrollPosition, setScrollPosition] = useState(0)
-  const [isScrolling, setIsScrolling] = useState(false)
-  const [removingCards, setRemovingCards] = useState(new Set()) // Track cards being removed for animation
+  const getInitialContainerWidth = () => {
+    if (typeof window === 'undefined') return 0
+    return window.innerWidth
+  }
+  const [containerWidth, setContainerWidth] = useState(getInitialContainerWidth)
   const [newCards, setNewCards] = useState(new Set()) // Track newly added cards for fade-in animation
   const [removingCardSpacer, setRemovingCardSpacer] = useState(null) // Track card being removed with spacer: { baseName, groupIndex }
   const [spacerShrinking, setSpacerShrinking] = useState(false) // Track if spacer should shrink
@@ -182,19 +162,6 @@ const DashboardContent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pcCount]) // Only run when pcCount changes. Uses current adversaries, createAdversariesBulk, deleteAdversary from closure
 
-  // Mobile detection
-  useEffect(() => {
-    const checkMobile = () => {
-      const mediaQuery = window.matchMedia('(max-width: 800px)')
-      setIsMobile(mediaQuery.matches)
-    }
-    
-    checkMobile()
-    const mediaQuery = window.matchMedia('(max-width: 800px)')
-    mediaQuery.addEventListener('change', checkMobile)
-    return () => mediaQuery.removeEventListener('change', checkMobile)
-  }, [])
-
   // Column layout calculations - dynamic sizing to always show full columns
   const gap = 12
   const getMinColumnWidth = (columnCount) => {
@@ -235,15 +202,41 @@ const DashboardContent = () => {
   
   const { visibleColumns, columnWidth } = calculateColumnLayout(containerWidth)
   
-  // Handle container resize
-  useEffect(() => {
-    const handleResize = () => {
-      setContainerWidth(window.innerWidth)
+  // Handle container resize - measure actual scroll container width
+  useLayoutEffect(() => {
+    const measureWidth = () => {
+      if (scrollContainerRef.current) {
+        setContainerWidth(scrollContainerRef.current.clientWidth)
+      } else if (typeof window !== 'undefined') {
+        setContainerWidth(window.innerWidth)
+      }
     }
-    
-    handleResize() // Initial calculation
+
+    measureWidth()
+
+    const handleResize = () => {
+      measureWidth()
+    }
+
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+
+    let resizeObserver
+    if (typeof ResizeObserver !== 'undefined' && scrollContainerRef.current) {
+      resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0]
+        if (entry) {
+          setContainerWidth(entry.contentRect.width)
+        }
+      })
+      resizeObserver.observe(scrollContainerRef.current)
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (resizeObserver) {
+        resizeObserver.disconnect()
+      }
+    }
   }, [])
 
   // Encounter Builder handlers
@@ -560,7 +553,6 @@ const DashboardContent = () => {
     } else {
       createAdversary(itemData)
     }
-    setLastAddedItemType('adversary')
     
     // If it's a new adversary, mark it for fade-in animation
     if (isNewAdversary) {
@@ -914,43 +906,14 @@ const DashboardContent = () => {
 
   // Calculate battle points for balance display
   const encounterItems = getEncounterItems()
-  const baseBattlePoints = calculateBaseBattlePoints(pcCount)
-  
-  // Calculate automatic adjustments
-  const soloCount = encounterItems
-    .filter(item => item.item.type === 'Solo' && item.quantity > 0)
-    .reduce((sum, item) => sum + item.quantity, 0)
-  const hasMajorThreats = encounterItems.some(item => 
-    item.item.type && ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(item.item.type) && item.quantity > 0
-  )
-  
-  let automaticAdjustments = 0
-  if (soloCount >= 2) {
-    automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos
-  }
-  if (!hasMajorThreats) {
-    automaticAdjustments += BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos
-  }
-  
-  const availableBattlePoints = baseBattlePoints + automaticAdjustments
-  
-  const spentBattlePoints = encounterItems.reduce((total, item) => {
-    if (item.type === 'adversary') {
-      const cost = BATTLE_POINT_COSTS[item.item.type] || 2
-      if (item.item.type === 'Minion') {
-        return total + (Math.ceil(item.quantity / pcCount) * cost)
-      }
-      return total + (cost * item.quantity)
-    }
-    return total
-  }, 0)
+  const automaticAdjustments = calculateAutomaticAdjustments(encounterItems)
+  const availableBattlePoints = calculateBaseBattlePoints(pcCount) + automaticAdjustments
+  const spentBattlePoints = calculateSpentBattlePoints(encounterItems, pcCount)
 
   // Scroll handling - just track position, let CSS handle snapping
   const scrollTimeoutRef = useRef(null)
   
   const handleScroll = useCallback((e) => {
-    setScrollPosition(e.target.scrollLeft)
-    
     // Clear existing timeout
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current)
@@ -963,15 +926,6 @@ const DashboardContent = () => {
         container.style.scrollSnapType = 'x mandatory'
       }
     }, 150) // Wait 150ms after last scroll event
-  }, [])
-
-  // Touch gesture handling - simplified
-  const handleTouchStart = useCallback(() => {
-    setIsScrolling(true)
-  }, [])
-
-  const handleTouchEnd = useCallback(() => {
-    setTimeout(() => setIsScrolling(false), 100)
   }, [])
 
   // Remove auto-open encounter builder logic - replaced with empty state button
@@ -1605,15 +1559,12 @@ const DashboardContent = () => {
         onClose={handleCloseEncounterBuilder}
         onAddAdversary={(itemData) => {
           createAdversary(itemData)
-          setLastAddedItemType('adversary')
         }}
         onAddAdversariesBulk={(adversariesArray) => {
           createAdversariesBulk(adversariesArray)
-          setLastAddedItemType('adversary')
         }}
         onAddEnvironment={(itemData) => {
           createEnvironment(itemData)
-          setLastAddedItemType('environment')
         }}
         onDeleteAdversary={deleteAdversary}
         onDeleteEnvironment={deleteEnvironment}
@@ -1635,6 +1586,16 @@ const DashboardContent = () => {
 
 // Dashboard wrapper with providers
 const DashboardView = () => {
+  const { isLoaded } = useGameState()
+
+  if (!isLoaded) {
+    return (
+      <div className="app loading-state">
+        <div className="loading-placeholder" aria-hidden="true" />
+      </div>
+    )
+  }
+
   return (
     <ErrorBoundary>
       <DashboardContent />

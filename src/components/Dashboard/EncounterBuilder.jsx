@@ -1,35 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Plus, Minus, Users, Calculator } from 'lucide-react'
-import Browser from './Browser'
-import { useGameState } from '../state/state'
-import GameCard from './GameCard'
-
-// Battle Points calculation based on Daggerheart rules
-const calculateBaseBattlePoints = (pcCount) => (3 * pcCount) + 2
-
-// Battle Points costs for different adversary types
-const BATTLE_POINT_COSTS = {
-  'Minion': 1, // per group equal to party size
-  'Social': 1,
-  'Support': 1,
-  'Horde': 2,
-  'Ranged': 2,
-  'Skulk': 2,
-  'Standard': 2,
-  'Leader': 3,
-  'Bruiser': 4,
-  'Solo': 5
-}
-
-// Battle Points adjustments
-const BATTLE_POINT_ADJUSTMENTS = {
-  lessDifficult: -1,
-  twoOrMoreSolos: -2,
-  increasedDamage: -2,
-  lowerTierAdversary: 1,
-  noBruisersHordesLeadersSolos: 1,
-  moreDangerous: 2
-}
+import Browser from '../Browser/Browser'
+import { useGameState } from '../../state/state'
+import GameCard from '../Adversaries/GameCard'
+import {
+  calculateBaseBattlePoints,
+  calculateSpentBattlePoints,
+  calculateAutomaticAdjustments,
+  calculateAvailableBattlePoints,
+  BATTLE_POINT_COSTS,
+  BATTLE_POINT_ADJUSTMENTS
+} from './BattlePointsCalculator'
 
 const EncounterBuilder = ({ 
   isOpen, 
@@ -231,59 +212,14 @@ const EncounterBuilder = ({
   
   // Calculate automatic adjustments based on encounter composition
   const automaticAdjustments = React.useMemo(() => {
-    let adjustments = 0
-    
-    // Check for 2 or more Solo adversaries (only count those with quantity > 0)
-    const soloCount = encounterItems
-      .filter(item => item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0)
-      .reduce((sum, item) => sum + item.quantity, 0)
-    if (soloCount >= 2) {
-      adjustments += BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos
-    }
-    
-    // Check if no Bruisers, Hordes, Leaders, or Solos (only count those with quantity > 0)
-    const hasBruisers = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Bruiser' && item.quantity > 0
-    )
-    const hasHordes = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Horde' && item.quantity > 0
-    )
-    const hasLeaders = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Leader' && item.quantity > 0
-    )
-    const hasSolos = encounterItems.some(item => 
-      item.type === 'adversary' && item.item.type === 'Solo' && item.quantity > 0
-    )
-    
-    if (!hasBruisers && !hasHordes && !hasLeaders && !hasSolos) {
-      adjustments += BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos
-    }
-    
-    
-    return adjustments
+    return calculateAutomaticAdjustments(encounterItems)
   }, [encounterItems])
   
   // Calculate available battle points
-  const baseBattlePoints = calculateBaseBattlePoints(pcCount)
-  const manualAdjustments = Object.entries(battlePointsAdjustments)
-    .filter(([_, enabled]) => enabled)
-    .reduce((sum, [key, _]) => sum + BATTLE_POINT_ADJUSTMENTS[key], 0)
-  const availableBattlePoints = baseBattlePoints + manualAdjustments + automaticAdjustments
+  const availableBattlePoints = calculateAvailableBattlePoints(pcCount, battlePointsAdjustments) + automaticAdjustments
   
   // Calculate spent battle points
-  const spentBattlePoints = encounterItems.reduce((total, item) => {
-    if (item.type === 'adversary') {
-      const cost = BATTLE_POINT_COSTS[item.item.type] || 2 // Default to Standard cost
-      
-      // For Minions: quantity is already stored in groups (pcCount each)
-      if (item.item.type === 'Minion') {
-        return total + (Math.ceil(item.quantity / pcCount) * cost)
-      }
-      
-      return total + (cost * item.quantity)
-    }
-    return total // Environments don't cost battle points
-  }, 0)
+  const spentBattlePoints = calculateSpentBattlePoints(encounterItems, pcCount)
   
   const remainingBattlePoints = availableBattlePoints - spentBattlePoints
   

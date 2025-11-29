@@ -1,10 +1,22 @@
 import React, { useMemo, useEffect, useRef, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Filter, Square, CheckSquare, Plus, X, Trash2, BookOpen, Hammer, HelpCircle } from 'lucide-react'
-import GameCard from './GameCard'
-import logoImage from '../assets/daggerheart-logo.svg'
-import { useGameState } from '../state/state'
-import CustomAdversaryCreator from './CustomAdversaryCreator'
+import GameCard from '../Adversaries/GameCard'
+import logoImage from '../../assets/daggerheart-logo.svg'
+import { useGameState } from '../../state/state'
+import CustomAdversaryCreator from '../Adversaries/CustomAdversaryCreator'
+import { BATTLE_POINT_COSTS, BATTLE_POINT_ADJUSTMENTS } from '../Dashboard/BattlePointsCalculator'
+import {
+  loadData as loadDataLibrary,
+  getData,
+  reloadData,
+  loadCustomContent,
+  saveCustomContent,
+  updateCustomContent as updateCustomContentLibrary,
+  deleteCustomContent as deleteCustomContentLibrary,
+  adversariesData as libraryAdversariesData,
+  environmentsData as libraryEnvironmentsData
+} from './DataLibrary'
 
 // Hook to calculate optimal grid columns based on container width and item count
 const useOptimalGridColumns = (itemCount, containerRef) => {
@@ -89,184 +101,30 @@ const AdversaryList = ({ encounter }) => {
   )
 }
 
-// Battle Points costs for different adversary types (from EncounterBuilder)
-const BATTLE_POINT_COSTS = {
-  'Minion': 1, // per group equal to party size
-  'Social': 1,
-  'Support': 1,
-  'Horde': 2,
-  'Ranged': 2,
-  'Skulk': 2,
-  'Standard': 2,
-  'Leader': 3,
-  'Bruiser': 4,
-  'Solo': 5
-}
+// Use DataLibrary for data loading - keep local references for backward compatibility
+let adversariesData = libraryAdversariesData
+let environmentsData = libraryEnvironmentsData
 
-// Battle Points adjustments (from EncounterBuilder)
-const BATTLE_POINT_ADJUSTMENTS = {
-  twoOrMoreSolos: -2,
-  noBruisersHordesLeadersSolos: 1,
-  lowerTierAdversary: 1
-}
-
-// Dynamically import JSON data to keep initial bundle smaller
-let adversariesData = { adversaries: [] }
-let environmentsData = { environments: [] }
-let playtestAdversariesData = { adversaries: [] }
-let playtestEnvironmentsData = { environments: [] }
-let _dataLoaded = false
-
-// Load custom content from localStorage
-const loadCustomContent = () => {
-  const customAdversaries = JSON.parse(localStorage.getItem('daggerheart-custom-adversaries') || '[]')
-  const customEnvironments = JSON.parse(localStorage.getItem('daggerheart-custom-environments') || '[]')
-  return { customAdversaries, customEnvironments }
-}
-
-// Save custom content to localStorage
-const saveCustomContent = (type, content) => {
-  if (type === 'adversary') {
-    localStorage.setItem('daggerheart-custom-adversaries', JSON.stringify(content))
-  } else if (type === 'environment') {
-    localStorage.setItem('daggerheart-custom-environments', JSON.stringify(content))
-  }
-}
-
-// Load data asynchronously
+// Wrapper functions that update local references
 const loadData = async () => {
-  // Prevent multiple simultaneous loads
-  if (_dataLoaded) {
-    return
-  }
-  
-  let officialAdversaries = { adversaries: [] }
-  let officialEnvironments = { environments: [] }
-  let playtestAdv = { adversaries: [] }
-  let playtestEnv = { environments: [] }
-  
-  try {
-    const mod = await import(/* @vite-ignore */ '../data/adversaries.json')
-    officialAdversaries = mod?.default || mod
-  } catch (e) {
-    console.warn('Failed to load adversaries.json:', e)
-  }
-  
-  try {
-    const mod = await import(/* @vite-ignore */ '../data/environments.json')
-    officialEnvironments = mod?.default || mod
-  } catch (e) {
-    console.warn('Failed to load environments.json:', e)
-  }
-  
-  try {
-    const mod = await import(/* @vite-ignore */ '../data/playtest-adversaries.json')
-    playtestAdv = mod?.default || mod
-  } catch (e) {
-    console.warn('Failed to load playtest-adversaries.json:', e)
-  }
-  
-  try {
-    const mod = await import(/* @vite-ignore */ '../data/playtest-environments.json')
-    playtestEnv = mod?.default || mod
-  } catch (e) {
-    console.warn('Failed to load playtest-environments.json:', e)
-  }
-  
-  // Load custom content and merge everything
-  const { customAdversaries, customEnvironments } = loadCustomContent()
-  
-  // Create merged data objects without mutating originals
-  adversariesData = {
-    ...officialAdversaries,
-    adversaries: [
-      ...(officialAdversaries.adversaries || []),
-      ...(playtestAdv.adversaries || []),
-      ...customAdversaries
-    ]
-  }
-  
-  environmentsData = {
-    ...officialEnvironments,
-    environments: [
-      ...(officialEnvironments.environments || []),
-      ...(playtestEnv.environments || []),
-      ...customEnvironments
-    ]
-  }
-  
-  _dataLoaded = true
+  const data = await loadDataLibrary()
+  adversariesData = data.adversariesData
+  environmentsData = data.environmentsData
 }
 
-// Functions to manage custom content
-// Note: addCustomAdversary is now imported from useGameState
-
-const addCustomEnvironment = (environmentData) => {
-  const { customEnvironments } = loadCustomContent()
-  const newEnvironment = {
-    ...environmentData,
-    id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
-    source: environmentData.source || 'Homebrew'
-  }
-  const updatedEnvironments = [...customEnvironments, newEnvironment]
-  saveCustomContent('environment', updatedEnvironments)
-  
-  // Reset flag and reload data to include the new custom environment
-  _dataLoaded = false
-  loadData()
-  
-  return newEnvironment.id
+const updateCustomContent = async (type, id, updates) => {
+  const data = await updateCustomContentLibrary(type, id, updates)
+  adversariesData = data.adversariesData
+  environmentsData = data.environmentsData
 }
 
-const updateCustomContent = (type, id, updates) => {
-  const { customAdversaries, customEnvironments } = loadCustomContent()
-  
-  if (type === 'adversary') {
-    const updatedAdversaries = customAdversaries.map(adv => 
-      adv.id === id ? { ...adv, ...updates } : adv
-    )
-    saveCustomContent('adversary', updatedAdversaries)
-  } else if (type === 'environment') {
-    const updatedEnvironments = customEnvironments.map(env => 
-      env.id === id ? { ...env, ...updates } : env
-    )
-    saveCustomContent('environment', updatedEnvironments)
-  }
-  
-  // Reset flag and reload data to reflect changes
-  _dataLoaded = false
-  loadData()
-}
-
-const deleteCustomContent = (type, id) => {
-  const { customAdversaries, customEnvironments } = loadCustomContent()
-  
-  if (type === 'adversary') {
-    const updatedAdversaries = customAdversaries.filter(adv => adv.id !== id)
-    saveCustomContent('adversary', updatedAdversaries)
-  } else if (type === 'environment') {
-    const updatedEnvironments = customEnvironments.filter(env => env.id !== id)
-    saveCustomContent('environment', updatedEnvironments)
-  }
-  
-  // Reset flag and reload data to reflect changes
-  _dataLoaded = false
-  loadData()
+const deleteCustomContent = async (type, id) => {
+  const data = await deleteCustomContentLibrary(type, id)
+  adversariesData = data.adversariesData
+  environmentsData = data.environmentsData
 }
 
 // Functions to manage playtest content (for development/admin use)
-const addPlaytestAdversary = (adversaryData) => {
-  // Note: This would typically be done by updating the playtest-adversaries.json file directly
-  // This function is here for completeness but playtest content is usually managed via file updates
-  console.warn('addPlaytestAdversary: Playtest content should be managed by updating playtest-adversaries.json directly')
-}
-
-const addPlaytestEnvironment = (environmentData) => {
-  // Note: This would typically be done by updating the playtest-environments.json file directly
-  // This function is here for completeness but playtest content is usually managed via file updates
-  console.warn('addPlaytestEnvironment: Playtest content should be managed by updating playtest-environments.json directly')
-}
-
 // Custom hook for browser functionality - all logic inline
 const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filterCustom = false, customContent = null) => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -307,8 +165,9 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filt
   useEffect(() => {
     if (type === 'adversary' && customContent) {
       const refreshData = async () => {
-        _dataLoaded = false
-        await loadData()
+        const data = await reloadData()
+        adversariesData = data.adversariesData
+        environmentsData = data.environmentsData
         
         let sourceData = []
         if (filterCustom) {
@@ -338,8 +197,9 @@ const useBrowser = (type, encounterItems = [], pcCount = 4, playerTier = 1, filt
 
   // Function to refresh data
   const refreshData = useCallback(async () => {
-    _dataLoaded = false
-    await loadData()
+    const data = await reloadData()
+    adversariesData = data.adversariesData
+    environmentsData = data.environmentsData
     
     // Update data after reload
     let sourceData = []
@@ -2765,13 +2625,10 @@ const styles = {
 
 // Export custom content management functions
 export { 
-  addCustomEnvironment, 
   updateCustomContent, 
   deleteCustomContent,
   loadCustomContent,
-  saveCustomContent,
-  addPlaytestAdversary,
-  addPlaytestEnvironment
+  saveCustomContent
 }
 
 export default Browser

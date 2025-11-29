@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { HelpCircle } from 'lucide-react'
-import logoImage from '../assets/daggerheart-logo.svg'
+import logoImage from '../../assets/daggerheart-logo.svg'
 
 const HelpButton = ({ showFlyout, onFlyoutChange }) => {
   const [helpFlyoutOpen, setHelpFlyoutOpen] = useState(false)

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
 import GameCard from './GameCard'
-import { getDefaultAdversaryValues } from '../data/adversaryDefaults'
+import { getDefaultAdversaryValues } from './adversaryDefaults'
 
 // Load adversary data for autocomplete
 let adversariesData = { adversaries: [] }
@@ -20,14 +20,14 @@ const loadData = async () => {
   let playtestAdv = { adversaries: [] }
   
   try {
-    const mod = await import(/* @vite-ignore */ '../data/adversaries.json')
+    const mod = await import(/* @vite-ignore */ './adversaries.json')
     officialAdversaries = mod?.default || mod
   } catch (e) {
     console.warn('Failed to load adversaries.json:', e)
   }
   
   try {
-    const mod = await import(/* @vite-ignore */ '../data/playtest-adversaries.json')
+    const mod = await import(/* @vite-ignore */ './playtest-adversaries.json')
     playtestAdv = mod?.default || mod
   } catch (e) {
     console.warn('Failed to load playtest-adversaries.json:', e)

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { Droplet, Activity, CheckCircle, X, Hexagon, Triangle, Gem, Star, Locate, Tag, Diamond, Shield, Circle, Skull, Plus, Minus, Pencil, Check } from 'lucide-react'
-import Pips from './Pips'
-import ContainerWithTab from './ContainerWithTab'
+import Pips from '../Shared/Pips'
+import ContainerWithTab from '../Dashboard/ContainerWithTab'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
 
 // Reusable Threshold Tag Component

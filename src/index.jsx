@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import DashboardView from './components/DashboardView.jsx'
+import DashboardView from './components/Dashboard/DashboardView.jsx'
 import { GameStateProvider } from './state/state.jsx'
 import './index.css'
 
