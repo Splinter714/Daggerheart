@@ -30,21 +30,7 @@ const EntityColumns = ({
   setSpacerShrinking,
 }) => {
   return (
-    <div
-      ref={scrollContainerRef}
-      className="dashboard-scroll-container"
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        overflowX: 'auto',
-        overflowY: 'hidden',
-        padding: `0 ${gap}px 0 0`,
-        scrollSnapType: 'x mandatory',
-        height: '100%',
-        width: '100%',
-      }}
-      onScroll={onScroll}
-    >
+    <div ref={scrollContainerRef} className="dashboard-scroll-container" onScroll={onScroll}>
       {entityGroups.length === 0
         ? null
         : (() => {

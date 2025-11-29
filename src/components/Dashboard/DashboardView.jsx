@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useGameState } from '../../state/state'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import EncounterBuilder from './EncounterBuilder'
@@ -14,6 +14,9 @@ import {
 import TopBarControls from './TopBarControls'
 import BrowserOverlay from './BrowserOverlay'
 import EntityColumns from './EntityColumns'
+import { useMinionSync } from './hooks/useMinionSync'
+import { useColumnLayout } from './hooks/useColumnLayout'
+import './DashboardView.css'
 
 // Simple Error Boundary for debugging
 class ErrorBoundary extends React.Component {
@@ -88,153 +91,14 @@ const DashboardContent = () => {
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null) // Selected custom adversary in browser
   
   // Column layout state
-  const getInitialContainerWidth = () => {
-    if (typeof window === 'undefined') return 0
-    return window.innerWidth
-  }
-  const [containerWidth, setContainerWidth] = useState(getInitialContainerWidth)
   const [newCards, setNewCards] = useState(new Set()) // Track newly added cards for fade-in animation
   const [removingCardSpacer, setRemovingCardSpacer] = useState(null) // Track card being removed with spacer: { baseName, groupIndex }
   const [spacerShrinking, setSpacerShrinking] = useState(false) // Track if spacer should shrink
   const scrollContainerRef = useRef(null)
-  const prevPartySizeRef = useRef(pcCount)
 
-  // Adjust minion quantities when party size changes
-  useEffect(() => {
-    const prevPcCount = prevPartySizeRef.current
-    
-    if (prevPcCount !== pcCount && prevPcCount > 0) {
-      // Group adversaries by base name to get minion groups
-      const groups = {}
-      adversaries.forEach(adversary => {
-        const baseName = adversary.baseName || adversary.name?.replace(/\s+\(\d+\)$/, '') || adversary.name
-        if (!groups[baseName]) {
-          groups[baseName] = {
-            type: 'adversary',
-            baseName: baseName,
-            instances: []
-          }
-        }
-        groups[baseName].instances.push(adversary)
-      })
-      
-      Object.values(groups).forEach(group => {
-        if (group.type === 'adversary' && group.instances.length > 0) {
-          const firstInstance = group.instances[0]
-          
-          // Only adjust minions
-          if (firstInstance.type === 'Minion') {
-            const currentInstanceCount = group.instances.length
-            // Calculate how many groups we had with the previous party size
-            const currentGroups = Math.ceil(currentInstanceCount / prevPcCount)
-            // Calculate new instance count to maintain the same number of groups
-            const newInstanceCount = currentGroups * pcCount
-            
-            if (newInstanceCount !== currentInstanceCount) {
-              if (newInstanceCount > currentInstanceCount) {
-                // Need to add instances
-                const instancesToAdd = newInstanceCount - currentInstanceCount
-                const newInstances = Array(instancesToAdd).fill(null).map(() => ({ ...firstInstance }))
-                createAdversariesBulk(newInstances)
-              } else {
-                // Need to remove instances
-                const instancesToRemove = currentInstanceCount - newInstanceCount
-                // Remove from the end
-                const instancesToDelete = group.instances.slice(-instancesToRemove)
-                instancesToDelete.forEach(instance => {
-                  deleteAdversary(instance.id)
-                })
-              }
-            }
-          }
-        }
-      })
-      
-      // Update the ref for next time
-      prevPartySizeRef.current = pcCount
-    } else if (prevPcCount === 0 || prevPartySizeRef.current === 0) {
-      // First render - just set the ref
-      prevPartySizeRef.current = pcCount
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pcCount]) // Only run when pcCount changes. Uses current adversaries, createAdversariesBulk, deleteAdversary from closure
+  useMinionSync(adversaries, pcCount, createAdversariesBulk, deleteAdversary)
 
-  // Column layout calculations - dynamic sizing to always show full columns
-  const gap = 12
-  const getMinColumnWidth = (columnCount) => {
-    if (columnCount === 1) return 200  // Smaller minimum for single column
-    return 350  // Higher minimum for multiple columns
-  }
-  
-  const calculateColumnLayout = (width) => {
-    if (width <= 0) return { visibleColumns: 1, columnWidth: getMinColumnWidth(1) }
-    
-    const padding = gap * 2
-    // Don't reserve space for browser overlay - it overlays on top
-    const availableWidth = width - padding
-    
-    // Try different column counts to find the best fit
-    let layout = { visibleColumns: 1, columnWidth: availableWidth }
-    
-    for (let columns = 1; columns <= 5; columns++) {
-      const totalGapWidth = (columns - 1) * gap
-      const columnWidth = (availableWidth - totalGapWidth) / columns
-      
-      if (columnWidth >= getMinColumnWidth(columns)) {
-        const totalWidth = columns * columnWidth + totalGapWidth
-        if (totalWidth <= availableWidth) {
-          layout = { visibleColumns: columns, columnWidth }
-        }
-      }
-    }
-    
-    // Ensure we never exceed the available width
-    const totalWidth = layout.visibleColumns * layout.columnWidth + (layout.visibleColumns - 1) * gap
-    if (totalWidth > availableWidth) {
-      layout = { visibleColumns: 1, columnWidth: availableWidth }
-    }
-    
-    return layout
-  }
-  
-  const { visibleColumns, columnWidth } = calculateColumnLayout(containerWidth)
-  
-  // Handle container resize - measure actual scroll container width
-  useLayoutEffect(() => {
-    const measureWidth = () => {
-      if (scrollContainerRef.current) {
-        setContainerWidth(scrollContainerRef.current.clientWidth)
-      } else if (typeof window !== 'undefined') {
-        setContainerWidth(window.innerWidth)
-      }
-    }
-
-    measureWidth()
-
-    const handleResize = () => {
-      measureWidth()
-    }
-
-    window.addEventListener('resize', handleResize)
-
-    let resizeObserver
-    if (typeof ResizeObserver !== 'undefined' && scrollContainerRef.current) {
-      resizeObserver = new ResizeObserver((entries) => {
-        const entry = entries[0]
-        if (entry) {
-          setContainerWidth(entry.contentRect.width)
-        }
-      })
-      resizeObserver.observe(scrollContainerRef.current)
-    }
-
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      if (resizeObserver) {
-        resizeObserver.disconnect()
-      }
-    }
-  }, [])
+  const { columnWidth, gap } = useColumnLayout(scrollContainerRef)
 
   // Encounter Builder handlers
   const handleOpenEncounterBuilder = () => {
@@ -927,13 +791,10 @@ const DashboardContent = () => {
 
   // Remove auto-open encounter builder logic - replaced with empty state button
 
-  // Calculate total width needed for all columns
-  const totalColumns = entityGroups.length
-  const totalWidth = totalColumns * columnWidth + (totalColumns - 1) * gap + (gap * 2)
-
   return (
     <div 
-      className="app"
+      className="app dashboard-root"
+      style={{ '--dashboard-gap': `${gap}px` }}
       onClick={(e) => {
         // Clear selection when clicking on app background
         if (e.target === e.currentTarget) {
@@ -956,10 +817,7 @@ const DashboardContent = () => {
       />
 
       {/* Main Dashboard Content */}
-      <div className="main-content" style={{ 
-        position: 'relative',
-        width: '100%'
-      }}>
+      <div className="dashboard-main">
         <BrowserOverlay
           isOpen={browserOpenAtPosition !== null}
           columnWidth={columnWidth}
