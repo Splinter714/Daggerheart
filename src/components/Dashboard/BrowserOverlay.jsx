@@ -28,9 +28,9 @@ const BrowserOverlay = ({
     <div
       style={{
         position: 'absolute',
-        top: `${gap}px`,
-        right: `${gap}px`,
-        bottom: `${gap}px`,
+        top: `${gap}px`, // Match card paddingTop spacing (tab + gap)
+        right: `${gap}px`, // Match card marginRight
+        bottom: `${gap}px`, // Match card paddingBottom
         width: `${columnWidth}px`,
         zIndex: 100,
         overflow: 'visible',

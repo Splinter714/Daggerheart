@@ -19,6 +19,8 @@
   gap: var(--dashboard-gap, 8px);
   box-sizing: border-box;
   scroll-snap-type: x mandatory;
+  scroll-padding-left: var(--dashboard-gap, 8px);
+  scroll-padding-right: var(--dashboard-gap, 8px);
   height: 100%;
   width: 100%;
 }
