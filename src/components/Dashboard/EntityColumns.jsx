@@ -36,7 +36,7 @@ const EntityColumns = ({
         : (() => {
             const items = []
 
-            entityGroups.forEach((group) => {
+            entityGroups.forEach((group, index) => {
               const isSpacerPosition =
                 removingCardSpacer && removingCardSpacer.baseName === group.baseName && group.type === 'adversary'
 
@@ -69,6 +69,13 @@ const EntityColumns = ({
               items.push(
                 <Panel
                   key={`${group.type}-${group.baseName}`}
+                  className={
+                    index === 0
+                      ? 'dashboard-column dashboard-column--first'
+                      : index === entityGroups.length - 1
+                      ? 'dashboard-column dashboard-column--last'
+                      : 'dashboard-column'
+                  }
                   style={{
                     width: `${columnWidth}px`,
                     flexShrink: 0,
@@ -77,6 +84,8 @@ const EntityColumns = ({
                     paddingRight: '0',
                     paddingTop: `${group.type === 'adversary' ? gap + 52 : gap}px`,
                     paddingBottom: `${gap}px`,
+                    marginLeft: index === 0 ? `${gap}px` : '0',
+                    marginRight: index === entityGroups.length - 1 ? `${gap}px` : '0',
                     scrollSnapAlign: 'start',
                     overflow: group.type === 'adversary' ? 'visible' : 'hidden',
                     display: 'flex',
@@ -324,6 +333,7 @@ const EntityColumns = ({
                 0,
                 <Panel
                   key={`spacer-${removingCardSpacer.baseName}`}
+                  className="dashboard-column"
                   style={{
                     width: spacerShrinking ? '0px' : `${columnWidth}px`,
                     flexShrink: 0,

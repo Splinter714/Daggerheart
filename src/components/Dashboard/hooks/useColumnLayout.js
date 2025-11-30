@@ -1,6 +1,6 @@
 import { useState, useMemo, useLayoutEffect } from 'react'
 
-const DASHBOARD_GAP = 12
+const DASHBOARD_GAP = 8
 
 const getMinColumnWidth = (columnCount) => {
   if (columnCount === 1) return 200
@@ -10,8 +10,9 @@ const getMinColumnWidth = (columnCount) => {
 const calculateColumnLayout = (width) => {
   if (width <= 0) return { visibleColumns: 1, columnWidth: getMinColumnWidth(1) }
 
-  const padding = DASHBOARD_GAP * 2
-  const availableWidth = width - padding
+  // Subtract left and right margins (first and last column margins)
+  const marginSpace = DASHBOARD_GAP * 2
+  const availableWidth = width - marginSpace
   let layout = { visibleColumns: 1, columnWidth: availableWidth }
 
   for (let columns = 1; columns <= 5; columns += 1) {

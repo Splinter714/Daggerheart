@@ -16,10 +16,23 @@
   flex-direction: row;
   overflow-x: auto;
   overflow-y: hidden;
-  gap: var(--dashboard-gap, 12px);
-  padding: 0 var(--dashboard-gap, 12px) 0 var(--dashboard-gap, 12px);
+  gap: var(--dashboard-gap, 8px);
+  box-sizing: border-box;
   scroll-snap-type: x mandatory;
   height: 100%;
   width: 100%;
 }
+
+.dashboard-column {
+  display: flex;
+}
+
+.dashboard-column--first {
+  margin-left: var(--dashboard-gap, 8px);
+}
+
+.dashboard-column--last {
+  margin-right: var(--dashboard-gap, 8px);
+}
+
 
