@@ -16,13 +16,13 @@ export const GameStateProvider = ({ children }) => {
   const [initialState, setInitialState] = useState(() => {
     const savedState = readFromStorage('daggerheart-game-state')
     return savedState || {
-      fear: { value: 0, visible: false },
-      countdowns: [],
-      adversaries: [],
-      environments: [],
-      partySize: 4,
-      savedEncounters: [],
-      currentEncounterName: 'Encounter'
+    fear: { value: 0, visible: false },
+    countdowns: [],
+    adversaries: [],
+    environments: [],
+    partySize: 4,
+    savedEncounters: [],
+    currentEncounterName: 'Encounter'
     }
   })
 

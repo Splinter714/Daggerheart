@@ -84,8 +84,6 @@ const EntityColumns = ({
                     paddingRight: '0',
                     paddingTop: `${group.type === 'adversary' ? gap + 52 : gap}px`,
                     paddingBottom: `${gap}px`,
-                    marginLeft: index === 0 ? `${gap}px` : '0',
-                    marginRight: index === entityGroups.length - 1 ? `${gap}px` : '0',
                     scrollSnapAlign: 'start',
                     overflow: group.type === 'adversary' ? 'visible' : 'hidden',
                     display: 'flex',

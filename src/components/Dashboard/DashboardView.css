@@ -18,6 +18,8 @@
   overflow-y: hidden;
   gap: var(--dashboard-gap, 8px);
   box-sizing: border-box;
+  padding-left: var(--dashboard-gap, 8px);
+  padding-right: var(--dashboard-gap, 8px);
   scroll-snap-type: x mandatory;
   scroll-padding-left: var(--dashboard-gap, 8px);
   scroll-padding-right: var(--dashboard-gap, 8px);
@@ -27,14 +29,6 @@
 
 .dashboard-column {
   display: flex;
-}
-
-.dashboard-column--first {
-  margin-left: var(--dashboard-gap, 8px);
-}
-
-.dashboard-column--last {
-  margin-right: var(--dashboard-gap, 8px);
 }
 
 

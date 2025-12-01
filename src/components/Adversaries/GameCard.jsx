@@ -170,7 +170,7 @@ const GameCard = ({
       }, 3000)
     }
   }
-  
+
   // Get adversary-specific logic
   // Debug logging removed - selection styling working correctly
 
@@ -710,31 +710,31 @@ const GameCard = ({
 
             {/* Right Column - Experiences */}
             <ExperienceSection
-              item={item}
+                              item={item} 
               isEditMode={isEditMode}
-              onUpdate={onUpdate}
-              deleteConfirmations={deleteConfirmations}
+                              onUpdate={onUpdate}
+                              deleteConfirmations={deleteConfirmations}
               setDeleteConfirmations={setDeleteConfirmations}
             />
-          </div>
-        )}
+                        </div>
+                      )}
         <StandardAttackSection item={item} isEditMode={isEditMode} onUpdate={onUpdate} />
 
         <FeaturesSection
-          item={item}
+                              item={item} 
           isEditMode={isEditMode}
-          onUpdate={onUpdate}
-          handleFeatureDeleteClick={handleFeatureDeleteClick}
-          deleteConfirmations={deleteConfirmations}
-          getFeatureKey={getFeatureKey}
-        />
+                              onUpdate={onUpdate}
+                              handleFeatureDeleteClick={handleFeatureDeleteClick}
+                              deleteConfirmations={deleteConfirmations}
+                              getFeatureKey={getFeatureKey}
+                            />
 
         <StatusSection
-          item={item}
+                              item={item} 
           instances={instances}
           isEditMode={isEditMode}
           type={type}
-          onUpdate={onUpdate}
+                              onUpdate={onUpdate}
           onApplyDamage={onApplyDamage}
           onApplyHealing={onApplyHealing}
           onApplyStressChange={onApplyStressChange}
@@ -742,7 +742,7 @@ const GameCard = ({
 
         <DescriptionSection item={item} isEditMode={isEditMode} mode={mode} onUpdate={onUpdate} />
 
-          </div>
+            </div>
 
       </div>
       </ContainerWithTab>

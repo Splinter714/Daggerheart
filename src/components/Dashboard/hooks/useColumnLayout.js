@@ -10,9 +10,9 @@ const getMinColumnWidth = (columnCount) => {
 const calculateColumnLayout = (width) => {
   if (width <= 0) return { visibleColumns: 1, columnWidth: getMinColumnWidth(1) }
 
-  // Subtract left and right margins (first and last column margins)
-  const marginSpace = DASHBOARD_GAP * 2
-  const availableWidth = width - marginSpace
+  // Subtract container padding (left and right) from available width
+  // Container has padding-left and padding-right, both 8px
+  const availableWidth = width - (DASHBOARD_GAP * 2)
   let layout = { visibleColumns: 1, columnWidth: availableWidth }
 
   for (let columns = 1; columns <= 5; columns += 1) {
@@ -41,14 +41,15 @@ const getInitialWidth = () => {
 }
 
 export const useColumnLayout = (scrollContainerRef) => {
-  // Start with 0 to avoid initial layout shift - will be measured in useLayoutEffect
-  const [containerWidth, setContainerWidth] = useState(0)
+  // Start with window width estimate to avoid weird initial render - will be measured accurately in useLayoutEffect
+  const [containerWidth, setContainerWidth] = useState(getInitialWidth)
 
   const layout = useMemo(() => calculateColumnLayout(containerWidth), [containerWidth])
 
   useLayoutEffect(() => {
     const measureWidth = () => {
       if (scrollContainerRef.current) {
+        // Use clientWidth to exclude padding, matching the calculation logic
         setContainerWidth(scrollContainerRef.current.clientWidth)
       } else if (typeof window !== 'undefined') {
         setContainerWidth(window.innerWidth)
@@ -61,10 +62,10 @@ export const useColumnLayout = (scrollContainerRef) => {
 
     let resizeObserver
     if (typeof ResizeObserver !== 'undefined' && scrollContainerRef.current) {
-      resizeObserver = new ResizeObserver((entries) => {
-        const entry = entries[0]
-        if (entry) {
-          setContainerWidth(entry.contentRect.width)
+      resizeObserver = new ResizeObserver(() => {
+        // Use clientWidth to exclude padding, matching the initial measurement
+        if (scrollContainerRef.current) {
+          setContainerWidth(scrollContainerRef.current.clientWidth)
         }
       })
       resizeObserver.observe(scrollContainerRef.current)
