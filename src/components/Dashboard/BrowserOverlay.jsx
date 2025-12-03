@@ -2,11 +2,11 @@ import React from 'react'
 import { Plus, Minus, X } from 'lucide-react'
 import ContainerWithTab from './ContainerWithTab'
 import Browser from '../Browser/Browser'
+import { DASHBOARD_GAP, TAB_HEIGHT } from './constants'
 
 const BrowserOverlay = ({
   isOpen,
   columnWidth,
-  gap,
   onClose,
   onCreateCustomAdversary,
   pcCount,
@@ -28,9 +28,9 @@ const BrowserOverlay = ({
     <div
       style={{
         position: 'absolute',
-        top: `${gap}px`, // Match card paddingTop spacing (tab + gap)
-        right: `${gap}px`, // Match card marginRight
-        bottom: `${gap}px`, // Match card paddingBottom
+        top: `${DASHBOARD_GAP}px`, // Match card top spacing (tab extends above)
+        right: `${DASHBOARD_GAP}px`, // Match container padding-right
+        bottom: `${DASHBOARD_GAP}px`, // Match container padding-bottom
         width: `${columnWidth}px`,
         zIndex: 100,
         overflow: 'visible',

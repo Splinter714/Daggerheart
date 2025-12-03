@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react'
 import { useGameState } from '../../state/state'
+import { DASHBOARD_GAP } from './constants'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import EncounterBuilder from './EncounterBuilder'
 import { getDefaultAdversaryValues } from '../Adversaries/adversaryDefaults'
@@ -65,12 +66,11 @@ const DashboardContent = () => {
 
   useMinionSync(adversaries, pcCount, createAdversariesBulk, deleteAdversary)
 
-  const { columnWidth, gap } = useColumnLayout(scrollContainerRef)
+  const { columnWidth } = useColumnLayout(scrollContainerRef)
 
   const { browserOpenAtPosition, handleOpenBrowser, handleCloseBrowser } = useBrowserOverlay({
     scrollContainerRef,
     columnWidth,
-    gap,
     onCloseReset: () => setBrowserActiveTab('adversaries')
   })
 
@@ -103,8 +103,7 @@ const DashboardContent = () => {
     getEntityGroups,
     smoothScrollTo,
     browserOpenAtPosition,
-    columnWidth,
-    gap
+    columnWidth
   })
 
   // Handle creating a new custom adversary
@@ -163,8 +162,8 @@ const DashboardContent = () => {
                     g.instances.some(i => i.id === newAdversary.id)
                   )
                   if (groupIndex >= 0) {
-                    // Account for left padding: gap + groupIndex * (columnWidth + gap)
-                    const cardPosition = gap + groupIndex * (columnWidth + gap)
+                    // Account for left padding: DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
+                    const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
                     smoothScrollTo(cardPosition, 600, 'new-custom-adversary')
                   }
                 }
@@ -175,7 +174,7 @@ const DashboardContent = () => {
         }
       }
     }, 100) // Small delay to ensure state has updated
-  }, [createAdversary, getEntityGroups, columnWidth, gap, smoothScrollTo, editingAdversaryId])
+  }, [createAdversary, getEntityGroups, columnWidth, smoothScrollTo, editingAdversaryId])
 
   // Handle editing an adversary
   const handleEditAdversary = useCallback((adversaryId) => {
@@ -381,7 +380,7 @@ const DashboardContent = () => {
   return (
     <div 
       className="app dashboard-root"
-      style={{ '--dashboard-gap': `${gap}px` }}
+      style={{ '--dashboard-gap': `${DASHBOARD_GAP}px` }}
       onClick={(e) => {
         // Clear selection when clicking on app background
         if (e.target === e.currentTarget) {
@@ -408,7 +407,6 @@ const DashboardContent = () => {
         <BrowserOverlay
           isOpen={browserOpenAtPosition !== null}
           columnWidth={columnWidth}
-          gap={gap}
           onClose={handleCloseBrowser}
           onCreateCustomAdversary={handleCreateCustomAdversary}
           pcCount={pcCount}
@@ -427,7 +425,6 @@ const DashboardContent = () => {
         <EntityColumns
           entityGroups={entityGroups}
           columnWidth={columnWidth}
-          gap={gap}
           scrollContainerRef={scrollContainerRef}
           onScroll={handleScroll}
           newCards={newCards}

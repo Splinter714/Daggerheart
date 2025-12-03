@@ -1,11 +1,11 @@
 import React from 'react'
 import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
+import { DASHBOARD_GAP, TAB_HEIGHT } from './constants'
 
 const EntityColumns = ({
   entityGroups,
   columnWidth,
-  gap,
   scrollContainerRef,
   onScroll,
   newCards,
@@ -50,8 +50,8 @@ const EntityColumns = ({
                       flexGrow: 0,
                       flex: 'none',
                       paddingRight: '0',
-                      paddingTop: spacerShrinking ? '0px' : `${gap}px`,
-                      paddingBottom: spacerShrinking ? '0px' : `${gap}px`,
+                      paddingTop: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
+                      paddingBottom: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
                       scrollSnapAlign: 'none',
                       overflow: 'hidden',
                       display: 'flex',
@@ -82,8 +82,8 @@ const EntityColumns = ({
                     flexGrow: 0,
                     flex: 'none',
                     paddingRight: '0',
-                    paddingTop: `${group.type === 'adversary' ? gap + 52 : gap}px`,
-                    paddingBottom: `${gap}px`,
+                    paddingTop: `${group.type === 'adversary' ? DASHBOARD_GAP + TAB_HEIGHT : DASHBOARD_GAP}px`,
+                    paddingBottom: `${DASHBOARD_GAP}px`,
                     scrollSnapAlign: 'start',
                     overflow: group.type === 'adversary' ? 'visible' : 'hidden',
                     display: 'flex',
@@ -190,15 +190,15 @@ const EntityColumns = ({
                                   const currentScroll = container.scrollLeft
                                   const containerWidth = container.clientWidth
                                   const effectiveWidth =
-                                    browserOpenAtPosition !== null ? containerWidth - (columnWidth + gap) : containerWidth
+                                    browserOpenAtPosition !== null ? containerWidth - (columnWidth + DASHBOARD_GAP) : containerWidth
 
                                   const updatedGroups = getEntityGroups()
                                   const groupIndex = updatedGroups.findIndex(
                                     (g) => g.baseName === group.baseName && g.type === 'adversary',
                                   )
                                   if (groupIndex >= 0) {
-                                    // Account for left padding: gap + groupIndex * (columnWidth + gap)
-                                    const cardPosition = gap + groupIndex * (columnWidth + gap)
+                                    // Account for left padding: DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
+                                    const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
                                     const cardEnd = cardPosition + columnWidth
                                     const margin = 10
                                     const isVisible =
@@ -338,8 +338,8 @@ const EntityColumns = ({
                     flexGrow: 0,
                     flex: 'none',
                     paddingRight: '0',
-                    paddingTop: spacerShrinking ? '0px' : `${gap}px`,
-                    paddingBottom: spacerShrinking ? '0px' : `${gap}px`,
+                    paddingTop: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
+                    paddingBottom: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
                     scrollSnapAlign: 'none',
                     overflow: 'hidden',
                     display: 'flex',

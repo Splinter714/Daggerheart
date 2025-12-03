@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { DASHBOARD_GAP } from '../constants'
 
 /**
  * Returns the monster addition handler that used to live inline in
@@ -15,8 +16,7 @@ export const useAdversaryAddition = ({
   getEntityGroups,
   smoothScrollTo,
   browserOpenAtPosition,
-  columnWidth,
-  gap
+  columnWidth
 }) => {
   return useCallback(
     (itemData) => {
@@ -107,10 +107,10 @@ export const useAdversaryAddition = ({
                 const currentScroll = container.scrollLeft
                 const containerWidth = container.clientWidth
                 const effectiveWidth =
-                  browserOpenAtPosition !== null ? containerWidth - (columnWidth + gap) : containerWidth
+                  browserOpenAtPosition !== null ? containerWidth - (columnWidth + DASHBOARD_GAP) : containerWidth
 
-                // Account for left padding: gap + groupIndex * (columnWidth + gap)
-                const cardPosition = gap + groupIndex * (columnWidth + gap)
+                // Account for left padding: DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
+                const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
                 const cardEnd = cardPosition + columnWidth
                 const margin = 10
                 const isVisible = cardPosition >= currentScroll - margin && cardEnd <= currentScroll + effectiveWidth + margin
@@ -130,7 +130,6 @@ export const useAdversaryAddition = ({
       createAdversariesBulk,
       createAdversary,
       entityGroups,
-      gap,
       getEntityGroups,
       pcCount,
       scrollContainerRef,

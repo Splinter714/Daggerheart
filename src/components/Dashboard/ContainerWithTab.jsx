@@ -1,4 +1,5 @@
 import React from 'react'
+import { TAB_HEIGHT } from './constants'
 
 /**
  * ContainerWithTab - A reusable component that provides a container with an optional tab above it
@@ -18,7 +19,6 @@ import React from 'react'
  * @param {string} containerBoxShadow - Box shadow for the container
  * @param {string} containerOverflow - Overflow for the container (default: 'hidden' for content, but wrapper allows tab to extend)
  */
-const TAB_HEIGHT = 52
 
 const ContainerWithTab = ({
   tabContent,

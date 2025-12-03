@@ -1,6 +1,5 @@
 import { useState, useMemo, useLayoutEffect } from 'react'
-
-const DASHBOARD_GAP = 8
+import { DASHBOARD_GAP } from '../constants'
 
 const getMinColumnWidth = (columnCount) => {
   if (columnCount === 1) return 200

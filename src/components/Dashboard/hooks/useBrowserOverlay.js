@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
  * horizontal scroll position stable. Encapsulates the scroll bookkeeping that
  * used to live inline inside DashboardView.
  */
-export const useBrowserOverlay = ({ scrollContainerRef, columnWidth, gap, onCloseReset }) => {
+export const useBrowserOverlay = ({ scrollContainerRef, columnWidth, onCloseReset }) => {
   const [browserOpenAtPosition, setBrowserOpenAtPosition] = useState(null)
 
   const handleOpenBrowser = useCallback(
@@ -73,7 +73,7 @@ export const useBrowserOverlay = ({ scrollContainerRef, columnWidth, gap, onClos
         })
       })
     }
-  }, [browserOpenAtPosition, columnWidth, gap, scrollContainerRef])
+  }, [browserOpenAtPosition, columnWidth, scrollContainerRef])
 
   return {
     browserOpenAtPosition,
