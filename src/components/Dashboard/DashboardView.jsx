@@ -394,12 +394,12 @@ const DashboardContent = () => {
         onUpdateFear={updateFear}
         isBrowserOpen={browserOpenAtPosition !== null}
         onToggleBrowser={() => {
-          if (browserOpenAtPosition !== null) {
-            handleCloseBrowser()
-          } else {
-            handleOpenBrowser(entityGroups.length)
-          }
-        }}
+              if (browserOpenAtPosition !== null) {
+                handleCloseBrowser()
+              } else {
+                handleOpenBrowser(entityGroups.length)
+              }
+            }}
       />
 
       {/* Main Dashboard Content */}
@@ -409,19 +409,19 @@ const DashboardContent = () => {
           columnWidth={columnWidth}
           onClose={handleCloseBrowser}
           onCreateCustomAdversary={handleCreateCustomAdversary}
-          pcCount={pcCount}
+                  pcCount={pcCount}
           updatePartySize={updatePartySize}
           availableBattlePoints={availableBattlePoints}
           spentBattlePoints={spentBattlePoints}
           browserActiveTab={browserActiveTab}
           onTabChange={setBrowserActiveTab}
-          savedEncounters={savedEncounters}
+                  savedEncounters={savedEncounters}
           loadEncounter={loadEncounter}
           deleteEncounter={deleteEncounter}
-          selectedCustomAdversaryId={selectedCustomAdversaryId}
-          onSelectCustomAdversary={setSelectedCustomAdversaryId}
+                  selectedCustomAdversaryId={selectedCustomAdversaryId}
+                  onSelectCustomAdversary={setSelectedCustomAdversaryId}
           onAddAdversaryFromBrowser={handleAddAdversaryFromBrowser}
-        />
+                />
         <EntityColumns
           entityGroups={entityGroups}
           columnWidth={columnWidth}
@@ -437,7 +437,7 @@ const DashboardContent = () => {
           updateAdversary={updateAdversary}
           updateEnvironment={updateEnvironment}
           updateCountdown={updateCountdown}
-          adversaries={adversaries}
+              adversaries={adversaries}
           handleEditAdversary={handleEditAdversary}
           createAdversary={createAdversary}
           createAdversariesBulk={createAdversariesBulk}
@@ -447,7 +447,7 @@ const DashboardContent = () => {
           deleteAdversary={deleteAdversary}
           setRemovingCardSpacer={setRemovingCardSpacer}
           setSpacerShrinking={setSpacerShrinking}
-        />
+                />
       </div>
 
       {/* Encounter Builder Modal */}
