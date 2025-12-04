@@ -1,4 +1,5 @@
 import React from 'react'
+import { CARD_SPACE } from './constants'
 
 const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, setDeleteConfirmations }) => {
   const getExperienceKey = (exp, index) => {
@@ -52,9 +53,9 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
     const experiencesToShow = experiences.length === 0 ? [{ name: '', modifier: 0 }] : experiences
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', marginTop: '-0.25rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
         {experiencesToShow.map((exp, index) => (
-          <div key={index} style={{ position: 'relative', marginBottom: '0.5rem' }}>
+          <div key={index} style={{ position: 'relative' }}>
             <div
               style={{
                 position: 'absolute',
@@ -134,7 +135,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
                 placeholder="Experience name"
                 style={{
                   flex: 1,
-                  padding: '0.25rem 0.5rem',
+                  padding: CARD_SPACE,
                   border: '1px solid var(--border)',
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-primary)',
@@ -351,13 +352,15 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
   const renderReadOnlyExperiences = () => {
     if (!item.experience || item.experience.length === 0) return null
 
-    return item.experience.map((exp, index) => {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
+        {item.experience.map((exp, index) => {
       if (typeof exp === 'string') {
         const match = exp.match(/^(.+?)\s*([+-]?\d+)$/)
         if (match) {
           const [, name, bonus] = match
           return (
-            <div key={index} style={{ position: 'relative', marginBottom: '0.75rem' }}>
+            <div key={index} style={{ position: 'relative' }}>
               <div
                 style={{
                   position: 'absolute',
@@ -402,14 +405,14 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
         }
 
         return (
-          <div key={index} style={{ marginBottom: '0.25rem' }}>
+          <div key={index}>
             {exp}
           </div>
         )
       }
 
       return (
-        <div key={index} style={{ position: 'relative', marginBottom: '0.75rem' }}>
+        <div key={index} style={{ position: 'relative' }}>
           <div
             style={{
               position: 'absolute',
@@ -452,7 +455,9 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
           <span style={{ marginLeft: '32px' }}>{exp.name}</span>
         </div>
       )
-    })
+    })}
+      </div>
+    )
   }
 
   return (

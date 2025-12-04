@@ -1,16 +1,22 @@
 import React from 'react'
+import { CARD_SPACE, CARD_INDENT } from './constants'
 
 const StandardAttackSection = ({ item, isEditMode, onUpdate }) => {
   const shouldShow = isEditMode || (item.atk !== undefined && item.weapon)
   if (!shouldShow) return null
 
   return (
-    <div>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      paddingLeft: CARD_SPACE,
+      paddingRight: CARD_SPACE
+    }}>
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          marginBottom: '-0.25rem',
+          gap: CARD_SPACE,
         }}
       >
         <hr
@@ -29,7 +35,6 @@ const StandardAttackSection = ({ item, isEditMode, onUpdate }) => {
             color: 'var(--text-secondary)',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
-            marginLeft: '0.75rem',
           }}
         >
           Standard Attack
@@ -46,16 +51,14 @@ const StandardAttackSection = ({ item, isEditMode, onUpdate }) => {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '0.25rem',
-              padding: '0.5rem',
+              gap: CARD_SPACE,
+              padding: CARD_SPACE,
               border: '1px solid var(--border)',
               borderRadius: '4px',
               backgroundColor: 'var(--bg-secondary)',
-              marginTop: '0.75rem',
-              marginBottom: '0.75rem',
             }}
           >
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: CARD_SPACE, alignItems: 'center' }}>
               <input
                 type="text"
                 value={item.weapon || ''}
@@ -63,7 +66,7 @@ const StandardAttackSection = ({ item, isEditMode, onUpdate }) => {
                 placeholder="Standard attack name"
                 style={{
                   flex: 1,
-                  padding: '0.25rem 0.5rem',
+                  padding: CARD_SPACE,
                   border: '1px solid var(--border)',
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-primary)',
@@ -76,7 +79,7 @@ const StandardAttackSection = ({ item, isEditMode, onUpdate }) => {
                 onChange={(e) => onUpdate && onUpdate(item.id, { range: e.target.value })}
                 style={{
                   flex: 1,
-                  padding: '0.25rem 0.5rem',
+                  padding: CARD_SPACE,
                   border: '1px solid var(--border)',
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-primary)',
@@ -105,7 +108,7 @@ const StandardAttackSection = ({ item, isEditMode, onUpdate }) => {
                 placeholder="Damage (e.g., 1d6+2)"
                 style={{
                   flex: 1,
-                  padding: '0.25rem 0.5rem',
+                  padding: CARD_SPACE,
                   border: '1px solid var(--border)',
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-primary)',
@@ -116,28 +119,23 @@ const StandardAttackSection = ({ item, isEditMode, onUpdate }) => {
             </div>
           </div>
         ) : (
-          <div
-            style={{
-              fontSize: '0.875rem',
-              lineHeight: 1.4,
-              color: 'var(--text-secondary)',
-            }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span
               style={{
                 fontWeight: 600,
                 color: 'var(--text-primary)',
-                marginBottom: '0.25rem',
-                display: 'block',
+                fontSize: '0.9rem',
               }}
             >
               {item.weapon}
             </span>
             <div
               style={{
-                marginLeft: '0.25rem',
+                fontSize: '0.85rem',
+                lineHeight: 1.4,
                 color: 'var(--text-secondary)',
-                marginBottom: '0.75rem',
+                marginLeft: CARD_INDENT,
+                marginRight: CARD_INDENT,
               }}
             >
               Make an attack against a target within {item.range || 'Melee'} range. On a success, deal{' '}

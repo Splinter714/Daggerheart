@@ -8,6 +8,7 @@ import StatusSection from './GameCard/StatusSection'
 import DescriptionSection from './GameCard/DescriptionSection'
 import TypeTierBadge from './GameCard/TypeTierBadge'
 import ExperienceSection from './GameCard/ExperienceSection'
+import { CARD_SPACE } from './GameCard/constants'
 import TabButtons from './GameCard/TabButtons'
 import useCardScroll from './GameCard/hooks/useCardScroll'
 // ============================================================================
@@ -352,7 +353,7 @@ const GameCard = ({
         )}
         {/* Fixed Header Section - Identical to Compact View */}
         <div className="border-b" style={{
-          padding: '8px',
+          padding: CARD_SPACE,
           flexShrink: 0,
           backgroundColor: 'var(--bg-card)',
           borderRadius: '8px 8px 0 0',
@@ -393,7 +394,7 @@ const GameCard = ({
                   color: 'var(--text-primary)',
                   fontSize: '1.1rem',
                   fontWeight: '600',
-                  padding: '0.5rem',
+                  padding: CARD_SPACE,
                   width: '100%',
                   maxWidth: '300px',
                   paddingRight: '0.625rem'
@@ -450,7 +451,7 @@ const GameCard = ({
         {/* Motives */}
         {(item.motives || isEditMode) && (
             <div style={{
-              padding: '0.5rem 8px',
+              padding: `${CARD_SPACE} ${CARD_SPACE}`,
               textAlign: 'center'
           }}>
             {isEditMode ? (
@@ -461,7 +462,7 @@ const GameCard = ({
                 placeholder="Motives..."
                 style={{
                   width: '100%',
-                  padding: '0.5rem',
+                  padding: CARD_SPACE,
                   border: '1px solid var(--border)',
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-primary)',

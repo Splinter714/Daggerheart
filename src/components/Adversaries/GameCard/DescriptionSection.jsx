@@ -1,4 +1,5 @@
 import React from 'react'
+import { CARD_SPACE } from './constants'
 
 const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
   const shouldShow = isEditMode || (mode === 'expanded' && item.description && item.description.trim())
@@ -7,7 +8,11 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
   return (
     <div
       style={{
-        padding: '0 8px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: CARD_SPACE,
+        paddingLeft: CARD_SPACE,
+        paddingRight: CARD_SPACE,
         textAlign: 'center',
       }}
     >
@@ -15,7 +20,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
         style={{
           display: 'flex',
           alignItems: 'center',
-          marginBottom: '-0.25rem',
+          gap: CARD_SPACE,
         }}
       >
         <hr
@@ -34,7 +39,6 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
             color: 'var(--text-secondary)',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
-            marginLeft: '0.75rem',
           }}
         >
           Description
@@ -45,7 +49,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
           style={{
             width: '100%',
             minHeight: '100px',
-            padding: '0.5rem',
+            padding: CARD_SPACE,
             border: '1px solid var(--border)',
             borderRadius: '0.5rem',
             backgroundColor: 'var(--bg-primary)',
@@ -55,8 +59,6 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
             resize: 'none',
             overflow: 'hidden',
             fontFamily: 'inherit',
-            marginTop: '0.75rem',
-            marginBottom: '0.75rem',
           }}
           value={item.description}
           onChange={(e) => {
@@ -74,7 +76,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
             color: 'var(--text-secondary)',
             lineHeight: 1.4,
             whiteSpace: 'pre-wrap',
-            padding: '0.5rem 0',
+            padding: `${CARD_SPACE} 0`,
           }}
         >
           {item.description}

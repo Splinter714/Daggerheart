@@ -1,5 +1,6 @@
 import React from 'react'
 import Pips from '../../Shared/Pips'
+import { CARD_SPACE } from './constants'
 
 const ThresholdTag = ({ value }) => (
   <div
@@ -61,18 +62,18 @@ const StatusSection = ({
   const renderInstanceRow = (instance) => {
     const isInstanceDead = (instance.hp || 0) >= (instance.hpMax || 1)
     return (
-      <div key={instance.id} data-instance-id={instance.id} style={{ marginBottom: '0.5rem' }}>
+      <div key={instance.id} data-instance-id={instance.id}>
         <div
           style={{
             backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-primary)',
             borderRadius: '6px',
-            padding: '0.25rem 0.5rem',
+            padding: CARD_SPACE,
             border: '1px solid',
             borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
             display: 'flex',
             justifyContent: 'flex-start',
             alignItems: 'center',
-            gap: '0.5rem',
+            gap: CARD_SPACE,
             opacity: isInstanceDead ? 0.7 : 1,
             position: 'relative',
             transition: 'all 0.2s ease',
@@ -183,8 +184,6 @@ const StatusSection = ({
           display: 'flex',
           justifyContent: 'center',
           paddingTop: '1px',
-          marginTop: '0.5rem',
-          marginBottom: '0.5rem',
         }}
       >
         <div
@@ -213,7 +212,7 @@ const StatusSection = ({
               zIndex: 2,
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: CARD_SPACE,
             }}
           >
             {isEditMode ? (
@@ -239,14 +238,21 @@ const StatusSection = ({
   return (
     <div
       style={{
-        padding: '0 8px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: CARD_SPACE,
+        paddingLeft: CARD_SPACE,
+        paddingRight: CARD_SPACE,
+        marginTop: CARD_SPACE,  // Space from Features section
       }}
     >
       <SectionHeader title="Status" />
       {isEditMode ? (
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (
-        instances.map((instance) => renderInstanceRow(instance))
+        <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
+          {instances.map((instance) => renderInstanceRow(instance))}
+        </div>
       )}
       {renderThresholds()}
     </div>
@@ -258,7 +264,7 @@ const SectionHeader = ({ title }) => (
     style={{
       display: 'flex',
       alignItems: 'center',
-      marginBottom: '0.25rem',
+      gap: CARD_SPACE,
     }}
   >
     <hr
@@ -277,7 +283,6 @@ const SectionHeader = ({ title }) => (
         color: 'var(--text-secondary)',
         textTransform: 'uppercase',
         letterSpacing: '0.5px',
-        marginLeft: '0.75rem',
       }}
     >
       {title}
@@ -286,16 +291,16 @@ const SectionHeader = ({ title }) => (
 )
 
 const EditableVitals = ({ item, onUpdate }) => (
-  <div style={{ marginBottom: '0.5rem' }}>
+  <div>
     <div
       style={{
-        padding: '0.75rem',
+        padding: CARD_SPACE,
         backgroundColor: 'var(--bg-secondary)',
         borderRadius: '8px',
         border: '1px solid var(--border)',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
         <VitalRow
           label="HP"
           pipType="adversaryHP"
@@ -314,7 +319,7 @@ const EditableVitals = ({ item, onUpdate }) => (
 )
 
 const VitalRow = ({ label, pipType, value, onChange }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE }}>
     <input
       type="number"
       value={value}
@@ -326,7 +331,7 @@ const VitalRow = ({ label, pipType, value, onChange }) => (
       max="99"
       style={{
         width: '40px',
-        padding: '0.25rem 0.25rem',
+        padding: CARD_SPACE,
         border: '1px solid var(--border)',
         borderRadius: '4px',
         backgroundColor: 'var(--bg-primary)',
@@ -378,7 +383,7 @@ const ThresholdInput = ({ label, value, onChange }) => (
       }}
       style={{
         width: '30px',
-        padding: '0.125rem 0.25rem',
+        padding: CARD_SPACE,
         border: '1px solid var(--border)',
         borderRadius: '4px',
         backgroundColor: 'var(--bg-primary)',

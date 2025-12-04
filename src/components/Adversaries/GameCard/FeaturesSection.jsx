@@ -1,8 +1,9 @@
 import React from 'react'
 import ReorderControls from './ReorderControls'
+import { CARD_SPACE, CARD_INDENT } from './constants'
 
 const FeatureDivider = ({ title }) => (
-  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '-0.25rem' }}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE }}>
     <hr
       style={{
         flex: 1,
@@ -19,7 +20,6 @@ const FeatureDivider = ({ title }) => (
         color: 'var(--text-secondary)',
         textTransform: 'uppercase',
         letterSpacing: '0.5px',
-        marginLeft: '0.75rem',
       }}
     >
       {title}
@@ -35,16 +35,15 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
       key={feature.id || `${type}-${feature.name}-${feature.description}-${Math.random()}`}
       style={{
         display: 'flex',
-        gap: '0.25rem',
-        margin: '0.5rem 0',
-        padding: '0.5rem',
+        gap: CARD_SPACE,
+        padding: CARD_SPACE,
         border: '1px solid var(--border)',
         borderRadius: '4px',
         backgroundColor: 'var(--bg-secondary)',
         alignItems: 'stretch',
       }}
     >
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
         <input
           type="text"
           value={feature.name || ''}
@@ -74,7 +73,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
           }}
           placeholder={`${placeholder} name`}
           style={{
-            padding: '0.5rem',
+            padding: CARD_SPACE,
             border: '1px solid var(--border)',
             borderRadius: '4px',
             backgroundColor: 'var(--bg-primary)',
@@ -104,7 +103,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
           }}
           placeholder={`${placeholder} description`}
           style={{
-            padding: '0.5rem',
+            padding: CARD_SPACE,
             border: '1px solid var(--border)',
             borderRadius: '4px',
             backgroundColor: 'var(--bg-primary)',
@@ -128,13 +127,19 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
   )
 
   const renderFeatureList = (features, placeholder) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.75rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
       {features.map((feature, index) => (
-        <div key={`${feature.type}-${index}`} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <div key={`${feature.type}-${index}`} style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{feature.name}</span>
           </div>
-          <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)' }}>
+          <div style={{ 
+            fontSize: '0.85rem', 
+            lineHeight: 1.4, 
+            color: 'var(--text-secondary)',
+            marginLeft: CARD_INDENT,
+            marginRight: CARD_INDENT,
+          }}>
             {feature.description || placeholder}
           </div>
         </div>
@@ -149,8 +154,10 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
     if (!hasFeatures && !isEditMode) return null
 
     const featuresToShow = isEditMode && features.length === 0 ? [{ type, name: '', description: '' }] : features
+    const isFirstCategory = type === 'Action'  // Actions is always first
+    
     return (
-      <div>
+      <div style={isFirstCategory ? {} : { marginTop: CARD_SPACE }}>
         <FeatureDivider title={title} />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {isEditMode
@@ -162,7 +169,11 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
   }
 
   return (
-    <div style={{ padding: '0 8px 8px 8px' }}>
+    <div style={{ 
+      paddingLeft: CARD_SPACE,
+      paddingRight: CARD_SPACE,
+      marginTop: CARD_SPACE,  // Space from Standard Attack section
+    }}>
       {renderFeatureCategory('Action', 'Actions')}
       {renderFeatureCategory('Passive', 'Passives')}
       {renderFeatureCategory('Reaction', 'Reactions')}

@@ -17,7 +17,69 @@ if [ "$current_branch" != "main" ]; then
     fi
 fi
 
-# Build the project
+# Step 1: Increment app version
+echo "📈 Incrementing app version..."
+npm version patch --no-git-tag-version --no-git-commit
+
+if [ $? -ne 0 ]; then
+    echo "❌ Version increment failed!"
+    exit 1
+fi
+
+NEW_VERSION=$(node -p "require('./package.json').version")
+echo "✅ Version incremented to: $NEW_VERSION"
+
+# Step 2: Summarize and commit any uncommitted changes (including version bump)
+echo "📝 Checking for uncommitted changes..."
+if ! git diff-index --quiet HEAD --; then
+    echo "📋 Uncommitted changes found. Summarizing..."
+    
+    # Get a summary of changes
+    echo "Changed files:"
+    git status --short
+    
+    # Stage all changes
+    git add -A
+    
+    # Create a simple commit message summarizing changes
+    COMMIT_MSG="Update to version $NEW_VERSION"
+    
+    # Add bullet points for changed files (excluding package.json version change)
+    CHANGED_FILES=$(git diff --cached --name-only | grep -v "^package.json$" | head -5)
+    if [ -n "$CHANGED_FILES" ]; then
+        COMMIT_MSG="$COMMIT_MSG"$'\n'
+        for file in $CHANGED_FILES; do
+            COMMIT_MSG="$COMMIT_MSG"$'\n'"- $(basename "$file")"
+        done
+        if [ $(git diff --cached --name-only | grep -v "^package.json$" | wc -l) -gt 5 ]; then
+            COMMIT_MSG="$COMMIT_MSG"$'\n'"- ... and more"
+        fi
+    fi
+    
+    echo "💾 Committing changes..."
+    git commit -m "$COMMIT_MSG"
+    
+    if [ $? -ne 0 ]; then
+        echo "❌ Commit failed!"
+        exit 1
+    fi
+else
+    # Even if no other changes, commit the version bump
+    git add package.json
+    git commit -m "Increment version to $NEW_VERSION"
+    echo "✅ Version bump committed"
+fi
+
+# Step 3: Push to remote
+echo "⬆️  Pushing to remote..."
+git push
+
+if [ $? -ne 0 ]; then
+    echo "❌ Push failed!"
+    exit 1
+fi
+
+# Step 4: Build the project
 echo "📦 Building project..."
 npm run build
 
@@ -26,7 +88,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Deploy to GitHub Pages
+# Step 5: Deploy to GitHub Pages
 echo "🌐 Deploying to GitHub Pages..."
 npm run deploy
 
