@@ -1,6 +1,6 @@
 import React from 'react'
 import Pips from '../../Shared/Pips'
-import { CARD_SPACE } from './constants'
+import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
 const ThresholdTag = ({ value }) => (
   <div
@@ -69,14 +69,13 @@ const StatusSection = ({
             borderRadius: '6px',
             paddingTop: 0,
             paddingBottom: 0,
-            paddingLeft: CARD_SPACE,
-            paddingRight: CARD_SPACE,
+            paddingLeft: CARD_SPACE_H,
+            paddingRight: CARD_SPACE_H,
             border: '1px solid',
             borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
             display: 'flex',
             justifyContent: 'flex-start',
             alignItems: 'center',
-            gap: CARD_SPACE,
             opacity: isInstanceDead ? 0.7 : 1,
             position: 'relative',
             transition: 'all 0.2s ease',
@@ -118,6 +117,7 @@ const StatusSection = ({
               paddingTop: '1px',
               flexShrink: 0,
               opacity: isInstanceDead ? 0.5 : 1,
+              marginRight: '0.375rem', // Specific spacing for instance number badge
             }}
           >
             <span
@@ -215,7 +215,7 @@ const StatusSection = ({
               zIndex: 2,
               display: 'flex',
               alignItems: 'center',
-              gap: CARD_SPACE,
+              gap: '0.375rem', // Specific spacing for thresholds graphic elements
             }}
           >
             {isEditMode ? (
@@ -243,17 +243,16 @@ const StatusSection = ({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: CARD_SPACE,
-        paddingLeft: CARD_SPACE,
-        paddingRight: CARD_SPACE,
-        marginTop: CARD_SPACE,  // Space from Features section
+        gap: CARD_SPACE_V,
+        paddingLeft: CARD_SPACE_H,
+        paddingRight: CARD_SPACE_H,
       }}
     >
       <SectionHeader title="Status" />
       {isEditMode ? (
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
           {instances.map((instance) => renderInstanceRow(instance))}
         </div>
       )}
@@ -267,7 +266,7 @@ const SectionHeader = ({ title }) => (
     style={{
       display: 'flex',
       alignItems: 'center',
-      gap: CARD_SPACE,
+      gap: CARD_SPACE_H,
     }}
   >
     <hr
@@ -297,13 +296,13 @@ const EditableVitals = ({ item, onUpdate }) => (
   <div>
     <div
       style={{
-        padding: CARD_SPACE,
+        padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
         backgroundColor: 'var(--bg-secondary)',
         borderRadius: '8px',
         border: '1px solid var(--border)',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
         <VitalRow
           label="HP"
           pipType="adversaryHP"
@@ -322,7 +321,7 @@ const EditableVitals = ({ item, onUpdate }) => (
 )
 
 const VitalRow = ({ label, pipType, value, onChange }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE }}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H }}>
     <input
       type="number"
       value={value}
@@ -334,7 +333,7 @@ const VitalRow = ({ label, pipType, value, onChange }) => (
       max="99"
       style={{
         width: '40px',
-        padding: CARD_SPACE,
+        padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
         border: '1px solid var(--border)',
         borderRadius: '4px',
         backgroundColor: 'var(--bg-primary)',
@@ -386,7 +385,7 @@ const ThresholdInput = ({ label, value, onChange }) => (
       }}
       style={{
         width: '30px',
-        padding: CARD_SPACE,
+        padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
         border: '1px solid var(--border)',
         borderRadius: '4px',
         backgroundColor: 'var(--bg-primary)',

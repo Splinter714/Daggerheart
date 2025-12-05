@@ -1,5 +1,5 @@
 import React from 'react'
-import { CARD_SPACE } from './constants'
+import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
 const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
   const shouldShow = isEditMode || (mode === 'expanded' && item.description && item.description.trim())
@@ -10,10 +10,9 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: CARD_SPACE,
-        paddingLeft: CARD_SPACE,
-        paddingRight: CARD_SPACE,
-        marginTop: CARD_SPACE,  // Space from Status section
+        gap: CARD_SPACE_V,
+        paddingLeft: CARD_SPACE_H,
+        paddingRight: CARD_SPACE_H,
         textAlign: 'center',
       }}
     >
@@ -21,7 +20,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: CARD_SPACE,
+          gap: CARD_SPACE_H,
         }}
       >
         <hr
@@ -50,7 +49,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
           style={{
             width: '100%',
             minHeight: '100px',
-            padding: CARD_SPACE,
+            padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
             border: '1px solid var(--border)',
             borderRadius: '0.5rem',
             backgroundColor: 'var(--bg-primary)',
@@ -77,7 +76,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
             color: 'var(--text-secondary)',
             lineHeight: 1.4,
             whiteSpace: 'pre-wrap',
-            padding: `${CARD_SPACE} 0`,
+            padding: `${CARD_SPACE_V} 0`,
           }}
         >
           {item.description}

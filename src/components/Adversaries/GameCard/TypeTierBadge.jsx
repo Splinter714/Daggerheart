@@ -1,5 +1,5 @@
 import React from 'react'
-import { CARD_SPACE } from './constants'
+import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
 /**
  * Compact badge showing the adversary type and tier. This was originally
@@ -28,7 +28,7 @@ const TypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => {
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
-          gap: CARD_SPACE,
+          gap: CARD_SPACE_H,
           height: '32px'
         }}
       >
@@ -46,7 +46,7 @@ const TypeTierBadge = ({ type, tier, isEditMode, onUpdate, itemId }) => {
             textTransform: 'uppercase',
             outline: 'none',
             borderRadius: '4px',
-            padding: CARD_SPACE,
+            padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
             width: '95px',
             height: '24px'
           }}

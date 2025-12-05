@@ -1,9 +1,9 @@
 import React from 'react'
 import ReorderControls from './ReorderControls'
-import { CARD_SPACE, CARD_INDENT } from './constants'
+import { CARD_SPACE_H, CARD_SPACE_V, CARD_INDENT } from './constants'
 
 const FeatureDivider = ({ title }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE }}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H }}>
     <hr
       style={{
         flex: 1,
@@ -28,22 +28,25 @@ const FeatureDivider = ({ title }) => (
 )
 
 const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick, deleteConfirmations, getFeatureKey }) => {
-  if (!((item.features && item.features.length > 0) || isEditMode)) return null
+  const hasStandardAttack = isEditMode || (item.atk !== undefined && item.weapon)
+  const hasFeatures = (item.features && item.features.length > 0) || isEditMode
+  
+  if (!hasStandardAttack && !hasFeatures) return null
 
   const renderFeatureEditor = (feature, placeholder, type) => (
     <div
       key={feature.id || `${type}-${feature.name}-${feature.description}-${Math.random()}`}
       style={{
         display: 'flex',
-        gap: CARD_SPACE,
-        padding: CARD_SPACE,
+        gap: CARD_SPACE_H,
+        padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
         border: '1px solid var(--border)',
         borderRadius: '4px',
         backgroundColor: 'var(--bg-secondary)',
         alignItems: 'stretch',
       }}
     >
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
         <input
           type="text"
           value={feature.name || ''}
@@ -73,7 +76,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
           }}
           placeholder={`${placeholder} name`}
           style={{
-            padding: CARD_SPACE,
+            padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
             border: '1px solid var(--border)',
             borderRadius: '4px',
             backgroundColor: 'var(--bg-primary)',
@@ -103,7 +106,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
           }}
           placeholder={`${placeholder} description`}
           style={{
-            padding: CARD_SPACE,
+            padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
             border: '1px solid var(--border)',
             borderRadius: '4px',
             backgroundColor: 'var(--bg-primary)',
@@ -127,7 +130,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
   )
 
   const renderFeatureList = (features, placeholder) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
       {features.map((feature, index) => (
         <div key={`${feature.type}-${index}`} style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -138,9 +141,6 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
             lineHeight: 1.4, 
             color: 'var(--text-secondary)',
             marginLeft: CARD_INDENT,
-            marginRight: CARD_INDENT,
-            marginTop: CARD_INDENT,
-            marginBottom: CARD_INDENT,
           }}>
             {feature.description || placeholder}
           </div>
@@ -149,6 +149,115 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
     </div>
   )
 
+  const renderStandardAttack = () => {
+    const shouldShow = isEditMode || (item.atk !== undefined && item.weapon)
+    if (!shouldShow) return null
+
+    return (
+      <div>
+        <FeatureDivider title="Standard Attack" />
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {isEditMode ? (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: CARD_SPACE_V,
+                padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+                border: '1px solid var(--border)',
+                borderRadius: '4px',
+                backgroundColor: 'var(--bg-secondary)',
+              }}
+            >
+              <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'center' }}>
+                <input
+                  type="text"
+                  value={item.weapon || ''}
+                  onChange={(e) => onUpdate && onUpdate(item.id, { weapon: e.target.value })}
+                  placeholder="Standard attack name"
+                  style={{
+                    flex: 1,
+                    padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+                    border: '1px solid var(--border)',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--bg-primary)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.875rem',
+                  }}
+                />
+                <select
+                  value={item.range || ''}
+                  onChange={(e) => onUpdate && onUpdate(item.id, { range: e.target.value })}
+                  style={{
+                    flex: 1,
+                    padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+                    border: '1px solid var(--border)',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--bg-primary)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.875rem',
+                    appearance: 'none',
+                    backgroundImage:
+                      "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e\")",
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.5rem center',
+                    backgroundSize: '1rem',
+                    paddingRight: '2rem',
+                  }}
+                >
+                  <option value=""></option>
+                  <option value="Melee">Melee</option>
+                  <option value="Very Close">Very Close</option>
+                  <option value="Close">Close</option>
+                  <option value="Far">Far</option>
+                  <option value="Very Far">Very Far</option>
+                </select>
+                <input
+                  type="text"
+                  value={item.damage || ''}
+                  onChange={(e) => onUpdate && onUpdate(item.id, { damage: e.target.value })}
+                  placeholder="Damage (e.g., 1d6+2)"
+                  style={{
+                    flex: 1,
+                    padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+                    border: '1px solid var(--border)',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--bg-primary)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.875rem',
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span
+                style={{
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  fontSize: '0.9rem',
+                }}
+              >
+                {item.weapon}
+              </span>
+              <div
+                style={{
+                  fontSize: '0.85rem',
+                  lineHeight: 1.4,
+                  color: 'var(--text-secondary)',
+                  marginLeft: CARD_INDENT,
+                }}
+              >
+                Make an attack against a target within {item.range || 'Melee'} range. On a success, deal{' '}
+                {item.damage || 'damage varies'}.
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   const renderFeatureCategory = (type, title) => {
     const features = (item.features || []).filter((f) => f.type === type)
     const hasFeatures = features.length > 0
@@ -156,10 +265,10 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
     if (!hasFeatures && !isEditMode) return null
 
     const featuresToShow = isEditMode && features.length === 0 ? [{ type, name: '', description: '' }] : features
-    const isFirstCategory = type === 'Action'  // Actions is always first
+    const isFirstCategory = type === 'Action' && !hasStandardAttack  // Actions is first only if no Standard Attack
     
     return (
-      <div style={isFirstCategory ? {} : { marginTop: CARD_SPACE }}>
+      <div style={isFirstCategory ? {} : { marginTop: CARD_SPACE_V }}>
         <FeatureDivider title={title} />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {isEditMode
@@ -172,10 +281,10 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
 
   return (
     <div style={{ 
-      paddingLeft: CARD_SPACE,
-      paddingRight: CARD_SPACE,
-      marginTop: CARD_SPACE,  // Space from Standard Attack section
+      paddingLeft: CARD_SPACE_H,
+      paddingRight: CARD_SPACE_H,
     }}>
+      {renderStandardAttack()}
       {renderFeatureCategory('Action', 'Actions')}
       {renderFeatureCategory('Passive', 'Passives')}
       {renderFeatureCategory('Reaction', 'Reactions')}

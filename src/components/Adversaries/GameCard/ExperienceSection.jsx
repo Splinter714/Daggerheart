@@ -1,5 +1,5 @@
 import React from 'react'
-import { CARD_SPACE } from './constants'
+import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
 const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, setDeleteConfirmations }) => {
   const getExperienceKey = (exp, index) => {
@@ -53,7 +53,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
     const experiencesToShow = experiences.length === 0 ? [{ name: '', modifier: 0 }] : experiences
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
         {experiencesToShow.map((exp, index) => (
           <div key={index} style={{ position: 'relative' }}>
             <div
@@ -135,7 +135,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
                 placeholder="Experience name"
                 style={{
                   flex: 1,
-                  padding: CARD_SPACE,
+                  padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
                   border: '1px solid var(--border)',
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-primary)',
@@ -353,7 +353,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
     if (!item.experience || item.experience.length === 0) return null
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
         {item.experience.map((exp, index) => {
       if (typeof exp === 'string') {
         const match = exp.match(/^(.+?)\s*([+-]?\d+)$/)

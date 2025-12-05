@@ -3,12 +3,11 @@ import { X, Hexagon, Locate, Check } from 'lucide-react'
 import ContainerWithTab from '../Dashboard/ContainerWithTab'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
 import FeaturesSection from './GameCard/FeaturesSection'
-import StandardAttackSection from './GameCard/StandardAttackSection'
 import StatusSection from './GameCard/StatusSection'
 import DescriptionSection from './GameCard/DescriptionSection'
 import TypeTierBadge from './GameCard/TypeTierBadge'
 import ExperienceSection from './GameCard/ExperienceSection'
-import { CARD_SPACE } from './GameCard/constants'
+import { CARD_SPACE_H, CARD_SPACE_V } from './GameCard/constants'
 import TabButtons from './GameCard/TabButtons'
 import useCardScroll from './GameCard/hooks/useCardScroll'
 // ============================================================================
@@ -353,10 +352,10 @@ const GameCard = ({
         )}
         {/* Fixed Header Section - Identical to Compact View */}
         <div className="border-b" style={{
-          paddingTop: CARD_SPACE,
-          paddingBottom: CARD_SPACE,
-          paddingLeft: CARD_SPACE,
-          paddingRight: CARD_SPACE,
+          paddingTop: CARD_SPACE_V,
+          paddingBottom: CARD_SPACE_V,
+          paddingLeft: CARD_SPACE_H,
+          paddingRight: CARD_SPACE_H,
           flexShrink: 0,
           backgroundColor: 'var(--bg-card)',
           borderRadius: '8px 8px 0 0',
@@ -378,7 +377,7 @@ const GameCard = ({
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-            }}>
+          }}>
             {isEditMode ? (
               <input
                   ref={nameInputRef}
@@ -396,7 +395,7 @@ const GameCard = ({
                   color: 'var(--text-primary)',
                   fontSize: '1.1rem',
                   fontWeight: '600',
-                  padding: CARD_SPACE,
+                  padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
                   width: '100%',
                   maxWidth: '300px',
                   paddingRight: '0.625rem'
@@ -454,7 +453,7 @@ const GameCard = ({
         {/* Motives */}
         {(item.motives || isEditMode) && (
             <div style={{
-              padding: `${CARD_SPACE} ${CARD_SPACE}`,
+              padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
               textAlign: 'center'
           }}>
             {isEditMode ? (
@@ -465,7 +464,7 @@ const GameCard = ({
                 placeholder="Motives..."
                 style={{
                   width: '100%',
-                  padding: CARD_SPACE,
+                  padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
                   border: '1px solid var(--border)',
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-primary)',
@@ -722,8 +721,6 @@ const GameCard = ({
             />
                         </div>
                       )}
-        <StandardAttackSection item={item} isEditMode={isEditMode} onUpdate={onUpdate} />
-
         <FeaturesSection
                               item={item} 
           isEditMode={isEditMode}
