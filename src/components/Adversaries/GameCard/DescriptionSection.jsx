@@ -13,6 +13,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
         gap: CARD_SPACE,
         paddingLeft: CARD_SPACE,
         paddingRight: CARD_SPACE,
+        marginTop: CARD_SPACE,  // Space from Status section
         textAlign: 'center',
       }}
     >

@@ -67,7 +67,10 @@ const StatusSection = ({
           style={{
             backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-primary)',
             borderRadius: '6px',
-            padding: CARD_SPACE,
+            paddingTop: 0,
+            paddingBottom: 0,
+            paddingLeft: CARD_SPACE,
+            paddingRight: CARD_SPACE,
             border: '1px solid',
             borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
             display: 'flex',

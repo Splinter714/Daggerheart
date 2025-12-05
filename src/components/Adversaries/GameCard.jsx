@@ -353,7 +353,10 @@ const GameCard = ({
         )}
         {/* Fixed Header Section - Identical to Compact View */}
         <div className="border-b" style={{
-          padding: CARD_SPACE,
+          paddingTop: CARD_SPACE,
+          paddingBottom: CARD_SPACE,
+          paddingLeft: CARD_SPACE,
+          paddingRight: CARD_SPACE,
           flexShrink: 0,
           backgroundColor: 'var(--bg-card)',
           borderRadius: '8px 8px 0 0',
@@ -367,7 +370,7 @@ const GameCard = ({
             flexDirection: 'column',
             position: 'relative',
             zIndex: isDead ? 1 : 'auto',
-            padding: '2px',
+            padding: 0,
             gap: 0
           }}>
             {/* Name and Badge row */}
@@ -375,8 +378,7 @@ const GameCard = ({
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-            minHeight: '40px'
-          }}>
+            }}>
             {isEditMode ? (
               <input
                   ref={nameInputRef}
@@ -410,7 +412,8 @@ const GameCard = ({
               margin: 0,
               fontSize: '1.1rem',
                     paddingRight: '6px',
-                    flex: 1
+                    flex: 1,
+                    textTransform: 'uppercase'
             }}>
               {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
             </h4>
