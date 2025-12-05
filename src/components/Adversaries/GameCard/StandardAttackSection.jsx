@@ -136,6 +136,8 @@ const StandardAttackSection = ({ item, isEditMode, onUpdate }) => {
                 color: 'var(--text-secondary)',
                 marginLeft: CARD_INDENT,
                 marginRight: CARD_INDENT,
+                marginTop: CARD_INDENT,
+                marginBottom: CARD_INDENT,
               }}
             >
               Make an attack against a target within {item.range || 'Melee'} range. On a success, deal{' '}

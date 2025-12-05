@@ -139,6 +139,8 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
             color: 'var(--text-secondary)',
             marginLeft: CARD_INDENT,
             marginRight: CARD_INDENT,
+            marginTop: CARD_INDENT,
+            marginBottom: CARD_INDENT,
           }}>
             {feature.description || placeholder}
           </div>
