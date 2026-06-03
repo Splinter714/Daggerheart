@@ -643,13 +643,6 @@ const BrowserTableHeader = ({
   isTierFiltered,
   isTypeFiltered,
   getDropdownStyle,
-  // Cost filter props
-  costFilter,
-  showCostDropdown,
-  setShowCostDropdown,
-  costFilterRef,
-  handleCostFilterSelect,
-  isCostFiltered
 }) => {
   const [hoveredColumn, setHoveredColumn] = useState(null)
 
@@ -658,7 +651,7 @@ const BrowserTableHeader = ({
       return [
         { key: 'name', label: 'Name' },
         { key: 'tier', label: 'Tier', hasFilter: true },
-        { key: 'type', label: 'Type', hasFilter: true, hasCostFilter: true },
+        { key: 'type', label: 'Type', hasFilter: true },
         { key: 'source', label: 'Src' }
       ]
     } else if (type === 'environment') {
@@ -673,50 +666,6 @@ const BrowserTableHeader = ({
   }
 
   const columns = getColumns()
-
-  const renderCostFilterDropdown = () => {
-    if (!showCostDropdown) return null
-
-    const costFilterOptions = [
-      { value: 'all', label: 'All' },
-      { value: 'auto-grey', label: 'Auto Grey' },
-      { value: 'auto-hide', label: 'Auto Hide' }
-    ]
-
-    return createPortal(
-      <div 
-        className="filter-dropdown"
-        style={{
-          ...styles.filterDropdown,
-          ...getDropdownStyle(costFilterRef),
-          maxHeight: '60vh',
-          overflow: 'auto'
-        }}
-        onMouseDown={(e) => e.stopPropagation()}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {costFilterOptions.map(option => {
-          const isSelected = costFilter === option.value
-          return (
-            <div
-              key={option.value}
-              style={{
-                ...styles.filterOption,
-                ...(isSelected ? styles.filterOptionSelected : {})
-              }}
-              onClick={() => handleCostFilterSelect(option.value)}
-            >
-              <span style={styles.checkIcon}>
-                {isSelected ? <CheckSquare size={16}/> : <Square size={16}/>}
-              </span>
-              <span style={styles.filterLabel}>{option.label}</span>
-            </div>
-          )
-        })}
-      </div>,
-      document.body
-    )
-  }
 
   const renderFilterDropdown = (filterType, values, selected, onSelect, isOpen, setIsOpen, filterRef, isFiltered) => {
     if (!isOpen) return null
@@ -809,12 +758,11 @@ const BrowserTableHeader = ({
                 {column.label}
               </span>
               <button
-                ref={column.key === 'tier' ? tierFilterRef : (column.key === 'type' && column.hasCostFilter) ? costFilterRef : (column.key === 'type' ? typeFilterRef : costFilterRef)}
+                ref={column.key === 'tier' ? tierFilterRef : typeFilterRef}
                 style={{
                   ...styles.headerFilterIcon,
                   ...(column.key === 'tier' && isTierFiltered ? styles.headerFilterIconActive : {}),
-                  ...(column.key === 'type' && (isTypeFiltered || isCostFiltered) ? styles.headerFilterIconActive : {}),
-                  ...(column.key === 'cost' && isCostFiltered ? styles.headerFilterIconActive : {})
+                  ...(column.key === 'type' && isTypeFiltered ? styles.headerFilterIconActive : {}),
                 }}
                 className="header-filter-icon"
                 onClick={(e) => {
@@ -822,23 +770,14 @@ const BrowserTableHeader = ({
                   if (column.key === 'tier') {
                     setShowTierDropdown(!showTierDropdown)
                     setShowTypeDropdown(false)
-                    setShowCostDropdown(false)
                   } else if (column.key === 'type') {
-                    // If type column has cost filter, show cost filter dropdown
-                    if (column.hasCostFilter) {
-                      setShowCostDropdown(!showCostDropdown)
-                      setShowTierDropdown(false)
-                      setShowTypeDropdown(false)
-                    } else {
-                      setShowTypeDropdown(!showTypeDropdown)
-                      setShowTierDropdown(false)
-                      setShowCostDropdown(false)
-                    }
+                    setShowTypeDropdown(!showTypeDropdown)
+                    setShowTierDropdown(false)
                   }
                 }}
               >
                 <Filter size={14} />
-                {(column.key === 'tier' && isTierFiltered) || (column.key === 'type' && (isTypeFiltered || isCostFiltered)) || (column.key === 'cost' && isCostFiltered) ? (
+                {(column.key === 'tier' && isTierFiltered) || (column.key === 'type' && isTypeFiltered) ? (
                   <span style={styles.filterActiveDot}></span>
                 ) : null}
               </button>
@@ -852,11 +791,10 @@ const BrowserTableHeader = ({
             'tier', uniqueTiers, selectedTiers, handleTierSelect,
             showTierDropdown, setShowTierDropdown, tierFilterRef, isTierFiltered
           )}
-          {column.key === 'type' && !column.hasCostFilter && renderFilterDropdown(
+          {column.key === 'type' && renderFilterDropdown(
             'type', uniqueTypes, selectedTypes, handleTypeSelect,
             showTypeDropdown, setShowTypeDropdown, typeFilterRef, isTypeFiltered
           )}
-          {column.key === 'type' && column.hasCostFilter && renderCostFilterDropdown()}
         </th>
       ))}
     </tr>
@@ -864,7 +802,7 @@ const BrowserTableHeader = ({
 }
 
 // Browser Row Component
-const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0, costFilter = 'auto-grey', isFocused = false, rowRef = null, onDeleteCustomAdversary = null, isDeleteConfirmed = false }) => {
+const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, remainingBudget = 0, isFocused = false, rowRef = null, onDeleteCustomAdversary = null, isDeleteConfirmed = false }) => {
   const [isHovered, setIsHovered] = useState(false)
 
   const handleAdd = () => {
@@ -916,16 +854,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
       const baseCost = BATTLE_POINT_COSTS[item.type] || 2
       const exceedsBudget = dynamicCost > remainingBudget || remainingBudget <= 0
       
-      // Apply cost filter logic
-      if (costFilter === 'auto-hide' && exceedsBudget) {
-        return null // Hide the row completely
-      }
-      
-      // De-emphasized styling for rows that exceed budget (only for auto-grey mode)
-      const deEmphasizedStyle = (costFilter === 'auto-grey' && exceedsBudget) ? {
-        opacity: 0.5,
-        color: 'var(--text-secondary)'
-      } : {}
+      const deEmphasizedStyle = {}
       
       // If there's a description or motives, return array of two rows
       if (item.description || item.motives) {
@@ -1217,13 +1146,10 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
 const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems = [], pcCount = 4, playerTier = 1, partyControls = null, showContainer = true, savedEncounters = [], onLoadEncounter, onDeleteEncounter, activeTab = 'adversaries', selectedCustomAdversaryId, onSelectCustomAdversary, onTabChange, selectedAdversary, onSelectAdversary, filterCustom = false, showCustomToggle = false, onToggleCustom, onExportCustomAdversaries, onImportCustomAdversaries, autoFocus = false, hideImportExport = false, onClose = null, searchPlaceholder = "Search" }) => {
   const { addCustomAdversary, updateCustomAdversary, deleteCustomAdversary, customContent, adversaries, deleteAdversary } = useGameState()
   const [editingAdversary, setEditingAdversary] = useState(null)
-  const [costFilter, setCostFilter] = useState('all') // 'all', 'auto-grey', 'auto-hide'
-  const [showCostDropdown, setShowCostDropdown] = useState(false)
   const [deleteConfirmations, setDeleteConfirmations] = useState({}) // Track which encounters are in delete confirmation state
   const [deleteAdversaryConfirmations, setDeleteAdversaryConfirmations] = useState({}) // Track which custom adversaries are in delete confirmation state
   const deleteTimeouts = useRef({}) // Track timeouts for each encounter
   const deleteAdversaryTimeouts = useRef({}) // Track timeouts for each custom adversary
-  const costFilterRef = useRef(null)
   
   // Keyboard navigation state - track by item ID for stability
   const [focusedRowIndex, setFocusedRowIndex] = useState(-1)
@@ -1854,13 +1780,6 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
 
   const remainingBudget = calculateRemainingBudget()
 
-  const handleCostFilterSelect = (filter) => {
-    setCostFilter(filter)
-    setShowCostDropdown(false)
-  }
-
-  const isCostFiltered = costFilter !== 'all'
-
   if (loading) {
     return (
       <div style={styles.browser}>
@@ -1919,19 +1838,10 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
               isTierFiltered={isTierFiltered}
               isTypeFiltered={isTypeFiltered}
               getDropdownStyle={getDropdownStyle}
-              // Cost filter props
-              costFilter={costFilter}
-              showCostDropdown={showCostDropdown}
-              setShowCostDropdown={setShowCostDropdown}
-              costFilterRef={costFilterRef}
-              handleCostFilterSelect={handleCostFilterSelect}
-              isCostFiltered={isCostFiltered}
             />
           </thead>
           <tbody>
             {filteredAndSortedData.map((item, index) => {
-              // Filter out rows that should be hidden (cost filter auto-hide)
-              // We'll let BrowserRow handle the visibility, but we need to track visible indices
               return (
                 <BrowserRow
                   key={item.id}
@@ -1943,7 +1853,6 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
                   pcCount={pcCount}
                   playerTier={playerTier}
                   remainingBudget={remainingBudget}
-                  costFilter={costFilter}
                   isFocused={focusedItemId === item.id || focusedRowIndex === index}
                   onDeleteCustomAdversary={type === 'adversary' ? handleDeleteCustomAdversary : null}
                   isDeleteConfirmed={deleteAdversaryConfirmations[item.id] || false}
