@@ -33,9 +33,9 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
   
   if (!hasStandardAttack && !hasFeatures) return null
 
-  const renderFeatureEditor = (feature, placeholder, type) => (
+  const renderFeatureEditor = (feature, placeholder, type, featureIndex) => (
     <div
-      key={feature.id || `${type}-${feature.name}-${feature.description}-${Math.random()}`}
+      key={feature.id || `${type}-${featureIndex}`}
       style={{
         display: 'flex',
         gap: CARD_SPACE_H,
@@ -266,13 +266,13 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
 
     const featuresToShow = isEditMode && features.length === 0 ? [{ type, name: '', description: '' }] : features
     const isFirstCategory = type === 'Action' && !hasStandardAttack  // Actions is first only if no Standard Attack
-    
+
     return (
       <div style={isFirstCategory ? {} : { marginTop: CARD_SPACE_V }}>
         <FeatureDivider title={title} />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {isEditMode
-            ? featuresToShow.map((feature) => renderFeatureEditor(feature, title.slice(0, -1), type))
+            ? featuresToShow.map((feature, featureIndex) => renderFeatureEditor(feature, title.slice(0, -1), type, featureIndex))
             : renderFeatureList(featuresToShow, `Describe the ${title.toLowerCase()}`)}
         </div>
       </div>

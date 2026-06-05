@@ -355,21 +355,26 @@ const GameCard = ({
         }}
         onClick={onClick}
         onMouseDown={(e) => {
-          if (showCustomCreator || quickEdit) return
-          if (e.target.closest('button, input, textarea')) return
-          const timer = setTimeout(() => setQuickEdit(true), 500)
+          if (showCustomCreator) return
+          // Entering edit: block on any interactive element
+          // Exiting edit: only block on buttons (inputs/textareas are fair game to long-press on)
+          if (!quickEdit && e.target.closest('button, input, textarea')) return
+          if (quickEdit && e.target.closest('button')) return
+          const timer = setTimeout(() => setQuickEdit(prev => !prev), 500)
           e.currentTarget._longPressTimer = timer
         }}
         onMouseUp={(e) => clearTimeout(e.currentTarget._longPressTimer)}
         onMouseLeave={(e) => clearTimeout(e.currentTarget._longPressTimer)}
         onTouchStart={(e) => {
-          if (showCustomCreator || quickEdit) return
-          if (e.target.closest('button, input, textarea')) return
-          const timer = setTimeout(() => setQuickEdit(true), 500)
+          if (showCustomCreator) return
+          if (!quickEdit && e.target.closest('button, input, textarea')) return
+          if (quickEdit && e.target.closest('button')) return
+          const timer = setTimeout(() => setQuickEdit(prev => !prev), 500)
           e.currentTarget._longPressTimer = timer
         }}
         onTouchEnd={(e) => clearTimeout(e.currentTarget._longPressTimer)}
         onTouchMove={(e) => clearTimeout(e.currentTarget._longPressTimer)}
+        onTouchCancel={(e) => clearTimeout(e.currentTarget._longPressTimer)}
       >
         {/* DEFEATED overlay */}
         {isDead && (
@@ -754,7 +759,7 @@ const GameCard = ({
             {/* Right Column - Experiences */}
             <ExperienceSection
                               item={item}
-              isEditMode={false}
+              isEditMode={isEditMode}
                               onUpdate={onUpdate}
                               deleteConfirmations={deleteConfirmations}
               setDeleteConfirmations={setDeleteConfirmations}
@@ -763,7 +768,7 @@ const GameCard = ({
                       )}
         <FeaturesSection
                               item={item}
-          isEditMode={false}
+          isEditMode={isEditMode}
                               onUpdate={onUpdate}
                               handleFeatureDeleteClick={handleFeatureDeleteClick}
                               deleteConfirmations={deleteConfirmations}
@@ -783,7 +788,7 @@ const GameCard = ({
           onRemoveInstance={onRemoveInstance}
         />
 
-        <DescriptionSection item={item} isEditMode={false} mode={mode} onUpdate={onUpdate} />
+        <DescriptionSection item={item} isEditMode={isEditMode} mode={mode} onUpdate={onUpdate} />
 
             </div>
 

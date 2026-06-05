@@ -3,7 +3,6 @@ import { useGameState } from '../../state/state'
 import { DASHBOARD_GAP } from './constants'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import EncounterBuilder from './EncounterBuilder'
-import { getDefaultAdversaryValues } from '../Adversaries/adversaryDefaults'
 import { useAppKeyboardShortcuts } from './useAppKeyboardShortcuts'
 import { 
   calculateBaseBattlePoints, 
@@ -13,6 +12,7 @@ import {
 // import TopBarControls from './TopBarControls' // TEMPORARILY DISABLED (fear tracker removal)
 import BrowserOverlay from './BrowserOverlay'
 import EntityColumns from './EntityColumns'
+import CustomAdversaryCreator from '../Adversaries/CustomAdversaryCreator'
 import { useMinionSync } from './hooks/useMinionSync'
 import { useColumnLayout } from './hooks/useColumnLayout'
 import ErrorBoundary from './ErrorBoundary'
@@ -55,6 +55,7 @@ const DashboardContent = () => {
   
   // Dashboard state
   const [encounterBuilderOpen, setEncounterBuilderOpen] = useState(false)
+  const [adversaryCreatorOpen, setAdversaryCreatorOpen] = useState(false)
   const [editingAdversaryId, setEditingAdversaryId] = useState(null) // ID of adversary being edited, or null
   const [browserActiveTab, setBrowserActiveTab] = useState('adversaries') // Active tab in browser overlay
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null) // Selected custom adversary in browser
@@ -106,76 +107,6 @@ const DashboardContent = () => {
     browserOpenAtPosition,
     columnWidth
   })
-
-  // Handle creating a new custom adversary
-  const handleCreateCustomAdversary = useCallback(() => {
-    // Create a blank custom adversary and add it to the dashboard
-    // Use default stats based on tier and type
-    const tier = 1
-    const type = 'Standard'
-    const defaultStats = getDefaultAdversaryValues(tier, type)
-    
-    const defaults = {
-      name: '',
-      baseName: '',
-      tier: tier,
-      type: type,
-      description: '',
-      motives: '',
-      difficulty: defaultStats.difficulty,
-      thresholds: defaultStats.thresholds,
-      hpMax: defaultStats.hpMax,
-      stressMax: defaultStats.stressMax,
-      atk: defaultStats.atk,
-      weapon: '',
-      range: defaultStats.range,
-      damage: defaultStats.damage,
-      experience: [],
-      features: [],
-      source: 'Homebrew',
-      hp: 0,
-      stress: 0,
-      isVisible: true
-    }
-    
-    // Create the adversary
-    createAdversary(defaults)
-    
-    // After a brief delay, find the newly created adversary and set it to edit mode
-    // We look for an adversary with empty/Unknown name and Homebrew source
-    setTimeout(() => {
-      const updatedGroups = getEntityGroups()
-      // Find the adversary with empty name and Homebrew source (the one we just created)
-      for (const group of updatedGroups) {
-        if (group.type === 'adversary') {
-          const newAdversary = group.instances.find(i => 
-            i.source === 'Homebrew' && 
-            (!i.baseName || i.baseName.trim() === '' || i.baseName === 'Unknown')
-          )
-          if (newAdversary && !editingAdversaryId) {
-            setEditingAdversaryId(newAdversary.id)
-            
-            // Scroll to the new card
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                if (scrollContainerRef.current) {
-                  const groupIndex = updatedGroups.findIndex(g => 
-                    g.instances.some(i => i.id === newAdversary.id)
-                  )
-                  if (groupIndex >= 0) {
-                    // Account for left padding: DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
-                    const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
-                    smoothScrollTo(cardPosition, 600, 'new-custom-adversary')
-                  }
-                }
-              })
-            })
-            break
-          }
-        }
-      }
-    }, 100) // Small delay to ensure state has updated
-  }, [createAdversary, getEntityGroups, columnWidth, smoothScrollTo, editingAdversaryId])
 
   // Handle editing an adversary
   const handleEditAdversary = useCallback((adversaryId) => {
@@ -411,7 +342,7 @@ const DashboardContent = () => {
           isOpen={browserOpenAtPosition !== null}
           columnWidth={columnWidth}
           onClose={handleCloseBrowser}
-          onCreateCustomAdversary={handleCreateCustomAdversary}
+          onCreateCustomAdversary={() => setAdversaryCreatorOpen(true)}
                   pcCount={pcCount}
           updatePartySize={updatePartySize}
           availableBattlePoints={availableBattlePoints}
@@ -458,6 +389,76 @@ const DashboardContent = () => {
                 />
       </div>
 
+
+      {/* Custom Adversary Creator Modal */}
+      {adversaryCreatorOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 200,
+            backgroundColor: 'var(--bg-primary)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
+              overflow: 'hidden',
+            }}
+          >
+            {/* Header bar */}
+            <div style={{
+              flex: '0 0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              height: '39px',
+              borderBottom: '1px solid var(--border)',
+              padding: '0 1rem',
+            }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                Create Adversary
+              </span>
+              <button
+                onClick={() => setAdversaryCreatorOpen(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  lineHeight: 1,
+                  padding: '0.25rem',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content — fills the panel, two-panel layout handled by CustomAdversaryCreator */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+                <CustomAdversaryCreator
+                  onSave={(adversaryData, id) => {
+                    if (id) {
+                      updateCustomAdversary(id, adversaryData)
+                    } else {
+                      addCustomAdversary(adversaryData)
+                    }
+                    setAdversaryCreatorOpen(false)
+                  }}
+                  onCancelEdit={() => setAdversaryCreatorOpen(false)}
+                  embedded={false}
+                  autoFocus
+                />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Encounter Builder button DORMANT - will be redesigned with custom adversary creator */}
 
