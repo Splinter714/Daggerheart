@@ -12,6 +12,7 @@ const AddColumn = ({ columnWidth, onOpenBrowser }) => (
       flexShrink: 0,
       flexGrow: 0,
       flex: 'none',
+      marginLeft: 'auto',
       height: '100%',
       padding: `${DASHBOARD_GAP}px 0`,
       boxSizing: 'border-box',
@@ -77,12 +78,7 @@ const EntityColumns = ({
     <div ref={scrollContainerRef} className="dashboard-scroll-container" onScroll={onScroll}>
       {entityGroups.length === 0
         ? browserOpenAtPosition === null
-          ? (
-            <>
-              <div style={{ flex: 1 }} />
-              <AddColumn columnWidth={columnWidth} onOpenBrowser={onOpenBrowser} />
-            </>
-          )
+          ? <AddColumn columnWidth={columnWidth} onOpenBrowser={onOpenBrowser} />
           : null
         : (() => {
             const items = []
