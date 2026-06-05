@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Hexagon, Locate, Check, Pencil, Plus, Minus } from 'lucide-react'
+import { X, Hexagon, Locate, Check, Plus, Minus } from 'lucide-react'
 import ContainerWithTab from '../Dashboard/ContainerWithTab'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
 import FeaturesSection from './GameCard/FeaturesSection'
 import StatusSection from './GameCard/StatusSection'
 import DescriptionSection from './GameCard/DescriptionSection'
-import TypeTierBadge from './GameCard/TypeTierBadge'
 import ExperienceSection from './GameCard/ExperienceSection'
 import { CARD_SPACE_H, CARD_SPACE_V } from './GameCard/constants'
 import TabButtons from './GameCard/TabButtons'
@@ -113,11 +112,28 @@ const GameCard = ({
   isStockAdversary = false, // Whether this is a stock adversary (needs Save As)
 }) => {
   const { scrollableContentRef } = useCardScroll(instances)
-  const nameInputRef = useRef(null) // Ref for name input in edit mode
-  const customCreatorRef = useRef(null) // Ref for CustomAdversaryCreator when showCustomCreator is true
-  
+  const nameInputRef = useRef(null)
+  const customCreatorRef = useRef(null)
+  const cardRef = useRef(null)
+
   // Quick edit mode — local toggle, saves immediately via onUpdate, no Save/Cancel needed
   const [quickEdit, setQuickEdit] = useState(false)
+
+  // Exit edit mode when clicking/tapping outside the card
+  useEffect(() => {
+    if (!quickEdit) return
+    const handleOutside = (e) => {
+      if (cardRef.current && !cardRef.current.contains(e.target)) {
+        setQuickEdit(false)
+      }
+    }
+    document.addEventListener('mousedown', handleOutside)
+    document.addEventListener('touchstart', handleOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleOutside)
+      document.removeEventListener('touchstart', handleOutside)
+    }
+  }, [quickEdit])
 
   // State for two-stage delete functionality
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
@@ -316,7 +332,8 @@ const GameCard = ({
           minHeight: 0
         }}
       >
-      <div 
+      <div
+        ref={cardRef}
         className={getCardClassName()}
         style={{
           ...getCardStyle(true),
@@ -326,10 +343,26 @@ const GameCard = ({
             position: 'relative',
             height: '100%',
             minHeight: 0,
-            border: 'none', // Border is handled by ContainerWithTab
-            borderRadius: 0 // Border radius is handled by ContainerWithTab
+            border: 'none',
+            borderRadius: 0
         }}
         onClick={onClick}
+        onMouseDown={(e) => {
+          if (showCustomCreator || quickEdit) return
+          if (e.target.closest('button, input, textarea')) return
+          const timer = setTimeout(() => setQuickEdit(true), 500)
+          e.currentTarget._longPressTimer = timer
+        }}
+        onMouseUp={(e) => clearTimeout(e.currentTarget._longPressTimer)}
+        onMouseLeave={(e) => clearTimeout(e.currentTarget._longPressTimer)}
+        onTouchStart={(e) => {
+          if (showCustomCreator || quickEdit) return
+          if (e.target.closest('button, input, textarea')) return
+          const timer = setTimeout(() => setQuickEdit(true), 500)
+          e.currentTarget._longPressTimer = timer
+        }}
+        onTouchEnd={(e) => clearTimeout(e.currentTarget._longPressTimer)}
+        onTouchMove={(e) => clearTimeout(e.currentTarget._longPressTimer)}
       >
         {/* DEFEATED overlay */}
         {isDead && (
@@ -375,113 +408,79 @@ const GameCard = ({
             padding: 0,
             gap: 0
           }}>
-            {/* Name and Badge row */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-          }}>
-            {isEditMode ? (
-              <input
-                  ref={nameInputRef}
-                type="text"
-                value={item.baseName || item.name?.replace(/\s+\(\d+\)$/, '') || ''}
-                onChange={(e) => {
-                    if (onUpdate && item.id) {
-                      onUpdate(item.id, { name: e.target.value, baseName: e.target.value })
-                    }
-                }}
-                style={{
-                  backgroundColor: 'var(--bg-primary)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '4px',
-                  color: 'var(--text-primary)',
-                  fontSize: '1.1rem',
-                  fontWeight: '600',
-                  padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
-                  width: '100%',
-                  maxWidth: '300px',
-                  paddingRight: '0.625rem'
-                }}
-                placeholder="Name"
-              />
-            ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: 0 }}>
-            <h4 style={{
-              ...styles.rowTitle,
+            {/* Name row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {/* Left: − button */}
+              <div style={{ flexShrink: 0, width: '28px' }}>
+                {onRemoveInstance && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onRemoveInstance(item.id) }}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
+                    title="Remove one"
+                  >
+                    <Minus size={18} />
+                  </button>
+                )}
+              </div>
+
+              {/* Center: name */}
+              <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
+                {isEditMode ? (
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    value={item.baseName || item.name?.replace(/\s+\(\d+\)$/, '') || ''}
+                    onChange={(e) => {
+                      if (onUpdate && item.id) {
+                        onUpdate(item.id, { name: e.target.value, baseName: e.target.value })
+                      }
+                    }}
+                    style={{
+                      backgroundColor: 'var(--bg-primary)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      color: 'var(--text-primary)',
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+                      width: '100%',
+                      textAlign: 'center',
+                    }}
+                    placeholder="Name"
+                  />
+                ) : (
+                  <h4 style={{
+                    ...styles.rowTitle,
                     color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
-              textAlign: 'left',
-              margin: 0,
-              fontSize: '1.1rem',
-                    flex: 1,
-                    minWidth: 0,
+                    textAlign: 'center',
+                    margin: 0,
+                    fontSize: '1.1rem',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
-                    textTransform: 'uppercase'
-            }}>
-              {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
-            </h4>
-                </div>
-            )}
-            
-            {/* Right side: instance controls + edit + badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
-              {onRemoveInstance && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onRemoveInstance(item.id) }}
-                  style={{
-                    background: 'none', border: 'none',
-                    color: 'var(--text-secondary)', cursor: 'pointer',
-                    padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
-                  title="Remove one"
-                >
-                  <Minus size={14} />
-                </button>
-              )}
-              {onAddInstance && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onAddInstance(item) }}
-                  style={{
-                    background: 'none', border: 'none',
-                    color: 'var(--text-secondary)', cursor: 'pointer',
-                    padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
-                  title="Add another"
-                >
-                  <Plus size={14} />
-                </button>
-              )}
-              {(onEdit || true) && !showCustomCreator && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); setQuickEdit(q => !q) }}
-                  style={{
-                    background: quickEdit ? 'var(--purple)' : 'none',
-                    border: 'none',
-                    color: quickEdit ? 'white' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px',
-                  }}
-                  title={quickEdit ? 'Done editing' : 'Edit'}
-                >
-                  <Pencil size={13} />
-                </button>
-              )}
-              {(item.type || item.tier) && (
-                <TypeTierBadge
-                  type={item.type}
-                  tier={item.tier}
-                  isEditMode={false}
-                  onUpdate={onUpdate}
-                  itemId={item.id}
-                />
-              )}
-            </div>
+                    textTransform: 'uppercase',
+                  }}>
+                    {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
+                  </h4>
+                )}
+              </div>
+
+              {/* Right: + button */}
+              <div style={{ flexShrink: 0, width: '28px', display: 'flex', justifyContent: 'flex-end' }}>
+                {onAddInstance && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onAddInstance(item) }}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
+                    title="Add another"
+                  >
+                    <Plus size={18} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
