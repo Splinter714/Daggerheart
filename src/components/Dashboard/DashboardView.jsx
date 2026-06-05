@@ -25,8 +25,9 @@ import './DashboardView.css'
 
 // Main Dashboard View Component
 const DashboardContent = () => {
-  const { 
-    adversaries, 
+  const {
+    adversaries,
+    adversaryGroups,
     environments,
     countdowns,
     fear,
@@ -65,7 +66,7 @@ const DashboardContent = () => {
   const [spacerShrinking, setSpacerShrinking] = useState(false) // Track if spacer should shrink
   const scrollContainerRef = useRef(null)
 
-  useMinionSync(adversaries, pcCount, createAdversariesBulk, deleteAdversary)
+  useMinionSync(adversaryGroups, pcCount, createAdversariesBulk, deleteAdversary)
 
   const { columnWidth } = useColumnLayout(scrollContainerRef)
 
@@ -82,7 +83,7 @@ const DashboardContent = () => {
   }, [])
 
 
-  const { entityGroups, getEntityGroups } = useEntityGroups(adversaries, countdowns)
+  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, countdowns)
 
   // Keyboard shortcuts
   useAppKeyboardShortcuts({

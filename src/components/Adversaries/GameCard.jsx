@@ -116,6 +116,9 @@ const GameCard = ({
   const nameInputRef = useRef(null) // Ref for name input in edit mode
   const customCreatorRef = useRef(null) // Ref for CustomAdversaryCreator when showCustomCreator is true
   
+  // Quick edit mode — local toggle, saves immediately via onUpdate, no Save/Cancel needed
+  const [quickEdit, setQuickEdit] = useState(false)
+
   // State for two-stage delete functionality
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
   
@@ -275,7 +278,7 @@ const GameCard = ({
 
   const renderExpandedAdversary = () => {
     const isDead = (item.hp || 0) >= (item.hpMax || 1)
-    const isEditMode = effectiveMode === 'edit' || showCustomCreator
+    const isEditMode = effectiveMode === 'edit' || showCustomCreator || quickEdit
     
     // Tab only shown in custom creator mode (Save/Cancel buttons)
     const shouldShowTab = (type === 'adversary') && showCustomCreator
@@ -382,10 +385,10 @@ const GameCard = ({
               <input
                   ref={nameInputRef}
                 type="text"
-                value={item.name || ''}
+                value={item.baseName || item.name?.replace(/\s+\(\d+\)$/, '') || ''}
                 onChange={(e) => {
                     if (onUpdate && item.id) {
-                      onUpdate(item.id, { name: e.target.value })
+                      onUpdate(item.id, { name: e.target.value, baseName: e.target.value })
                     }
                 }}
                 style={{
@@ -454,17 +457,17 @@ const GameCard = ({
                   <Plus size={14} />
                 </button>
               )}
-              {onEdit && (
+              {(onEdit || true) && !showCustomCreator && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); onEdit(item.id) }}
+                  onClick={(e) => { e.stopPropagation(); setQuickEdit(q => !q) }}
                   style={{
-                    background: 'none', border: 'none',
-                    color: 'var(--text-secondary)', cursor: 'pointer',
+                    background: quickEdit ? 'var(--purple)' : 'none',
+                    border: 'none',
+                    color: quickEdit ? 'white' : 'var(--text-secondary)',
+                    cursor: 'pointer',
                     padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px',
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
-                  title="Edit"
+                  title={quickEdit ? 'Done editing' : 'Edit'}
                 >
                   <Pencil size={13} />
                 </button>

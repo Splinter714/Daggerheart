@@ -75,6 +75,7 @@ export const GameStateProvider = ({ children }) => {
     incrementCountdown: countdownState.incrementCountdown,
     decrementCountdown: countdownState.decrementCountdown,
     // Adversary actions
+    adversaryGroups: adversaryState.groups,
     createAdversary: adversaryState.createAdversary,
     createAdversariesBulk: adversaryState.createAdversariesBulk,
     updateAdversary: adversaryState.updateAdversary,
@@ -216,6 +217,7 @@ export const useGameState = () => {
     fear,
     countdowns,
     adversaries,
+    adversaryGroups: context.adversaryGroups || [],
     environments,
     partySize,
     savedEncounters,

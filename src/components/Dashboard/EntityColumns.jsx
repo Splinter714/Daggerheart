@@ -140,15 +140,21 @@ const EntityColumns = ({
                 >
                   <GameCard
                     type={group.type}
-                    item={{
-                      ...group.instances[0],
-                      name: group.instances[0]?.name || group.baseName,
-                      hp: 0,
-                      stress: 0,
-                      isDead: false,
-                    }}
+                    item={
+                      group.type === 'adversary'
+                        ? { ...group.template, name: group.baseName, hp: 0, stress: 0, isDead: false }
+                        : { ...group.instances[0], name: group.instances[0]?.name || group.baseName }
+                    }
                     mode="expanded"
-                    instances={group.instances}
+                    instances={
+                      group.type === 'adversary'
+                        ? group.instances.map((inst) => ({
+                            ...inst,
+                            hpMax: group.template.hpMax,
+                            stressMax: group.template.stressMax,
+                          }))
+                        : group.instances
+                    }
                     showCustomCreator={
                       group.type === 'adversary' && editingAdversaryId && group.instances.some((i) => i.id === editingAdversaryId)
                     }
@@ -164,7 +170,7 @@ const EntityColumns = ({
                     }
                     isStockAdversary={
                       group.type === 'adversary' && editingAdversaryId && group.instances.some((i) => i.id === editingAdversaryId)
-                        ? !group.instances[0]?.source || group.instances[0]?.source !== 'Homebrew'
+                        ? !group.template?.source || group.template?.source !== 'Homebrew'
                         : false
                     }
                     onApplyDamage={
@@ -172,7 +178,7 @@ const EntityColumns = ({
                         ? (id, damage) => {
                             const instance = group.instances.find((i) => i.id === id)
                             if (instance) {
-                              updateAdversary(id, { hp: Math.min(instance.hpMax || 1, (instance.hp || 0) + damage) })
+                              updateAdversary(id, { hp: Math.min(group.template.hpMax || 1, (instance.hp || 0) + damage) })
                             }
                           }
                         : undefined
@@ -189,16 +195,14 @@ const EntityColumns = ({
                     }
                     onApplyStressChange={
                       group.type === 'adversary'
-                        ? (id, stress) =>
-                            updateAdversary(id, {
-                              stress: Math.max(
-                                0,
-                                Math.min(
-                                  group.instances.find((i) => i.id === id)?.stressMax || 6,
-                                  (group.instances.find((i) => i.id === id)?.stress || 0) + stress,
-                                ),
-                              ),
-                            })
+                        ? (id, stress) => {
+                            const instance = group.instances.find((i) => i.id === id)
+                            if (instance) {
+                              updateAdversary(id, {
+                                stress: Math.max(0, Math.min(group.template.stressMax || 6, (instance.stress || 0) + stress)),
+                              })
+                            }
+                          }
                         : undefined
                     }
                     onUpdate={
@@ -262,8 +266,7 @@ const EntityColumns = ({
                     onRemoveInstance={
                       group.type === 'adversary'
                         ? () => {
-                            const firstInstance = group.instances[0]
-                            const isMinion = firstInstance?.type === 'Minion'
+                            const isMinion = group.template?.type === 'Minion'
                             const instancesToRemove = isMinion ? pcCount : 1
                             const instances = group.instances.sort((a, b) => {
                               const aNum = a.duplicateNumber || 1

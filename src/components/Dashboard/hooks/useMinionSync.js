@@ -1,31 +1,14 @@
 import { useEffect, useRef } from 'react'
 
-const buildAdversaryGroups = (adversaries = []) => {
-  return adversaries.reduce((result, adversary) => {
-    const baseName = adversary.baseName || adversary.name?.replace(/\s+\(\d+\)$/, '') || adversary.name || 'Unknown'
-    if (!result[baseName]) {
-      result[baseName] = {
-        type: 'adversary',
-        baseName,
-        instances: [],
-      }
-    }
-    result[baseName].instances.push(adversary)
-    return result
-  }, {})
-}
-
-export const useMinionSync = (adversaries, pcCount, createAdversariesBulk, deleteAdversary) => {
+export const useMinionSync = (adversaryGroups, pcCount, createAdversariesBulk, deleteAdversary) => {
   const prevPartySizeRef = useRef(pcCount)
 
   useEffect(() => {
     const prevPcCount = prevPartySizeRef.current
     if (prevPcCount !== pcCount && prevPcCount > 0) {
-      const groups = buildAdversaryGroups(adversaries)
-      Object.values(groups).forEach((group) => {
-        if (group.type !== 'adversary' || group.instances.length === 0) return
-        const firstInstance = group.instances[0]
-        if (firstInstance.type !== 'Minion') return
+      adversaryGroups.forEach((group) => {
+        if (group.instances.length === 0) return
+        if (group.type !== 'Minion') return  // group.type is the adversary type (Solo, Minion, etc.)
 
         const currentInstances = group.instances.length
         const currentGroups = Math.ceil(currentInstances / prevPcCount)
@@ -35,14 +18,12 @@ export const useMinionSync = (adversaries, pcCount, createAdversariesBulk, delet
 
         if (desiredInstances > currentInstances) {
           const instancesToAdd = desiredInstances - currentInstances
-          const newInstances = Array(instancesToAdd)
-            .fill(null)
-            .map(() => ({ ...firstInstance }))
+          const newInstances = Array(instancesToAdd).fill(null).map(() => ({ ...group }))
           createAdversariesBulk(newInstances)
         } else {
           const instancesToRemove = currentInstances - desiredInstances
-          const instancesToDelete = group.instances.slice(-instancesToRemove)
-          instancesToDelete.forEach((instance) => deleteAdversary(instance.id))
+          const sorted = [...group.instances].sort((a, b) => (b.duplicateNumber || 1) - (a.duplicateNumber || 1))
+          sorted.slice(0, instancesToRemove).forEach((inst) => deleteAdversary(inst.id))
         }
       })
 
@@ -50,6 +31,5 @@ export const useMinionSync = (adversaries, pcCount, createAdversariesBulk, delet
     } else if (prevPcCount === 0 || prevPartySizeRef.current === 0) {
       prevPartySizeRef.current = pcCount
     }
-  }, [adversaries, pcCount, createAdversariesBulk, deleteAdversary])
+  }, [adversaryGroups, pcCount, createAdversariesBulk, deleteAdversary])
 }
-
