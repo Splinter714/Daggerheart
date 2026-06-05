@@ -370,11 +370,6 @@ const GameCard = ({
         }}
         onTouchEnd={(e) => clearTimeout(e.currentTarget._longPressTimer)}
         onTouchMove={(e) => clearTimeout(e.currentTarget._longPressTimer)}
-        onDoubleClick={(e) => {
-          if (showCustomCreator || quickEdit) return
-          if (e.target.closest('button, input, textarea')) return
-          setQuickEdit(true)
-        }}
       >
         {/* DEFEATED overlay */}
         {isDead && (
