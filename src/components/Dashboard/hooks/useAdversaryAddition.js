@@ -106,8 +106,7 @@ export const useAdversaryAddition = ({
                 const container = scrollContainerRef.current
                 const currentScroll = container.scrollLeft
                 const containerWidth = container.clientWidth
-                const effectiveWidth =
-                  browserOpenAtPosition !== null ? containerWidth - (columnWidth + DASHBOARD_GAP) : containerWidth
+                const effectiveWidth = containerWidth
 
                 // Account for left padding: DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
                 const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)

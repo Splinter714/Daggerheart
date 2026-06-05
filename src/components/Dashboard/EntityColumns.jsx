@@ -232,36 +232,36 @@ const EntityColumns = ({
                               createAdversary(item)
                             }
 
-                            setTimeout(() => {
-                              requestAnimationFrame(() => {
+                            // Only auto-scroll when the browser is closed
+                            if (browserOpenAtPosition === null) {
+                              setTimeout(() => {
                                 requestAnimationFrame(() => {
-                                  if (!scrollContainerRef.current) return
-                                  const container = scrollContainerRef.current
-                                  const currentScroll = container.scrollLeft
-                                  const containerWidth = container.clientWidth
-                                  const effectiveWidth =
-                                    browserOpenAtPosition !== null ? containerWidth - (columnWidth + DASHBOARD_GAP) : containerWidth
+                                  requestAnimationFrame(() => {
+                                    if (!scrollContainerRef.current) return
+                                    const container = scrollContainerRef.current
+                                    const currentScroll = container.scrollLeft
+                                    const containerWidth = container.clientWidth
 
-                                  const updatedGroups = getEntityGroups()
-                                  const groupIndex = updatedGroups.findIndex(
-                                    (g) => g.baseName === group.baseName && g.type === 'adversary',
-                                  )
-                                  if (groupIndex >= 0) {
-                                    // Account for left padding: DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
-                                    const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
-                                    const cardEnd = cardPosition + columnWidth
-                                    const margin = 10
-                                    const isVisible =
-                                      cardPosition >= currentScroll - margin &&
-                                      cardEnd <= currentScroll + effectiveWidth + margin
+                                    const updatedGroups = getEntityGroups()
+                                    const groupIndex = updatedGroups.findIndex(
+                                      (g) => g.baseName === group.baseName && g.type === 'adversary',
+                                    )
+                                    if (groupIndex >= 0) {
+                                      const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
+                                      const cardEnd = cardPosition + columnWidth
+                                      const margin = 10
+                                      const isVisible =
+                                        cardPosition >= currentScroll - margin &&
+                                        cardEnd <= currentScroll + containerWidth + margin
 
-                                    if (!isVisible) {
-                                      smoothScrollTo(cardPosition, 500)
+                                      if (!isVisible) {
+                                        smoothScrollTo(cardPosition, 500)
+                                      }
                                     }
-                                  }
+                                  })
                                 })
-                              })
-                            }, 50)
+                              }, 50)
+                            }
                           }
                         : undefined
                     }

@@ -11,7 +11,6 @@ import {
   calculateAutomaticAdjustments
 } from './BattlePointsCalculator'
 // import TopBarControls from './TopBarControls' // TEMPORARILY DISABLED (fear tracker removal)
-import { Plus } from 'lucide-react'
 import BrowserOverlay from './BrowserOverlay'
 import EntityColumns from './EntityColumns'
 import { useMinionSync } from './hooks/useMinionSync'
@@ -459,50 +458,6 @@ const DashboardContent = () => {
                 />
       </div>
 
-      {/* Floating Add Adversaries button */}
-      <button
-        onClick={() => {
-          if (browserOpenAtPosition !== null) {
-            handleCloseBrowser()
-          } else {
-            handleOpenBrowser(entityGroups.length)
-          }
-        }}
-        title={browserOpenAtPosition !== null ? 'Close Browser' : 'Add Adversaries'}
-        style={{
-          position: 'fixed',
-          bottom: '1.5rem',
-          right: '1.5rem',
-          width: '48px',
-          height: '48px',
-          padding: 0,
-          backgroundColor: browserOpenAtPosition !== null ? 'var(--purple)' : 'var(--bg-secondary)',
-          border: '1px solid var(--border)',
-          borderRadius: '50%',
-          color: browserOpenAtPosition !== null ? 'white' : 'var(--text-primary)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'all 0.2s ease',
-          zIndex: 200,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-        }}
-        onMouseEnter={(e) => {
-          if (browserOpenAtPosition === null) {
-            e.currentTarget.style.borderColor = 'var(--purple)'
-            e.currentTarget.style.backgroundColor = 'var(--bg-primary)'
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (browserOpenAtPosition === null) {
-            e.currentTarget.style.borderColor = 'var(--border)'
-            e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
-          }
-        }}
-      >
-        <Plus size={20} />
-      </button>
 
       {/* Encounter Builder button DORMANT - will be redesigned with custom adversary creator */}
 
