@@ -11,7 +11,7 @@ import {
   calculateAutomaticAdjustments
 } from './BattlePointsCalculator'
 // import TopBarControls from './TopBarControls' // TEMPORARILY DISABLED (fear tracker removal)
-import { Plus, Layers } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import BrowserOverlay from './BrowserOverlay'
 import EntityColumns from './EntityColumns'
 import { useMinionSync } from './hooks/useMinionSync'
@@ -503,44 +503,7 @@ const DashboardContent = () => {
         <Plus size={20} />
       </button>
 
-      {/* Floating Encounter Builder button */}
-      <button
-        onClick={() => setEncounterBuilderOpen(true)}
-        title="Encounter Builder"
-        style={{
-          position: 'fixed',
-          bottom: '5rem',
-          right: '1.5rem',
-          width: '48px',
-          height: '48px',
-          padding: 0,
-          backgroundColor: encounterBuilderOpen ? 'var(--purple)' : 'var(--bg-secondary)',
-          border: '1px solid var(--border)',
-          borderRadius: '50%',
-          color: encounterBuilderOpen ? 'white' : 'var(--text-primary)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'all 0.2s ease',
-          zIndex: 200,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-        }}
-        onMouseEnter={(e) => {
-          if (!encounterBuilderOpen) {
-            e.currentTarget.style.borderColor = 'var(--purple)'
-            e.currentTarget.style.backgroundColor = 'var(--bg-primary)'
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!encounterBuilderOpen) {
-            e.currentTarget.style.borderColor = 'var(--border)'
-            e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'
-          }
-        }}
-      >
-        <Layers size={18} />
-      </button>
+      {/* Encounter Builder button DORMANT - will be redesigned with custom adversary creator */}
 
       {/* Encounter Builder Modal */}
       <EncounterBuilder

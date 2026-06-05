@@ -126,7 +126,7 @@ const EntityColumns = ({
                     flexGrow: 0,
                     flex: 'none',
                     paddingRight: '0',
-                    paddingTop: `${group.type === 'adversary' ? DASHBOARD_GAP + TAB_HEIGHT : DASHBOARD_GAP}px`,
+                    paddingTop: `${DASHBOARD_GAP}px`,
                     paddingBottom: `${DASHBOARD_GAP}px`,
                     scrollSnapAlign: 'start',
                     overflow: group.type === 'adversary' ? 'visible' : 'hidden',

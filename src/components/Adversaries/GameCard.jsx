@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Hexagon, Locate, Check } from 'lucide-react'
+import { X, Hexagon, Locate, Check, Pencil, Plus, Minus } from 'lucide-react'
 import ContainerWithTab from '../Dashboard/ContainerWithTab'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
 import FeaturesSection from './GameCard/FeaturesSection'
@@ -277,8 +277,8 @@ const GameCard = ({
     const isDead = (item.hp || 0) >= (item.hpMax || 1)
     const isEditMode = effectiveMode === 'edit' || showCustomCreator
     
-    // Determine if tab should be shown - always show for adversaries
-    const shouldShowTab = (type === 'adversary')
+    // Tab only shown in custom creator mode (Save/Cancel buttons)
+    const shouldShowTab = (type === 'adversary') && showCustomCreator
     
     // Build tab content
     const tabContent = shouldShowTab ? (
@@ -403,15 +403,18 @@ const GameCard = ({
                 placeholder="Name"
               />
             ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: 0 }}>
             <h4 style={{
               ...styles.rowTitle,
                     color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
               textAlign: 'left',
               margin: 0,
               fontSize: '1.1rem',
-                    paddingRight: '6px',
                     flex: 1,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                     textTransform: 'uppercase'
             }}>
               {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
@@ -419,16 +422,63 @@ const GameCard = ({
                 </div>
             )}
             
-            {/* Combined Type/Tier Badge */}
-            {(item.type || item.tier || isEditMode) && (
-              <TypeTierBadge
-                type={item.type}
-                tier={item.tier}
-                isEditMode={isEditMode}
-                onUpdate={onUpdate}
-                itemId={item.id}
-              />
-            )}
+            {/* Right side: instance controls + edit + badge */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
+              {onRemoveInstance && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onRemoveInstance(item.id) }}
+                  style={{
+                    background: 'none', border: 'none',
+                    color: 'var(--text-secondary)', cursor: 'pointer',
+                    padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
+                  title="Remove one"
+                >
+                  <Minus size={14} />
+                </button>
+              )}
+              {onAddInstance && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onAddInstance(item) }}
+                  style={{
+                    background: 'none', border: 'none',
+                    color: 'var(--text-secondary)', cursor: 'pointer',
+                    padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
+                  title="Add another"
+                >
+                  <Plus size={14} />
+                </button>
+              )}
+              {onEdit && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onEdit(item.id) }}
+                  style={{
+                    background: 'none', border: 'none',
+                    color: 'var(--text-secondary)', cursor: 'pointer',
+                    padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
+                  title="Edit"
+                >
+                  <Pencil size={13} />
+                </button>
+              )}
+              {(item.type || item.tier) && (
+                <TypeTierBadge
+                  type={item.type}
+                  tier={item.tier}
+                  isEditMode={false}
+                  onUpdate={onUpdate}
+                  itemId={item.id}
+                />
+              )}
+            </div>
             </div>
           </div>
         </div>
@@ -450,30 +500,12 @@ const GameCard = ({
 
 
 
-        {/* Motives */}
-        {(item.motives || isEditMode) && (
+        {/* Motives — not editable in session edit mode */}
+        {item.motives && (
             <div style={{
               padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
               textAlign: 'center'
           }}>
-            {isEditMode ? (
-              <input
-                type="text"
-                value={item.motives || ''}
-                onChange={(e) => onUpdate && onUpdate(item.id, { motives: e.target.value })}
-                placeholder="Motives..."
-                style={{
-                  width: '100%',
-                  padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
-                  border: '1px solid var(--border)',
-                  borderRadius: '4px',
-                  backgroundColor: 'var(--bg-primary)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.875rem',
-                  textAlign: 'center'
-                }}
-              />
-            ) : (
                       <div style={{
                 fontSize: '0.875rem',
                 fontStyle: 'italic',
@@ -483,7 +515,6 @@ const GameCard = ({
               }}>
                 {item.motives}{item.motives && !item.motives.endsWith('.') ? '.' : ''}
                     </div>
-            )}
                 </div>
               )}
 
@@ -713,8 +744,8 @@ const GameCard = ({
 
             {/* Right Column - Experiences */}
             <ExperienceSection
-                              item={item} 
-              isEditMode={isEditMode}
+                              item={item}
+              isEditMode={false}
                               onUpdate={onUpdate}
                               deleteConfirmations={deleteConfirmations}
               setDeleteConfirmations={setDeleteConfirmations}
@@ -722,8 +753,8 @@ const GameCard = ({
                         </div>
                       )}
         <FeaturesSection
-                              item={item} 
-          isEditMode={isEditMode}
+                              item={item}
+          isEditMode={false}
                               onUpdate={onUpdate}
                               handleFeatureDeleteClick={handleFeatureDeleteClick}
                               deleteConfirmations={deleteConfirmations}
@@ -731,7 +762,7 @@ const GameCard = ({
                             />
 
         <StatusSection
-                              item={item} 
+                              item={item}
           instances={instances}
           isEditMode={isEditMode}
           type={type}
@@ -739,9 +770,11 @@ const GameCard = ({
           onApplyDamage={onApplyDamage}
           onApplyHealing={onApplyHealing}
           onApplyStressChange={onApplyStressChange}
+          onAddInstance={onAddInstance}
+          onRemoveInstance={onRemoveInstance}
         />
 
-        <DescriptionSection item={item} isEditMode={isEditMode} mode={mode} onUpdate={onUpdate} />
+        <DescriptionSection item={item} isEditMode={false} mode={mode} onUpdate={onUpdate} />
 
             </div>
 

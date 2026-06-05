@@ -54,6 +54,8 @@ const StatusSection = ({
   onApplyDamage,
   onApplyHealing,
   onApplyStressChange,
+  onAddInstance,
+  onRemoveInstance,
 }) => {
   const shouldShowStatus =
     (instances && instances.length > 0) || (item.type !== 'Minion' && (item.thresholds || isEditMode))
