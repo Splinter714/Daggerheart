@@ -156,7 +156,8 @@ export function useAdversaryState(initialAdversaries = []) {
   }
 
   // Smart routing: hp/stress/isVisible → instance; everything else → group template
-  const updateAdversary = (instanceId, updates) => {
+  // Accepts either a group ID (grp-xxx) or an instance ID (adv-xxx)
+  const updateAdversary = (id, updates) => {
     const instanceUpdates = {}
     const templateUpdates = {}
 
@@ -170,8 +171,10 @@ export function useAdversaryState(initialAdversaries = []) {
 
     setGroups((prev) =>
       prev.map((group) => {
-        const instanceIndex = group.instances.findIndex((i) => i.id === instanceId)
-        if (instanceIndex === -1) return group
+        const isGroupId = group.id === id
+        const instanceIndex = isGroupId ? -1 : group.instances.findIndex((i) => i.id === id)
+
+        if (!isGroupId && instanceIndex === -1) return group
 
         let updated = { ...group }
 
@@ -179,7 +182,7 @@ export function useAdversaryState(initialAdversaries = []) {
           updated = { ...updated, ...templateUpdates }
         }
 
-        if (Object.keys(instanceUpdates).length > 0) {
+        if (instanceIndex !== -1 && Object.keys(instanceUpdates).length > 0) {
           updated.instances = group.instances.map((inst, i) =>
             i === instanceIndex ? { ...inst, ...instanceUpdates } : inst
           )

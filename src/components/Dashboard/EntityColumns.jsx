@@ -112,7 +112,7 @@ const EntityColumns = ({
 
               items.push(
                 <Panel
-                  key={`${group.type}-${group.baseName}`}
+                  key={group.type === 'adversary' ? `adversary-${group.template?.id || group.baseName}` : `${group.type}-${group.baseName}`}
                   className={
                     index === 0
                       ? 'dashboard-column dashboard-column--first'

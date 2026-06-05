@@ -363,6 +363,12 @@ const GameCard = ({
         }}
         onTouchEnd={(e) => clearTimeout(e.currentTarget._longPressTimer)}
         onTouchMove={(e) => clearTimeout(e.currentTarget._longPressTimer)}
+        onKeyDown={(e) => {
+          if (quickEdit && (e.key === 'Enter' || e.key === 'Escape')) {
+            e.preventDefault()
+            setQuickEdit(false)
+          }
+        }}
       >
         {/* DEFEATED overlay */}
         {isDead && (
