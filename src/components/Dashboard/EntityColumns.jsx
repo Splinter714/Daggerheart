@@ -76,7 +76,14 @@ const EntityColumns = ({
   return (
     <div ref={scrollContainerRef} className="dashboard-scroll-container" onScroll={onScroll}>
       {entityGroups.length === 0
-        ? <AddColumn columnWidth={columnWidth} onOpenBrowser={onOpenBrowser} />
+        ? browserOpenAtPosition === null
+          ? (
+            <>
+              <div style={{ flex: 1 }} />
+              <AddColumn columnWidth={columnWidth} onOpenBrowser={onOpenBrowser} />
+            </>
+          )
+          : null
         : (() => {
             const items = []
 
@@ -232,36 +239,46 @@ const EntityColumns = ({
                               createAdversary(item)
                             }
 
-                            // Only auto-scroll when the browser is closed
-                            if (browserOpenAtPosition === null) {
-                              setTimeout(() => {
+                            setTimeout(() => {
+                              requestAnimationFrame(() => {
                                 requestAnimationFrame(() => {
-                                  requestAnimationFrame(() => {
-                                    if (!scrollContainerRef.current) return
-                                    const container = scrollContainerRef.current
-                                    const currentScroll = container.scrollLeft
-                                    const containerWidth = container.clientWidth
+                                  if (!scrollContainerRef.current) return
+                                  const container = scrollContainerRef.current
+                                  const currentScroll = container.scrollLeft
+                                  const containerWidth = container.clientWidth
+                                  // When browser is open, the last column is covered — reduce visible area
+                                  const effectiveWidth = browserOpenAtPosition !== null
+                                    ? containerWidth - columnWidth - DASHBOARD_GAP
+                                    : containerWidth
 
-                                    const updatedGroups = getEntityGroups()
-                                    const groupIndex = updatedGroups.findIndex(
-                                      (g) => g.baseName === group.baseName && g.type === 'adversary',
-                                    )
-                                    if (groupIndex >= 0) {
-                                      const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
-                                      const cardEnd = cardPosition + columnWidth
-                                      const margin = 10
-                                      const isVisible =
-                                        cardPosition >= currentScroll - margin &&
-                                        cardEnd <= currentScroll + containerWidth + margin
+                                  const updatedGroups = getEntityGroups()
+                                  const groupIndex = updatedGroups.findIndex(
+                                    (g) => g.baseName === group.baseName && g.type === 'adversary',
+                                  )
+                                  if (groupIndex >= 0) {
+                                    const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
+                                    const cardEnd = cardPosition + columnWidth
+                                    const margin = 10
+                                    const isVisible =
+                                      cardPosition >= currentScroll - margin &&
+                                      cardEnd <= currentScroll + effectiveWidth + margin
 
-                                      if (!isVisible) {
-                                        smoothScrollTo(cardPosition, 500)
+                                    if (!isVisible) {
+                                      let targetScroll
+                                      if (cardEnd > currentScroll + effectiveWidth + margin) {
+                                        // Card is hidden on the right (under browser) — use a snap-aligned target
+                                        const visibleColumns = Math.round((containerWidth - DASHBOARD_GAP) / (columnWidth + DASHBOARD_GAP))
+                                        targetScroll = (groupIndex - visibleColumns + 2) * (columnWidth + DASHBOARD_GAP)
+                                      } else {
+                                        // Card is hidden on the left — snap-aligned left edge
+                                        targetScroll = groupIndex * (columnWidth + DASHBOARD_GAP)
                                       }
+                                      smoothScrollTo(Math.max(0, targetScroll), 500)
                                     }
-                                  })
+                                  }
                                 })
-                              }, 50)
-                            }
+                              })
+                            }, 50)
                           }
                         : undefined
                     }
@@ -402,9 +419,11 @@ const EntityColumns = ({
               )
             }
 
-            items.push(
-              <AddColumn key="add-column" columnWidth={columnWidth} onOpenBrowser={onOpenBrowser} />
-            )
+            if (browserOpenAtPosition === null) {
+              items.push(
+                <AddColumn key="add-column" columnWidth={columnWidth} onOpenBrowser={onOpenBrowser} />
+              )
+            }
             return items
           })()}
       {browserOpenAtPosition !== null && (

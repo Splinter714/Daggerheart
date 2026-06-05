@@ -83,7 +83,8 @@ export const useAdversaryAddition = ({
                   const scrollWidthIncreased = finalContainer.scrollWidth > scrollWidthBeforeAdd
 
                   if (scrollWidthIncreased && Math.abs(distance) < 1) {
-                    smoothScrollTo(maxScroll + 10, 500)
+                    // When browser is open, don't over-scroll past maxScroll (no AddColumn to scroll past)
+                    smoothScrollTo(browserOpenAtPosition !== null ? maxScroll : maxScroll + 10, 500)
                   } else if (Math.abs(distance) > 1) {
                     smoothScrollTo(maxScroll, 500)
                   }
@@ -106,7 +107,10 @@ export const useAdversaryAddition = ({
                 const container = scrollContainerRef.current
                 const currentScroll = container.scrollLeft
                 const containerWidth = container.clientWidth
-                const effectiveWidth = containerWidth
+                // When browser is open, the last column is covered — reduce visible area
+                const effectiveWidth = browserOpenAtPosition !== null
+                  ? containerWidth - columnWidth - DASHBOARD_GAP
+                  : containerWidth
 
                 // Account for left padding: DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
                 const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
@@ -115,7 +119,17 @@ export const useAdversaryAddition = ({
                 const isVisible = cardPosition >= currentScroll - margin && cardEnd <= currentScroll + effectiveWidth + margin
 
                 if (!isVisible) {
-                  smoothScrollTo(cardPosition, 500)
+                  let targetScroll
+                  if (cardEnd > currentScroll + effectiveWidth + margin) {
+                    // Card is hidden on the right — snap-aligned target placing card in last visible slot
+                    const visibleColumns = Math.round((containerWidth - DASHBOARD_GAP) / (columnWidth + DASHBOARD_GAP))
+                    const lastVisibleSlot = browserOpenAtPosition !== null ? visibleColumns - 2 : visibleColumns - 1
+                    targetScroll = (groupIndex - lastVisibleSlot) * (columnWidth + DASHBOARD_GAP)
+                  } else {
+                    // Card is hidden on the left — snap-aligned left edge
+                    targetScroll = groupIndex * (columnWidth + DASHBOARD_GAP)
+                  }
+                  smoothScrollTo(Math.max(0, targetScroll), 500)
                 }
               }
             }
