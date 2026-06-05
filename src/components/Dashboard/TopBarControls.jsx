@@ -16,6 +16,7 @@ const TopBarControls = ({ fearValue, onUpdateFear, onToggleBrowser, isBrowserOpe
           padding: '0 1rem',
         }}
       >
+        {/* FEAR TRACKER TEMPORARILY DISABLED
         <Pips
           type="fear"
           value={fearValue}
@@ -26,6 +27,7 @@ const TopBarControls = ({ fearValue, onUpdateFear, onToggleBrowser, isBrowserOpe
           clickContainerWidth="100%"
           centerPips={true}
         />
+        */}
         <button
           onClick={onToggleBrowser}
           title={isBrowserOpen ? 'Close Browser' : 'Add Adversaries'}

@@ -78,7 +78,6 @@
       "stressMax": 3,
       "damageThreshold": 8,
       "atk": 2,
-      "def": 2,
       "features": [
         {
           "name": "Relentless (3)",
@@ -96,16 +95,13 @@
           "description": "The Troll swings their skull flail in a wide arc. Mark a Stress to make an attack against all targets in front of the Troll within Very Close range. On a success, the Troll deals 2d10+3 instead of its normal damage. The Troll cannot use this action while evolved."
         }
       ],
-      "traits": [
-        "Skull Flail: Very Close | 1d10+3 phy"
-      ],
       "experience": [
-        {
-          "name": "Mountains",
-          "modifier": 2
-        }
+        "Mountains +2"
       ],
-      "source": "Daggerheart Playtest"
+      "source": "Daggerheart Playtest",
+      "weapon": "Skull Flail",
+      "range": "Very Close",
+      "damage": "1d10+3 phy"
     },
     {
       "id": "rabble-mawb",
@@ -125,7 +121,6 @@
       "stressMax": 2,
       "damageThreshold": 4,
       "atk": -2,
-      "def": 1,
       "features": [
         {
           "name": "Horde (1d4)",
@@ -138,16 +133,13 @@
           "description": "When a Rabble Mawb is defeated, you can spend a Fear to bring this Rabble Mawb back to life. This new Rabble Mawb gains a +X bonus to all rolls, where X is the number of times this feature has been used by this adversary."
         }
       ],
-      "traits": [
-        "Chomp: Melee | 1d6+3 phy"
-      ],
       "experience": [
-        {
-          "name": "Underground",
-          "modifier": 2
-        }
+        "Underground +2"
       ],
-      "source": "Daggerheart Playtest"
+      "source": "Daggerheart Playtest",
+      "weapon": "Chomp",
+      "range": "Melee",
+      "damage": "1d6+3 phy"
     },
     {
       "id": "redcap-butcher",
@@ -167,7 +159,6 @@
       "stressMax": 3,
       "damageThreshold": 5,
       "atk": 1,
-      "def": 2,
       "features": [
         {
           "name": "Chop Happy",
@@ -180,16 +171,13 @@
           "description": "Mark a Stress to make a standard attack against a target within Far range. If the Butcher makes this attack while Hidden, they have advantage on the attack roll."
         }
       ],
-      "traits": [
-        "Meat Cleaver: Melee | 1d8+1 phy"
-      ],
       "experience": [
-        {
-          "name": "Scurry",
-          "modifier": 2
-        }
+        "Scurry +2"
       ],
-      "source": "Daggerheart Playtest"
+      "source": "Daggerheart Playtest",
+      "weapon": "Meat Cleaver",
+      "range": "Melee",
+      "damage": "1d8+1 phy"
     },
     {
       "id": "redcap-candlemaker",
@@ -209,7 +197,6 @@
       "stressMax": 3,
       "damageThreshold": 7,
       "atk": 3,
-      "def": 3,
       "features": [
         {
           "name": "Hand of Glory",
@@ -227,16 +214,13 @@
           "description": "Spend a token from this stat block. The Candlemaker conjures a ball of fire at a point within Far range. All creatures within Very Close range of that point must make an Agility Reaction Roll. Targets who fail take 2d10 magic damage. Targets who succeed take half damage."
         }
       ],
-      "traits": [
-        "Burning Candlestick: Very Close | 1d10+2 mag"
-      ],
       "experience": [
-        {
-          "name": "Vigilance",
-          "modifier": 3
-        }
+        "Vigilance +3"
       ],
-      "source": "Daggerheart Playtest"
+      "source": "Daggerheart Playtest",
+      "weapon": "Burning Candlestick",
+      "range": "Very Close",
+      "damage": "1d10+2 mag"
     },
     {
       "id": "doppelhund",
@@ -256,7 +240,6 @@
       "stressMax": 5,
       "damageThreshold": 9,
       "atk": 3,
-      "def": 3,
       "features": [
         {
           "name": "Blink Beast",
@@ -269,16 +252,13 @@
           "description": "When the Doppelhünd makes a standard attack, it can mark a Stress to make an additional standard attack. If both attacks target the same creature, their damage is combined."
         }
       ],
-      "traits": [
-        "Toothy Arms: Very Close | 2d8+2 phy"
-      ],
       "experience": [
-        {
-          "name": "Shadows",
-          "modifier": 3
-        }
+        "Shadows +3"
       ],
-      "source": "Daggerheart Playtest"
+      "source": "Daggerheart Playtest",
+      "weapon": "Toothy Arms",
+      "range": "Very Close",
+      "damage": "2d8+2 phy"
     },
     {
       "id": "dragon-knight",
@@ -298,7 +278,6 @@
       "stressMax": 3,
       "damageThreshold": 15,
       "atk": 2,
-      "def": 4,
       "features": [
         {
           "name": "High Ground",
@@ -316,16 +295,13 @@
           "description": "Marks a Stress and chooses a target within Far range. Moves into Melee range, makes a standard attack. On a success, gains a +1d12 bonus to damage, and the target must mark an Armor Slot without receiving its benefits (can still use armor to reduce damage)."
         }
       ],
-      "traits": [
-        "Lance: Very Close | 2d12+3 phy"
-      ],
       "experience": [
-        {
-          "name": "Acrobatics",
-          "modifier": 2
-        }
+        "Acrobatics +2"
       ],
-      "source": "Daggerheart Playtest"
+      "source": "Daggerheart Playtest",
+      "weapon": "Lance",
+      "range": "Very Close",
+      "damage": "2d12+3 phy"
     },
     {
       "id": "gargoyle",
@@ -345,7 +321,6 @@
       "stressMax": 2,
       "damageThreshold": 14,
       "atk": 2,
-      "def": 4,
       "features": [
         {
           "name": "Stone Body",
@@ -363,16 +338,13 @@
           "description": "Chooses a point within Far range, moves to that point in a straight line, and makes an attack against one target along its path."
         }
       ],
-      "traits": [
-        "Stone Claws: Melee | 2d10+3 phy"
-      ],
       "experience": [
-        {
-          "name": "Ruins",
-          "modifier": 2
-        }
+        "Ruins +2"
       ],
-      "source": "Daggerheart Playtest"
+      "source": "Daggerheart Playtest",
+      "weapon": "Stone Claws",
+      "range": "Melee",
+      "damage": "2d10+3 phy"
     },
     {
       "id": "gobstalker",
@@ -392,7 +364,6 @@
       "stressMax": 6,
       "damageThreshold": 10,
       "atk": 2,
-      "def": 3,
       "features": [
         {
           "name": "Relentless (3)",
@@ -410,16 +381,13 @@
           "description": "Marks a Stress to attack a target within Far range. On a hit, spends a Fear to choose an effect or roll a d10 for a random effect, using the corresponding magical beam: 1. Beguile: Target is Beguiled, sees Gobstalker as a friend, cannot attack it, and must mark a Stress or attack nearest ally when someone rolls with Fear. Lasts until Presence or Knowledge Roll (16) succeeds. 2. Corrode: Target takes 2d8 magical damage and marks an Armor Slot without receiving benefits. If all Armor Slots are marked, damage is doubled. 3. Doom: Target immediately marks all cleared HP, but can reduce marked HP by spending Hope (1 Hope = 1 HP reduction). 4. Hypnosis: Target falls into a deep, sleeplike trance, cannot take actions except trying to wake up. Wakes on hit, 1+ HP mark, or Instinct Roll (16) succeeds. 5. Paralyze: Target freezes in place, becoming Vulnerable and Restrained until 2 Stress are marked. 6. Petrify: Places a Petrification Countdown (6) on the target. Ticks down when a PC rolls with Fear. On trigger, target turns to stone until Gobstalker is defeated or a long rest. Stone targets are immune to damage but aware. 7. Push: Target is thrown up to Far range and takes 3d6 physical damage from whatever they hit. 8. Sear: Target takes 2d8 direct magical damage. 9. Slow: Target is Vulnerable and must mark a Stress to move. Can spend 2 Hope to end. 10. Terrify: Target can't act except to flee or shake off fear (Insight Roll 16). Marks a Stress whenever Fear is spent. Lasts until Gobstalker is defeated or a rest."
         }
       ],
-      "traits": [
-        "Bite: Melee | 2d6+3 phy"
-      ],
       "experience": [
-        {
-          "name": "Magic",
-          "modifier": 3
-        }
+        "Magic +3"
       ],
-      "source": "Daggerheart Playtest"
+      "source": "Daggerheart Playtest",
+      "weapon": "Bite",
+      "range": "Melee",
+      "damage": "2d6+3 phy"
     }
   ]
 }

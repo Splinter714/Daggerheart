@@ -698,38 +698,29 @@ const EncounterBuilder = ({
                  document.referrer.includes('android-app://')
 
   return (
-    <div 
-      onClick={onClose}
+    <div
       className="encounter-builder-modal"
       style={{
         position: 'fixed',
         top: 0,
-        left: 0,
         right: 0,
-        bottom: isPWA ? 'calc(60px + env(safe-area-inset-bottom) + 1rem)' : 'calc(60px + env(safe-area-inset-bottom))',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(8px)',
-        zIndex: 1000,
+        bottom: 0,
+        width: 'min(720px, 100%)',
+        backgroundColor: 'var(--bg-primary)',
+        borderLeft: '1px solid var(--border)',
+        zIndex: 150,
         display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        padding: '12px'
+        flexDirection: 'column',
+        overflow: 'hidden',
+        boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.4)',
       }}
     >
-      <div 
-        onClick={(e) => e.stopPropagation()}
+      <div
         style={{
-          backgroundColor: 'var(--bg-primary)',
-          border: '2px solid var(--border)',
-          borderRadius: '12px',
-          width: '100%',
-          maxWidth: '1200px',
-          height: '100%',
-          maxHeight: '100%',
           display: 'flex',
           flexDirection: 'column',
+          height: '100%',
           overflow: 'hidden',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
         }}
       >
       {/* Full-Width Tabs Bar */}

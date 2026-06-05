@@ -154,9 +154,6 @@ const BrowserOverlay = ({
                 gap: '0.5rem',
               }}
             >
-              <span style={{ color: 'var(--text-primary)', fontSize: '0.875rem', fontWeight: '500' }}>
-                Balance:
-              </span>
               <span
                 style={{
                   color:
@@ -170,10 +167,10 @@ const BrowserOverlay = ({
                 }}
               >
                 {spentBattlePoints > availableBattlePoints
-                  ? `+${spentBattlePoints - availableBattlePoints}`
+                  ? `-${spentBattlePoints - availableBattlePoints}`
                   : availableBattlePoints - spentBattlePoints === 0
                   ? '0'
-                  : `-${availableBattlePoints - spentBattlePoints}`}
+                  : `+${availableBattlePoints - spentBattlePoints}`}
               </span>
             </div>
             {onClose && (
