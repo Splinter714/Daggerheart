@@ -148,11 +148,13 @@ const EntityColumns = ({
                     mode="expanded"
                     instances={
                       group.type === 'adversary'
-                        ? group.instances.map((inst) => ({
-                            ...inst,
-                            hpMax: group.template.hpMax,
-                            stressMax: group.template.stressMax,
-                          }))
+                        ? [...group.instances]
+                            .sort((a, b) => (a.duplicateNumber || 1) - (b.duplicateNumber || 1))
+                            .map((inst) => ({
+                              ...inst,
+                              hpMax: group.template.hpMax,
+                              stressMax: group.template.stressMax,
+                            }))
                         : group.instances
                     }
                     showCustomCreator={
@@ -268,7 +270,7 @@ const EntityColumns = ({
                         ? () => {
                             const isMinion = group.template?.type === 'Minion'
                             const instancesToRemove = isMinion ? pcCount : 1
-                            const instances = group.instances.sort((a, b) => {
+                            const instances = [...group.instances].sort((a, b) => {
                               const aNum = a.duplicateNumber || 1
                               const bNum = b.duplicateNumber || 1
                               return bNum - aNum

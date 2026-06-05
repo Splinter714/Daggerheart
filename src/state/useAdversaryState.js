@@ -176,10 +176,10 @@ export function useAdversaryState(initialAdversaries = []) {
 
         if (!isGroupId && instanceIndex === -1) return group
 
-        let updated = { ...group }
+        let updated = { ...group, instances: [...group.instances] }
 
         if (Object.keys(templateUpdates).length > 0) {
-          updated = { ...updated, ...templateUpdates }
+          updated = { ...updated, ...templateUpdates, instances: updated.instances }
         }
 
         if (instanceIndex !== -1 && Object.keys(instanceUpdates).length > 0) {
