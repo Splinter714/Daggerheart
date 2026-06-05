@@ -119,7 +119,7 @@ const GameCard = ({
   // Quick edit mode — local toggle, saves immediately via onUpdate, no Save/Cancel needed
   const [quickEdit, setQuickEdit] = useState(false)
 
-  // Exit edit mode when clicking/tapping outside the card
+  // Exit edit mode when clicking/tapping outside the card, or pressing Enter/Escape
   useEffect(() => {
     if (!quickEdit) return
     const handleOutside = (e) => {
@@ -127,11 +127,18 @@ const GameCard = ({
         setQuickEdit(false)
       }
     }
+    const handleKey = (e) => {
+      if (e.key === 'Escape') {
+        setQuickEdit(false)
+      }
+    }
     document.addEventListener('mousedown', handleOutside)
     document.addEventListener('touchstart', handleOutside)
+    document.addEventListener('keydown', handleKey)
     return () => {
       document.removeEventListener('mousedown', handleOutside)
       document.removeEventListener('touchstart', handleOutside)
+      document.removeEventListener('keydown', handleKey)
     }
   }, [quickEdit])
 
@@ -363,11 +370,10 @@ const GameCard = ({
         }}
         onTouchEnd={(e) => clearTimeout(e.currentTarget._longPressTimer)}
         onTouchMove={(e) => clearTimeout(e.currentTarget._longPressTimer)}
-        onKeyDown={(e) => {
-          if (quickEdit && (e.key === 'Enter' || e.key === 'Escape')) {
-            e.preventDefault()
-            setQuickEdit(false)
-          }
+        onDoubleClick={(e) => {
+          if (showCustomCreator || quickEdit) return
+          if (e.target.closest('button, input, textarea')) return
+          setQuickEdit(true)
         }}
       >
         {/* DEFEATED overlay */}
