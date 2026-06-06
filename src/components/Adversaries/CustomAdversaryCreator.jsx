@@ -788,7 +788,7 @@ const CustomAdversaryCreator = forwardRef(({
 
     return (
       <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, overflow: 'hidden' }}>
-        <ActionBar />
+        {ActionBar()}
         <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
 
         {/* ── Preview ───────────────────────────────────────────────────────── */}
@@ -1143,7 +1143,9 @@ const CustomAdversaryCreator = forwardRef(({
               opacity: isSaving || !formData.name.trim() ? 0.6 : 1,
             }}
           >
-            {getSaveButtonText()}
+            {isSaving
+              ? (editingAdversary ? (isStockAdversary ? 'Creating...' : 'Saving...') : 'Saving...')
+              : (editingAdversary ? (isStockAdversary ? 'Save As Custom' : 'Save') : 'Save')}
           </button>
           {onCancelEdit && (
             <button
