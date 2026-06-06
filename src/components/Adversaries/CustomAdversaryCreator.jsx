@@ -133,8 +133,8 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
   }, [open])
 
   const popoverPos = align === 'right'
-    ? { top: '24px', right: 0, left: 'auto', transform: 'none' }
-    : { top: '24px', left: 0, right: 'auto', transform: 'none' }
+    ? { top: '36px', right: 0, left: 'auto', transform: 'none' }
+    : { top: '36px', left: 0, right: 'auto', transform: 'none' }
 
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
@@ -142,17 +142,25 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
         type="button"
         onClick={() => setOpen(v => !v)}
         style={{
+          width: '44px', height: '44px',
+          border: 'none', background: 'transparent',
+          cursor: 'pointer', padding: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+          margin: '-12px',
+        }}
+      >
+        <span style={{
           width: '20px', height: '20px',
           borderRadius: '50%',
-          border: '1px solid var(--border)',
+          border: `1px solid ${open ? 'var(--purple)' : 'var(--border)'}`,
           background: open ? 'var(--purple)' : 'var(--bg-secondary)',
           color: open ? 'white' : 'var(--text-secondary)',
           fontSize: '0.65rem', fontWeight: 700,
-          lineHeight: 1, cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >i</button>
+          pointerEvents: 'none', flexShrink: 0,
+        }}>i</span>
+      </button>
       {open && (
         <div style={{
           position: 'absolute', ...popoverPos,
@@ -302,7 +310,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.5rem' }}>
                       <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.78rem' }}>{f.name}</span>
                       <button type="button" onClick={() => addGuideFeature(f)} style={{
-                        padding: '0.2rem 0.5rem', minHeight: '28px', flexShrink: 0,
+                        padding: '0.2rem 0.5rem', minHeight: '36px', flexShrink: 0,
                         background: 'var(--purple)', border: 'none', borderRadius: '3px',
                         color: 'white', fontSize: '0.68rem', cursor: 'pointer',
                       }}>Add</button>
@@ -320,7 +328,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
             </div>
           )}
         </InfoPopover>
-        <button type="button" onClick={addItem} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '28px', minHeight: '28px' }} title={`Add ${label.slice(0, -1)}`}>+</button>
+        <button type="button" onClick={addItem} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '44px', minHeight: '44px' }} title={`Add ${label.slice(0, -1)}`}>+</button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
         {items.map((feat, localIdx) => {
@@ -359,7 +367,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
                 <button type="button" onClick={() => {
                   const next = allFeatures.filter((_, i) => i !== globalIdx)
                   setFormData(prev => ({ ...prev, features: next }))
-                }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.6rem 0.5rem', fontSize: '1rem', flexShrink: 0, minWidth: '36px', minHeight: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.6rem 0.5rem', fontSize: '1rem', flexShrink: 0, minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
               </div>
               <textarea
                 value={feat.description || ''}
@@ -398,10 +406,7 @@ const TypeSelector = ({ selectedType, setFormData }) => {
         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem',
         minHeight: '44px',
       }}>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)' }}>{selectedType}</div>
-          {tGuide?.summary && <div style={{ fontSize: '0.71rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tGuide.summary}</div>}
-        </div>
+        <span style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)' }}>{selectedType}</span>
         <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', flexShrink: 0 }}>{typeOpen ? '▲' : '▼'}</span>
       </button>
       {typeOpen && (
@@ -421,7 +426,7 @@ const TypeSelector = ({ selectedType, setFormData }) => {
                 width: '100%', textAlign: 'left',
                 background: isSelected ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent',
                 border: 'none', borderBottom: '1px solid var(--border)',
-                padding: '0.4rem 0.6rem', cursor: 'pointer',
+                padding: '0.4rem 0.6rem', cursor: 'pointer', minHeight: '44px',
               }}>
                 <div style={{ fontWeight: 700, fontSize: '0.82rem', color: isSelected ? 'var(--purple)' : 'var(--text-primary)', marginBottom: tg?.summary ? '0.1rem' : 0 }}>{t}</div>
                 {tg?.summary && <div style={{ fontSize: '0.71rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tg.summary}</div>}
@@ -917,10 +922,13 @@ const CustomAdversaryCreator = forwardRef(({
                       ))}
                     </InfoPopover>
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
-                    {[1, 2, 3, 4].map(t => (
+                  <div style={{ display: 'flex' }}>
+                    {[1, 2, 3, 4].map((t, i) => (
                       <button key={t} onClick={() => setFormData(prev => ({ ...prev, tier: t }))} style={{
-                        flex: '1 1 calc(50% - 0.15rem)', minWidth: '44px', height: '44px', border: '1px solid var(--border)', borderRadius: '5px',
+                        flex: 1, minWidth: '36px', height: '44px',
+                        border: '1px solid var(--border)',
+                        borderLeft: i > 0 ? 'none' : '1px solid var(--border)',
+                        borderRadius: i === 0 ? '5px 0 0 5px' : i === 3 ? '0 5px 5px 0' : '0',
                         background: formData.tier === t ? 'var(--purple)' : 'var(--bg-secondary)',
                         color: formData.tier === t ? 'white' : 'var(--text-primary)',
                         fontWeight: formData.tier === t ? '700' : '400',
@@ -1032,7 +1040,7 @@ const CustomAdversaryCreator = forwardRef(({
                   <button type="button" onClick={() => {
                     const bonus = Math.min(formData.tier + 1, 3)
                     setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: '', modifier: bonus }] }))
-                  }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '28px', minHeight: '28px' }} title="Add experience">+</button>
+                  }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '44px', minHeight: '44px' }} title="Add experience">+</button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                   {(formData.experience || []).map((exp, i) => (
