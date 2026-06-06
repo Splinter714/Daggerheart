@@ -390,6 +390,59 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
   )
 }
 
+// ─── Damage selector — dropdown of pool presets with optional custom text entry ─
+
+const selectArrowBg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E")`
+
+const DamageSelector = ({ damage, type, tier, onChange }) => {
+  const pools = getDamagePools(type, tier)
+  const isPreset = pools?.includes(damage) ?? false
+  const [customMode, setCustomMode] = useState(!isPreset && damage !== '')
+
+  useEffect(() => {
+    if (isPreset) setCustomMode(false)
+  }, [isPreset])
+
+  if (!pools) {
+    return (
+      <input type="text" value={damage} onChange={e => onChange(e.target.value)}
+        placeholder="e.g. 1d8+2" style={{ ...inputStyle, minHeight: '44px', fontFamily: 'monospace' }} />
+    )
+  }
+
+  const showCustom = customMode || (!isPreset && damage !== '')
+  const selectValue = showCustom ? '__custom__' : (isPreset ? damage : '')
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+      <select
+        value={selectValue}
+        onChange={e => {
+          if (e.target.value === '__custom__') { setCustomMode(true) }
+          else { setCustomMode(false); onChange(e.target.value) }
+        }}
+        style={{
+          ...inputStyle, minHeight: '44px',
+          appearance: 'none', WebkitAppearance: 'none',
+          backgroundImage: selectArrowBg,
+          backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.65rem center', paddingRight: '2rem',
+          fontFamily: 'monospace',
+        }}
+      >
+        {!damage && <option value="" disabled>Select damage…</option>}
+        {pools.map(p => <option key={p} value={p}>{p}</option>)}
+        <option value="__custom__">Custom…</option>
+      </select>
+      {showCustom && (
+        <input type="text" value={damage} onChange={e => onChange(e.target.value)}
+          placeholder="e.g. 1d8+2"
+          style={{ ...inputStyle, minHeight: '44px', fontFamily: 'monospace' }}
+          autoFocus />
+      )}
+    </div>
+  )
+}
+
 // ─── Type selector dropdown (extracted to avoid useState inside IIFE) ────────
 
 const TypeSelector = ({ selectedType, setFormData }) => {
@@ -925,7 +978,7 @@ const CustomAdversaryCreator = forwardRef(({
                   <div style={{ display: 'flex' }}>
                     {[1, 2, 3, 4].map((t, i) => (
                       <button key={t} onClick={() => setFormData(prev => ({ ...prev, tier: t }))} style={{
-                        flex: 1, minWidth: '36px', height: '44px',
+                        flex: 1, minWidth: '44px', height: '44px',
                         border: '1px solid var(--border)',
                         borderLeft: i > 0 ? 'none' : '1px solid var(--border)',
                         borderRadius: i === 0 ? '5px 0 0 5px' : i === 3 ? '0 5px 5px 0' : '0',
@@ -956,7 +1009,7 @@ const CustomAdversaryCreator = forwardRef(({
               </div>
 
               {/* Stats */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <StatField label="Difficulty" field="difficulty" rangeKey="difficulty" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
                 <StatField label="Major Threshold" field="thresholds" subfield="major" rangeKey="major" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
                 <StatField label="Severe Threshold" field="thresholds" subfield="severe" rangeKey="severe" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
@@ -987,27 +1040,12 @@ const CustomAdversaryCreator = forwardRef(({
                       </InfoPopover>
                     )}
                   </div>
-                  <input type="text" value={formData.damage} onChange={e => setFormData(prev => ({ ...prev, damage: e.target.value }))} placeholder="e.g. 1d8+2" style={{ ...inputStyle, minHeight: '44px' }} />
-                  {(() => {
-                    const pools = getDamagePools(formData.type, formData.tier)
-                    if (!pools) return null
-                    return (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.3rem' }}>
-                        {pools.map((pool, i) => {
-                          const active = formData.damage === pool
-                          return (
-                            <button key={i} type="button" onClick={() => setFormData(prev => ({ ...prev, damage: pool }))} style={{
-                              padding: '0.3rem 0.5rem', minHeight: '36px',
-                              background: active ? 'var(--purple)' : 'var(--bg-secondary)',
-                              border: `1px solid ${active ? 'var(--purple)' : 'var(--border)'}`,
-                              borderRadius: '4px', color: active ? 'white' : 'var(--text-secondary)',
-                              fontSize: '0.72rem', fontFamily: 'monospace', cursor: 'pointer',
-                            }}>{pool}</button>
-                          )
-                        })}
-                      </div>
-                    )
-                  })()}
+                  <DamageSelector
+                    damage={formData.damage}
+                    type={formData.type}
+                    tier={formData.tier}
+                    onChange={v => setFormData(prev => ({ ...prev, damage: v }))}
+                  />
                 </div>
               </div>
 
