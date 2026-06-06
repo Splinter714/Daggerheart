@@ -7,6 +7,7 @@ import StatusSection from './GameCard/StatusSection'
 import DescriptionSection from './GameCard/DescriptionSection'
 import ExperienceSection from './GameCard/ExperienceSection'
 import { CARD_SPACE_H, CARD_SPACE_V } from './GameCard/constants'
+import { DASHBOARD_GAP, TAB_HEIGHT } from '../Dashboard/constants'
 import TabButtons from './GameCard/TabButtons'
 import useCardScroll from './GameCard/hooks/useCardScroll'
 // ============================================================================
@@ -335,7 +336,7 @@ const GameCard = ({
           height: 'auto',
           // When tab is visible, reserve space for it (120px for bars + padding)
           // When tab is not visible, add back the tab height (52px) to extend lower
-          maxHeight: shouldShowTab ? 'calc(100vh - 120px)' : 'calc(100vh - 68px)',
+          maxHeight: shouldShowTab ? `calc(100vh - ${2 * DASHBOARD_GAP + TAB_HEIGHT}px)` : `calc(100vh - ${2 * DASHBOARD_GAP}px)`,
           minHeight: 0
         }}
       >
@@ -885,7 +886,7 @@ const GameCard = ({
         containerStyle={{
           padding: 0,
           height: 'auto',
-          maxHeight: shouldShowTab ? 'calc(100vh - 120px)' : 'calc(100vh - 68px)',
+          maxHeight: shouldShowTab ? `calc(100vh - ${2 * DASHBOARD_GAP + TAB_HEIGHT}px)` : `calc(100vh - ${2 * DASHBOARD_GAP}px)`,
           minHeight: 0
         }}
       >

@@ -1,7 +1,7 @@
 import React from 'react'
 import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
-import { DASHBOARD_GAP, TAB_HEIGHT } from './constants'
+import { DASHBOARD_GAP } from './constants'
 
 const EntityColumns = ({
   entityGroups,
