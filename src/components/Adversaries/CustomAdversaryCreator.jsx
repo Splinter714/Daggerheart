@@ -48,7 +48,7 @@ const inputStyle = {
   borderRadius: '5px',
   backgroundColor: 'var(--bg-secondary)',
   color: 'var(--text-primary)',
-  fontSize: '0.875rem',
+  fontSize: '1rem',
   outline: 'none',
   boxSizing: 'border-box',
 }
@@ -133,8 +133,8 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
   }, [open])
 
   const popoverPos = align === 'right'
-    ? { top: '24px', right: 0, left: 'auto', transform: 'none' }
-    : { top: '24px', left: 0, right: 'auto', transform: 'none' }
+    ? { top: '36px', right: 0, left: 'auto', transform: 'none' }
+    : { top: '36px', left: 0, right: 'auto', transform: 'none' }
 
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
@@ -142,17 +142,25 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
         type="button"
         onClick={() => setOpen(v => !v)}
         style={{
+          width: '44px', height: '44px',
+          border: 'none', background: 'transparent',
+          cursor: 'pointer', padding: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+          marginTop: '-12px', marginRight: '-12px', marginBottom: '-12px', marginLeft: 0,
+        }}
+      >
+        <span style={{
           width: '20px', height: '20px',
           borderRadius: '50%',
-          border: '1px solid var(--border)',
+          border: `1px solid ${open ? 'var(--purple)' : 'var(--border)'}`,
           background: open ? 'var(--purple)' : 'var(--bg-secondary)',
           color: open ? 'white' : 'var(--text-secondary)',
           fontSize: '0.65rem', fontWeight: 700,
-          lineHeight: 1, cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >i</button>
+          pointerEvents: 'none', flexShrink: 0,
+        }}>i</span>
+      </button>
       {open && (
         <div style={{
           position: 'absolute', ...popoverPos,
@@ -213,8 +221,8 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
   return (
     <div style={sectionStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.3rem' }}>
-        <span style={{ ...labelStyle, marginBottom: 0 }}>{label}</span>
-        {!disabled && (
+        <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>{label}</span>
+        <span style={{ visibility: disabled ? 'hidden' : 'visible', display: 'flex', alignItems: 'center' }}>
           <InfoPopover minWidth={320}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', whiteSpace: 'nowrap' }}>
               <thead>
@@ -255,7 +263,7 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
               </tbody>
             </table>
           </InfoPopover>
-        )}
+        </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         {stepBtn(-1)}
@@ -291,7 +299,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
   return (
     <div style={sectionStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.35rem' }}>
-        <label style={{ ...labelStyle, marginBottom: 0 }}>{label}</label>
+        <label style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>{label}</label>
         <InfoPopover>
           {guideFeatures?.length > 0 ? (
             <>
@@ -302,7 +310,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.5rem' }}>
                       <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.78rem' }}>{f.name}</span>
                       <button type="button" onClick={() => addGuideFeature(f)} style={{
-                        padding: '0.2rem 0.5rem', minHeight: '28px', flexShrink: 0,
+                        padding: '0.2rem 0.5rem', minHeight: '36px', flexShrink: 0,
                         background: 'var(--purple)', border: 'none', borderRadius: '3px',
                         color: 'white', fontSize: '0.68rem', cursor: 'pointer',
                       }}>Add</button>
@@ -320,7 +328,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
             </div>
           )}
         </InfoPopover>
-        <button type="button" onClick={addItem} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '28px', minHeight: '28px' }} title={`Add ${label.slice(0, -1)}`}>+</button>
+        <button type="button" onClick={addItem} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '44px', minHeight: '44px' }} title={`Add ${label.slice(0, -1)}`}>+</button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
         {items.map((feat, localIdx) => {
@@ -359,7 +367,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
                 <button type="button" onClick={() => {
                   const next = allFeatures.filter((_, i) => i !== globalIdx)
                   setFormData(prev => ({ ...prev, features: next }))
-                }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.6rem 0.5rem', fontSize: '1rem', flexShrink: 0, minWidth: '36px', minHeight: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.6rem 0.5rem', fontSize: '1rem', flexShrink: 0, minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
               </div>
               <textarea
                 value={feat.description || ''}
@@ -370,7 +378,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
                 }}
                 placeholder="Description..."
                 rows={2}
-                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', fontSize: '0.8rem', minHeight: '48px', background: 'transparent', border: '1px solid transparent', borderRadius: '4px' }}
+                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', minHeight: '48px', background: 'transparent', border: '1px solid transparent', borderRadius: '4px' }}
                 onFocus={e => e.target.style.borderColor = 'var(--border)'}
                 onBlur={e => e.target.style.borderColor = 'transparent'}
               />
@@ -378,6 +386,108 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
           )
         })}
       </div>
+    </div>
+  )
+}
+
+// ─── Damage selector — dropdown of pool presets with optional custom text entry ─
+
+const selectArrowBg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E")`
+
+const DamageSelector = ({ damage, type, tier, onChange }) => {
+  const pools = getDamagePools(type, tier)
+  const isPreset = pools?.includes(damage) ?? false
+  const [customMode, setCustomMode] = useState(!isPreset && damage !== '')
+
+  useEffect(() => {
+    if (isPreset) setCustomMode(false)
+  }, [isPreset])
+
+  if (!pools) {
+    return (
+      <input type="text" value={damage} onChange={e => onChange(e.target.value)}
+        placeholder="e.g. 1d8+2" style={{ ...inputStyle, minHeight: '44px', fontFamily: 'monospace' }} />
+    )
+  }
+
+  const showCustom = customMode || (!isPreset && damage !== '')
+  const selectValue = showCustom ? '__custom__' : (isPreset ? damage : '')
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+      <select
+        value={selectValue}
+        onChange={e => {
+          if (e.target.value === '__custom__') { setCustomMode(true) }
+          else { setCustomMode(false); onChange(e.target.value) }
+        }}
+        style={{
+          ...inputStyle, minHeight: '44px',
+          appearance: 'none', WebkitAppearance: 'none',
+          backgroundImage: selectArrowBg,
+          backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.65rem center', paddingRight: '2rem',
+          fontFamily: 'monospace',
+        }}
+      >
+        {!damage && <option value="" disabled>Select damage…</option>}
+        {pools.map(p => <option key={p} value={p}>{p}</option>)}
+        <option value="__custom__">Custom…</option>
+      </select>
+      {showCustom && (
+        <input type="text" value={damage} onChange={e => onChange(e.target.value)}
+          placeholder="e.g. 1d8+2"
+          style={{ ...inputStyle, minHeight: '44px', fontFamily: 'monospace' }}
+          autoFocus={customMode} />
+      )}
+    </div>
+  )
+}
+
+// ─── Type selector dropdown (extracted to avoid useState inside IIFE) ────────
+
+const TypeSelector = ({ selectedType, setFormData }) => {
+  const [typeOpen, setTypeOpen] = useState(false)
+  const tGuide = typeGuide[selectedType]
+  return (
+    <div style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setTypeOpen(v => !v)} style={{
+        width: '100%', textAlign: 'left',
+        background: 'var(--bg-secondary)',
+        border: `1px solid ${typeOpen ? 'var(--purple)' : 'var(--border)'}`,
+        borderRadius: typeOpen ? '5px 5px 0 0' : '5px',
+        padding: '0.4rem 0.6rem',
+        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem',
+        minHeight: '44px',
+      }}>
+        <span style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)' }}>{selectedType}</span>
+        <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', flexShrink: 0 }}>{typeOpen ? '▲' : '▼'}</span>
+      </button>
+      {typeOpen && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+          border: '1px solid var(--purple)', borderTop: 'none',
+          borderRadius: '0 0 5px 5px',
+          backgroundColor: 'var(--bg-primary)',
+          maxHeight: '260px', overflowY: 'auto',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        }}>
+          {TYPES.map(t => {
+            const tg = typeGuide[t]
+            const isSelected = selectedType === t
+            return (
+              <button key={t} type="button" onClick={() => { setFormData(prev => ({ ...prev, type: t })); setTypeOpen(false) }} style={{
+                width: '100%', textAlign: 'left',
+                background: isSelected ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent',
+                border: 'none', borderBottom: '1px solid var(--border)',
+                padding: '0.4rem 0.6rem', cursor: 'pointer', minHeight: '44px',
+              }}>
+                <div style={{ fontWeight: 700, fontSize: '0.82rem', color: isSelected ? 'var(--purple)' : 'var(--text-primary)', marginBottom: tg?.summary ? '0.1rem' : 0 }}>{t}</div>
+                {tg?.summary && <div style={{ fontSize: '0.71rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tg.summary}</div>}
+              </button>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -422,6 +532,23 @@ const CustomAdversaryCreator = forwardRef(({
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [adversaryData, setAdversaryData] = useState([])
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
+
+  // activeTab / isNarrow — only meaningful when !embedded, but hooks must be unconditional
+  const [activeTab, setActiveTab] = useState('build')
+  const containerRef = useRef(null)
+  const [isNarrow, setIsNarrow] = useState(false)
+
+  useEffect(() => {
+    if (embedded) return
+    const el = containerRef.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => {
+      setIsNarrow(entry.contentRect.width < 760)
+    })
+    observer.observe(el)
+    setIsNarrow(el.offsetWidth < 760)
+    return () => observer.disconnect()
+  }, [embedded])
 
   // ── Data loading ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -680,22 +807,6 @@ const CustomAdversaryCreator = forwardRef(({
     const formItem = { ...formData, id: 'creator-form', hp: 0, stress: 0, source: 'Homebrew' }
     const previewInstances = [{ ...formItem }]
 
-    // activeTab: 'build' | 'preview' — narrow only
-    const [activeTab, setActiveTab] = useState('build')
-    const containerRef = useRef(null)
-    const [isNarrow, setIsNarrow] = useState(false)
-
-    useEffect(() => {
-      const el = containerRef.current
-      if (!el) return
-      const observer = new ResizeObserver(([entry]) => {
-        setIsNarrow(entry.contentRect.width < 760)
-      })
-      observer.observe(el)
-      setIsNarrow(el.offsetWidth < 760)
-      return () => observer.disconnect()
-    }, [])
-
     const canAct = !isSaving && !!formData.name.trim()
     const disabledStyle = { opacity: 0.5, cursor: 'not-allowed' }
 
@@ -853,8 +964,8 @@ const CustomAdversaryCreator = forwardRef(({
               {/* Tier + Type */}
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                 <div style={sectionStyle}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0 }}>Tier</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem', minHeight: '20px' }}>
+                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Tier</span>
                     <InfoPopover>
                       <div style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>PC Levels by Tier</div>
                       {[['1','1'],['2','2–4'],['3','5–7'],['4','8–10']].map(([t, lvls]) => (
@@ -864,10 +975,13 @@ const CustomAdversaryCreator = forwardRef(({
                       ))}
                     </InfoPopover>
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
-                    {[1, 2, 3, 4].map(t => (
+                  <div style={{ display: 'flex' }}>
+                    {[1, 2, 3, 4].map((t, i) => (
                       <button key={t} onClick={() => setFormData(prev => ({ ...prev, tier: t }))} style={{
-                        flex: '1 1 calc(50% - 0.15rem)', minWidth: '44px', height: '44px', border: '1px solid var(--border)', borderRadius: '5px',
+                        flex: 1, minWidth: '44px', height: '44px',
+                        border: '1px solid var(--border)',
+                        borderLeft: i > 0 ? 'none' : '1px solid var(--border)',
+                        borderRadius: i === 0 ? '5px 0 0 5px' : i === 3 ? '0 5px 5px 0' : '0',
                         background: formData.tier === t ? 'var(--purple)' : 'var(--bg-secondary)',
                         color: formData.tier === t ? 'white' : 'var(--text-primary)',
                         fontWeight: formData.tier === t ? '700' : '400',
@@ -877,58 +991,10 @@ const CustomAdversaryCreator = forwardRef(({
                   </div>
                 </div>
                 <div style={{ ...sectionStyle, flex: 1 }}>
-                  <label style={labelStyle}>Type</label>
-                  {(() => {
-                    const [typeOpen, setTypeOpen] = useState(false)
-                    const tGuide = typeGuide[formData.type]
-                    return (
-                      <div style={{ position: 'relative' }}>
-                        {/* Collapsed: show selected type, tap to open */}
-                        <button type="button" onClick={() => setTypeOpen(v => !v)} style={{
-                          width: '100%', textAlign: 'left',
-                          background: 'var(--bg-secondary)',
-                          border: `1px solid ${typeOpen ? 'var(--purple)' : 'var(--border)'}`,
-                          borderRadius: typeOpen ? '5px 5px 0 0' : '5px',
-                          padding: '0.4rem 0.6rem',
-                          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem',
-                          minHeight: '44px',
-                        }}>
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)' }}>{formData.type}</div>
-                            {tGuide?.summary && <div style={{ fontSize: '0.71rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tGuide.summary}</div>}
-                          </div>
-                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', flexShrink: 0 }}>{typeOpen ? '▲' : '▼'}</span>
-                        </button>
-                        {/* Expanded list */}
-                        {typeOpen && (
-                          <div style={{
-                            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-                            border: '1px solid var(--purple)', borderTop: 'none',
-                            borderRadius: '0 0 5px 5px',
-                            backgroundColor: 'var(--bg-primary)',
-                            maxHeight: '260px', overflowY: 'auto',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                          }}>
-                            {TYPES.map(t => {
-                              const tg = typeGuide[t]
-                              const isSelected = formData.type === t
-                              return (
-                                <button key={t} type="button" onClick={() => { setFormData(prev => ({ ...prev, type: t })); setTypeOpen(false) }} style={{
-                                  width: '100%', textAlign: 'left',
-                                  background: isSelected ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent',
-                                  border: 'none', borderBottom: '1px solid var(--border)',
-                                  padding: '0.4rem 0.6rem', cursor: 'pointer',
-                                }}>
-                                  <div style={{ fontWeight: 700, fontSize: '0.82rem', color: isSelected ? 'var(--purple)' : 'var(--text-primary)', marginBottom: tg?.summary ? '0.1rem' : 0 }}>{t}</div>
-                                  {tg?.summary && <div style={{ fontSize: '0.71rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tg.summary}</div>}
-                                </button>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })()}
+                  <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
+                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Type</span>
+                  </div>
+                  <TypeSelector selectedType={formData.type} setFormData={setFormData} />
                 </div>
               </div>
 
@@ -945,65 +1011,54 @@ const CustomAdversaryCreator = forwardRef(({
               </div>
 
               {/* Stats */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <StatField label="Difficulty" field="difficulty" rangeKey="difficulty" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
-                <StatField label="Major Threshold" field="thresholds" subfield="major" rangeKey="major" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
-                <StatField label="Severe Threshold" field="thresholds" subfield="severe" rangeKey="severe" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+                <StatField label="Attack Modifier" field="atk" rangeKey="atk" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
                 <StatField label="HP" field="hpMax" rangeKey="hp" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
                 <StatField label="Stress" field="stressMax" rangeKey="stress" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
-                <StatField label="Attack Modifier" field="atk" rangeKey="atk" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+                <StatField label="Major Threshold" field="thresholds" subfield="major" rangeKey="major" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+                <StatField label="Severe Threshold" field="thresholds" subfield="severe" rangeKey="severe" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
               </div>
 
               {/* Standard Attack fields */}
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '0.5rem' }}>
                 <div style={sectionStyle}>
-                  <label style={labelStyle}>Standard Attack</label>
+                  <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
+                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Standard Attack</span>
+                  </div>
                   <input type="text" value={formData.weapon} onChange={e => setFormData(prev => ({ ...prev, weapon: e.target.value }))} placeholder="e.g. Greataxe" style={{ ...inputStyle, minHeight: '44px' }} />
                 </div>
                 <div style={sectionStyle}>
-                  <label style={labelStyle}>Range</label>
+                  <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
+                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Range</span>
+                  </div>
                   <select value={formData.range} onChange={e => setFormData(prev => ({ ...prev, range: e.target.value }))} style={{ ...inputStyle, minHeight: '44px', appearance: 'none', WebkitAppearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.65rem center', paddingRight: '2rem' }}>
                     {['Melee', 'Very Close', 'Close', 'Far', 'Very Far'].map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
                 <div style={sectionStyle}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0 }}>Damage</span>
-                    {guide?.damageDie && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem', minHeight: '20px' }}>
+                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Damage</span>
+                    <span style={{ visibility: guide?.damageDie ? 'visible' : 'hidden', display: 'flex', alignItems: 'center' }}>
                       <InfoPopover align="right">
                         <div style={{ fontWeight: 700, fontSize: '0.72rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Damage Die</div>
-                        <div>{guide.damageDie}</div>
+                        <div>{guide?.damageDie}</div>
                       </InfoPopover>
-                    )}
+                    </span>
                   </div>
-                  <input type="text" value={formData.damage} onChange={e => setFormData(prev => ({ ...prev, damage: e.target.value }))} placeholder="e.g. 1d8+2" style={{ ...inputStyle, minHeight: '44px' }} />
-                  {(() => {
-                    const pools = getDamagePools(formData.type, formData.tier)
-                    if (!pools) return null
-                    return (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.3rem' }}>
-                        {pools.map((pool, i) => {
-                          const active = formData.damage === pool
-                          return (
-                            <button key={i} type="button" onClick={() => setFormData(prev => ({ ...prev, damage: pool }))} style={{
-                              padding: '0.3rem 0.5rem', minHeight: '36px',
-                              background: active ? 'var(--purple)' : 'var(--bg-secondary)',
-                              border: `1px solid ${active ? 'var(--purple)' : 'var(--border)'}`,
-                              borderRadius: '4px', color: active ? 'white' : 'var(--text-secondary)',
-                              fontSize: '0.72rem', fontFamily: 'monospace', cursor: 'pointer',
-                            }}>{pool}</button>
-                          )
-                        })}
-                      </div>
-                    )
-                  })()}
+                  <DamageSelector
+                    damage={formData.damage}
+                    type={formData.type}
+                    tier={formData.tier}
+                    onChange={v => setFormData(prev => ({ ...prev, damage: v }))}
+                  />
                 </div>
               </div>
 
               {/* Experiences */}
               <div style={sectionStyle}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.35rem' }}>
-                  <label style={{ ...labelStyle, marginBottom: 0 }}>Experiences</label>
+                  <label style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Experiences</label>
                   {guide?.experiences?.length > 0 && (
                     <InfoPopover>
                       <div style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
@@ -1029,7 +1084,7 @@ const CustomAdversaryCreator = forwardRef(({
                   <button type="button" onClick={() => {
                     const bonus = Math.min(formData.tier + 1, 3)
                     setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: '', modifier: bonus }] }))
-                  }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '28px', minHeight: '28px' }} title="Add experience">+</button>
+                  }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '44px', minHeight: '44px' }} title="Add experience">+</button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                   {(formData.experience || []).map((exp, i) => (
