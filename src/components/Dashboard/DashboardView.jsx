@@ -368,6 +368,11 @@ const DashboardContent = () => {
     >
       {/* Main Dashboard Content */}
       <div className="dashboard-main">
+        {rightColumnOpen && (isNarrow ? (
+          <div style={{ position: 'absolute', inset: 0, zIndex: 99, backgroundColor: 'var(--bg-primary)' }} />
+        ) : (
+          <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: `${columnWidth + DASHBOARD_GAP}px`, zIndex: 99, backgroundColor: 'var(--bg-primary)' }} />
+        ))}
         {rightColumnOpen && (
           <RightColumn
             mode={rightColumnMode}
