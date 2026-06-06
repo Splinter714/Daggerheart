@@ -802,10 +802,10 @@ const CustomAdversaryCreator = forwardRef(({
                       ))}
                     </InfoPopover>
                   </div>
-                  <div style={{ display: 'flex', gap: '0.3rem' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                     {[1, 2, 3, 4].map(t => (
                       <button key={t} onClick={() => setFormData(prev => ({ ...prev, tier: t }))} style={{
-                        width: '44px', height: '44px', border: '1px solid var(--border)', borderRadius: '5px',
+                        flex: '1 1 calc(50% - 0.15rem)', minWidth: '44px', height: '44px', border: '1px solid var(--border)', borderRadius: '5px',
                         background: formData.tier === t ? 'var(--purple)' : 'var(--bg-secondary)',
                         color: formData.tier === t ? 'white' : 'var(--text-primary)',
                         fontWeight: formData.tier === t ? '700' : '400',
