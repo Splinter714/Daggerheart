@@ -388,6 +388,7 @@ const CustomAdversaryCreator = forwardRef(({
   onSave,
   onRefresh,
   onAddItem,
+  onAddToEncounter,
   editingAdversary,
   onCancelEdit,
   isStockAdversary = false,
@@ -617,17 +618,54 @@ const CustomAdversaryCreator = forwardRef(({
     }
   }
 
+  const handleSaveAs = async () => {
+    if (!formData.name.trim()) return
+    setIsSaving(true)
+    try {
+      const filterBlank = (exps) =>
+        (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier !== undefined && e.modifier !== 0))
+      const baseName = formData.name.trim()
+      const data = {
+        ...formData, baseName, name: baseName,
+        experience: filterBlank(formData.experience),
+        hp: 0, stress: 0, source: 'Homebrew',
+      }
+      const { id, ...dataToSave } = data
+      await onSave(dataToSave)
+      onCancelEdit?.()
+    } catch (err) {
+      console.error('Error saving adversary as new:', err)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleAddToEncounter = async () => {
+    if (!formData.name.trim() || !onAddToEncounter) return
+    setIsSaving(true)
+    try {
+      const filterBlank = (exps) =>
+        (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier !== undefined && e.modifier !== 0))
+      const baseName = formData.name.trim()
+      const data = {
+        ...formData, baseName, name: baseName,
+        experience: filterBlank(formData.experience),
+        hp: 0, stress: 0, source: 'Homebrew',
+      }
+      await onAddToEncounter(data)
+      onCancelEdit?.()
+    } catch (err) {
+      console.error('Error adding adversary to encounter:', err)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   useImperativeHandle(ref, () => ({
     handleSave,
     isSaving,
     canSave: formData.name.trim().length > 0,
   }))
-
-  const getSaveButtonText = () => {
-    if (isSaving) return editingAdversary ? (isStockAdversary ? 'Creating...' : 'Saving...') : 'Creating...'
-    if (editingAdversary) return isStockAdversary ? 'Save As Custom' : 'Save'
-    return 'Create'
-  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // RESPONSIVE LAYOUT (embedded={false})
@@ -658,14 +696,34 @@ const CustomAdversaryCreator = forwardRef(({
       return () => observer.disconnect()
     }, [])
 
+    const canAct = !isSaving && !!formData.name.trim()
+    const disabledStyle = { opacity: 0.5, cursor: 'not-allowed' }
+
     const ActionBar = () => (
       <div style={{
         flex: '0 0 auto',
-        display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+        display: 'flex', alignItems: 'center',
         padding: '0.5rem 0.75rem',
         borderBottom: '1px solid var(--border)',
         gap: '0.5rem',
       }}>
+        {/* Preview toggle — narrow only */}
+        {isNarrow && (
+          <button
+            onClick={() => setActiveTab(v => v === 'build' ? 'preview' : 'build')}
+            style={{
+              padding: '0.3rem 0.7rem', minHeight: '44px',
+              background: activeTab === 'preview' ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent',
+              border: `1px solid ${activeTab === 'preview' ? 'var(--purple)' : 'var(--border)'}`,
+              borderRadius: '5px',
+              color: activeTab === 'preview' ? 'var(--purple)' : 'var(--text-secondary)',
+              fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap',
+            }}
+          >{activeTab === 'preview' ? '← Build' : 'Preview'}</button>
+        )}
+
+        <div style={{ flex: 1 }} />
+
         {onCancelEdit && (
           <button onClick={onCancelEdit} style={{
             padding: '0.3rem 0.7rem', minHeight: '44px',
@@ -674,50 +732,54 @@ const CustomAdversaryCreator = forwardRef(({
             color: 'var(--text-primary)', fontSize: '0.875rem', cursor: 'pointer',
           }}>Cancel</button>
         )}
+
+        {/* Save As New — only when editing a homebrew adversary */}
+        {editingAdversary && !isStockAdversary && (
+          <button
+            onClick={handleSaveAs}
+            disabled={!canAct}
+            style={{
+              padding: '0.3rem 0.7rem', minHeight: '44px',
+              background: 'transparent',
+              border: '1px solid var(--border)', borderRadius: '5px',
+              color: 'var(--text-primary)', fontSize: '0.875rem', cursor: canAct ? 'pointer' : 'not-allowed',
+              ...(canAct ? {} : disabledStyle),
+            }}
+          >Save As New</button>
+        )}
+
+        {/* Add to Encounter — only when creating new (not editing) */}
+        {!editingAdversary && onAddToEncounter && (
+          <button
+            onClick={handleAddToEncounter}
+            disabled={!canAct}
+            style={{
+              padding: '0.3rem 0.7rem', minHeight: '44px',
+              background: 'transparent',
+              border: '1px solid var(--border)', borderRadius: '5px',
+              color: 'var(--text-primary)', fontSize: '0.875rem', cursor: canAct ? 'pointer' : 'not-allowed',
+              ...(canAct ? {} : disabledStyle),
+            }}
+          >Add to Encounter</button>
+        )}
+
+        {/* Primary save button */}
         <button
           onClick={handleSave}
-          disabled={isSaving || !formData.name.trim()}
+          disabled={!canAct}
           style={{
             padding: '0.3rem 0.9rem', minHeight: '44px',
-            background: isSaving || !formData.name.trim() ? 'var(--gray-600)' : 'var(--purple)',
+            background: canAct ? 'var(--purple)' : 'var(--gray-600)',
             border: 'none', borderRadius: '5px', color: 'white',
             fontSize: '0.875rem', fontWeight: '600',
-            cursor: isSaving || !formData.name.trim() ? 'not-allowed' : 'pointer',
-            opacity: isSaving || !formData.name.trim() ? 0.6 : 1,
+            cursor: canAct ? 'pointer' : 'not-allowed',
+            ...(canAct ? {} : disabledStyle),
           }}
-        >{getSaveButtonText()}</button>
-      </div>
-    )
-
-    const BottomTabBar = () => (
-      <div style={{
-        flex: '0 0 auto',
-        display: 'flex',
-        borderTop: '1px solid var(--border)',
-        backgroundColor: 'var(--bg-primary)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-      }}>
-        {[['build','Build'],['preview','Preview']].map(([id, label]) => {
-          const active = activeTab === id
-          return (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              style={{
-                flex: 1,
-                padding: '0.6rem 0.5rem',
-                minHeight: '52px',
-                background: 'transparent',
-                border: 'none',
-                borderTop: `2px solid ${active ? 'var(--purple)' : 'transparent'}`,
-                color: active ? 'var(--purple)' : 'var(--text-secondary)',
-                fontSize: '0.72rem', fontWeight: active ? 700 : 500,
-                textTransform: 'uppercase', letterSpacing: '0.5px',
-                cursor: 'pointer',
-              }}
-            >{label}</button>
-          )
-        })}
+        >
+          {isSaving
+            ? (editingAdversary ? (isStockAdversary ? 'Creating...' : 'Saving...') : 'Saving...')
+            : (editingAdversary ? (isStockAdversary ? 'Save As Custom' : 'Save') : 'Save')}
+        </button>
       </div>
     )
 
@@ -1047,7 +1109,6 @@ const CustomAdversaryCreator = forwardRef(({
         )}
 
         </div>{/* end panel row */}
-        {isNarrow && <BottomTabBar />}
       </div>
     )
   }

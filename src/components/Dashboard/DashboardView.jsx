@@ -439,6 +439,10 @@ selectedCustomAdversaryId={selectedCustomAdversaryId}
                 if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
                 setAdversaryCreatorOpen(false)
               }}
+              onAddToEncounter={(adversaryData) => {
+                createAdversary({ ...adversaryData })
+                setAdversaryCreatorOpen(false)
+              }}
               onCancelEdit={() => setAdversaryCreatorOpen(false)}
               embedded={false}
               autoFocus
