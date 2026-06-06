@@ -2,12 +2,12 @@ import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useGameState } from '../../state/state'
 import { DASHBOARD_GAP } from './constants'
 import PWAInstallPrompt from './PWAInstallPrompt'
-import EncounterBuilder from './EncounterBuilder'
 import { useAppKeyboardShortcuts } from './useAppKeyboardShortcuts'
 import {
   calculateBaseBattlePoints,
   calculateSpentBattlePoints,
-  calculateAutomaticAdjustments
+  calculateAutomaticAdjustments,
+  calculateAvailableBattlePoints,
 } from './BattlePointsCalculator'
 import RightColumn from './RightColumn'
 import EntityColumns from './EntityColumns'
@@ -30,7 +30,6 @@ const DashboardContent = () => {
     environments,
     countdowns,
     fear,
-    savedEncounters,
     partySize,
     customContent,
     updatePartySize,
@@ -41,21 +40,15 @@ const DashboardContent = () => {
     deleteAdversary,
     addCustomAdversary,
     updateCustomAdversary,
-    createEnvironment,
     updateEnvironment,
-    deleteEnvironment,
     updateCountdown,
-    deleteCountdown,
-    saveEncounter,
-    loadEncounter,
-    deleteEncounter
   } = useGameState()
-  
+
   const pcCount = partySize || 4
-  
+
   // Dashboard state
-  const [encounterBuilderOpen, setEncounterBuilderOpen] = useState(false)
   const [adversaryCreatorOpen, setAdversaryCreatorOpen] = useState(false)
+  const [bpAdjustments, setBpAdjustments] = useState({ lessDifficult: false, increasedDamage: false, moreDangerous: false })
   const [editingAdversaryId, setEditingAdversaryId] = useState(null)
   const [browserActiveTab, setBrowserActiveTab] = useState('adversaries')
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null)
@@ -91,10 +84,6 @@ const DashboardContent = () => {
   })
 
   const smoothScrollTo = useSmoothScroll(scrollContainerRef)
-
-  const handleCloseEncounterBuilder = useCallback(() => {
-    setEncounterBuilderOpen(false)
-  }, [])
 
   const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, countdowns)
 
@@ -304,7 +293,7 @@ const DashboardContent = () => {
   // Calculate battle points for balance display
   const encounterItems = getEncounterItems()
   const automaticAdjustments = calculateAutomaticAdjustments(encounterItems)
-  const availableBattlePoints = calculateBaseBattlePoints(pcCount) + automaticAdjustments
+  const availableBattlePoints = calculateAvailableBattlePoints(pcCount, bpAdjustments) + automaticAdjustments
   const spentBattlePoints = calculateSpentBattlePoints(encounterItems, pcCount)
 
   // Scroll handling - just track position, let CSS handle snapping
@@ -340,7 +329,7 @@ const DashboardContent = () => {
 
   const handleNavAction = useCallback((id) => {
     if (id === 'browse') {
-      if (rightColumnOpen && rightColumnMode === 'browse') {
+      if (rightColumnOpen && rightColumnMode === 'browser') {
         handleCloseBrowser()
       } else {
         setAdversaryCreatorOpen(false)
@@ -367,8 +356,9 @@ const DashboardContent = () => {
     }
   }, [rightColumnOpen, rightColumnMode, handleCloseBrowser, handleOpenBrowser, openRightColumn, entityGroups])
 
-  // On mobile, hide NavRail when creator is open (creator has its own bottom tab bar)
-  const showNavRail = !(isNarrow && adversaryCreatorOpen)
+  // On mobile the creator uses the right-column slot; on desktop it's a centered modal.
+  // NavRail stays visible in both cases on desktop; on mobile it shows above the creator column.
+  const showNavRail = true
 
   return (
     <div
@@ -393,6 +383,12 @@ const DashboardContent = () => {
             onAddAdversaryFromBrowser={handleAddAdversaryFromBrowser}
             pcCount={pcCount}
             updatePartySize={updatePartySize}
+            adversaryGroups={adversaryGroups}
+            createAdversary={createAdversary}
+            createAdversariesBulk={createAdversariesBulk}
+            deleteAdversary={deleteAdversary}
+            bpAdjustments={bpAdjustments}
+            onChangeBpAdjustments={setBpAdjustments}
             availableBattlePoints={availableBattlePoints}
             spentBattlePoints={spentBattlePoints}
           />
@@ -428,17 +424,22 @@ const DashboardContent = () => {
         />
       </div>
 
-      {/* Custom Adversary Creator — full-screen takeover */}
+      {/* Custom Adversary Creator */}
       {adversaryCreatorOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, backgroundColor: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+        isNarrow ? (
+          // Mobile: column slot (same mechanism as RightColumn, full viewport width)
+          <div style={{
+            position: 'fixed',
+            top: 0, right: 0, bottom: `${RAIL_SIZE}px`, left: 0,
+            zIndex: 200,
+            backgroundColor: 'var(--bg-primary)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}>
             <CustomAdversaryCreator
               onSave={(adversaryData, id) => {
-                if (id) {
-                  updateCustomAdversary(id, adversaryData)
-                } else {
-                  addCustomAdversary(adversaryData)
-                }
+                if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
                 setAdversaryCreatorOpen(false)
               }}
               onCancelEdit={() => setAdversaryCreatorOpen(false)}
@@ -446,27 +447,30 @@ const DashboardContent = () => {
               autoFocus
             />
           </div>
-        </div>
+        ) : (
+          // Desktop: centered modal with backdrop
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 200, backgroundColor: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
+            onClick={() => setAdversaryCreatorOpen(false)}
+          >
+            <div
+              style={{ width: 'min(92vw, 960px)', height: 'min(90vh, 820px)', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '12px', boxShadow: '0 16px 48px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CustomAdversaryCreator
+                onSave={(adversaryData, id) => {
+                  if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
+                  setAdversaryCreatorOpen(false)
+                }}
+                onCancelEdit={() => setAdversaryCreatorOpen(false)}
+                embedded={false}
+                autoFocus
+              />
+            </div>
+          </div>
+        )
       )}
 
-      {/* Encounter Builder Modal */}
-      <EncounterBuilder
-        isOpen={encounterBuilderOpen}
-        onClose={handleCloseEncounterBuilder}
-        onAddAdversary={(itemData) => { createAdversary(itemData) }}
-        onAddAdversariesBulk={(adversariesArray) => { createAdversariesBulk(adversariesArray) }}
-        onAddEnvironment={(itemData) => { createEnvironment(itemData) }}
-        onDeleteAdversary={deleteAdversary}
-        onDeleteEnvironment={deleteEnvironment}
-        onDeleteCountdown={deleteCountdown}
-        adversaries={adversaries}
-        environments={environments}
-        countdowns={countdowns}
-        savedEncounters={savedEncounters}
-        onSaveEncounter={saveEncounter}
-        onLoadEncounter={loadEncounter}
-        onDeleteEncounter={deleteEncounter}
-      />
 
       <PWAInstallPrompt />
 

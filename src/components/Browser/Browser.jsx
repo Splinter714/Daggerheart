@@ -2152,8 +2152,8 @@ const styles = {
     alignItems: 'center',
     padding: '16px',
     borderBottom: '1px solid var(--border)',
-    backgroundColor: 'var(--gray-900)',
-    flexShrink: 0, // Prevent header from shrinking
+    backgroundColor: 'var(--bg-primary)',
+    flexShrink: 0,
     position: 'sticky',
     top: 0,
     zIndex: 20
