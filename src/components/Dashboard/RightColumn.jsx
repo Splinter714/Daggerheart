@@ -37,7 +37,7 @@ const groupsToEncounterItems = (adversaryGroups, pcCount) =>
   adversaryGroups.map((group) => {
     const isMinion = group.template?.type === 'Minion'
     const qty = isMinion ? Math.round(group.instances.length / pcCount) : group.instances.length
-    return { type: 'adversary', item: { ...group.template, id: group.template?.id || group.baseName }, quantity: qty }
+    return { type: 'adversary', item: { ...group.template, id: group.template?.id || group.baseName, name: group.baseName }, quantity: qty }
   })
 
 // mode: 'browser' | 'info' | 'receipt'

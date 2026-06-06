@@ -1,6 +1,6 @@
 import React from 'react'
 import { Plus, Minus, X } from 'lucide-react'
-import { BATTLE_POINT_ADJUSTMENTS } from './BattlePointsCalculator'
+import { BATTLE_POINT_ADJUSTMENTS, BATTLE_POINT_COSTS } from './BattlePointsCalculator'
 
 const btnStyle = (danger) => ({
   background: danger ? 'var(--danger)' : 'var(--bg-secondary)',
@@ -34,6 +34,12 @@ const MANUAL_ADJUSTMENTS = [
   { key: 'moreDangerous',   label: 'More Dangerous',    value: BATTLE_POINT_ADJUSTMENTS.moreDangerous   },
 ]
 
+const rowBpCost = (item, quantity, pcCount) => {
+  const cost = BATTLE_POINT_COSTS[item.type] || 2
+  if (item.type === 'Minion') return Math.ceil(quantity / pcCount) * cost
+  return cost * quantity
+}
+
 // encounterItems: [{ type: 'adversary', item: {...}, quantity: number }]
 const EncounterReceipt = ({
   encounterItems,
@@ -63,7 +69,6 @@ const EncounterReceipt = ({
         <div style={{ flex: 1, marginLeft: '1rem' }}>
           <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Party Size</span>
         </div>
-        <div style={{ width: '120px' }} />
       </div>
 
       {/* Adversary Rows */}
@@ -82,34 +87,48 @@ const EncounterReceipt = ({
               </button>
             </div>
             <div style={{ flex: 1, marginLeft: '1rem' }}>
-              <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                {encounterItem.item.baseName || encounterItem.item.name?.replace(/\s+\(\d+\)$/, '') || encounterItem.item.name}
-              </span>
+              <div style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                {encounterItem.item.name || encounterItem.item.baseName}
+              </div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{encounterItem.item.type}</div>
             </div>
-            <div style={{ width: '80px', textAlign: 'right' }}>
-              <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{encounterItem.item.type}</span>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                {rowBpCost(encounterItem.item, encounterItem.quantity, pcCount)} BP
+              </span>
             </div>
           </div>
         )
       })}
 
-      {/* Balance Row */}
+      {/* Budget / Remaining Rows */}
       <div className="receipt-item" style={itemRowStyle}>
         <div style={{ flex: 1 }}>
-          <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Balance</span>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Budget</span>
         </div>
-        <div style={{ width: '120px', textAlign: 'right' }}>
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{availableBattlePoints} BP</span>
+        </div>
+      </div>
+      <div className="receipt-item" style={{ ...itemRowStyle, borderBottom: 'none' }}>
+        <div style={{ flex: 1 }}>
+          <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600 }}>
+            {spentBattlePoints > availableBattlePoints ? 'Over Budget' : 'Remaining'}
+          </span>
+        </div>
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
           <span style={{
             color: spentBattlePoints > availableBattlePoints ? 'var(--danger)'
                  : spentBattlePoints === availableBattlePoints ? 'var(--purple)'
                  : 'var(--success)',
             fontWeight: 600,
+            fontSize: '0.9rem',
           }}>
             {spentBattlePoints > availableBattlePoints
-              ? `+${spentBattlePoints - availableBattlePoints}`
+              ? `${spentBattlePoints - availableBattlePoints} BP`
               : availableBattlePoints - spentBattlePoints === 0
-              ? '0'
-              : `-${availableBattlePoints - spentBattlePoints}`}
+              ? '0 BP'
+              : `${availableBattlePoints - spentBattlePoints} BP`}
           </span>
         </div>
       </div>
