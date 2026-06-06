@@ -382,6 +382,58 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
   )
 }
 
+// ─── Type selector dropdown (extracted to avoid useState inside IIFE) ────────
+
+const TypeSelector = ({ selectedType, setFormData }) => {
+  const [typeOpen, setTypeOpen] = useState(false)
+  const tGuide = typeGuide[selectedType]
+  return (
+    <div style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setTypeOpen(v => !v)} style={{
+        width: '100%', textAlign: 'left',
+        background: 'var(--bg-secondary)',
+        border: `1px solid ${typeOpen ? 'var(--purple)' : 'var(--border)'}`,
+        borderRadius: typeOpen ? '5px 5px 0 0' : '5px',
+        padding: '0.4rem 0.6rem',
+        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem',
+        minHeight: '44px',
+      }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)' }}>{selectedType}</div>
+          {tGuide?.summary && <div style={{ fontSize: '0.71rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tGuide.summary}</div>}
+        </div>
+        <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', flexShrink: 0 }}>{typeOpen ? '▲' : '▼'}</span>
+      </button>
+      {typeOpen && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+          border: '1px solid var(--purple)', borderTop: 'none',
+          borderRadius: '0 0 5px 5px',
+          backgroundColor: 'var(--bg-primary)',
+          maxHeight: '260px', overflowY: 'auto',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        }}>
+          {TYPES.map(t => {
+            const tg = typeGuide[t]
+            const isSelected = selectedType === t
+            return (
+              <button key={t} type="button" onClick={() => { setFormData(prev => ({ ...prev, type: t })); setTypeOpen(false) }} style={{
+                width: '100%', textAlign: 'left',
+                background: isSelected ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent',
+                border: 'none', borderBottom: '1px solid var(--border)',
+                padding: '0.4rem 0.6rem', cursor: 'pointer',
+              }}>
+                <div style={{ fontWeight: 700, fontSize: '0.82rem', color: isSelected ? 'var(--purple)' : 'var(--text-primary)', marginBottom: tg?.summary ? '0.1rem' : 0 }}>{t}</div>
+                {tg?.summary && <div style={{ fontSize: '0.71rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tg.summary}</div>}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Main component ──────────────────────────────────────────────────────────
 
 const CustomAdversaryCreator = forwardRef(({
@@ -422,6 +474,23 @@ const CustomAdversaryCreator = forwardRef(({
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [adversaryData, setAdversaryData] = useState([])
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
+
+  // activeTab / isNarrow — only meaningful when !embedded, but hooks must be unconditional
+  const [activeTab, setActiveTab] = useState('build')
+  const containerRef = useRef(null)
+  const [isNarrow, setIsNarrow] = useState(false)
+
+  useEffect(() => {
+    if (embedded) return
+    const el = containerRef.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => {
+      setIsNarrow(entry.contentRect.width < 760)
+    })
+    observer.observe(el)
+    setIsNarrow(el.offsetWidth < 760)
+    return () => observer.disconnect()
+  }, [embedded])
 
   // ── Data loading ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -680,22 +749,6 @@ const CustomAdversaryCreator = forwardRef(({
     const formItem = { ...formData, id: 'creator-form', hp: 0, stress: 0, source: 'Homebrew' }
     const previewInstances = [{ ...formItem }]
 
-    // activeTab: 'build' | 'preview' — narrow only
-    const [activeTab, setActiveTab] = useState('build')
-    const containerRef = useRef(null)
-    const [isNarrow, setIsNarrow] = useState(false)
-
-    useEffect(() => {
-      const el = containerRef.current
-      if (!el) return
-      const observer = new ResizeObserver(([entry]) => {
-        setIsNarrow(entry.contentRect.width < 760)
-      })
-      observer.observe(el)
-      setIsNarrow(el.offsetWidth < 760)
-      return () => observer.disconnect()
-    }, [])
-
     const canAct = !isSaving && !!formData.name.trim()
     const disabledStyle = { opacity: 0.5, cursor: 'not-allowed' }
 
@@ -878,57 +931,7 @@ const CustomAdversaryCreator = forwardRef(({
                 </div>
                 <div style={{ ...sectionStyle, flex: 1 }}>
                   <label style={labelStyle}>Type</label>
-                  {(() => {
-                    const [typeOpen, setTypeOpen] = useState(false)
-                    const tGuide = typeGuide[formData.type]
-                    return (
-                      <div style={{ position: 'relative' }}>
-                        {/* Collapsed: show selected type, tap to open */}
-                        <button type="button" onClick={() => setTypeOpen(v => !v)} style={{
-                          width: '100%', textAlign: 'left',
-                          background: 'var(--bg-secondary)',
-                          border: `1px solid ${typeOpen ? 'var(--purple)' : 'var(--border)'}`,
-                          borderRadius: typeOpen ? '5px 5px 0 0' : '5px',
-                          padding: '0.4rem 0.6rem',
-                          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem',
-                          minHeight: '44px',
-                        }}>
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)' }}>{formData.type}</div>
-                            {tGuide?.summary && <div style={{ fontSize: '0.71rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tGuide.summary}</div>}
-                          </div>
-                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', flexShrink: 0 }}>{typeOpen ? '▲' : '▼'}</span>
-                        </button>
-                        {/* Expanded list */}
-                        {typeOpen && (
-                          <div style={{
-                            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-                            border: '1px solid var(--purple)', borderTop: 'none',
-                            borderRadius: '0 0 5px 5px',
-                            backgroundColor: 'var(--bg-primary)',
-                            maxHeight: '260px', overflowY: 'auto',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                          }}>
-                            {TYPES.map(t => {
-                              const tg = typeGuide[t]
-                              const isSelected = formData.type === t
-                              return (
-                                <button key={t} type="button" onClick={() => { setFormData(prev => ({ ...prev, type: t })); setTypeOpen(false) }} style={{
-                                  width: '100%', textAlign: 'left',
-                                  background: isSelected ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent',
-                                  border: 'none', borderBottom: '1px solid var(--border)',
-                                  padding: '0.4rem 0.6rem', cursor: 'pointer',
-                                }}>
-                                  <div style={{ fontWeight: 700, fontSize: '0.82rem', color: isSelected ? 'var(--purple)' : 'var(--text-primary)', marginBottom: tg?.summary ? '0.1rem' : 0 }}>{t}</div>
-                                  {tg?.summary && <div style={{ fontSize: '0.71rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tg.summary}</div>}
-                                </button>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })()}
+                  <TypeSelector selectedType={formData.type} setFormData={setFormData} />
                 </div>
               </div>
 
