@@ -411,36 +411,7 @@ const DashboardContent = () => {
               overflow: 'hidden',
             }}
           >
-            {/* Header bar */}
-            <div style={{
-              flex: '0 0 auto',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              height: '39px',
-              borderBottom: '1px solid var(--border)',
-              padding: '0 1rem',
-            }}>
-              <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-primary)' }}>
-                Create Adversary
-              </span>
-              <button
-                onClick={() => setAdversaryCreatorOpen(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--text-secondary)',
-                  fontSize: '1rem',
-                  cursor: 'pointer',
-                  lineHeight: 1,
-                  padding: '0.25rem',
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Content — fills the panel, two-panel layout handled by CustomAdversaryCreator */}
+            {/* Content — fills the panel, three-panel layout handled by CustomAdversaryCreator */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
                 <CustomAdversaryCreator
                   onSave={(adversaryData, id) => {

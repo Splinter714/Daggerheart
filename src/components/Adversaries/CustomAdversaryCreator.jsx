@@ -71,6 +71,178 @@ const sectionStyle = {
 
 const TYPES = ['Standard', 'Bruiser', 'Horde', 'Leader', 'Minion', 'Ranged', 'Skulk', 'Solo', 'Support', 'Social']
 
+// ─── Module-level helpers (MUST stay outside the component to avoid remounting on every render) ───
+
+const reorder = (arr, from, to) => {
+  if (from === to) return arr
+  const r = [...arr]
+  const [item] = r.splice(from, 1)
+  r.splice(to, 0, item)
+  return r
+}
+
+const DragHandle = () => (
+  <div style={{ cursor: 'grab', color: 'var(--text-secondary)', padding: '0.3rem 0.2rem', flexShrink: 0, userSelect: 'none', fontSize: '1rem' }} title="Drag to reorder">⠿</div>
+)
+
+const PanelHeader = ({ label, children }) => (
+  <div style={{
+    flex: '0 0 auto', padding: '0.45rem 0.75rem',
+    borderBottom: '1px solid var(--border)',
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-secondary)',
+    textTransform: 'uppercase', letterSpacing: '0.6px',
+  }}>
+    <span>{label}</span>
+    {children}
+  </div>
+)
+
+const AddBtn = ({ label, onClick }) => (
+  <button type="button" onClick={onClick} style={{
+    marginTop: '0.4rem', padding: '0.25rem 0.6rem',
+    background: 'transparent', border: '1px dashed var(--border)',
+    borderRadius: '5px', color: 'var(--text-secondary)',
+    fontSize: '0.78rem', cursor: 'pointer', width: '100%', textAlign: 'left',
+  }}>+ {label}</button>
+)
+
+const GuidanceHeading = ({ children }) => (
+  <div style={{
+    fontSize: '0.68rem', fontWeight: '700', color: 'var(--text-secondary)',
+    textTransform: 'uppercase', letterSpacing: '0.6px',
+    paddingBottom: '0.3rem', borderBottom: '1px solid var(--border)',
+    marginBottom: '0.5rem',
+  }}>{children}</div>
+)
+
+const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFormData, guideRange }) => {
+  const raw = subfield ? formData[field]?.[subfield] : formData[field]
+  const range = guideRange?.[rangeKey]
+  const outOfRange = !disabled && !isInRange(raw, range)
+  const color = disabled ? 'var(--text-secondary)' : outOfRange ? 'var(--orange, #e67e22)' : 'var(--border)'
+
+  const set = (val) => {
+    if (subfield) {
+      setFormData(prev => ({ ...prev, [field]: { ...prev[field], [subfield]: val } }))
+    } else {
+      setFormData(prev => ({ ...prev, [field]: val }))
+    }
+  }
+
+  const stepBtn = (delta) => (
+    <button type="button" disabled={disabled} onClick={() => set((parseInt(raw) || 0) + delta)} style={{
+      width: '26px', height: '26px', flexShrink: 0,
+      border: `1px solid ${color}`,
+      borderRadius: delta < 0 ? '4px 0 0 4px' : '0 4px 4px 0',
+      background: 'var(--bg-secondary)',
+      color: disabled ? 'var(--text-secondary)' : 'var(--text-primary)',
+      fontSize: '1rem', lineHeight: 1, cursor: disabled ? 'not-allowed' : 'pointer',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      opacity: disabled ? 0.4 : 1,
+    }}>{delta < 0 ? '−' : '+'}</button>
+  )
+
+  return (
+    <div style={sectionStyle}>
+      <label style={labelStyle}>{label}</label>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {stepBtn(-1)}
+        <input
+          type="number"
+          value={raw ?? ''}
+          disabled={disabled}
+          onChange={e => set(e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+          style={{
+            ...inputStyle, borderRadius: 0, borderLeft: 'none', borderRight: 'none',
+            textAlign: 'center', opacity: disabled ? 0.4 : 1, borderColor: color,
+            width: '100%', minWidth: 0,
+          }}
+        />
+        {stepBtn(1)}
+      </div>
+      {range && !disabled && (
+        <span style={{ fontSize: '0.68rem', color: outOfRange ? 'var(--orange, #e67e22)' : 'var(--text-secondary)', marginTop: '1px' }}>
+          {formatRange(range)}
+        </span>
+      )}
+    </div>
+  )
+}
+
+const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef }) => {
+  const allFeatures = formData.features || []
+  const items = allFeatures.filter(f => f.type === featureType)
+  const indices = allFeatures.reduce((acc, f, i) => { if (f.type === featureType) acc.push(i); return acc }, [])
+
+  const addItem = () => setFormData(prev => ({ ...prev, features: [...(prev.features || []), { type: featureType, name: '', description: '' }] }))
+
+  return (
+    <div style={sectionStyle}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.35rem' }}>
+        <label style={{ ...labelStyle, marginBottom: 0 }}>{label}</label>
+        <button type="button" onClick={addItem} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0 0.1rem' }} title={`Add ${label.slice(0, -1)}`}>+</button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        {items.map((feat, localIdx) => {
+          const globalIdx = indices[localIdx]
+          return (
+            <div
+              key={`${featureType}-${localIdx}`}
+              draggable
+              onDragStart={() => { dragFromRef.current = localIdx }}
+              onDragOver={e => e.preventDefault()}
+              onDrop={() => {
+                if (dragFromRef.current === null) return
+                const newItems = reorder(items, dragFromRef.current, localIdx)
+                const order = ['Action', 'Passive', 'Reaction']
+                const rebuilt = order.flatMap(t => t === featureType ? newItems : allFeatures.filter(f => f.type === t))
+                setFormData(prev => ({ ...prev, features: rebuilt }))
+                dragFromRef.current = null
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '5px', padding: '0.4rem 0.5rem' }}
+            >
+              <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
+                <DragHandle />
+                <input
+                  type="text"
+                  value={feat.name || ''}
+                  onChange={e => {
+                    const next = [...allFeatures]
+                    next[globalIdx] = { ...next[globalIdx], name: e.target.value }
+                    setFormData(prev => ({ ...prev, features: next }))
+                  }}
+                  placeholder={`${label.slice(0, -1)} name`}
+                  style={{ ...inputStyle, flex: 1, background: 'transparent', border: '1px solid transparent', borderRadius: '4px' }}
+                  onFocus={e => e.target.style.borderColor = 'var(--border)'}
+                  onBlur={e => e.target.style.borderColor = 'transparent'}
+                />
+                <button type="button" onClick={() => {
+                  const next = allFeatures.filter((_, i) => i !== globalIdx)
+                  setFormData(prev => ({ ...prev, features: next }))
+                }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.1rem 0.2rem', fontSize: '0.875rem', flexShrink: 0 }}>×</button>
+              </div>
+              <textarea
+                value={feat.description || ''}
+                onChange={e => {
+                  const next = [...allFeatures]
+                  next[globalIdx] = { ...next[globalIdx], description: e.target.value }
+                  setFormData(prev => ({ ...prev, features: next }))
+                }}
+                placeholder="Description..."
+                rows={2}
+                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', fontSize: '0.8rem', minHeight: '48px', background: 'transparent', border: '1px solid transparent', borderRadius: '4px' }}
+                onFocus={e => e.target.style.borderColor = 'var(--border)'}
+                onBlur={e => e.target.style.borderColor = 'transparent'}
+              />
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main component ──────────────────────────────────────────────────────────
 
 const CustomAdversaryCreator = forwardRef(({
@@ -87,6 +259,7 @@ const CustomAdversaryCreator = forwardRef(({
 }, ref) => {
   const nameInputRef = useRef(null)
   const gameCardNameInputRef = useRef(null)
+  const dragFromRef = useRef(null)
 
   const [formData, setFormData] = useState(() => {
     const defaults = getDefaultAdversaryValues(1, 'Standard')
@@ -330,324 +503,260 @@ const CustomAdversaryCreator = forwardRef(({
     const formItem = { ...formData, id: 'creator-form', hp: 0, stress: 0, source: 'Homebrew' }
     const previewInstances = [{ ...formItem }]
 
-    // Stat stepper: [−] [editable value] [+] with guide range hint and out-of-range highlight
-    const StatField = ({ label, field, subfield, rangeKey, disabled }) => {
-      const raw = subfield ? formData[field]?.[subfield] : formData[field]
-      const range = guideRange?.[rangeKey]
-      const outOfRange = !disabled && !isInRange(raw, range)
-      const color = disabled ? 'var(--text-secondary)' : outOfRange ? 'var(--orange, #e67e22)' : 'var(--border)'
-
-      const set = (val) => {
-        if (subfield) {
-          setFormData(prev => ({ ...prev, [field]: { ...prev[field], [subfield]: val } }))
-        } else {
-          setFormData(prev => ({ ...prev, [field]: val }))
-        }
-      }
-
-      const stepBtn = (delta) => (
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => set((parseInt(raw) || 0) + delta)}
-          style={{
-            width: '26px', height: '26px', flexShrink: 0,
-            border: `1px solid ${color}`,
-            borderRadius: delta < 0 ? '4px 0 0 4px' : '0 4px 4px 0',
-            background: 'var(--bg-secondary)',
-            color: disabled ? 'var(--text-secondary)' : 'var(--text-primary)',
-            fontSize: '1rem', lineHeight: 1, cursor: disabled ? 'not-allowed' : 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            opacity: disabled ? 0.4 : 1,
-          }}
-        >{delta < 0 ? '−' : '+'}</button>
-      )
-
-      return (
-        <div style={sectionStyle}>
-          <label style={labelStyle}>{label}</label>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {stepBtn(-1)}
-            <input
-              type="number"
-              value={raw ?? ''}
-              disabled={disabled}
-              onChange={e => set(e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-              style={{
-                ...inputStyle,
-                borderRadius: 0,
-                borderLeft: 'none', borderRight: 'none',
-                textAlign: 'center',
-                opacity: disabled ? 0.4 : 1,
-                borderColor: color,
-                width: '100%',
-                minWidth: 0,
-              }}
-            />
-            {stepBtn(1)}
-          </div>
-          {range && !disabled && (
-            <span style={{ fontSize: '0.68rem', color: outOfRange ? 'var(--orange, #e67e22)' : 'var(--text-secondary)', marginTop: '1px' }}>
-              {formatRange(range)}
-            </span>
-          )}
-        </div>
-      )
-    }
-
-    // Guidance section heading
-    const GuidanceHeading = ({ children }) => (
-      <div style={{
-        fontSize: '0.68rem', fontWeight: '700', color: 'var(--text-secondary)',
-        textTransform: 'uppercase', letterSpacing: '0.6px',
-        paddingBottom: '0.3rem', borderBottom: '1px solid var(--border)',
-        marginBottom: '0.5rem',
-      }}>
-        {children}
-      </div>
-    )
-
     return (
       <div style={{ display: 'flex', height: '100%', minHeight: 0, overflow: 'hidden' }}>
 
-        {/* ── LEFT: Card Preview ────────────────────────────────────────────── */}
-        <div style={{
-          width: '340px', flexShrink: 0,
-          overflowY: 'auto', borderRight: '1px solid var(--border)',
-          padding: '0.75rem', boxSizing: 'border-box',
-        }}>
-          <GameCard
-            item={formItem}
-            type="adversary"
-            mode="expanded"
-            instances={previewInstances}
-            showAddRemoveButtons={false}
-            onUpdate={() => {}}
-          />
+        {/* ── LEFT: Preview ─────────────────────────────────────────────────── */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, borderRight: '1px solid var(--border)' }}>
+          <PanelHeader label="Preview" />
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>
+            <GameCard
+              item={formItem}
+              type="adversary"
+              mode="expanded"
+              instances={previewInstances}
+              showAddRemoveButtons={false}
+              onUpdate={() => {}}
+            />
+          </div>
         </div>
 
-        {/* ── CENTER: Form ──────────────────────────────────────────────────── */}
-        <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, borderRight: '1px solid var(--border)' }}>
-          <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
-              <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                {editingAdversary ? (isStockAdversary ? 'Edit (Save As Custom)' : 'Edit Adversary') : 'Create Adversary'}
-              </h2>
-              <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
-                {onCancelEdit && (
-                  <button onClick={onCancelEdit} style={{
-                    padding: '0.4rem 0.875rem', background: 'transparent',
-                    border: '1px solid var(--border)', borderRadius: '5px',
-                    color: 'var(--text-primary)', fontSize: '0.875rem', cursor: 'pointer',
-                  }}>Cancel</button>
-                )}
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving || !formData.name.trim()}
-                  style={{
-                    padding: '0.4rem 1rem',
-                    background: isSaving || !formData.name.trim() ? 'var(--gray-600)' : 'var(--purple)',
-                    border: 'none', borderRadius: '5px', color: 'white',
-                    fontSize: '0.875rem', fontWeight: '600',
-                    cursor: isSaving || !formData.name.trim() ? 'not-allowed' : 'pointer',
-                    opacity: isSaving || !formData.name.trim() ? 0.6 : 1,
-                  }}
-                >{getSaveButtonText()}</button>
-              </div>
-            </div>
-
-            {/* Name */}
-            <div style={{ ...sectionStyle, position: 'relative' }}>
-              <label style={labelStyle}>Name</label>
-              <input
-                ref={nameInputRef}
-                type="text"
-                value={formData.name}
-                onChange={e => handleNameChange(e.target.value)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                placeholder="Adversary name — or search to import from an existing one"
-                style={inputStyle}
-              />
-              {showSuggestions && nameSuggestions.length > 0 && (
-                <div style={{
-                  position: 'absolute', top: '100%', left: 0, right: 0,
-                  backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
-                  borderTop: 'none', borderRadius: '0 0 6px 6px',
-                  maxHeight: '180px', overflowY: 'auto', zIndex: 100,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                }}>
-                  {nameSuggestions.map((adv, idx) => {
-                    const base = adv.baseName || adv.name?.replace(/\s+\(\d+\)$/, '') || adv.name
-                    return (
-                      <div
-                        key={idx}
-                        onMouseDown={e => e.preventDefault()}
-                        onClick={() => handleSelectAdversary(adv)}
-                        style={{
-                          padding: '0.5rem 0.75rem', cursor: 'pointer',
-                          borderBottom: idx < nameSuggestions.length - 1 ? '1px solid var(--border)' : 'none',
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
-                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{base}</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{adv.type} · Tier {adv.tier}</div>
-                      </div>
-                    )
-                  })}
-                </div>
+        {/* ── CENTER: Build ─────────────────────────────────────────────────── */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, borderRight: '1px solid var(--border)' }}>
+          <PanelHeader label="Build">
+            <div style={{ display: 'flex', gap: '0.4rem' }}>
+              {onCancelEdit && (
+                <button onClick={onCancelEdit} style={{
+                  padding: '0.25rem 0.6rem', background: 'transparent',
+                  border: '1px solid var(--border)', borderRadius: '4px',
+                  color: 'var(--text-primary)', fontSize: '0.75rem', cursor: 'pointer',
+                }}>Cancel</button>
               )}
+              <button
+                onClick={handleSave}
+                disabled={isSaving || !formData.name.trim()}
+                style={{
+                  padding: '0.25rem 0.75rem',
+                  background: isSaving || !formData.name.trim() ? 'var(--gray-600)' : 'var(--purple)',
+                  border: 'none', borderRadius: '4px', color: 'white',
+                  fontSize: '0.75rem', fontWeight: '600',
+                  cursor: isSaving || !formData.name.trim() ? 'not-allowed' : 'pointer',
+                  opacity: isSaving || !formData.name.trim() ? 0.6 : 1,
+                }}
+              >{getSaveButtonText()}</button>
             </div>
+          </PanelHeader>
+          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+            <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
 
-            {/* Tier + Type */}
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-              <div style={sectionStyle}>
-                <label style={labelStyle}>Tier</label>
-                <div style={{ display: 'flex', gap: '0.3rem' }}>
-                  {[1, 2, 3, 4].map(t => (
-                    <button key={t} onClick={() => setFormData(prev => ({ ...prev, tier: t }))} style={{
-                      width: '34px', height: '34px', border: '1px solid var(--border)', borderRadius: '5px',
-                      background: formData.tier === t ? 'var(--purple)' : 'var(--bg-secondary)',
-                      color: formData.tier === t ? 'white' : 'var(--text-primary)',
-                      fontWeight: formData.tier === t ? '700' : '400',
-                      fontSize: '0.875rem', cursor: 'pointer',
-                    }}>{t}</button>
-                  ))}
-                </div>
+              {/* Name */}
+              <div style={{ ...sectionStyle, position: 'relative' }}>
+                <label style={labelStyle}>Name</label>
+                <input
+                  ref={nameInputRef}
+                  type="text" value={formData.name}
+                  onChange={e => handleNameChange(e.target.value)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                  placeholder="Name — or search to import from existing"
+                  style={inputStyle}
+                />
+                {showSuggestions && nameSuggestions.length > 0 && (
+                  <div style={{
+                    position: 'absolute', top: '100%', left: 0, right: 0,
+                    backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
+                    borderTop: 'none', borderRadius: '0 0 6px 6px',
+                    maxHeight: '180px', overflowY: 'auto', zIndex: 100,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                  }}>
+                    {nameSuggestions.map((adv, idx) => {
+                      const base = adv.baseName || adv.name?.replace(/\s+\(\d+\)$/, '') || adv.name
+                      return (
+                        <div key={idx} onMouseDown={e => e.preventDefault()} onClick={() => handleSelectAdversary(adv)}
+                          style={{ padding: '0.5rem 0.75rem', cursor: 'pointer', borderBottom: idx < nameSuggestions.length - 1 ? '1px solid var(--border)' : 'none' }}
+                          onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
+                          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{base}</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{adv.type} · Tier {adv.tier}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
-              <div style={{ ...sectionStyle, flex: 1 }}>
-                <label style={labelStyle}>Type</label>
-                <select
-                  value={formData.type}
-                  onChange={e => setFormData(prev => ({ ...prev, type: e.target.value }))}
-                  style={{ ...inputStyle, height: '34px' }}
-                >
-                  {TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-            </div>
 
-            {/* Combat Stats */}
-            <div style={sectionStyle}>
-              <label style={{ ...labelStyle, marginBottom: '0.5rem' }}>Combat Stats</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                <StatField label="Difficulty" field="difficulty" rangeKey="difficulty" />
-                <StatField label="Major Threshold" field="thresholds" subfield="major" rangeKey="major" disabled={isMinion} />
-                <StatField label="Severe Threshold" field="thresholds" subfield="severe" rangeKey="severe" disabled={isMinion} />
-                <StatField label="HP Max" field="hpMax" rangeKey="hp" />
-                <StatField label="Stress Max" field="stressMax" rangeKey="stress" />
-                <StatField label="ATK Modifier" field="atk" rangeKey="atk" />
-              </div>
-            </div>
-
-            {/* Standard Attack */}
-            <div style={sectionStyle}>
-              <label style={{ ...labelStyle, marginBottom: '0.5rem' }}>Standard Attack</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '0.5rem' }}>
+              {/* Tier + Type */}
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                 <div style={sectionStyle}>
-                  <label style={labelStyle}>Weapon / Attack name</label>
-                  <input type="text" value={formData.weapon}
-                    onChange={e => setFormData(prev => ({ ...prev, weapon: e.target.value }))}
-                    placeholder="e.g. Greataxe" style={inputStyle} />
+                  <label style={labelStyle}>Tier</label>
+                  <div style={{ display: 'flex', gap: '0.3rem' }}>
+                    {[1, 2, 3, 4].map(t => (
+                      <button key={t} onClick={() => setFormData(prev => ({ ...prev, tier: t }))} style={{
+                        width: '34px', height: '34px', border: '1px solid var(--border)', borderRadius: '5px',
+                        background: formData.tier === t ? 'var(--purple)' : 'var(--bg-secondary)',
+                        color: formData.tier === t ? 'white' : 'var(--text-primary)',
+                        fontWeight: formData.tier === t ? '700' : '400',
+                        fontSize: '0.875rem', cursor: 'pointer',
+                      }}>{t}</button>
+                    ))}
+                  </div>
                 </div>
-                <div style={sectionStyle}>
-                  <label style={labelStyle}>Range</label>
-                  <select value={formData.range}
-                    onChange={e => setFormData(prev => ({ ...prev, range: e.target.value }))}
-                    style={inputStyle}>
-                    {['Melee', 'Very Close', 'Close', 'Far', 'Very Far'].map(r => <option key={r} value={r}>{r}</option>)}
+                <div style={{ ...sectionStyle, flex: 1 }}>
+                  <label style={labelStyle}>Type</label>
+                  <select value={formData.type} onChange={e => setFormData(prev => ({ ...prev, type: e.target.value }))} style={{ ...inputStyle, height: '34px' }}>
+                    {TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
-                <div style={sectionStyle}>
-                  <label style={labelStyle}>Damage</label>
-                  <input type="text" value={formData.damage}
-                    onChange={e => setFormData(prev => ({ ...prev, damage: e.target.value }))}
-                    placeholder="e.g. 1d8+2" style={inputStyle} />
-                  {(() => {
-                    const pools = getDamagePools(formData.type, formData.tier)
-                    if (!pools) return null
-                    return (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.3rem' }}>
-                        {pools.map((pool, i) => {
-                          const active = formData.damage === pool
-                          return (
-                            <button
-                              key={i}
-                              type="button"
-                              onClick={() => setFormData(prev => ({ ...prev, damage: pool }))}
-                              style={{
+              </div>
+
+              {/* Combat Stats */}
+              <div style={sectionStyle}>
+                <label style={{ ...labelStyle, marginBottom: '0.5rem' }}>Combat Stats</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                  <StatField label="Difficulty" field="difficulty" rangeKey="difficulty" formData={formData} setFormData={setFormData} guideRange={guideRange} />
+                  <StatField label="Major Threshold" field="thresholds" subfield="major" rangeKey="major" disabled={isMinion} formData={formData} setFormData={setFormData} guideRange={guideRange} />
+                  <StatField label="Severe Threshold" field="thresholds" subfield="severe" rangeKey="severe" disabled={isMinion} formData={formData} setFormData={setFormData} guideRange={guideRange} />
+                  <StatField label="HP Max" field="hpMax" rangeKey="hp" formData={formData} setFormData={setFormData} guideRange={guideRange} />
+                  <StatField label="Stress Max" field="stressMax" rangeKey="stress" formData={formData} setFormData={setFormData} guideRange={guideRange} />
+                  <StatField label="ATK Modifier" field="atk" rangeKey="atk" formData={formData} setFormData={setFormData} guideRange={guideRange} />
+                </div>
+              </div>
+
+              {/* Standard Attack */}
+              <div style={sectionStyle}>
+                <label style={{ ...labelStyle, marginBottom: '0.5rem' }}>Standard Attack</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '0.5rem' }}>
+                  <div style={sectionStyle}>
+                    <label style={labelStyle}>Name</label>
+                    <input type="text" value={formData.weapon} onChange={e => setFormData(prev => ({ ...prev, weapon: e.target.value }))} placeholder="e.g. Greataxe" style={inputStyle} />
+                  </div>
+                  <div style={sectionStyle}>
+                    <label style={labelStyle}>Range</label>
+                    <select value={formData.range} onChange={e => setFormData(prev => ({ ...prev, range: e.target.value }))} style={inputStyle}>
+                      {['Melee', 'Very Close', 'Close', 'Far', 'Very Far'].map(r => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                  </div>
+                  <div style={sectionStyle}>
+                    <label style={labelStyle}>Damage</label>
+                    <input type="text" value={formData.damage} onChange={e => setFormData(prev => ({ ...prev, damage: e.target.value }))} placeholder="e.g. 1d8+2" style={inputStyle} />
+                    {(() => {
+                      const pools = getDamagePools(formData.type, formData.tier)
+                      if (!pools) return null
+                      return (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.3rem' }}>
+                          {pools.map((pool, i) => {
+                            const active = formData.damage === pool
+                            return (
+                              <button key={i} type="button" onClick={() => setFormData(prev => ({ ...prev, damage: pool }))} style={{
                                 padding: '0.15rem 0.45rem',
                                 background: active ? 'var(--purple)' : 'var(--bg-secondary)',
                                 border: `1px solid ${active ? 'var(--purple)' : 'var(--border)'}`,
-                                borderRadius: '4px',
-                                color: active ? 'white' : 'var(--text-secondary)',
-                                fontSize: '0.72rem',
-                                fontFamily: 'monospace',
-                                cursor: 'pointer',
-                                transition: 'all 0.1s ease',
-                              }}
-                            >
-                              {pool}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    )
-                  })()}
+                                borderRadius: '4px', color: active ? 'white' : 'var(--text-secondary)',
+                                fontSize: '0.72rem', fontFamily: 'monospace', cursor: 'pointer',
+                              }}>{pool}</button>
+                            )
+                          })}
+                        </div>
+                      )
+                    })()}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Description + Motives */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <div style={sectionStyle}>
-                <label style={labelStyle}>Description</label>
-                <textarea value={formData.description}
-                  onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Appearance and background..." rows={3}
-                  style={{ ...inputStyle, resize: 'vertical', minHeight: '72px', fontFamily: 'inherit' }} />
+              {/* Description + Motives */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={sectionStyle}>
+                  <label style={labelStyle}>Description</label>
+                  <textarea value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} placeholder="Appearance and background..." rows={3} style={{ ...inputStyle, resize: 'vertical', minHeight: '72px', fontFamily: 'inherit' }} />
+                </div>
+                <div style={sectionStyle}>
+                  <label style={labelStyle}>Motives & Tactics</label>
+                  <textarea value={formData.motives} onChange={e => setFormData(prev => ({ ...prev, motives: e.target.value }))} placeholder="What drives them, how they fight..." rows={3} style={{ ...inputStyle, resize: 'vertical', minHeight: '72px', fontFamily: 'inherit' }} />
+                </div>
               </div>
+
+              {/* Experiences */}
               <div style={sectionStyle}>
-                <label style={labelStyle}>Motives & Tactics</label>
-                <textarea value={formData.motives}
-                  onChange={e => setFormData(prev => ({ ...prev, motives: e.target.value }))}
-                  placeholder="What drives them, how they fight..." rows={3}
-                  style={{ ...inputStyle, resize: 'vertical', minHeight: '72px', fontFamily: 'inherit' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.35rem' }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>Experiences</label>
+                  <button type="button" onClick={() => {
+                    const bonus = Math.min(formData.tier + 1, 3)
+                    setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: '', modifier: bonus }] }))
+                  }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0 0.1rem' }} title="Add experience">+</button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                  {(formData.experience || []).map((exp, i) => (
+                    <div
+                      key={i}
+                      draggable
+                      onDragStart={() => { dragFromRef.current = i }}
+                      onDragOver={e => e.preventDefault()}
+                      onDrop={() => {
+                        if (dragFromRef.current === null) return
+                        setFormData(prev => ({ ...prev, experience: reorder(prev.experience, dragFromRef.current, i) }))
+                        dragFromRef.current = null
+                      }}
+                      style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}
+                    >
+                      <DragHandle />
+                      <input
+                        type="text"
+                        value={typeof exp === 'string' ? exp : (exp.name || '')}
+                        onChange={e => {
+                          const next = [...(formData.experience || [])]
+                          next[i] = { name: e.target.value, modifier: typeof exp === 'object' ? (exp.modifier || 0) : 0 }
+                          setFormData(prev => ({ ...prev, experience: next }))
+                        }}
+                        placeholder="Experience name"
+                        style={{ ...inputStyle, flex: 1 }}
+                      />
+                      {/* Bonus stepper */}
+                      <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                        <button type="button" onClick={() => {
+                          const next = [...(formData.experience || [])]
+                          const cur = typeof exp === 'object' ? (exp.modifier || 0) : 0
+                          next[i] = { name: typeof exp === 'object' ? (exp.name || '') : exp, modifier: Math.max(0, cur - 1) }
+                          setFormData(prev => ({ ...prev, experience: next }))
+                        }} style={{ width: '22px', height: '28px', border: '1px solid var(--border)', borderRadius: '4px 0 0 4px', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.875rem' }}>−</button>
+                        <div style={{ width: '32px', height: '28px', border: '1px solid var(--border)', borderLeft: 'none', borderRight: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-primary)', background: 'var(--bg-secondary)', fontFamily: 'monospace' }}>
+                          +{typeof exp === 'object' ? (exp.modifier || 0) : 0}
+                        </div>
+                        <button type="button" onClick={() => {
+                          const next = [...(formData.experience || [])]
+                          const cur = typeof exp === 'object' ? (exp.modifier || 0) : 0
+                          next[i] = { name: typeof exp === 'object' ? (exp.name || '') : exp, modifier: Math.min(6, cur + 1) }
+                          setFormData(prev => ({ ...prev, experience: next }))
+                        }} style={{ width: '22px', height: '28px', border: '1px solid var(--border)', borderRadius: '0 4px 4px 0', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.875rem' }}>+</button>
+                      </div>
+                      <button type="button" onClick={() => {
+                        const next = (formData.experience || []).filter((_, j) => j !== i)
+                        setFormData(prev => ({ ...prev, experience: next }))
+                      }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1rem', padding: '0 0.2rem', flexShrink: 0 }}>×</button>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Experiences */}
-            <div style={sectionStyle}>
-              <label style={{ ...labelStyle, marginBottom: '0.5rem' }}>Experiences</label>
-              <ExperienceSection
-                item={formItem} isEditMode={true} onUpdate={handleFormUpdate}
-                deleteConfirmations={deleteConfirmations} setDeleteConfirmations={setDeleteConfirmations}
-              />
-            </div>
+              {/* Features */}
+              <FeatureList featureType="Action" label="Actions" formData={formData} setFormData={setFormData} dragFromRef={dragFromRef} />
+              <FeatureList featureType="Passive" label="Passives" formData={formData} setFormData={setFormData} dragFromRef={dragFromRef} />
+              <div style={{ paddingBottom: '1rem' }}>
+                <FeatureList featureType="Reaction" label="Reactions" formData={formData} setFormData={setFormData} dragFromRef={dragFromRef} />
+              </div>
 
-            {/* Features */}
-            <div style={{ ...sectionStyle, paddingBottom: '1rem' }}>
-              <label style={{ ...labelStyle, marginBottom: '0.5rem' }}>Features</label>
-              <FeaturesSection
-                item={formItem} isEditMode={true} onUpdate={handleFormUpdate}
-                handleFeatureDeleteClick={handleFeatureDeleteClick}
-                deleteConfirmations={deleteConfirmations} getFeatureKey={getFeatureKey}
-              />
             </div>
-
           </div>
         </div>
 
         {/* ── RIGHT: Guidance ───────────────────────────────────────────────── */}
-        <div style={{
-          width: '280px', flexShrink: 0,
-          overflowY: 'auto', padding: '1rem',
-          boxSizing: 'border-box',
-          display: 'flex', flexDirection: 'column', gap: '1.25rem',
-          fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--text-secondary)',
-        }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <PanelHeader label="Guidance" />
+          <div style={{
+            flex: 1, overflowY: 'auto',
+            padding: '0.75rem',
+            display: 'flex', flexDirection: 'column', gap: '1.25rem',
+            fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--text-secondary)',
+          }}>
 
           {/* Role overview */}
           {guide && (
@@ -712,15 +821,24 @@ const CustomAdversaryCreator = forwardRef(({
           {guide?.experiences?.length > 0 && (
             <div>
               <GuidanceHeading>Suggested Experiences</GuidanceHeading>
+              <p style={{ margin: '0 0 0.5rem', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                Typical bonus: +{Math.min(formData.tier + 1, 3)} for Tier {formData.tier}. Click to add.
+              </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                 {guide.experiences.map((exp, i) => (
-                  <span key={i} style={{
-                    padding: '0.15rem 0.5rem',
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '4px', fontSize: '0.75rem',
-                    color: 'var(--text-primary)',
-                  }}>{exp}</span>
+                  <button key={i} type="button"
+                    onClick={() => {
+                      const bonus = Math.min(formData.tier + 1, 3)
+                      setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: exp, modifier: bonus }] }))
+                    }}
+                    title="Click to add"
+                    style={{
+                      padding: '0.15rem 0.5rem',
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px', fontSize: '0.75rem',
+                      color: 'var(--text-primary)', cursor: 'pointer',
+                    }}>{exp}</button>
                 ))}
               </div>
             </div>
@@ -766,7 +884,8 @@ const CustomAdversaryCreator = forwardRef(({
             {stressFearGuide.momentumNote}
           </div>
 
-        </div>
+          </div>{/* end guidance scroll */}
+        </div>{/* end right panel */}
 
       </div>
     )
