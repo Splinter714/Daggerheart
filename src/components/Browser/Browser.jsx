@@ -2197,7 +2197,7 @@ const styles = {
     boxShadow: '0 0 0 3px rgba(139, 92, 246, 0.1)'
   },
   tableHeader: {
-    background: 'var(--gray-900)',
+    background: 'var(--bg-primary)',
     borderBottom: '1px solid var(--border)',
     boxShadow: '0 1px 0 var(--border)',
     position: 'sticky',
@@ -2205,7 +2205,7 @@ const styles = {
     zIndex: 10
   },
   tableHeaderCell: {
-    backgroundColor: 'var(--gray-900)',
+    backgroundColor: 'var(--bg-primary)',
     fontWeight: '700',
     borderBottom: '1px solid var(--border)',
     cursor: 'pointer',
@@ -2240,7 +2240,7 @@ const styles = {
     borderBottom: '1px solid var(--border)',
     transition: 'background-color 0.2s ease',
     cursor: 'pointer',
-    backgroundColor: 'var(--gray-900)'
+    backgroundColor: 'var(--bg-primary)'
   },
   rowHover: {
     backgroundColor: 'var(--bg-secondary)'

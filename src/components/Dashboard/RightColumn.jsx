@@ -1,16 +1,12 @@
 import React from 'react'
-import { X } from 'lucide-react'
 import Browser from '../Browser/Browser'
 import EncounterReceipt from './EncounterReceipt'
 import { DASHBOARD_GAP } from './constants'
 import logoImage from '../../assets/daggerheart-logo.svg'
 
-const ColumnHeader = ({ title, onClose }) => (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-    <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{title}</span>
-    <button type="button" onClick={onClose} style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', borderRadius: '4px' }}>
-      <X size={16} />
-    </button>
+const ColumnHeader = ({ title }) => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+    <span style={{ fontWeight: 600, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '0.01em' }}>{title}</span>
   </div>
 )
 
@@ -90,7 +86,7 @@ const RightColumn = ({
     }}>
       {mode === 'browser' && (
         <>
-          <ColumnHeader title="Adversaries" onClose={onClose} />
+          <ColumnHeader title="Adversaries" />
           <Browser
             type="adversary"
             onAddItem={onAddAdversaryFromBrowser}
@@ -111,7 +107,7 @@ const RightColumn = ({
 
       {mode === 'receipt' && (
         <>
-          <ColumnHeader title="Encounter" onClose={onClose} />
+          <ColumnHeader title="Encounter" />
           <EncounterReceipt
             encounterItems={encounterItems}
             pcCount={pcCount}

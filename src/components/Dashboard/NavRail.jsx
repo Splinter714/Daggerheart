@@ -5,8 +5,8 @@ const RAIL_SIZE = 52
 
 const NAV_ITEMS = [
   { id: 'browse',   Icon: Library,       label: 'Add adversaries'   },
-  { id: 'create',   Icon: Wand2,         label: 'Create custom'     },
   { id: 'receipt',  Icon: ClipboardList, label: 'Encounter info'    },
+  { id: 'create',   Icon: Wand2,         label: 'Create custom'     },
   { id: 'info',     Icon: Info,          label: 'App info'          },
 ]
 
