@@ -375,10 +375,7 @@ const DashboardContent = () => {
             onClose={handleCloseBrowser}
             browserActiveTab={browserActiveTab}
             onTabChange={setBrowserActiveTab}
-            savedEncounters={savedEncounters}
-            loadEncounter={loadEncounter}
-            deleteEncounter={deleteEncounter}
-            selectedCustomAdversaryId={selectedCustomAdversaryId}
+selectedCustomAdversaryId={selectedCustomAdversaryId}
             onSelectCustomAdversary={setSelectedCustomAdversaryId}
             onAddAdversaryFromBrowser={handleAddAdversaryFromBrowser}
             pcCount={pcCount}
