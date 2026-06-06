@@ -1,17 +1,13 @@
 import React from 'react'
-import { Library, Wand2, Info } from 'lucide-react'
+import { Library, Wand2, Info, ClipboardList } from 'lucide-react'
 
-// placement: 'right' | 'bottom'
-// Right: fixed vertical strip on the right edge
-// Bottom: fixed horizontal strip on the bottom edge
-// Switching between them is a one-prop change.
-
-const RAIL_SIZE = 52 // px — width (right) or height (bottom)
+const RAIL_SIZE = 52
 
 const NAV_ITEMS = [
-  { id: 'browse',  Icon: Library, label: 'Add adversaries' },
-  { id: 'create',  Icon: Wand2,   label: 'Create custom'   },
-  { id: 'info',    Icon: Info,    label: 'App info'         },
+  { id: 'browse',   Icon: Library,       label: 'Add adversaries'   },
+  { id: 'create',   Icon: Wand2,         label: 'Create custom'     },
+  { id: 'receipt',  Icon: ClipboardList, label: 'Encounter info'    },
+  { id: 'info',     Icon: Info,          label: 'App info'          },
 ]
 
 const NavRail = ({ placement = 'right', activeId, onAction }) => {
@@ -35,6 +31,7 @@ const NavRail = ({ placement = 'right', activeId, onAction }) => {
         borderTop: '1px solid var(--border)',
         paddingLeft: 'env(safe-area-inset-left, 0)',
         paddingRight: 'env(safe-area-inset-right, 0)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0)',
       }
 
   return (
@@ -42,8 +39,8 @@ const NavRail = ({ placement = 'right', activeId, onAction }) => {
       ...railStyle,
       display: 'flex',
       alignItems: 'center',
-      justifyContent: isRight ? 'flex-start' : 'center',
-      gap: isRight ? '0.25rem' : '0.5rem',
+      justifyContent: isRight ? 'flex-start' : 'space-around',
+      gap: isRight ? '0.25rem' : 0,
       backgroundColor: 'var(--bg-primary)',
       zIndex: 100,
     }}>
@@ -70,7 +67,7 @@ const NavRail = ({ placement = 'right', activeId, onAction }) => {
               transition: 'color 0.15s, background 0.15s',
             }}
             onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'var(--text-primary)' }}
-            onMouseLeave={e => { if (!active) e.currentTarget.style.color = 'var(--text-secondary)' }}
+            onMouseLeave={e => { if (!active) e.currentTarget.style.color = active ? 'var(--purple)' : 'var(--text-secondary)' }}
           >
             <Icon size={22} strokeWidth={1.6} />
           </button>

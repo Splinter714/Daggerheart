@@ -238,17 +238,14 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
                   const curRow = t === currentTier
                   return (
                     <tr key={t}>
-                      <td style={{ padding: '0.18rem 0.4rem 0.18rem 0', color: curRow ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: curRow ? 600 : 400, backgroundColor: curRow ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent', borderRadius: '3px 0 0 3px' }}>{t}</td>
+                      <td style={{ padding: '0.18rem 0.4rem 0.18rem 0', color: curRow ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: curRow ? 600 : 400 }}>{t}</td>
                       {STAT_COLS.map((c, ci) => {
-                        const isLast = ci === STAT_COLS.length - 1
                         const highlight = curRow && c.key === rangeKey
                         return (
                           <td key={c.key} style={{
                             padding: '0.18rem 0.35rem 0.18rem 0',
-                            color: highlight ? 'var(--purple)' : curRow ? 'var(--text-primary)' : 'var(--text-secondary)',
+                            color: highlight ? '#fff' : curRow ? 'var(--text-primary)' : 'var(--text-secondary)',
                             fontWeight: highlight ? 700 : curRow ? 600 : 400,
-                            backgroundColor: curRow ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent',
-                            borderRadius: isLast ? '0 3px 3px 0' : 0,
                           }}>{c.fmt(r)}</td>
                         )
                       })}

@@ -1,16 +1,15 @@
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useGameState } from '../../state/state'
 import { DASHBOARD_GAP } from './constants'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import EncounterBuilder from './EncounterBuilder'
 import { useAppKeyboardShortcuts } from './useAppKeyboardShortcuts'
-import { 
-  calculateBaseBattlePoints, 
-  calculateSpentBattlePoints, 
+import {
+  calculateBaseBattlePoints,
+  calculateSpentBattlePoints,
   calculateAutomaticAdjustments
 } from './BattlePointsCalculator'
-// import TopBarControls from './TopBarControls' // TEMPORARILY DISABLED (fear tracker removal)
-import BrowserOverlay from './BrowserOverlay'
+import RightColumn from './RightColumn'
 import EntityColumns from './EntityColumns'
 import CustomAdversaryCreator from '../Adversaries/CustomAdversaryCreator'
 import { useMinionSync } from './hooks/useMinionSync'
@@ -57,14 +56,28 @@ const DashboardContent = () => {
   // Dashboard state
   const [encounterBuilderOpen, setEncounterBuilderOpen] = useState(false)
   const [adversaryCreatorOpen, setAdversaryCreatorOpen] = useState(false)
-  const [editingAdversaryId, setEditingAdversaryId] = useState(null) // ID of adversary being edited, or null
-  const [browserActiveTab, setBrowserActiveTab] = useState('adversaries') // Active tab in browser overlay
-  const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null) // Selected custom adversary in browser
-  
+  const [editingAdversaryId, setEditingAdversaryId] = useState(null)
+  const [browserActiveTab, setBrowserActiveTab] = useState('adversaries')
+  const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null)
+  const [rightColumnMode, setRightColumnMode] = useState('browser') // 'browser' | 'info' | 'receipt'
+
+  // Narrow screen detection for NavRail placement
+  const [isNarrow, setIsNarrow] = useState(false)
+  const dashboardRootRef = useRef(null)
+  useEffect(() => {
+    const el = dashboardRootRef.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => {
+      setIsNarrow(entry.contentRect.width < 760)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   // Column layout state
-  const [newCards, setNewCards] = useState(new Set()) // Track newly added cards for fade-in animation
-  const [removingCardSpacer, setRemovingCardSpacer] = useState(null) // Track card being removed with spacer: { baseName, groupIndex }
-  const [spacerShrinking, setSpacerShrinking] = useState(false) // Track if spacer should shrink
+  const [newCards, setNewCards] = useState(new Set())
+  const [removingCardSpacer, setRemovingCardSpacer] = useState(null)
+  const [spacerShrinking, setSpacerShrinking] = useState(false)
   const scrollContainerRef = useRef(null)
 
   useMinionSync(adversaryGroups, pcCount, createAdversariesBulk, deleteAdversary)
@@ -74,7 +87,7 @@ const DashboardContent = () => {
   const { browserOpenAtPosition, handleOpenBrowser, handleCloseBrowser } = useBrowserOverlay({
     scrollContainerRef,
     columnWidth,
-    onCloseReset: () => setBrowserActiveTab('adversaries')
+    onCloseReset: () => { setBrowserActiveTab('adversaries'); setRightColumnMode('browser') }
   })
 
   const smoothScrollTo = useSmoothScroll(scrollContainerRef)
@@ -83,8 +96,12 @@ const DashboardContent = () => {
     setEncounterBuilderOpen(false)
   }, [])
 
-
   const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, countdowns)
+
+  const openRightColumn = useCallback((mode) => {
+    setRightColumnMode(mode)
+    handleOpenBrowser(entityGroups.length)
+  }, [handleOpenBrowser, entityGroups])
 
   // Keyboard shortcuts
   useAppKeyboardShortcuts({
@@ -308,57 +325,78 @@ const DashboardContent = () => {
     }, 150) // Wait 150ms after last scroll event
   }, [])
 
-  // Remove auto-open encounter builder logic - replaced with empty state button
+  const navPlacement = isNarrow ? 'bottom' : 'right'
+  const railPadding = isNarrow
+    ? { paddingBottom: `${RAIL_SIZE}px` }
+    : { paddingRight: `${RAIL_SIZE}px` }
 
-    const navActiveId = adversaryCreatorOpen ? 'create' : browserOpenAtPosition !== null ? 'browse' : null
+  const rightColumnOpen = browserOpenAtPosition !== null
 
-    return (
+  const navActiveId = adversaryCreatorOpen
+    ? 'create'
+    : rightColumnOpen
+    ? rightColumnMode === 'receipt' ? 'receipt' : rightColumnMode === 'info' ? 'info' : 'browse'
+    : null
+
+  const handleNavAction = useCallback((id) => {
+    if (id === 'browse') {
+      if (rightColumnOpen && rightColumnMode === 'browse') {
+        handleCloseBrowser()
+      } else {
+        setAdversaryCreatorOpen(false)
+        setRightColumnMode('browser')
+        if (!rightColumnOpen) handleOpenBrowser(entityGroups.length)
+      }
+    } else if (id === 'create') {
+      handleCloseBrowser()
+      setAdversaryCreatorOpen(v => !v)
+    } else if (id === 'receipt') {
+      if (rightColumnOpen && rightColumnMode === 'receipt') {
+        handleCloseBrowser()
+      } else {
+        setAdversaryCreatorOpen(false)
+        openRightColumn('receipt')
+      }
+    } else if (id === 'info') {
+      if (rightColumnOpen && rightColumnMode === 'info') {
+        handleCloseBrowser()
+      } else {
+        setAdversaryCreatorOpen(false)
+        openRightColumn('info')
+      }
+    }
+  }, [rightColumnOpen, rightColumnMode, handleCloseBrowser, handleOpenBrowser, openRightColumn, entityGroups])
+
+  // On mobile, hide NavRail when creator is open (creator has its own bottom tab bar)
+  const showNavRail = !(isNarrow && adversaryCreatorOpen)
+
+  return (
     <div
+      ref={dashboardRootRef}
       className="app dashboard-root"
-      style={{ '--dashboard-gap': `${DASHBOARD_GAP}px`, paddingRight: `${RAIL_SIZE}px` }}
-      onClick={(e) => {
-        // Clear selection when clicking on app background
-        if (e.target === e.currentTarget) {
-          // Handle any global click behavior here if needed
-        }
-      }}
+      style={{ '--dashboard-gap': `${DASHBOARD_GAP}px`, ...railPadding }}
     >
-
-      {/* TOP BAR TEMPORARILY DISABLED (fear tracker removal)
-      <TopBarControls
-        fearValue={fear?.value || 0}
-        onUpdateFear={updateFear}
-        isBrowserOpen={browserOpenAtPosition !== null}
-        onToggleBrowser={() => {
-              if (browserOpenAtPosition !== null) {
-                handleCloseBrowser()
-              } else {
-                handleOpenBrowser(entityGroups.length)
-              }
-            }}
-      />
-      */}
-
       {/* Main Dashboard Content */}
       <div className="dashboard-main">
-        <BrowserOverlay
-          isOpen={browserOpenAtPosition !== null}
-          columnWidth={columnWidth}
-          onClose={handleCloseBrowser}
-          onCreateCustomAdversary={() => setAdversaryCreatorOpen(true)}
-                  pcCount={pcCount}
-          updatePartySize={updatePartySize}
-          availableBattlePoints={availableBattlePoints}
-          spentBattlePoints={spentBattlePoints}
-          browserActiveTab={browserActiveTab}
-          onTabChange={setBrowserActiveTab}
-                  savedEncounters={savedEncounters}
-          loadEncounter={loadEncounter}
-          deleteEncounter={deleteEncounter}
-                  selectedCustomAdversaryId={selectedCustomAdversaryId}
-                  onSelectCustomAdversary={setSelectedCustomAdversaryId}
-          onAddAdversaryFromBrowser={handleAddAdversaryFromBrowser}
-                />
+        {rightColumnOpen && (
+          <RightColumn
+            mode={rightColumnMode}
+            columnWidth={columnWidth}
+            onClose={handleCloseBrowser}
+            browserActiveTab={browserActiveTab}
+            onTabChange={setBrowserActiveTab}
+            savedEncounters={savedEncounters}
+            loadEncounter={loadEncounter}
+            deleteEncounter={deleteEncounter}
+            selectedCustomAdversaryId={selectedCustomAdversaryId}
+            onSelectCustomAdversary={setSelectedCustomAdversaryId}
+            onAddAdversaryFromBrowser={handleAddAdversaryFromBrowser}
+            pcCount={pcCount}
+            updatePartySize={updatePartySize}
+            availableBattlePoints={availableBattlePoints}
+            spentBattlePoints={spentBattlePoints}
+          />
+        )}
         <EntityColumns
           entityGroups={entityGroups}
           columnWidth={columnWidth}
@@ -374,7 +412,7 @@ const DashboardContent = () => {
           updateAdversary={updateAdversary}
           updateEnvironment={updateEnvironment}
           updateCountdown={updateCountdown}
-              adversaries={adversaries}
+          adversaries={adversaries}
           handleEditAdversary={handleEditAdversary}
           createAdversary={createAdversary}
           createAdversariesBulk={createAdversariesBulk}
@@ -385,70 +423,39 @@ const DashboardContent = () => {
           setRemovingCardSpacer={setRemovingCardSpacer}
           setSpacerShrinking={setSpacerShrinking}
           onOpenBrowser={() => {
-            if (browserOpenAtPosition === null) {
-              handleOpenBrowser(entityGroups.length)
-            }
+            if (!rightColumnOpen) openRightColumn('browser')
           }}
-                />
+        />
       </div>
 
-
-      {/* Custom Adversary Creator Modal */}
+      {/* Custom Adversary Creator — full-screen takeover */}
       {adversaryCreatorOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 200,
-            backgroundColor: 'var(--bg-primary)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              flex: 1,
-              overflow: 'hidden',
-            }}
-          >
-            {/* Content — fills the panel, three-panel layout handled by CustomAdversaryCreator */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
-                <CustomAdversaryCreator
-                  onSave={(adversaryData, id) => {
-                    if (id) {
-                      updateCustomAdversary(id, adversaryData)
-                    } else {
-                      addCustomAdversary(adversaryData)
-                    }
-                    setAdversaryCreatorOpen(false)
-                  }}
-                  onCancelEdit={() => setAdversaryCreatorOpen(false)}
-                  embedded={false}
-                  autoFocus
-                />
-            </div>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, backgroundColor: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+            <CustomAdversaryCreator
+              onSave={(adversaryData, id) => {
+                if (id) {
+                  updateCustomAdversary(id, adversaryData)
+                } else {
+                  addCustomAdversary(adversaryData)
+                }
+                setAdversaryCreatorOpen(false)
+              }}
+              onCancelEdit={() => setAdversaryCreatorOpen(false)}
+              embedded={false}
+              autoFocus
+            />
           </div>
         </div>
       )}
-
-      {/* Encounter Builder button DORMANT - will be redesigned with custom adversary creator */}
 
       {/* Encounter Builder Modal */}
       <EncounterBuilder
         isOpen={encounterBuilderOpen}
         onClose={handleCloseEncounterBuilder}
-        onAddAdversary={(itemData) => {
-          createAdversary(itemData)
-        }}
-        onAddAdversariesBulk={(adversariesArray) => {
-          createAdversariesBulk(adversariesArray)
-        }}
-        onAddEnvironment={(itemData) => {
-          createEnvironment(itemData)
-        }}
+        onAddAdversary={(itemData) => { createAdversary(itemData) }}
+        onAddAdversariesBulk={(adversariesArray) => { createAdversariesBulk(adversariesArray) }}
+        onAddEnvironment={(itemData) => { createEnvironment(itemData) }}
         onDeleteAdversary={deleteAdversary}
         onDeleteEnvironment={deleteEnvironment}
         onDeleteCountdown={deleteCountdown}
@@ -461,31 +468,15 @@ const DashboardContent = () => {
         onDeleteEncounter={deleteEncounter}
       />
 
-      {/* PWA Install Prompt */}
       <PWAInstallPrompt />
 
-      <NavRail
-        placement="right"
-        activeId={navActiveId}
-        onAction={(id) => {
-          if (id === 'browse') {
-            if (browserOpenAtPosition !== null) {
-              handleCloseBrowser()
-            } else {
-              setAdversaryCreatorOpen(false)
-              handleOpenBrowser(entityGroups.length)
-            }
-          } else if (id === 'create') {
-            handleCloseBrowser()
-            setAdversaryCreatorOpen(v => !v)
-          } else if (id === 'info') {
-            handleCloseBrowser()
-            setAdversaryCreatorOpen(false)
-            setBrowserActiveTab('info')
-            handleOpenBrowser(entityGroups.length)
-          }
-        }}
-      />
+      {showNavRail && (
+        <NavRail
+          placement={navPlacement}
+          activeId={navActiveId}
+          onAction={handleNavAction}
+        />
+      )}
     </div>
   )
 }
