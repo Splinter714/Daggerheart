@@ -964,7 +964,7 @@ const CustomAdversaryCreator = forwardRef(({
               {/* Tier + Type */}
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                 <div style={sectionStyle}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem', minHeight: '20px' }}>
                     <span style={{ ...labelStyle, marginBottom: 0 }}>Tier</span>
                     <InfoPopover>
                       <div style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>PC Levels by Tier</div>
@@ -991,7 +991,9 @@ const CustomAdversaryCreator = forwardRef(({
                   </div>
                 </div>
                 <div style={{ ...sectionStyle, flex: 1 }}>
-                  <label style={labelStyle}>Type</label>
+                  <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
+                    <span style={{ ...labelStyle, marginBottom: 0 }}>Type</span>
+                  </div>
                   <TypeSelector selectedType={formData.type} setFormData={setFormData} />
                 </div>
               </div>
@@ -1021,24 +1023,28 @@ const CustomAdversaryCreator = forwardRef(({
               {/* Standard Attack fields */}
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '0.5rem' }}>
                 <div style={sectionStyle}>
-                  <label style={labelStyle}>Standard Attack</label>
+                  <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
+                    <span style={{ ...labelStyle, marginBottom: 0 }}>Standard Attack</span>
+                  </div>
                   <input type="text" value={formData.weapon} onChange={e => setFormData(prev => ({ ...prev, weapon: e.target.value }))} placeholder="e.g. Greataxe" style={{ ...inputStyle, minHeight: '44px' }} />
                 </div>
                 <div style={sectionStyle}>
-                  <label style={labelStyle}>Range</label>
+                  <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
+                    <span style={{ ...labelStyle, marginBottom: 0 }}>Range</span>
+                  </div>
                   <select value={formData.range} onChange={e => setFormData(prev => ({ ...prev, range: e.target.value }))} style={{ ...inputStyle, minHeight: '44px', appearance: 'none', WebkitAppearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.65rem center', paddingRight: '2rem' }}>
                     {['Melee', 'Very Close', 'Close', 'Far', 'Very Far'].map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
                 <div style={sectionStyle}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem', minHeight: '20px' }}>
                     <span style={{ ...labelStyle, marginBottom: 0 }}>Damage</span>
-                    {guide?.damageDie && (
+                    <span style={{ visibility: guide?.damageDie ? 'visible' : 'hidden' }}>
                       <InfoPopover align="right">
                         <div style={{ fontWeight: 700, fontSize: '0.72rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Damage Die</div>
-                        <div>{guide.damageDie}</div>
+                        <div>{guide?.damageDie}</div>
                       </InfoPopover>
-                    )}
+                    </span>
                   </div>
                   <DamageSelector
                     damage={formData.damage}
