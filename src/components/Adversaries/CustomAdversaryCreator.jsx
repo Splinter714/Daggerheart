@@ -48,7 +48,7 @@ const inputStyle = {
   borderRadius: '5px',
   backgroundColor: 'var(--bg-secondary)',
   color: 'var(--text-primary)',
-  fontSize: '0.875rem',
+  fontSize: '1rem',
   outline: 'none',
   boxSizing: 'border-box',
 }
@@ -147,7 +147,7 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
           cursor: 'pointer', padding: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
-          margin: '-12px',
+          marginTop: '-12px', marginRight: '-12px', marginBottom: '-12px', marginLeft: 0,
         }}
       >
         <span style={{
@@ -221,8 +221,8 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
   return (
     <div style={sectionStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.3rem' }}>
-        <span style={{ ...labelStyle, marginBottom: 0, lineHeight: '20px' }}>{label}</span>
-        <span style={{ visibility: disabled ? 'hidden' : 'visible' }}>
+        <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>{label}</span>
+        <span style={{ visibility: disabled ? 'hidden' : 'visible', display: 'flex', alignItems: 'center' }}>
           <InfoPopover minWidth={320}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', whiteSpace: 'nowrap' }}>
               <thead>
@@ -299,7 +299,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
   return (
     <div style={sectionStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.35rem' }}>
-        <label style={{ ...labelStyle, marginBottom: 0, lineHeight: '20px' }}>{label}</label>
+        <label style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>{label}</label>
         <InfoPopover>
           {guideFeatures?.length > 0 ? (
             <>
@@ -378,7 +378,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
                 }}
                 placeholder="Description..."
                 rows={2}
-                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', fontSize: '0.8rem', minHeight: '48px', background: 'transparent', border: '1px solid transparent', borderRadius: '4px' }}
+                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', minHeight: '48px', background: 'transparent', border: '1px solid transparent', borderRadius: '4px' }}
                 onFocus={e => e.target.style.borderColor = 'var(--border)'}
                 onBlur={e => e.target.style.borderColor = 'transparent'}
               />
@@ -965,7 +965,7 @@ const CustomAdversaryCreator = forwardRef(({
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                 <div style={sectionStyle}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem', minHeight: '20px' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: '20px' }}>Tier</span>
+                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Tier</span>
                     <InfoPopover>
                       <div style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>PC Levels by Tier</div>
                       {[['1','1'],['2','2–4'],['3','5–7'],['4','8–10']].map(([t, lvls]) => (
@@ -992,7 +992,7 @@ const CustomAdversaryCreator = forwardRef(({
                 </div>
                 <div style={{ ...sectionStyle, flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: '20px' }}>Type</span>
+                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Type</span>
                   </div>
                   <TypeSelector selectedType={formData.type} setFormData={setFormData} />
                 </div>
@@ -1024,13 +1024,13 @@ const CustomAdversaryCreator = forwardRef(({
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '0.5rem' }}>
                 <div style={sectionStyle}>
                   <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: '20px' }}>Standard Attack</span>
+                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Standard Attack</span>
                   </div>
                   <input type="text" value={formData.weapon} onChange={e => setFormData(prev => ({ ...prev, weapon: e.target.value }))} placeholder="e.g. Greataxe" style={{ ...inputStyle, minHeight: '44px' }} />
                 </div>
                 <div style={sectionStyle}>
                   <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: '20px' }}>Range</span>
+                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Range</span>
                   </div>
                   <select value={formData.range} onChange={e => setFormData(prev => ({ ...prev, range: e.target.value }))} style={{ ...inputStyle, minHeight: '44px', appearance: 'none', WebkitAppearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.65rem center', paddingRight: '2rem' }}>
                     {['Melee', 'Very Close', 'Close', 'Far', 'Very Far'].map(r => <option key={r} value={r}>{r}</option>)}
@@ -1038,8 +1038,8 @@ const CustomAdversaryCreator = forwardRef(({
                 </div>
                 <div style={sectionStyle}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem', minHeight: '20px' }}>
-                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: '20px' }}>Damage</span>
-                    <span style={{ visibility: guide?.damageDie ? 'visible' : 'hidden' }}>
+                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Damage</span>
+                    <span style={{ visibility: guide?.damageDie ? 'visible' : 'hidden', display: 'flex', alignItems: 'center' }}>
                       <InfoPopover align="right">
                         <div style={{ fontWeight: 700, fontSize: '0.72rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Damage Die</div>
                         <div>{guide?.damageDie}</div>
@@ -1058,7 +1058,7 @@ const CustomAdversaryCreator = forwardRef(({
               {/* Experiences */}
               <div style={sectionStyle}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.35rem' }}>
-                  <label style={{ ...labelStyle, marginBottom: 0, lineHeight: '20px' }}>Experiences</label>
+                  <label style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Experiences</label>
                   {guide?.experiences?.length > 0 && (
                     <InfoPopover>
                       <div style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
