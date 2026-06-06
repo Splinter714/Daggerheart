@@ -150,109 +150,83 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
   )
 
   const renderStandardAttack = () => {
-    const shouldShow = isEditMode || (item.atk !== undefined && item.weapon)
-    if (!shouldShow) return null
+    if (!isEditMode) return null
 
     return (
       <div>
         <FeatureDivider title="Standard Attack" />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {isEditMode ? (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: CARD_SPACE_V,
-                padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
-                border: '1px solid var(--border)',
-                borderRadius: '4px',
-                backgroundColor: 'var(--bg-secondary)',
-              }}
-            >
-              <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'center' }}>
-                <input
-                  type="text"
-                  value={item.weapon || ''}
-                  onChange={(e) => onUpdate && onUpdate(item.id, { weapon: e.target.value })}
-                  placeholder="Standard attack name"
-                  style={{
-                    flex: 1,
-                    padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
-                    border: '1px solid var(--border)',
-                    borderRadius: '4px',
-                    backgroundColor: 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.875rem',
-                  }}
-                />
-                <select
-                  value={item.range || ''}
-                  onChange={(e) => onUpdate && onUpdate(item.id, { range: e.target.value })}
-                  style={{
-                    flex: 1,
-                    padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
-                    border: '1px solid var(--border)',
-                    borderRadius: '4px',
-                    backgroundColor: 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.875rem',
-                    appearance: 'none',
-                    backgroundImage:
-                      "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e\")",
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 0.5rem center',
-                    backgroundSize: '1rem',
-                    paddingRight: '2rem',
-                  }}
-                >
-                  <option value=""></option>
-                  <option value="Melee">Melee</option>
-                  <option value="Very Close">Very Close</option>
-                  <option value="Close">Close</option>
-                  <option value="Far">Far</option>
-                  <option value="Very Far">Very Far</option>
-                </select>
-                <input
-                  type="text"
-                  value={item.damage || ''}
-                  onChange={(e) => onUpdate && onUpdate(item.id, { damage: e.target.value })}
-                  placeholder="Damage (e.g., 1d6+2)"
-                  style={{
-                    flex: 1,
-                    padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
-                    border: '1px solid var(--border)',
-                    borderRadius: '4px',
-                    backgroundColor: 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.875rem',
-                  }}
-                />
-              </div>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: CARD_SPACE_V,
+              padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+              border: '1px solid var(--border)',
+              borderRadius: '4px',
+              backgroundColor: 'var(--bg-secondary)',
+            }}
+          >
+            <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'center' }}>
+              <input
+                type="text"
+                value={item.weapon || ''}
+                onChange={(e) => onUpdate && onUpdate(item.id, { weapon: e.target.value })}
+                placeholder="Standard attack name"
                 style={{
-                  fontWeight: 600,
+                  flex: 1,
+                  padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--bg-primary)',
                   color: 'var(--text-primary)',
-                  fontSize: '0.9rem',
+                  fontSize: '0.875rem',
                 }}
-              >
-                {item.weapon}
-              </span>
-              <div
+              />
+              <select
+                value={item.range || ''}
+                onChange={(e) => onUpdate && onUpdate(item.id, { range: e.target.value })}
                 style={{
-                  fontSize: '0.85rem',
-                  lineHeight: 1.4,
-                  color: 'var(--text-secondary)',
-                  marginLeft: CARD_INDENT,
+                  flex: 1,
+                  padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--bg-primary)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                  appearance: 'none',
+                  backgroundImage:
+                    "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e\")",
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.5rem center',
+                  backgroundSize: '1rem',
+                  paddingRight: '2rem',
                 }}
               >
-                Make an attack against a target within {item.range || 'Melee'} range. On a success, deal{' '}
-                {item.damage || 'damage varies'}.
-              </div>
+                <option value=""></option>
+                <option value="Melee">Melee</option>
+                <option value="Very Close">Very Close</option>
+                <option value="Close">Close</option>
+                <option value="Far">Far</option>
+                <option value="Very Far">Very Far</option>
+              </select>
+              <input
+                type="text"
+                value={item.damage || ''}
+                onChange={(e) => onUpdate && onUpdate(item.id, { damage: e.target.value })}
+                placeholder="Damage (e.g., 1d6+2)"
+                style={{
+                  flex: 1,
+                  padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--bg-primary)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                }}
+              />
             </div>
-          )}
+          </div>
         </div>
       </div>
     )
@@ -260,20 +234,28 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
 
   const renderFeatureCategory = (type, title) => {
     const features = (item.features || []).filter((f) => f.type === type)
-    const hasFeatures = features.length > 0
+    const hasCategoryFeatures = features.length > 0
+    const showAttackRow = type === 'Action' && hasStandardAttack && !isEditMode
 
-    if (!hasFeatures && !isEditMode) return null
+    if (!hasCategoryFeatures && !isEditMode && !showAttackRow) return null
 
     const featuresToShow = isEditMode && features.length === 0 ? [{ type, name: '', description: '' }] : features
-    const isFirstCategory = type === 'Action' && !hasStandardAttack  // Actions is first only if no Standard Attack
+    const isFirstCategory = type === 'Action' && (!hasStandardAttack || !isEditMode)
 
     return (
       <div style={isFirstCategory ? {} : { marginTop: CARD_SPACE_V }}>
         <FeatureDivider title={title} />
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: showAttackRow ? CARD_SPACE_V : undefined }}>
+          {showAttackRow && (
+            <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'baseline', fontSize: '0.9rem' }}>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.weapon}</span>
+              {item.range && <span style={{ color: 'var(--text-secondary)' }}>· {item.range}</span>}
+              {item.damage && <span style={{ color: 'var(--text-secondary)' }}>· {item.damage}</span>}
+            </div>
+          )}
           {isEditMode
             ? featuresToShow.map((feature, featureIndex) => renderFeatureEditor(feature, title.slice(0, -1), type, featureIndex))
-            : renderFeatureList(featuresToShow, `Describe the ${title.toLowerCase()}`)}
+            : (hasCategoryFeatures ? renderFeatureList(featuresToShow, `Describe the ${title.toLowerCase()}`) : null)}
         </div>
       </div>
     )
