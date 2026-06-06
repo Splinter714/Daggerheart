@@ -222,7 +222,7 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
     <div style={sectionStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.3rem' }}>
         <span style={{ ...labelStyle, marginBottom: 0 }}>{label}</span>
-        {!disabled && (
+        <span style={{ visibility: disabled ? 'hidden' : 'visible' }}>
           <InfoPopover minWidth={320}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', whiteSpace: 'nowrap' }}>
               <thead>
@@ -263,7 +263,7 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
               </tbody>
             </table>
           </InfoPopover>
-        )}
+        </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         {stepBtn(-1)}
