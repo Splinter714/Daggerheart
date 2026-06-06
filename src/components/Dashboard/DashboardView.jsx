@@ -20,6 +20,7 @@ import { useBrowserOverlay } from './hooks/useBrowserOverlay'
 import { useSmoothScroll } from './hooks/useSmoothScroll'
 import { useEntityGroups } from './hooks/useEntityGroups'
 import { useAdversaryAddition } from './hooks/useAdversaryAddition'
+import NavRail, { RAIL_SIZE } from './NavRail'
 import './DashboardView.css'
 
 // Main Dashboard View Component
@@ -309,10 +310,12 @@ const DashboardContent = () => {
 
   // Remove auto-open encounter builder logic - replaced with empty state button
 
-  return (
-    <div 
+    const navActiveId = adversaryCreatorOpen ? 'create' : browserOpenAtPosition !== null ? 'browse' : null
+
+    return (
+    <div
       className="app dashboard-root"
-      style={{ '--dashboard-gap': `${DASHBOARD_GAP}px` }}
+      style={{ '--dashboard-gap': `${DASHBOARD_GAP}px`, paddingRight: `${RAIL_SIZE}px` }}
       onClick={(e) => {
         // Clear selection when clicking on app background
         if (e.target === e.currentTarget) {
@@ -460,6 +463,29 @@ const DashboardContent = () => {
 
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
+
+      <NavRail
+        placement="right"
+        activeId={navActiveId}
+        onAction={(id) => {
+          if (id === 'browse') {
+            if (browserOpenAtPosition !== null) {
+              handleCloseBrowser()
+            } else {
+              setAdversaryCreatorOpen(false)
+              handleOpenBrowser(entityGroups.length)
+            }
+          } else if (id === 'create') {
+            handleCloseBrowser()
+            setAdversaryCreatorOpen(v => !v)
+          } else if (id === 'info') {
+            handleCloseBrowser()
+            setAdversaryCreatorOpen(false)
+            setBrowserActiveTab('info')
+            handleOpenBrowser(entityGroups.length)
+          }
+        }}
+      />
     </div>
   )
 }

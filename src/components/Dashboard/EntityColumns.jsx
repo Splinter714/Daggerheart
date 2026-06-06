@@ -1,51 +1,7 @@
 import React from 'react'
-import { Plus } from 'lucide-react'
 import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP, TAB_HEIGHT } from './constants'
-
-const AddColumn = ({ columnWidth, onOpenBrowser }) => (
-  <div
-    onClick={onOpenBrowser}
-    style={{
-      width: `${columnWidth}px`,
-      flexShrink: 0,
-      flexGrow: 0,
-      flex: 'none',
-      marginLeft: 'auto',
-      height: '100%',
-      padding: `${DASHBOARD_GAP}px 0`,
-      boxSizing: 'border-box',
-      scrollSnapAlign: 'start',
-      display: 'flex',
-      alignItems: 'stretch',
-    }}
-  >
-    <div
-      style={{
-        flex: 1,
-        border: '2px dashed var(--border)',
-        borderRadius: '8px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.75rem',
-        cursor: 'pointer',
-        opacity: 0.4,
-        transition: 'opacity 0.2s ease',
-        userSelect: 'none',
-      }}
-      onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.7' }}
-      onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.4' }}
-    >
-      <Plus size={28} strokeWidth={1.5} color='var(--text-primary)' />
-      <span style={{ color: 'var(--text-primary)', fontSize: '0.875rem', fontWeight: '500' }}>
-        Add adversaries
-      </span>
-    </div>
-  </div>
-)
 
 const EntityColumns = ({
   entityGroups,
@@ -77,9 +33,7 @@ const EntityColumns = ({
   return (
     <div ref={scrollContainerRef} className="dashboard-scroll-container" onScroll={onScroll}>
       {entityGroups.length === 0
-        ? browserOpenAtPosition === null
-          ? <AddColumn columnWidth={columnWidth} onOpenBrowser={onOpenBrowser} />
-          : null
+        ? null
         : (() => {
             const items = []
 
@@ -415,11 +369,6 @@ const EntityColumns = ({
               )
             }
 
-            if (browserOpenAtPosition === null) {
-              items.push(
-                <AddColumn key="add-column" columnWidth={columnWidth} onOpenBrowser={onOpenBrowser} />
-              )
-            }
             return items
           })()}
       {browserOpenAtPosition !== null && (
