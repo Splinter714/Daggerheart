@@ -80,6 +80,8 @@ const DashboardContent = () => {
 
   useMinionSync(adversaryGroups, pcCount, createAdversariesBulk, deleteAdversary)
 
+  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, countdowns, sortBy, sortDir, groupBy)
+
   // Count group→group boundaries so useColumnLayout can shrink columnWidth to compensate
   // for the extra DASHBOARD_GAP margin added between adjacent group sections.
   const numGroupBoundaries = useMemo(() => {
@@ -102,8 +104,6 @@ const DashboardContent = () => {
   })
 
   const smoothScrollTo = useSmoothScroll(scrollContainerRef)
-
-  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, countdowns, sortBy, sortDir, groupBy)
 
   const openRightColumn = useCallback((mode) => {
     setRightColumnMode(mode)
