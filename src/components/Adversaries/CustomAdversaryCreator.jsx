@@ -1067,28 +1067,34 @@ const CustomAdversaryCreator = forwardRef(({
               <div style={sectionStyle}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.35rem' }}>
                   <label style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Experiences</label>
-                  {guide?.experiences?.length > 0 && (
-                    <InfoPopover>
-                      <div style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
-                        Suggested — Tier {formData.tier} (+{Math.min(formData.tier + 1, 3)})
+                  <InfoPopover>
+                    {guide?.experiences?.length > 0 ? (
+                      <>
+                        <div style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
+                          Suggested — Tier {formData.tier} (+{Math.min(formData.tier + 1, 3)})
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                          {guide.experiences.map((exp, i) => (
+                            <button key={i} type="button"
+                              onClick={() => {
+                                const bonus = Math.min(formData.tier + 1, 3)
+                                setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: exp, modifier: bonus }] }))
+                              }}
+                              style={{
+                                padding: '0.2rem 0.5rem',
+                                background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+                                borderRadius: '4px', fontSize: '0.75rem',
+                                color: 'var(--text-primary)', cursor: 'pointer',
+                              }}>{exp}</button>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        Experiences represent things this adversary is particularly skilled at. Each experience has a name and a bonus modifier (+1 to +3) added to relevant rolls.
                       </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
-                        {guide.experiences.map((exp, i) => (
-                          <button key={i} type="button"
-                            onClick={() => {
-                              const bonus = Math.min(formData.tier + 1, 3)
-                              setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: exp, modifier: bonus }] }))
-                            }}
-                            style={{
-                              padding: '0.2rem 0.5rem',
-                              background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-                              borderRadius: '4px', fontSize: '0.75rem',
-                              color: 'var(--text-primary)', cursor: 'pointer',
-                            }}>{exp}</button>
-                        ))}
-                      </div>
-                    </InfoPopover>
-                  )}
+                    )}
+                  </InfoPopover>
                   <button type="button" onClick={() => {
                     const bonus = Math.min(formData.tier + 1, 3)
                     setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: '', modifier: bonus }] }))
