@@ -75,24 +75,36 @@ const GroupLabelOverlay = ({ entityGroups, columnWidth, effectiveGap, scrollCont
     setLabels(next)
   }, [entityGroups, columnWidth, effectiveGap, scrollContainerRef])
 
-  // Recompute on scroll-end (debounced) so the text doesn't move while scrolling
+  // Update ONLY after scroll fully settles (including snap animation).
+  // scrollend fires after snap completes — that's the primary trigger.
+  // A long-debounce fallback covers browsers that don't yet fire scrollend.
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container) return
 
-    compute() // initial
+    compute() // initial render
 
-    const onScroll = () => {
+    const supportsScrollEnd = 'onscrollend' in container
+
+    // scrollend: snap has finished, safe to update
+    const onScrollEnd = () => {
       if (timerRef.current) clearTimeout(timerRef.current)
-      timerRef.current = setTimeout(compute, 120)
+      compute()
     }
 
-    // scrollend is widely supported; fall back to the debounce above
-    container.addEventListener('scroll', onScroll, { passive: true })
-    container.addEventListener('scrollend', compute)
+    // Fallback for browsers without scrollend: long debounce so we wait past snap
+    const onScroll = () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(compute, 500)
+    }
+
+    container.addEventListener('scrollend', onScrollEnd)
+    if (!supportsScrollEnd) {
+      container.addEventListener('scroll', onScroll, { passive: true })
+    }
     return () => {
-      container.removeEventListener('scroll', onScroll)
-      container.removeEventListener('scrollend', compute)
+      container.removeEventListener('scrollend', onScrollEnd)
+      if (!supportsScrollEnd) container.removeEventListener('scroll', onScroll)
       if (timerRef.current) clearTimeout(timerRef.current)
     }
   }, [compute, scrollContainerRef])
