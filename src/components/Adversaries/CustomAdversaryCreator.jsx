@@ -521,7 +521,7 @@ const CustomAdversaryCreator = forwardRef(({
       hpMax: defaults.hpMax,
       stressMax: defaults.stressMax,
       atk: defaults.atk,
-      weapon: '', range: defaults.range, damage: defaults.damage,
+      weapon: 'Attack', range: defaults.range, damage: defaults.damage,
       experience: [], features: [],
     }
   })
@@ -607,7 +607,7 @@ const CustomAdversaryCreator = forwardRef(({
         difficulty: defaults.difficulty,
         thresholds: defaults.thresholds,
         hpMax: defaults.hpMax, stressMax: defaults.stressMax,
-        atk: defaults.atk, weapon: '', range: defaults.range, damage: defaults.damage,
+        atk: defaults.atk, weapon: 'Attack', range: defaults.range, damage: defaults.damage,
         experience: [], features: [],
       })
       setStatsPulledFromExisting(false)
@@ -733,7 +733,7 @@ const CustomAdversaryCreator = forwardRef(({
           description: '', motives: '',
           difficulty: defaults.difficulty, thresholds: defaults.thresholds,
           hpMax: defaults.hpMax, stressMax: defaults.stressMax,
-          atk: defaults.atk, weapon: '', range: defaults.range, damage: defaults.damage,
+          atk: defaults.atk, weapon: 'Attack', range: defaults.range, damage: defaults.damage,
           experience: [], features: [],
         })
         setStatsPulledFromExisting(false)
@@ -1228,7 +1228,7 @@ const CustomAdversaryCreator = forwardRef(({
             value={formData.name}
             onChange={e => handleNameChange(e.target.value)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-            placeholder="Adversary name"
+            placeholder="Name"
             style={{
               width: '100%', padding: '0.75rem',
               border: '1px solid var(--border)', borderRadius: '8px',
