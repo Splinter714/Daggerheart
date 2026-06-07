@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useEffect, useRef, useCallback } from 'react'
 import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
 
-// Collect consecutive adversary entries with the same groupName into sections.
+// Collect consecutive same-groupName adversary entries into sections.
 function buildSections(entityGroups) {
   const sections = []
   let i = 0
@@ -12,7 +12,9 @@ function buildSections(entityGroups) {
     if (g.groupName && g.type === 'adversary') {
       const entries = [g]
       let j = i + 1
-      while (j < entityGroups.length && entityGroups[j].groupName === g.groupName && entityGroups[j].type === 'adversary') {
+      while (j < entityGroups.length &&
+             entityGroups[j].groupName === g.groupName &&
+             entityGroups[j].type === 'adversary') {
         entries.push(entityGroups[j])
         j++
       }
@@ -24,6 +26,49 @@ function buildSections(entityGroups) {
     }
   }
   return sections
+}
+
+// How many grouped→grouped transitions (double gaps) are there up to and INCLUDING
+// the section at `sectionIndex`. These precede the first card of that section.
+function extraGapsUpToSection(sectionIndex, sections) {
+  let count = 0
+  for (let i = 1; i <= sectionIndex; i++) {
+    if (sections[i - 1]?.type === 'grouped' && sections[i]?.type === 'grouped') count++
+  }
+  return count
+}
+
+// Pixel scroll-left of a card at flatIndex, accounting for any double-gap boundaries.
+// Works by rebuilding sections from the provided groups (used after state updates).
+function cardScrollPosition(flatIndex, groups, columnWidth) {
+  // Rebuild sections inline so we don't need to import buildSections into the caller
+  const sections = []
+  let i = 0
+  while (i < groups.length) {
+    const g = groups[i]
+    if (g.groupName && g.type === 'adversary') {
+      const start = i
+      let j = i + 1
+      while (j < groups.length && groups[j].groupName === g.groupName && groups[j].type === 'adversary') j++
+      sections.push({ type: 'grouped', startFlatIndex: start, endFlatIndex: j - 1 })
+      i = j
+    } else {
+      sections.push({ type: 'solo', flatIndex: i })
+      i++
+    }
+  }
+  let sectionIdx = 0
+  for (let k = 0; k < sections.length; k++) {
+    const s = sections[k]
+    const lo = s.type === 'grouped' ? s.startFlatIndex : s.flatIndex
+    const hi = s.type === 'grouped' ? s.endFlatIndex : s.flatIndex
+    if (flatIndex >= lo && flatIndex <= hi) { sectionIdx = k; break }
+  }
+  let extra = 0
+  for (let k = 1; k <= sectionIdx; k++) {
+    if (sections[k - 1]?.type === 'grouped' && sections[k]?.type === 'grouped') extra++
+  }
+  return DASHBOARD_GAP + flatIndex * (columnWidth + DASHBOARD_GAP) + extra * DASHBOARD_GAP
 }
 
 const EntityColumns = ({
@@ -55,8 +100,52 @@ const EntityColumns = ({
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
 
-  // Render a single adversary/countdown card Panel
-  const renderCardPanel = (group, flatIndex, cssClass, insideGroup = false) => {
+  // Refs to label DOM nodes; updated by scroll listener to keep labels visible.
+  const labelInfoRef = useRef({})
+
+  const updateLabelPositions = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    const viewportLeft = container.scrollLeft
+    const viewportRight = viewportLeft + container.clientWidth
+
+    Object.values(labelInfoRef.current).forEach(({ el, startFlatIndex, count, extraGapsBefore }) => {
+      if (!el) return
+      const groupStart = DASHBOARD_GAP +
+        startFlatIndex * (columnWidth + DASHBOARD_GAP) +
+        extraGapsBefore * DASHBOARD_GAP
+      const groupWidth = count * columnWidth + (count - 1) * DASHBOARD_GAP
+      const groupEnd = groupStart + groupWidth
+
+      const visibleLeft = Math.max(groupStart, viewportLeft) - groupStart
+      const visibleRight = Math.min(groupEnd, viewportRight) - groupStart
+      const centerX = (visibleLeft + visibleRight) / 2
+
+      const halfLabel = el.offsetWidth / 2
+      const clamped = Math.max(halfLabel, Math.min(groupWidth - halfLabel, centerX))
+      el.style.left = `${clamped}px`
+    })
+  }, [columnWidth, scrollContainerRef])
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    updateLabelPositions()
+    container.addEventListener('scroll', updateLabelPositions, { passive: true })
+    return () => container.removeEventListener('scroll', updateLabelPositions)
+  }, [updateLabelPositions, entityGroups])
+
+  const registerLabel = (key, startFlatIndex, count, extraGapsBefore) => el => {
+    if (el) {
+      labelInfoRef.current[key] = { el, startFlatIndex, count, extraGapsBefore }
+    } else {
+      delete labelInfoRef.current[key]
+    }
+  }
+
+  // ─── Card panel renderer ────────────────────────────────────────────────────
+
+  const renderCardPanel = (group, flatIndex, cssClass) => {
     const isSpacerPosition =
       !isGrouped &&
       removingCardSpacer &&
@@ -73,8 +162,7 @@ const EntityColumns = ({
             paddingRight: '0',
             paddingTop: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
             paddingBottom: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
-            scrollSnapAlign: 'none',
-            overflow: 'hidden',
+            scrollSnapAlign: 'none', overflow: 'hidden',
             display: 'flex', flexDirection: 'column', alignItems: 'stretch',
             height: '100%', opacity: 0,
             transition: 'width 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease',
@@ -96,8 +184,7 @@ const EntityColumns = ({
           width: `${columnWidth}px`,
           flexShrink: 0, flexGrow: 0, flex: 'none',
           paddingRight: '0',
-          // Cards inside a group wrapper get no top padding — header area provides it
-          paddingTop: insideGroup ? '0' : `${DASHBOARD_GAP}px`,
+          paddingTop: `${DASHBOARD_GAP}px`,
           paddingBottom: `${DASHBOARD_GAP}px`,
           scrollSnapAlign: 'start',
           overflow: group.type === 'adversary' ? 'visible' : 'hidden',
@@ -128,151 +215,143 @@ const EntityColumns = ({
           isStockAdversary={isEditing
             ? (!group.template?.source || group.template?.source !== 'Homebrew')
             : false}
-          onApplyDamage={
-            group.type === 'adversary'
-              ? (id, damage) => {
-                  const inst = group.instances.find(i => i.id === id)
-                  if (inst) updateAdversary(id, { hp: Math.min(group.template.hpMax || 1, (inst.hp || 0) + damage) })
-                }
-              : undefined
-          }
-          onApplyHealing={
-            group.type === 'adversary'
-              ? (id, healing) => {
-                  const inst = group.instances.find(i => i.id === id)
-                  if (inst) updateAdversary(id, { hp: Math.max(0, (inst.hp || 0) - healing) })
-                }
-              : undefined
-          }
-          onApplyStressChange={
-            group.type === 'adversary'
-              ? (id, stress) => {
-                  const inst = group.instances.find(i => i.id === id)
-                  if (inst) updateAdversary(id, {
-                    stress: Math.max(0, Math.min(group.template.stressMax || 6, (inst.stress || 0) + stress)),
-                  })
-                }
-              : undefined
-          }
+          onApplyDamage={group.type === 'adversary'
+            ? (id, damage) => {
+                const inst = group.instances.find(i => i.id === id)
+                if (inst) updateAdversary(id, { hp: Math.min(group.template.hpMax || 1, (inst.hp || 0) + damage) })
+              }
+            : undefined}
+          onApplyHealing={group.type === 'adversary'
+            ? (id, healing) => {
+                const inst = group.instances.find(i => i.id === id)
+                if (inst) updateAdversary(id, { hp: Math.max(0, (inst.hp || 0) - healing) })
+              }
+            : undefined}
+          onApplyStressChange={group.type === 'adversary'
+            ? (id, stress) => {
+                const inst = group.instances.find(i => i.id === id)
+                if (inst) updateAdversary(id, {
+                  stress: Math.max(0, Math.min(group.template.stressMax || 6, (inst.stress || 0) + stress)),
+                })
+              }
+            : undefined}
           onUpdate={
             group.type === 'adversary' ? updateAdversary
               : group.type === 'environment' ? updateEnvironment
-              : updateCountdown
-          }
+              : updateCountdown}
           adversaries={adversaries}
           showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary'}
           onEdit={group.type === 'adversary' ? itemId => handleEditAdversary(itemId) : undefined}
-          onAddInstance={
-            group.type === 'adversary'
-              ? item => {
-                  const isMinion = item.type === 'Minion'
-                  const instancesToAdd = isMinion ? pcCount : 1
-                  if (isMinion && instancesToAdd > 1) {
-                    createAdversariesBulk(Array(instancesToAdd).fill(null).map(() => ({ ...item })))
-                  } else {
-                    createAdversary(item)
-                  }
-                  setTimeout(() => {
-                    requestAnimationFrame(() => requestAnimationFrame(() => {
-                      if (!scrollContainerRef.current) return
-                      const container = scrollContainerRef.current
-                      const currentScroll = container.scrollLeft
-                      const containerWidth = container.clientWidth
-                      const effectiveWidth = browserOpenAtPosition !== null
-                        ? containerWidth - columnWidth - DASHBOARD_GAP
-                        : containerWidth
-                      const updatedGroups = getEntityGroups()
-                      const groupIndex = updatedGroups.findIndex(
-                        g => g.baseName === group.baseName && g.type === 'adversary')
-                      if (groupIndex >= 0) {
-                        const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
-                        const cardEnd = cardPosition + columnWidth
-                        const margin = 10
-                        const isVisible = cardPosition >= currentScroll - margin &&
-                          cardEnd <= currentScroll + effectiveWidth + margin
-                        if (!isVisible) {
-                          let targetScroll
-                          if (cardEnd > currentScroll + effectiveWidth + margin) {
-                            const visibleColumns = Math.round((containerWidth - DASHBOARD_GAP) / (columnWidth + DASHBOARD_GAP))
-                            targetScroll = (groupIndex - visibleColumns + 2) * (columnWidth + DASHBOARD_GAP)
-                          } else {
-                            targetScroll = groupIndex * (columnWidth + DASHBOARD_GAP)
-                          }
-                          smoothScrollTo(Math.max(0, targetScroll), 500)
-                        }
-                      }
-                    }))
-                  }, 50)
+          onAddInstance={group.type === 'adversary'
+            ? item => {
+                const isMinion = item.type === 'Minion'
+                const instancesToAdd = isMinion ? pcCount : 1
+                if (isMinion && instancesToAdd > 1) {
+                  createAdversariesBulk(Array(instancesToAdd).fill(null).map(() => ({ ...item })))
+                } else {
+                  createAdversary(item)
                 }
-              : undefined
-          }
-          onRemoveInstance={
-            group.type === 'adversary'
-              ? () => {
-                  const isMinion = group.template?.type === 'Minion'
-                  const instancesToRemove = isMinion ? pcCount : 1
-                  const instances = [...group.instances]
-                    .sort((a, b) => (b.duplicateNumber || 1) - (a.duplicateNumber || 1))
-                  if (instances.length === 0) return
-                  const isLastInstance = Math.max(0, instances.length - instancesToRemove) === 0
-                  const instancesToDelete = instances.slice(0, instancesToRemove)
-
-                  if (isLastInstance && !isGrouped) {
-                    const groupIndex = entityGroups.findIndex(
+                setTimeout(() => {
+                  requestAnimationFrame(() => requestAnimationFrame(() => {
+                    if (!scrollContainerRef.current) return
+                    const container = scrollContainerRef.current
+                    const currentScroll = container.scrollLeft
+                    const containerWidth = container.clientWidth
+                    const effectiveWidth = browserOpenAtPosition !== null
+                      ? containerWidth - columnWidth - DASHBOARD_GAP
+                      : containerWidth
+                    const updatedGroups = getEntityGroups()
+                    const groupIndex = updatedGroups.findIndex(
                       g => g.baseName === group.baseName && g.type === 'adversary')
-                    const isLeftmostColumn = groupIndex === 0
-                    let wasAtMaxScroll = false
-                    if (scrollContainerRef.current) {
-                      const c = scrollContainerRef.current
-                      wasAtMaxScroll = Math.abs(c.scrollLeft - (c.scrollWidth - c.clientWidth)) < 1
+                    if (groupIndex >= 0) {
+                      const cardPosition = cardScrollPosition(groupIndex, updatedGroups, columnWidth)
+                      const cardEnd = cardPosition + columnWidth
+                      const margin = 10
+                      const isVisible = cardPosition >= currentScroll - margin &&
+                        cardEnd <= currentScroll + effectiveWidth + margin
+                      if (!isVisible) {
+                        let targetScroll
+                        if (cardEnd > currentScroll + effectiveWidth + margin) {
+                          const visibleColumns = Math.round((containerWidth - DASHBOARD_GAP) / (columnWidth + DASHBOARD_GAP))
+                          const prevIdx = Math.max(0, groupIndex - visibleColumns + 2)
+                          targetScroll = cardScrollPosition(prevIdx, updatedGroups, columnWidth) - DASHBOARD_GAP
+                        } else {
+                          targetScroll = cardScrollPosition(groupIndex, updatedGroups, columnWidth) - DASHBOARD_GAP
+                        }
+                        smoothScrollTo(Math.max(0, targetScroll), 500)
+                      }
                     }
-                    setRemovingCardSpacer({ baseName: group.baseName, groupIndex })
-                    setSpacerShrinking(false)
-                    if (isLeftmostColumn && scrollContainerRef.current) {
-                      scrollContainerRef.current.style.scrollSnapType = 'none'
-                    }
+                  }))
+                }, 50)
+              }
+            : undefined}
+          onRemoveInstance={group.type === 'adversary'
+            ? () => {
+                const isMinion = group.template?.type === 'Minion'
+                const instancesToRemove = isMinion ? pcCount : 1
+                const instances = [...group.instances]
+                  .sort((a, b) => (b.duplicateNumber || 1) - (a.duplicateNumber || 1))
+                if (instances.length === 0) return
+                const isLastInstance = Math.max(0, instances.length - instancesToRemove) === 0
+                const instancesToDelete = instances.slice(0, instancesToRemove)
+
+                if (isLastInstance && !isGrouped) {
+                  const groupIndex = entityGroups.findIndex(
+                    g => g.baseName === group.baseName && g.type === 'adversary')
+                  const isLeftmostColumn = groupIndex === 0
+                  let wasAtMaxScroll = false
+                  if (scrollContainerRef.current) {
+                    const c = scrollContainerRef.current
+                    wasAtMaxScroll = Math.abs(c.scrollLeft - (c.scrollWidth - c.clientWidth)) < 1
+                  }
+                  setRemovingCardSpacer({ baseName: group.baseName, groupIndex })
+                  setSpacerShrinking(false)
+                  if (isLeftmostColumn && scrollContainerRef.current) {
+                    scrollContainerRef.current.style.scrollSnapType = 'none'
+                  }
+                  requestAnimationFrame(() => requestAnimationFrame(() => {
+                    if (scrollContainerRef.current) scrollContainerRef.current.offsetHeight
+                    instancesToDelete.forEach(inst => deleteAdversary(inst.id))
                     requestAnimationFrame(() => requestAnimationFrame(() => {
                       if (scrollContainerRef.current) scrollContainerRef.current.offsetHeight
-                      instancesToDelete.forEach(inst => deleteAdversary(inst.id))
-                      requestAnimationFrame(() => requestAnimationFrame(() => {
-                        if (scrollContainerRef.current) scrollContainerRef.current.offsetHeight
-                        setTimeout(() => {
-                          setSpacerShrinking(true)
-                          if (wasAtMaxScroll && scrollContainerRef.current) {
-                            const startTime = performance.now()
-                            const duration = 300
-                            const tick = () => {
-                              if (!scrollContainerRef.current) return
-                              scrollContainerRef.current.scrollLeft =
-                                scrollContainerRef.current.scrollWidth - scrollContainerRef.current.clientWidth
-                              if (performance.now() - startTime < duration) requestAnimationFrame(tick)
-                            }
-                            requestAnimationFrame(tick)
+                      setTimeout(() => {
+                        setSpacerShrinking(true)
+                        if (wasAtMaxScroll && scrollContainerRef.current) {
+                          const startTime = performance.now()
+                          const duration = 300
+                          const tick = () => {
+                            if (!scrollContainerRef.current) return
+                            scrollContainerRef.current.scrollLeft =
+                              scrollContainerRef.current.scrollWidth - scrollContainerRef.current.clientWidth
+                            if (performance.now() - startTime < duration) requestAnimationFrame(tick)
                           }
-                          setTimeout(() => {
-                            setRemovingCardSpacer(null)
-                            setSpacerShrinking(false)
-                            if (isLeftmostColumn && scrollContainerRef.current) {
-                              scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
-                            }
-                            if (wasAtMaxScroll && scrollContainerRef.current) {
-                              scrollContainerRef.current.scrollLeft =
-                                scrollContainerRef.current.scrollWidth - scrollContainerRef.current.clientWidth
-                            }
-                          }, 300)
-                        }, 50)
-                      }))
+                          requestAnimationFrame(tick)
+                        }
+                        setTimeout(() => {
+                          setRemovingCardSpacer(null)
+                          setSpacerShrinking(false)
+                          if (isLeftmostColumn && scrollContainerRef.current) {
+                            scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+                          }
+                          if (wasAtMaxScroll && scrollContainerRef.current) {
+                            scrollContainerRef.current.scrollLeft =
+                              scrollContainerRef.current.scrollWidth - scrollContainerRef.current.clientWidth
+                          }
+                        }, 300)
+                      }, 50)
                     }))
-                  } else {
-                    instancesToDelete.forEach(inst => deleteAdversary(inst.id))
-                  }
+                  }))
+                } else {
+                  instancesToDelete.forEach(inst => deleteAdversary(inst.id))
                 }
-              : undefined
-          }
+              }
+            : undefined}
         />
       </Panel>
     )
   }
+
+  // ─── Build render items ─────────────────────────────────────────────────────
 
   const sections = buildSections(entityGroups)
   const items = []
@@ -280,9 +359,13 @@ const EntityColumns = ({
   sections.forEach((section, sectionIndex) => {
     const isFirstSection = sectionIndex === 0
     const isLastSection = sectionIndex === sections.length - 1
+    const prevIsGrouped = sectionIndex > 0 && sections[sectionIndex - 1].type === 'grouped'
+    const needsDoubleGap = section.type === 'grouped' && prevIsGrouped
+    const extraGapsBefore = extraGapsUpToSection(sectionIndex, sections)
 
     if (section.type === 'grouped') {
       const { groupName, entries, startFlatIndex } = section
+      const sectionKey = `group-section-${groupName}-${startFlatIndex}`
 
       const cards = entries.map((group, i) => {
         const isFirst = isFirstSection && i === 0
@@ -290,12 +373,12 @@ const EntityColumns = ({
         const cssClass = isFirst ? 'dashboard-column dashboard-column--first'
           : isLast ? 'dashboard-column dashboard-column--last'
           : 'dashboard-column'
-        return renderCardPanel(group, startFlatIndex + i, cssClass, true)
+        return renderCardPanel(group, startFlatIndex + i, cssClass)
       })
 
       items.push(
         <div
-          key={`group-section-${groupName}-${startFlatIndex}`}
+          key={sectionKey}
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -303,14 +386,18 @@ const EntityColumns = ({
             flexGrow: 0,
             flex: 'none',
             position: 'relative',
+            // Double gap: add a DASHBOARD_GAP margin so the visual gap between
+            // adjacent group sections is 2×DASHBOARD_GAP while the scroll-snap
+            // formula accounts for this via cardScrollPosition().
+            marginLeft: needsDoubleGap ? DASHBOARD_GAP : 0,
           }}
         >
-          {/* Vertical separator line — in the gap to the left, connects top-to-bottom.
-              Skipped for the very first section (nothing to separate from). */}
-          {!isFirstSection && (
+          {/* Vertical separator — 1px line centered in the double gap.
+              left: -DASHBOARD_GAP puts it at the midpoint of the 2×gap. */}
+          {needsDoubleGap && (
             <div style={{
               position: 'absolute',
-              left: -(DASHBOARD_GAP / 2) - 0.5,
+              left: -DASHBOARD_GAP - 0.5,
               top: 0,
               bottom: 0,
               width: 1,
@@ -319,29 +406,7 @@ const EntityColumns = ({
             }} />
           )}
 
-          {/* Horizontal header — group label centered, bottom border connects to separator */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingTop: DASHBOARD_GAP,
-            paddingBottom: 8,
-            borderBottom: '1px solid var(--border)',
-            marginBottom: 0,
-          }}>
-            <span style={{
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: 'var(--text-primary)',
-              userSelect: 'none',
-            }}>
-              {groupName}
-            </span>
-          </div>
-
-          {/* Cards row — gap matches scroll container so flat-index math stays correct */}
+          {/* Cards row */}
           <div style={{
             display: 'flex',
             flexDirection: 'row',
@@ -350,6 +415,35 @@ const EntityColumns = ({
           }}>
             {cards}
           </div>
+
+          {/* Group header — at the bottom, label repositions on scroll to stay visible */}
+          <div style={{
+            position: 'relative',
+            borderTop: '1px solid var(--border)',
+            height: 32,
+            flexShrink: 0,
+          }}>
+            <span
+              ref={registerLabel(sectionKey, startFlatIndex, entries.length, extraGapsBefore)}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                backgroundColor: 'var(--bg-primary)',
+                padding: '0 10px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: 'var(--text-primary)',
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                userSelect: 'none',
+              }}
+            >
+              {groupName}
+            </span>
+          </div>
         </div>
       )
     } else {
@@ -357,7 +451,7 @@ const EntityColumns = ({
       const cssClass = isFirstSection ? 'dashboard-column dashboard-column--first'
         : isLastSection ? 'dashboard-column dashboard-column--last'
         : 'dashboard-column'
-      items.push(renderCardPanel(group, flatIndex, cssClass, false))
+      items.push(renderCardPanel(group, flatIndex, cssClass))
     }
   })
 
@@ -375,8 +469,7 @@ const EntityColumns = ({
           paddingRight: '0',
           paddingTop: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
           paddingBottom: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
-          scrollSnapAlign: 'none',
-          overflow: 'hidden',
+          scrollSnapAlign: 'none', overflow: 'hidden',
           display: 'flex', flexDirection: 'column', alignItems: 'stretch',
           height: '100%', opacity: 0,
           transition: 'width 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease',
@@ -389,11 +482,7 @@ const EntityColumns = ({
     <div ref={scrollContainerRef} className="dashboard-scroll-container" onScroll={onScroll}>
       {items.length > 0 ? items : null}
       {browserOpenAtPosition !== null && (
-        <div style={{
-          width: `${columnWidth}px`,
-          flexShrink: 0, flexGrow: 0, flex: 'none',
-          height: '100%',
-        }} />
+        <div style={{ width: `${columnWidth}px`, flexShrink: 0, flexGrow: 0, flex: 'none', height: '100%' }} />
       )}
     </div>
   )
