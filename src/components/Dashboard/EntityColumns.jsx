@@ -64,10 +64,11 @@ const EntityColumns = ({
   onOpenBrowser,
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
+  const edgePadding = isGrouped ? DASHBOARD_GAP * 2 : DASHBOARD_GAP
 
   // ─── Card panel renderer ────────────────────────────────────────────────────
 
-  const renderCardPanel = (group, flatIndex, cssClass) => {
+  const renderCardPanel = (group, flatIndex, cssClass, isFirstInGroup = false, isLastInGroup = false) => {
     const isSpacerPosition =
       !isGrouped &&
       removingCardSpacer &&
@@ -112,6 +113,8 @@ const EntityColumns = ({
           overflow: isGrouped ? 'auto' : group.type === 'adversary' ? 'visible' : 'hidden',
           display: 'flex', flexDirection: 'column', alignItems: 'stretch',
           height: isGrouped ? '100%' : 'auto',
+          scrollMarginLeft: isGrouped && isFirstInGroup ? DASHBOARD_GAP : undefined,
+          scrollMarginRight: isGrouped && isLastInGroup ? DASHBOARD_GAP : undefined,
           opacity: newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
           transition: 'opacity 0.2s ease',
         }}
@@ -294,7 +297,7 @@ const EntityColumns = ({
         const cssClass = isFirst ? 'dashboard-column dashboard-column--first'
           : isLast ? 'dashboard-column dashboard-column--last'
           : 'dashboard-column'
-        return renderCardPanel(group, startFlatIndex + i, cssClass)
+        return renderCardPanel(group, startFlatIndex + i, cssClass, i === 0, i === entries.length - 1)
       })
 
       items.push(
@@ -357,7 +360,7 @@ const EntityColumns = ({
           <div style={{
             display: 'flex',
             flexDirection: 'row',
-            gap: `${effectiveGap}px`,
+            gap: `${DASHBOARD_GAP}px`,
             alignItems: 'flex-start',
             height: `calc(100% - ${GROUP_LABEL_BAR_HEIGHT}px - ${DASHBOARD_GAP * 2}px)`,
           }}>
@@ -403,8 +406,11 @@ const EntityColumns = ({
       className="dashboard-scroll-container"
       onScroll={onScroll}
       style={{
-        // Uniform gap between all direct children (group wrappers + solo panels)
         gap: `${effectiveGap}px`,
+        paddingLeft: `${edgePadding}px`,
+        paddingRight: `${edgePadding}px`,
+        scrollPaddingLeft: `${DASHBOARD_GAP}px`,
+        scrollPaddingRight: `${DASHBOARD_GAP}px`,
       }}
     >
       {items.length > 0 ? items : null}
