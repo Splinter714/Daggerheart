@@ -60,8 +60,20 @@ function getSortValue(group, sortBy) {
   }
 }
 
-export function applySort(adversaryGroups, sortBy, sortDir) {
+export function applySort(adversaryGroups, sortBy, sortDir, groupBy = 'none') {
   return [...adversaryGroups].sort((a, b) => {
+    // When grouping is active, sort by the group field first so same-group
+    // entries are always adjacent — sortBy acts as the secondary (within-group) key.
+    if (groupBy !== 'none') {
+      const groupField = groupBy === 'tier' ? 'tier' : 'type'
+      if (groupField !== sortBy) {
+        const ag = getSortValue(a, groupField)
+        const bg = getSortValue(b, groupField)
+        const gcmp = typeof ag === 'string' ? ag.localeCompare(bg) : ag - bg
+        if (gcmp !== 0) return gcmp
+      }
+    }
+    // Primary (or secondary when grouping) sort
     const av = getSortValue(a, sortBy)
     const bv = getSortValue(b, sortBy)
     let cmp

@@ -76,7 +76,11 @@ const EntityColumns = ({
       const visibleRight = Math.min(groupEnd, viewportRight) - groupStart
       const centerX = (visibleLeft + visibleRight) / 2
 
-      el.style.left = `${centerX}px`
+      // Clamp so the label never bleeds outside the group wrapper
+      const halfLabel = el.offsetWidth / 2
+      const clamped = Math.max(halfLabel, Math.min(groupWidth - halfLabel, centerX))
+
+      el.style.left = `${clamped}px`
       // No CSS transition — immediate repositioning as user scrolls
     })
   }, [columnWidth, scrollContainerRef])
@@ -334,14 +338,32 @@ const EntityColumns = ({
             flex: 'none',
           }}
         >
-          {/* Label area: line + centered label. Label position set by scroll handler. */}
-          <div style={{ position: 'relative', height: DASHBOARD_GAP + 20, flexShrink: 0 }}>
-            {/* Horizontal dividing line spanning full group width */}
+          {/* Label area: bracket line + centered label. Label position set by scroll handler. */}
+          <div style={{ position: 'relative', height: DASHBOARD_GAP + 24, flexShrink: 0 }}>
+            {/* Horizontal line spanning full group width */}
             <div style={{
               position: 'absolute',
               left: 0, right: 0,
               top: '50%',
               height: 1,
+              backgroundColor: 'var(--border)',
+              pointerEvents: 'none',
+            }} />
+            {/* Left bracket cap */}
+            <div style={{
+              position: 'absolute',
+              left: 0, top: '50%',
+              transform: 'translateY(-50%)',
+              width: 1, height: 12,
+              backgroundColor: 'var(--border)',
+              pointerEvents: 'none',
+            }} />
+            {/* Right bracket cap */}
+            <div style={{
+              position: 'absolute',
+              right: 0, top: '50%',
+              transform: 'translateY(-50%)',
+              width: 1, height: 12,
               backgroundColor: 'var(--border)',
               pointerEvents: 'none',
             }} />
@@ -354,11 +376,11 @@ const EntityColumns = ({
                 transform: 'translate(-50%, -50%)',
                 backgroundColor: 'var(--bg-primary)',
                 padding: '0 8px',
-                fontSize: '0.62rem',
+                fontSize: '0.72rem',
                 fontWeight: 700,
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
-                color: 'var(--text-secondary)',
+                color: 'var(--text-primary)',
                 whiteSpace: 'nowrap',
                 pointerEvents: 'none',
                 userSelect: 'none',

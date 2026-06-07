@@ -14,7 +14,7 @@ export const useEntityGroups = (adversaryGroups, countdowns, sortBy = 'name', so
   const getEntityGroups = useCallback(() => {
     const groups = []
 
-    const sortedAdversaryGroups = applySort(adversaryGroups, sortBy, sortDir)
+    const sortedAdversaryGroups = applySort(adversaryGroups, sortBy, sortDir, groupBy)
 
     sortedAdversaryGroups.forEach((group) => {
       const groupName = groupBy !== 'none' ? getGroupLabel(group, groupBy) : null
