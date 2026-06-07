@@ -8,6 +8,7 @@ import DescriptionSection from './GameCard/DescriptionSection'
 import ExperienceSection from './GameCard/ExperienceSection'
 import { CARD_SPACE_H, CARD_SPACE_V } from './GameCard/constants'
 import { DASHBOARD_GAP, TAB_HEIGHT } from '../Dashboard/constants'
+import { highlightCardText } from './GameCard/textHighlighter'
 import TabButtons from './GameCard/TabButtons'
 import useCardScroll from './GameCard/hooks/useCardScroll'
 // ============================================================================
@@ -528,7 +529,7 @@ const GameCard = ({
                 lineHeight: 1.4,
                 textAlign: 'center'
               }}>
-                {item.motives}{item.motives && !item.motives.endsWith('.') ? '.' : ''}
+                {item.motives ? highlightCardText(item.motives + (!item.motives.endsWith('.') ? '.' : '')) : ''}
                     </div>
                 </div>
               )}

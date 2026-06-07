@@ -1,6 +1,7 @@
 import React from 'react'
 import ReorderControls from './ReorderControls'
 import { CARD_SPACE_H, CARD_SPACE_V, CARD_INDENT } from './constants'
+import { highlightCardText } from './textHighlighter'
 
 const FeatureDivider = ({ title }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H }}>
@@ -142,7 +143,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
             color: 'var(--text-secondary)',
             marginLeft: CARD_INDENT,
           }}>
-            {feature.description || placeholder}
+            {feature.description ? highlightCardText(feature.description) : placeholder}
           </div>
         </div>
       ))}
@@ -249,8 +250,8 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
           {showAttackRow && (
             <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'baseline', fontSize: '0.9rem' }}>
               <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.weapon}</span>
-              {item.range && <span style={{ color: 'var(--text-secondary)' }}>· {item.range}</span>}
-              {item.damage && <span style={{ color: 'var(--text-secondary)' }}>· {item.damage}</span>}
+              {item.range && <span style={{ color: 'var(--text-secondary)' }}>· {highlightCardText(item.range)}</span>}
+              {item.damage && <span style={{ color: 'var(--text-secondary)' }}>· {highlightCardText(item.damage)}</span>}
             </div>
           )}
           {isEditMode
