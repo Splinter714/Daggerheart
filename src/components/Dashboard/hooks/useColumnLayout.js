@@ -6,16 +6,16 @@ const getMinColumnWidth = (columnCount) => {
   return 350
 }
 
-const calculateColumnLayout = (width, extraTakenWidth = 0) => {
+// effectiveGap: the gap between every column (may be wider than DASHBOARD_GAP when grouping is on).
+// Container padding-left/right always stays DASHBOARD_GAP regardless of effectiveGap.
+const calculateColumnLayout = (width, effectiveGap = DASHBOARD_GAP) => {
   if (width <= 0) return { visibleColumns: 1, columnWidth: getMinColumnWidth(1) }
 
-  // Subtract container padding (left and right) from available width.
-  // Also subtract any extra width consumed by group-boundary double-gaps.
-  const availableWidth = width - (DASHBOARD_GAP * 2) - extraTakenWidth
+  const availableWidth = width - (DASHBOARD_GAP * 2)
   let layout = { visibleColumns: 1, columnWidth: availableWidth }
 
   for (let columns = 1; columns <= 5; columns += 1) {
-    const totalGapWidth = (columns - 1) * DASHBOARD_GAP
+    const totalGapWidth = (columns - 1) * effectiveGap
     const columnWidth = (availableWidth - totalGapWidth) / columns
 
     if (columnWidth >= getMinColumnWidth(columns)) {
@@ -26,7 +26,7 @@ const calculateColumnLayout = (width, extraTakenWidth = 0) => {
     }
   }
 
-  const totalWidth = layout.visibleColumns * layout.columnWidth + (layout.visibleColumns - 1) * DASHBOARD_GAP
+  const totalWidth = layout.visibleColumns * layout.columnWidth + (layout.visibleColumns - 1) * effectiveGap
   if (totalWidth > availableWidth) {
     layout = { visibleColumns: 1, columnWidth: availableWidth }
   }
@@ -39,11 +39,11 @@ const getInitialWidth = () => {
   return window.innerWidth
 }
 
-export const useColumnLayout = (scrollContainerRef, extraTakenWidth = 0) => {
+export const useColumnLayout = (scrollContainerRef, effectiveGap = DASHBOARD_GAP) => {
   // Start with window width estimate to avoid weird initial render - will be measured accurately in useLayoutEffect
   const [containerWidth, setContainerWidth] = useState(getInitialWidth)
 
-  const layout = useMemo(() => calculateColumnLayout(containerWidth, extraTakenWidth), [containerWidth, extraTakenWidth])
+  const layout = useMemo(() => calculateColumnLayout(containerWidth, effectiveGap), [containerWidth, effectiveGap])
 
   useLayoutEffect(() => {
     const measureWidth = () => {

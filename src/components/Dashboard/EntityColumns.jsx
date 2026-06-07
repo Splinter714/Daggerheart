@@ -28,42 +28,17 @@ function buildSections(entityGroups) {
   return sections
 }
 
-// Pixel scroll-left of a card at flatIndex, accounting for any double-gap boundaries.
-// Works by rebuilding sections from the provided groups (used after state updates).
-function cardScrollPosition(flatIndex, groups, columnWidth) {
-  // Rebuild sections inline so we don't need to import buildSections into the caller
-  const sections = []
-  let i = 0
-  while (i < groups.length) {
-    const g = groups[i]
-    if (g.groupName && g.type === 'adversary') {
-      const start = i
-      let j = i + 1
-      while (j < groups.length && groups[j].groupName === g.groupName && groups[j].type === 'adversary') j++
-      sections.push({ type: 'grouped', startFlatIndex: start, endFlatIndex: j - 1 })
-      i = j
-    } else {
-      sections.push({ type: 'solo', flatIndex: i })
-      i++
-    }
-  }
-  let sectionIdx = 0
-  for (let k = 0; k < sections.length; k++) {
-    const s = sections[k]
-    const lo = s.type === 'grouped' ? s.startFlatIndex : s.flatIndex
-    const hi = s.type === 'grouped' ? s.endFlatIndex : s.flatIndex
-    if (flatIndex >= lo && flatIndex <= hi) { sectionIdx = k; break }
-  }
-  let extra = 0
-  for (let k = 1; k <= sectionIdx; k++) {
-    if (sections[k - 1]?.type === 'grouped' && sections[k]?.type === 'grouped') extra++
-  }
-  return DASHBOARD_GAP + flatIndex * (columnWidth + DASHBOARD_GAP) + extra * DASHBOARD_GAP
+// With uniform effectiveGap between all columns, the scroll position is simply:
+function cardScrollPosition(flatIndex, columnWidth, effectiveGap) {
+  return DASHBOARD_GAP + flatIndex * (columnWidth + effectiveGap)
 }
+
+const GROUP_LABEL_BAR_HEIGHT = 32
 
 const EntityColumns = ({
   entityGroups,
   columnWidth,
+  effectiveGap = DASHBOARD_GAP,
   scrollContainerRef,
   onScroll,
   newCards,
@@ -211,7 +186,7 @@ const EntityColumns = ({
                     const groupIndex = updatedGroups.findIndex(
                       g => g.baseName === group.baseName && g.type === 'adversary')
                     if (groupIndex >= 0) {
-                      const cardPosition = cardScrollPosition(groupIndex, updatedGroups, columnWidth)
+                      const cardPosition = cardScrollPosition(groupIndex, columnWidth, effectiveGap)
                       const cardEnd = cardPosition + columnWidth
                       const margin = 10
                       const isVisible = cardPosition >= currentScroll - margin &&
@@ -219,11 +194,11 @@ const EntityColumns = ({
                       if (!isVisible) {
                         let targetScroll
                         if (cardEnd > currentScroll + effectiveWidth + margin) {
-                          const visibleColumns = Math.round((containerWidth - DASHBOARD_GAP) / (columnWidth + DASHBOARD_GAP))
+                          const visibleColumns = Math.round((containerWidth - DASHBOARD_GAP) / (columnWidth + effectiveGap))
                           const prevIdx = Math.max(0, groupIndex - visibleColumns + 2)
-                          targetScroll = cardScrollPosition(prevIdx, updatedGroups, columnWidth) - DASHBOARD_GAP
+                          targetScroll = cardScrollPosition(prevIdx, columnWidth, effectiveGap) - DASHBOARD_GAP
                         } else {
-                          targetScroll = cardScrollPosition(groupIndex, updatedGroups, columnWidth) - DASHBOARD_GAP
+                          targetScroll = cardScrollPosition(groupIndex, columnWidth, effectiveGap) - DASHBOARD_GAP
                         }
                         smoothScrollTo(Math.max(0, targetScroll), 500)
                       }
@@ -332,18 +307,16 @@ const EntityColumns = ({
             flexGrow: 0,
             flex: 'none',
             position: 'relative',
-            // Double gap: add a DASHBOARD_GAP margin so the visual gap between
-            // adjacent group sections is 2×DASHBOARD_GAP while the scroll-snap
-            // formula accounts for this via cardScrollPosition().
-            marginLeft: needsDoubleGap ? DASHBOARD_GAP : 0,
+            // No extra marginLeft — effectiveGap is now uniform for all gaps
+            // (handled by the scroll container's gap style).
           }}
         >
-          {/* Vertical separator — 1px line centered in the double gap.
-              left: -DASHBOARD_GAP puts it at the midpoint of the 2×gap. */}
+          {/* Vertical separator between adjacent group sections.
+              Centered in the effectiveGap: left = -(effectiveGap/2) - 0.5 */}
           {needsDoubleGap && (
             <div style={{
               position: 'absolute',
-              left: -DASHBOARD_GAP - 0.5,
+              left: -(effectiveGap / 2) - 0.5,
               top: 0,
               bottom: 0,
               width: 1,
@@ -352,46 +325,25 @@ const EntityColumns = ({
             }} />
           )}
 
-          {/* Cards row — flex:1 so the group wrapper stretches to fill container height,
-              pushing the label bar to the very bottom of the screen */}
+          {/* Cards row — flex:1 so the wrapper fills the container height,
+              keeping the bottom bar at a consistent Y for all groups */}
           <div style={{
             display: 'flex',
             flexDirection: 'row',
-            gap: `${DASHBOARD_GAP}px`,
+            gap: `${effectiveGap}px`,
             alignItems: 'flex-start',
             flex: 1,
           }}>
             {cards}
           </div>
 
-          {/* Label bar — pinned at the bottom of the scroll container (same Y for all groups).
-              The span uses position:sticky so it stays visible as you scroll through a group. */}
+          {/* Bottom spacer bar — border-top visual only; label text is rendered
+              by the GroupLabelOverlay in DashboardView so it never scrolls */}
           <div style={{
             borderTop: '1px solid var(--border)',
-            height: 32,
+            height: GROUP_LABEL_BAR_HEIGHT,
             flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            overflow: 'visible',
-          }}>
-            <span style={{
-              position: 'sticky',
-              left: DASHBOARD_GAP,
-              display: 'inline-block',
-              backgroundColor: 'var(--bg-primary)',
-              padding: '0 10px',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: 'var(--text-primary)',
-              whiteSpace: 'nowrap',
-              pointerEvents: 'none',
-              userSelect: 'none',
-            }}>
-              {groupName}
-            </span>
-          </div>
+          }} />
         </div>
       )
     } else {
@@ -427,7 +379,17 @@ const EntityColumns = ({
   }
 
   return (
-    <div ref={scrollContainerRef} className="dashboard-scroll-container" onScroll={onScroll}>
+    <div
+      ref={scrollContainerRef}
+      className="dashboard-scroll-container"
+      onScroll={onScroll}
+      style={{
+        // Uniform gap between all direct children (group wrappers + solo panels)
+        gap: `${effectiveGap}px`,
+        // Reserve space at the bottom for the GroupLabelOverlay when grouping is on
+        paddingBottom: isGrouped ? `${GROUP_LABEL_BAR_HEIGHT}px` : undefined,
+      }}
+    >
       {items.length > 0 ? items : null}
       {browserOpenAtPosition !== null && (
         <div style={{ width: `${columnWidth}px`, flexShrink: 0, flexGrow: 0, flex: 'none', height: '100%' }} />
