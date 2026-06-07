@@ -19,7 +19,9 @@ import { useBrowserOverlay } from './hooks/useBrowserOverlay'
 import { useSmoothScroll } from './hooks/useSmoothScroll'
 import { useEntityGroups } from './hooks/useEntityGroups'
 import { useAdversaryAddition } from './hooks/useAdversaryAddition'
+import { useDashboardSortGroup } from './hooks/useDashboardSortGroup'
 import NavRail, { RAIL_SIZE } from './NavRail'
+import SortGroupPopover from './SortGroupPopover'
 import './DashboardView.css'
 
 // Main Dashboard View Component
@@ -53,6 +55,9 @@ const DashboardContent = () => {
   const [browserActiveTab, setBrowserActiveTab] = useState('adversaries')
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null)
   const [rightColumnMode, setRightColumnMode] = useState('browser') // 'browser' | 'info' | 'receipt'
+  const [sortGroupOpen, setSortGroupOpen] = useState(false)
+  const sortGroupButtonRef = useRef(null)
+  const { sortBy, groupBy, setSortBy, setGroupBy } = useDashboardSortGroup()
 
   // Narrow screen detection for NavRail placement
   const [isNarrow, setIsNarrow] = useState(false)
@@ -85,7 +90,7 @@ const DashboardContent = () => {
 
   const smoothScrollTo = useSmoothScroll(scrollContainerRef)
 
-  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, countdowns)
+  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, countdowns, sortBy, groupBy)
 
   const openRightColumn = useCallback((mode) => {
     setRightColumnMode(mode)
@@ -485,6 +490,20 @@ selectedCustomAdversaryId={selectedCustomAdversaryId}
           placement={navPlacement}
           activeId={navActiveId}
           onAction={handleNavAction}
+          sortActive={groupBy !== 'none' || sortBy !== 'name-asc'}
+          sortButtonRef={sortGroupButtonRef}
+          onSortToggle={() => setSortGroupOpen(v => !v)}
+        />
+      )}
+      {sortGroupOpen && (
+        <SortGroupPopover
+          anchorRef={sortGroupButtonRef}
+          placement={navPlacement}
+          sortBy={sortBy}
+          groupBy={groupBy}
+          onSortBy={setSortBy}
+          onGroupBy={setGroupBy}
+          onClose={() => setSortGroupOpen(false)}
         />
       )}
     </div>
