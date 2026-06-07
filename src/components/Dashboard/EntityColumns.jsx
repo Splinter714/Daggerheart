@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react'
+import React from 'react'
 import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
@@ -26,16 +26,6 @@ function buildSections(entityGroups) {
     }
   }
   return sections
-}
-
-// How many grouped→grouped transitions (double gaps) are there up to and INCLUDING
-// the section at `sectionIndex`. These precede the first card of that section.
-function extraGapsUpToSection(sectionIndex, sections) {
-  let count = 0
-  for (let i = 1; i <= sectionIndex; i++) {
-    if (sections[i - 1]?.type === 'grouped' && sections[i]?.type === 'grouped') count++
-  }
-  return count
 }
 
 // Pixel scroll-left of a card at flatIndex, accounting for any double-gap boundaries.
@@ -99,49 +89,6 @@ const EntityColumns = ({
   onOpenBrowser,
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
-
-  // Refs to label DOM nodes; updated by scroll listener to keep labels visible.
-  const labelInfoRef = useRef({})
-
-  const updateLabelPositions = useCallback(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
-    const viewportLeft = container.scrollLeft
-    const viewportRight = viewportLeft + container.clientWidth
-
-    Object.values(labelInfoRef.current).forEach(({ el, startFlatIndex, count, extraGapsBefore }) => {
-      if (!el) return
-      const groupStart = DASHBOARD_GAP +
-        startFlatIndex * (columnWidth + DASHBOARD_GAP) +
-        extraGapsBefore * DASHBOARD_GAP
-      const groupWidth = count * columnWidth + (count - 1) * DASHBOARD_GAP
-      const groupEnd = groupStart + groupWidth
-
-      const visibleLeft = Math.max(groupStart, viewportLeft) - groupStart
-      const visibleRight = Math.min(groupEnd, viewportRight) - groupStart
-      const centerX = (visibleLeft + visibleRight) / 2
-
-      const halfLabel = el.offsetWidth / 2
-      const clamped = Math.max(halfLabel, Math.min(groupWidth - halfLabel, centerX))
-      el.style.left = `${clamped}px`
-    })
-  }, [columnWidth, scrollContainerRef])
-
-  useEffect(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
-    updateLabelPositions()
-    container.addEventListener('scroll', updateLabelPositions, { passive: true })
-    return () => container.removeEventListener('scroll', updateLabelPositions)
-  }, [updateLabelPositions, entityGroups])
-
-  const registerLabel = (key, startFlatIndex, count, extraGapsBefore) => el => {
-    if (el) {
-      labelInfoRef.current[key] = { el, startFlatIndex, count, extraGapsBefore }
-    } else {
-      delete labelInfoRef.current[key]
-    }
-  }
 
   // ─── Card panel renderer ────────────────────────────────────────────────────
 
@@ -361,7 +308,6 @@ const EntityColumns = ({
     const isLastSection = sectionIndex === sections.length - 1
     const prevIsGrouped = sectionIndex > 0 && sections[sectionIndex - 1].type === 'grouped'
     const needsDoubleGap = section.type === 'grouped' && prevIsGrouped
-    const extraGapsBefore = extraGapsUpToSection(sectionIndex, sections)
 
     if (section.type === 'grouped') {
       const { groupName, entries, startFlatIndex } = section
@@ -406,41 +352,43 @@ const EntityColumns = ({
             }} />
           )}
 
-          {/* Cards row */}
+          {/* Cards row — flex:1 so the group wrapper stretches to fill container height,
+              pushing the label bar to the very bottom of the screen */}
           <div style={{
             display: 'flex',
             flexDirection: 'row',
             gap: `${DASHBOARD_GAP}px`,
-            alignItems: 'stretch',
+            alignItems: 'flex-start',
+            flex: 1,
           }}>
             {cards}
           </div>
 
-          {/* Group header — at the bottom, label repositions on scroll to stay visible */}
+          {/* Label bar — pinned at the bottom of the scroll container (same Y for all groups).
+              The span uses position:sticky so it stays visible as you scroll through a group. */}
           <div style={{
-            position: 'relative',
             borderTop: '1px solid var(--border)',
             height: 32,
             flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            overflow: 'visible',
           }}>
-            <span
-              ref={registerLabel(sectionKey, startFlatIndex, entries.length, extraGapsBefore)}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                backgroundColor: 'var(--bg-primary)',
-                padding: '0 10px',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                color: 'var(--text-primary)',
-                whiteSpace: 'nowrap',
-                pointerEvents: 'none',
-                userSelect: 'none',
-              }}
-            >
+            <span style={{
+              position: 'sticky',
+              left: DASHBOARD_GAP,
+              display: 'inline-block',
+              backgroundColor: 'var(--bg-primary)',
+              padding: '0 10px',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: 'var(--text-primary)',
+              whiteSpace: 'nowrap',
+              pointerEvents: 'none',
+              userSelect: 'none',
+            }}>
               {groupName}
             </span>
           </div>

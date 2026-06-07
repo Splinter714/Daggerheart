@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { useGameState } from '../../state/state'
 import { DASHBOARD_GAP } from './constants'
 import PWAInstallPrompt from './PWAInstallPrompt'
@@ -80,7 +80,20 @@ const DashboardContent = () => {
 
   useMinionSync(adversaryGroups, pcCount, createAdversariesBulk, deleteAdversary)
 
-  const { columnWidth } = useColumnLayout(scrollContainerRef)
+  // Count group→group boundaries so useColumnLayout can shrink columnWidth to compensate
+  // for the extra DASHBOARD_GAP margin added between adjacent group sections.
+  const numGroupBoundaries = useMemo(() => {
+    if (groupBy === 'none') return 0
+    let count = 0
+    let prev = null
+    for (const g of entityGroups) {
+      if (g.groupName && prev && g.groupName !== prev) count++
+      if (g.groupName) prev = g.groupName
+    }
+    return count
+  }, [entityGroups, groupBy])
+
+  const { columnWidth } = useColumnLayout(scrollContainerRef, numGroupBoundaries * DASHBOARD_GAP)
 
   const { browserOpenAtPosition, handleOpenBrowser, handleCloseBrowser } = useBrowserOverlay({
     scrollContainerRef,
