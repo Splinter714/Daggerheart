@@ -106,12 +106,12 @@ const EntityColumns = ({
           width: `${columnWidth}px`,
           flexShrink: 0, flexGrow: 0, flex: 'none',
           paddingRight: '0',
-          paddingTop: `${DASHBOARD_GAP}px`,
-          paddingBottom: `${DASHBOARD_GAP}px`,
+          paddingTop: isGrouped ? '0' : `${DASHBOARD_GAP}px`,
+          paddingBottom: isGrouped ? '0' : `${DASHBOARD_GAP}px`,
           scrollSnapAlign: 'start',
-          overflow: group.type === 'adversary' ? 'visible' : 'hidden',
+          overflow: isGrouped ? 'auto' : group.type === 'adversary' ? 'visible' : 'hidden',
           display: 'flex', flexDirection: 'column', alignItems: 'stretch',
-          height: 'auto',
+          height: isGrouped ? '100%' : 'auto',
           opacity: newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
           transition: 'opacity 0.2s ease',
         }}
@@ -359,7 +359,7 @@ const EntityColumns = ({
             flexDirection: 'row',
             gap: `${effectiveGap}px`,
             alignItems: 'flex-start',
-            flex: 1,
+            height: `calc(100% - ${GROUP_LABEL_BAR_HEIGHT}px - ${DASHBOARD_GAP * 2}px)`,
           }}>
             {cards}
           </div>
