@@ -445,7 +445,7 @@ const DamageSelector = ({ damage, type, tier, onChange }) => {
 
 // ─── Type selector dropdown (extracted to avoid useState inside IIFE) ────────
 
-const TypeSelector = ({ selectedType, setFormData }) => {
+const TypeSelector = ({ selectedType, onTypeChange }) => {
   const [typeOpen, setTypeOpen] = useState(false)
   const tGuide = typeGuide[selectedType]
   return (
@@ -475,7 +475,7 @@ const TypeSelector = ({ selectedType, setFormData }) => {
             const tg = typeGuide[t]
             const isSelected = selectedType === t
             return (
-              <button key={t} type="button" onClick={() => { setFormData(prev => ({ ...prev, type: t })); setTypeOpen(false) }} style={{
+              <button key={t} type="button" onClick={() => { onTypeChange(t); setTypeOpen(false) }} style={{
                 width: '100%', textAlign: 'left',
                 background: isSelected ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent',
                 border: 'none', borderBottom: '1px solid var(--border)',
@@ -614,18 +614,26 @@ const CustomAdversaryCreator = forwardRef(({
     }
   }, [editingAdversary])
 
-  // ── Auto-fill defaults when tier/type change (new adversary only) ───────────
-  useEffect(() => {
-    if (!editingAdversary && !statsPulledFromExisting) {
-      const d = getDefaultAdversaryValues(formData.tier, formData.type)
-      setFormData(prev => ({
-        ...prev,
-        difficulty: d.difficulty, thresholds: d.thresholds,
-        hpMax: d.hpMax, stressMax: d.stressMax,
-        atk: d.atk, range: d.range, damage: d.damage,
-      }))
-    }
-  }, [formData.tier, formData.type, editingAdversary, statsPulledFromExisting])
+  // ── Handlers that batch tier/type changes with new defaults to avoid flicker ─
+  const handleTierChange = useCallback((t) => {
+    setFormData(prev => {
+      if (!editingAdversary && !statsPulledFromExisting) {
+        const d = getDefaultAdversaryValues(t, prev.type)
+        return { ...prev, tier: t, difficulty: d.difficulty, thresholds: d.thresholds, hpMax: d.hpMax, stressMax: d.stressMax, atk: d.atk, range: d.range, damage: d.damage }
+      }
+      return { ...prev, tier: t }
+    })
+  }, [editingAdversary, statsPulledFromExisting])
+
+  const handleTypeChange = useCallback((t) => {
+    setFormData(prev => {
+      if (!editingAdversary && !statsPulledFromExisting) {
+        const d = getDefaultAdversaryValues(prev.tier, t)
+        return { ...prev, type: t, difficulty: d.difficulty, thresholds: d.thresholds, hpMax: d.hpMax, stressMax: d.stressMax, atk: d.atk, range: d.range, damage: d.damage }
+      }
+      return { ...prev, type: t }
+    })
+  }, [editingAdversary, statsPulledFromExisting])
 
   // ── Autocomplete ────────────────────────────────────────────────────────────
   const handleNameChange = (value) => {
@@ -977,7 +985,7 @@ const CustomAdversaryCreator = forwardRef(({
                   </div>
                   <div style={{ display: 'flex' }}>
                     {[1, 2, 3, 4].map((t, i) => (
-                      <button key={t} onClick={() => setFormData(prev => ({ ...prev, tier: t }))} style={{
+                      <button key={t} onClick={() => handleTierChange(t)} style={{
                         flex: 1, minWidth: '44px', height: '44px',
                         border: '1px solid var(--border)',
                         borderLeft: i > 0 ? 'none' : '1px solid var(--border)',
@@ -994,7 +1002,7 @@ const CustomAdversaryCreator = forwardRef(({
                   <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
                     <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Type</span>
                   </div>
-                  <TypeSelector selectedType={formData.type} setFormData={setFormData} />
+                  <TypeSelector selectedType={formData.type} onTypeChange={handleTypeChange} />
                 </div>
               </div>
 
