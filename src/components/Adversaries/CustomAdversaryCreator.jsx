@@ -521,7 +521,7 @@ const CustomAdversaryCreator = forwardRef(({
       hpMax: defaults.hpMax,
       stressMax: defaults.stressMax,
       atk: defaults.atk,
-      weapon: 'Attack', range: defaults.range, damage: defaults.damage,
+      weapon: '', range: defaults.range, damage: defaults.damage,
       experience: [], features: [],
     }
   })
@@ -607,7 +607,7 @@ const CustomAdversaryCreator = forwardRef(({
         difficulty: defaults.difficulty,
         thresholds: defaults.thresholds,
         hpMax: defaults.hpMax, stressMax: defaults.stressMax,
-        atk: defaults.atk, weapon: 'Attack', range: defaults.range, damage: defaults.damage,
+        atk: defaults.atk, weapon: '', range: defaults.range, damage: defaults.damage,
         experience: [], features: [],
       })
       setStatsPulledFromExisting(false)
@@ -733,7 +733,7 @@ const CustomAdversaryCreator = forwardRef(({
           description: '', motives: '',
           difficulty: defaults.difficulty, thresholds: defaults.thresholds,
           hpMax: defaults.hpMax, stressMax: defaults.stressMax,
-          atk: defaults.atk, weapon: 'Attack', range: defaults.range, damage: defaults.damage,
+          atk: defaults.atk, weapon: '', range: defaults.range, damage: defaults.damage,
           experience: [], features: [],
         })
         setStatsPulledFromExisting(false)
@@ -804,7 +804,7 @@ const CustomAdversaryCreator = forwardRef(({
     const isMinion = formData.type === 'Minion'
     const guide = typeGuide[formData.type]
 
-    const formItem = { ...formData, id: 'creator-form', hp: 0, stress: 0, source: 'Homebrew' }
+    const formItem = { ...formData, id: 'creator-form', hp: 0, stress: 0, source: 'Homebrew', name: formData.name || 'Name', weapon: formData.weapon || 'Attack' }
     const previewInstances = [{ ...formItem }]
 
     const canAct = !isSaving && !!formData.name.trim()
@@ -1228,7 +1228,7 @@ const CustomAdversaryCreator = forwardRef(({
             value={formData.name}
             onChange={e => handleNameChange(e.target.value)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-            placeholder="Name"
+            placeholder="Adversary name"
             style={{
               width: '100%', padding: '0.75rem',
               border: '1px solid var(--border)', borderRadius: '8px',
