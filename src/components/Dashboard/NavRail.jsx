@@ -1,5 +1,5 @@
 import React from 'react'
-import { Library, Wand2, Info, ClipboardList } from 'lucide-react'
+import { Library, Wand2, Info, ClipboardList, ArrowUpDown } from 'lucide-react'
 
 const RAIL_SIZE = 52
 
@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { id: 'info',     Icon: Info,          label: 'App info'          },
 ]
 
-const NavRail = ({ placement = 'right', activeId, onAction }) => {
+const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButtonRef, onSortToggle }) => {
   const isRight = placement === 'right'
 
   const railStyle = isRight
@@ -34,6 +34,44 @@ const NavRail = ({ placement = 'right', activeId, onAction }) => {
         paddingBottom: 'env(safe-area-inset-bottom, 0)',
       }
 
+  const renderButton = ({ id, Icon, label, active, onClick, btnRef }) => (
+    <button
+      key={id}
+      ref={btnRef}
+      type="button"
+      title={label}
+      onClick={onClick}
+      style={{
+        width: isRight ? `${RAIL_SIZE - 8}px` : '52px',
+        height: isRight ? '44px' : `${RAIL_SIZE - 8}px`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: active ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent',
+        border: 'none',
+        borderRadius: '8px',
+        color: active ? 'var(--purple)' : 'var(--text-secondary)',
+        cursor: 'pointer',
+        flexShrink: 0,
+        transition: 'color 0.15s, background 0.15s',
+        position: 'relative',
+      }}
+      onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'var(--text-primary)' }}
+      onMouseLeave={e => { if (!active) e.currentTarget.style.color = active ? 'var(--purple)' : 'var(--text-secondary)' }}
+    >
+      <Icon size={22} strokeWidth={1.6} />
+      {id === 'sort' && active && (
+        <span style={{
+          position: 'absolute',
+          top: 6, right: 6,
+          width: 6, height: 6,
+          borderRadius: '50%',
+          backgroundColor: 'var(--purple)',
+        }} />
+      )}
+    </button>
+  )
+
   return (
     <div style={{
       ...railStyle,
@@ -46,32 +84,15 @@ const NavRail = ({ placement = 'right', activeId, onAction }) => {
     }}>
       {NAV_ITEMS.map(({ id, Icon, label }) => {
         const active = activeId === id
-        return (
-          <button
-            key={id}
-            type="button"
-            title={label}
-            onClick={() => onAction(id)}
-            style={{
-              width: isRight ? `${RAIL_SIZE - 8}px` : '52px',
-              height: isRight ? '44px' : `${RAIL_SIZE - 8}px`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: active ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent',
-              border: 'none',
-              borderRadius: '8px',
-              color: active ? 'var(--purple)' : 'var(--text-secondary)',
-              cursor: 'pointer',
-              flexShrink: 0,
-              transition: 'color 0.15s, background 0.15s',
-            }}
-            onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'var(--text-primary)' }}
-            onMouseLeave={e => { if (!active) e.currentTarget.style.color = active ? 'var(--purple)' : 'var(--text-secondary)' }}
-          >
-            <Icon size={22} strokeWidth={1.6} />
-          </button>
-        )
+        return renderButton({ id, Icon, label, active, onClick: () => onAction(id) })
+      })}
+      {renderButton({
+        id: 'sort',
+        Icon: ArrowUpDown,
+        label: 'Sort & group',
+        active: sortActive,
+        onClick: onSortToggle,
+        btnRef: sortButtonRef,
       })}
     </div>
   )

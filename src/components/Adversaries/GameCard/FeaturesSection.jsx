@@ -15,8 +15,8 @@ const FeatureDivider = ({ title }) => (
     <h4
       style={{
         margin: 0,
-        fontSize: '0.75rem',
-        fontWeight: '500',
+        fontSize: '0.8rem',
+        fontWeight: '600',
         color: 'var(--text-secondary)',
         textTransform: 'uppercase',
         letterSpacing: '0.5px',
