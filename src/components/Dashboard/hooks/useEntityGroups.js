@@ -6,23 +6,20 @@ import { applySort, getGroupLabel } from './useDashboardSortGroup'
  * a single list for the rendering layer to treat each as a column.
  * Applies sort and optional grouping to adversary groups.
  */
-export const useEntityGroups = (adversaryGroups, countdowns, sortBy = 'name-asc', groupBy = 'none') => {
+export const useEntityGroups = (adversaryGroups, countdowns, sortBy = 'name', sortDir = 'asc', groupBy = 'none') => {
   const getEntityGroups = useCallback(() => {
     const groups = []
 
-    const sortedAdversaryGroups = applySort(adversaryGroups, sortBy)
+    const sortedAdversaryGroups = applySort(adversaryGroups, sortBy, sortDir)
 
     let lastGroupLabel = null
 
     sortedAdversaryGroups.forEach((group) => {
+      let groupLabel = null
       if (groupBy !== 'none') {
         const label = getGroupLabel(group, groupBy)
         if (label !== lastGroupLabel) {
-          groups.push({
-            type: 'separator',
-            baseName: `separator-${label}-${groups.length}`,
-            label,
-          })
+          groupLabel = label
           lastGroupLabel = label
         }
       }
@@ -32,6 +29,7 @@ export const useEntityGroups = (adversaryGroups, countdowns, sortBy = 'name-asc'
         baseName: group.baseName,
         template: group,
         instances: group.instances,
+        groupLabel,
       })
     })
 
@@ -45,7 +43,7 @@ export const useEntityGroups = (adversaryGroups, countdowns, sortBy = 'name-asc'
     })
 
     return groups
-  }, [adversaryGroups, countdowns, sortBy, groupBy])
+  }, [adversaryGroups, countdowns, sortBy, sortDir, groupBy])
 
   const entityGroups = useMemo(() => getEntityGroups(), [getEntityGroups])
 

@@ -38,46 +38,6 @@ const EntityColumns = ({
             const items = []
 
             entityGroups.forEach((group, index) => {
-              if (group.type === 'separator') {
-                items.push(
-                  <div
-                    key={group.baseName}
-                    style={{
-                      flexShrink: 0,
-                      flexGrow: 0,
-                      flex: 'none',
-                      width: '2px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'flex-start',
-                      paddingTop: `${DASHBOARD_GAP + 8}px`,
-                      scrollSnapAlign: 'none',
-                    }}
-                  >
-                    <div style={{
-                      writingMode: 'vertical-rl',
-                      textOrientation: 'mixed',
-                      transform: 'rotate(180deg)',
-                      fontSize: '0.65rem',
-                      fontWeight: 700,
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      color: 'var(--text-secondary)',
-                      backgroundColor: 'var(--bg-primary)',
-                      padding: '6px 3px',
-                      borderRadius: '4px',
-                      whiteSpace: 'nowrap',
-                      userSelect: 'none',
-                    }}>
-                      {group.label}
-                    </div>
-                    <div style={{ flex: 1, width: 1, backgroundColor: 'var(--border)', marginTop: 4 }} />
-                  </div>
-                )
-                return
-              }
-
               const isSpacerPosition =
                 removingCardSpacer && removingCardSpacer.baseName === group.baseName && group.type === 'adversary'
 
@@ -135,6 +95,19 @@ const EntityColumns = ({
                     transition: 'opacity 0.2s ease',
                   }}
                 >
+                  {group.groupLabel && (
+                    <div style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: 'var(--text-secondary)',
+                      padding: '0 2px 6px',
+                      userSelect: 'none',
+                    }}>
+                      {group.groupLabel}
+                    </div>
+                  )}
                   <GameCard
                     type={group.type}
                     item={

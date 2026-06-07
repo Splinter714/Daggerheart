@@ -57,7 +57,7 @@ const DashboardContent = () => {
   const [rightColumnMode, setRightColumnMode] = useState('browser') // 'browser' | 'info' | 'receipt'
   const [sortGroupOpen, setSortGroupOpen] = useState(false)
   const sortGroupButtonRef = useRef(null)
-  const { sortBy, groupBy, setSortBy, setGroupBy } = useDashboardSortGroup()
+  const { sortBy, sortDir, groupBy, setSortBy, setGroupBy } = useDashboardSortGroup()
 
   // Narrow screen detection for NavRail placement
   const [isNarrow, setIsNarrow] = useState(false)
@@ -90,7 +90,7 @@ const DashboardContent = () => {
 
   const smoothScrollTo = useSmoothScroll(scrollContainerRef)
 
-  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, countdowns, sortBy, groupBy)
+  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, countdowns, sortBy, sortDir, groupBy)
 
   const openRightColumn = useCallback((mode) => {
     setRightColumnMode(mode)
@@ -490,7 +490,7 @@ selectedCustomAdversaryId={selectedCustomAdversaryId}
           placement={navPlacement}
           activeId={navActiveId}
           onAction={handleNavAction}
-          sortActive={groupBy !== 'none' || sortBy !== 'name-asc'}
+          sortActive={groupBy !== 'none' || sortBy !== 'name' || sortDir !== 'asc'}
           sortButtonRef={sortGroupButtonRef}
           onSortToggle={() => setSortGroupOpen(v => !v)}
         />
@@ -500,6 +500,7 @@ selectedCustomAdversaryId={selectedCustomAdversaryId}
           anchorRef={sortGroupButtonRef}
           placement={navPlacement}
           sortBy={sortBy}
+          sortDir={sortDir}
           groupBy={groupBy}
           onSortBy={setSortBy}
           onGroupBy={setGroupBy}

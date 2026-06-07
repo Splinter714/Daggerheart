@@ -1,24 +1,24 @@
 import React, { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { ArrowUp, ArrowDown } from 'lucide-react'
 
 const SORT_OPTIONS = [
-  { value: 'name-asc',         label: 'Name A–Z'         },
-  { value: 'name-desc',        label: 'Name Z–A'         },
-  { value: 'tier',             label: 'Tier'             },
-  { value: 'type',             label: 'Type'             },
-  { value: 'hp',               label: 'Max HP'           },
-  { value: 'difficulty',       label: 'Difficulty'       },
-  { value: 'atk',              label: 'Attack'           },
-  { value: 'threshold-major',  label: 'Damage threshold' },
+  { value: 'name',       label: 'Name'             },
+  { value: 'tier',       label: 'Tier'             },
+  { value: 'type',       label: 'Type'             },
+  { value: 'hp',         label: 'Max HP'           },
+  { value: 'difficulty', label: 'Difficulty'       },
+  { value: 'atk',        label: 'Attack'           },
+  { value: 'threshold',  label: 'Damage threshold' },
 ]
 
 const GROUP_OPTIONS = [
-  { value: 'none', label: 'None'  },
-  { value: 'type', label: 'Type'  },
-  { value: 'tier', label: 'Tier'  },
+  { value: 'none', label: 'None' },
+  { value: 'type', label: 'Type' },
+  { value: 'tier', label: 'Tier' },
 ]
 
-const SortGroupPopover = ({ anchorRef, placement, sortBy, groupBy, onSortBy, onGroupBy, onClose }) => {
+const SortGroupPopover = ({ anchorRef, placement, sortBy, sortDir, groupBy, onSortBy, onGroupBy, onClose }) => {
   const popoverRef = useRef(null)
 
   useEffect(() => {
@@ -38,14 +38,12 @@ const SortGroupPopover = ({ anchorRef, placement, sortBy, groupBy, onSortBy, onG
     return () => document.removeEventListener('keydown', handleKey)
   }, [onClose])
 
-  // Position next to the anchor button
   const getPosition = () => {
     if (!anchorRef.current) return {}
     const rect = anchorRef.current.getBoundingClientRect()
     if (placement === 'right') {
       return { right: `calc(100vw - ${rect.left}px + 6px)`, top: `${rect.top}px` }
     }
-    // bottom rail
     return { left: `${rect.left}px`, bottom: `calc(100vh - ${rect.top}px + 6px)` }
   }
 
@@ -71,6 +69,7 @@ const SortGroupPopover = ({ anchorRef, placement, sortBy, groupBy, onSortBy, onG
     color: selected ? 'var(--purple)' : 'var(--text-primary)',
     fontSize: '0.85rem',
     userSelect: 'none',
+    justifyContent: 'space-between',
   })
 
   const dot = (selected) => ({
@@ -94,7 +93,7 @@ const SortGroupPopover = ({ anchorRef, placement, sortBy, groupBy, onSortBy, onG
         borderRadius: '10px',
         boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
         padding: '1rem',
-        minWidth: '180px',
+        minWidth: '190px',
         display: 'flex',
         flexDirection: 'column',
         gap: '1rem',
@@ -102,16 +101,26 @@ const SortGroupPopover = ({ anchorRef, placement, sortBy, groupBy, onSortBy, onG
     >
       <div>
         <div style={sectionLabel}>Sort by</div>
-        {SORT_OPTIONS.map(({ value, label }) => (
-          <div
-            key={value}
-            style={optRow(sortBy === value)}
-            onClick={() => onSortBy(value)}
-          >
-            <div style={dot(sortBy === value)} />
-            {label}
-          </div>
-        ))}
+        {SORT_OPTIONS.map(({ value, label }) => {
+          const selected = sortBy === value
+          return (
+            <div
+              key={value}
+              style={optRow(selected)}
+              onClick={() => onSortBy(value)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={dot(selected)} />
+                {label}
+              </div>
+              {selected && (
+                sortDir === 'asc'
+                  ? <ArrowUp size={13} strokeWidth={2.2} />
+                  : <ArrowDown size={13} strokeWidth={2.2} />
+              )}
+            </div>
+          )
+        })}
       </div>
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
         <div style={sectionLabel}>Group by</div>
@@ -121,8 +130,10 @@ const SortGroupPopover = ({ anchorRef, placement, sortBy, groupBy, onSortBy, onG
             style={optRow(groupBy === value)}
             onClick={() => onGroupBy(value)}
           >
-            <div style={dot(groupBy === value)} />
-            {label}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={dot(groupBy === value)} />
+              {label}
+            </div>
           </div>
         ))}
       </div>
