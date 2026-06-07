@@ -31,11 +31,15 @@ List open issues and see if any already describe this work:
 gh issue list --state open --limit 50
 ```
 
-Scan titles and (if needed) bodies for a match. A match means the issue clearly describes the same feature, bug, or task — not just a vague overlap. If uncertain, lean toward creating a new one rather than hijacking an unrelated issue.
+Scan titles and (if needed) bodies for a match. A match means the issue clearly describes the same feature, bug, or task — not just a vague overlap.
 
-### 3a. If a match exists — link and report
+**If a clear match exists**: use `AskUserQuestion` with **"Link to #N: \<title\>"** / **"Create a new issue instead"** before proceeding.
 
-Tell the user which issue you found and why it matches. Then link the branch:
+**If the intent isn't clear** from the branch name and commits alone (e.g. the branch name is generic or there are no commits yet): use `AskUserQuestion` to clarify the goal — offer 2–3 likely interpretations you can infer from context, plus **"Something else"** so the user can type it.
+
+**If nothing matches**: proceed to create a new issue.
+
+### 3a. If linking — link and report
 
 ```bash
 gh issue develop <issue-number> --branch <current-branch> --base main
@@ -43,9 +47,11 @@ gh issue develop <issue-number> --branch <current-branch> --base main
 
 If that command isn't available (older gh CLI), just report the issue URL so the user can see it.
 
-### 3b. If no match — create a new issue
+### 3b. If creating — confirm draft before creating
 
 Draft a concise title and short description based on what the branch + git log + conversation context reveal. Keep the title tight (under 70 chars). The description should be 2–4 bullet points of what's being changed and why — no fluff.
+
+Before running `gh issue create`, use `AskUserQuestion` to confirm: **"Create with this title: \<drafted title\>"** / **"Edit the title first"**. This gives the user a chance to redirect without typing unless they want to.
 
 ```bash
 gh issue create --title "<title>" --body "$(cat <<'EOF'

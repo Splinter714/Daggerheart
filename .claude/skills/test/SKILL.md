@@ -44,7 +44,7 @@ Report what you saw: a brief description of the visual state and whether it matc
 
 Run `git diff --stat` and `git status` to see what's changed. Only stage files that are directly related to this session's task. If there are unrelated dirty files, leave them unstaged — don't commit them.
 
-If it's unclear which files are task-related, show the user the diff and ask.
+If it's unclear which files are task-related, use `AskUserQuestion` to show the candidates and let the user confirm — offer **"All of these"** / **"Let me tell you"** or list specific file groupings as options if there's a natural split.
 
 ### 4. Commit
 
@@ -77,7 +77,7 @@ If there are merge conflicts, resolve them — don't just report them. After res
 gh issue close <number> --comment "Fixed in <commit-sha-or-branch>."
 ```
 
-If you don't know the issue number, ask. If there's no associated issue, skip.
+If you don't know the issue number, run `gh issue list --state open --limit 20` and use `AskUserQuestion` with the candidates as options. If there's no associated issue, skip.
 
 ### 7. Summarize
 

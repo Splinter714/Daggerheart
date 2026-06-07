@@ -36,7 +36,7 @@ Show the user a brief summary:
 - Whether main is ahead/behind origin/main
 - Any stale branches worth noting
 
-If there are uncommitted changes on main, ask the user whether to stash, commit, or stop.
+If there are uncommitted changes on main, use `AskUserQuestion` with options **"Stash them"** / **"Commit them first"** / **"Stop — I'll handle it"**.
 
 ### 2. Confirm main is ready
 
@@ -49,7 +49,7 @@ git pull origin main
 
 ### 3. Bump the version
 
-Ask the user which increment to use — **patch**, **minor**, or **major** — unless they already said (e.g. "deploy a minor release"). Current version is in `package.json`.
+Unless the user already specified the increment, read the current version from `package.json`, then use `AskUserQuestion` with options **"Patch (bug fixes / small tweaks)"** / **"Minor (new features)"** / **"Major (big redesign / breaking)"**, showing the current version and what each would bump it to.
 
 | Type  | When to use                        | Example       |
 |-------|------------------------------------|---------------|

@@ -53,11 +53,11 @@ Repo state after session
 
 ### 3. Ask before cleaning
 
-After the summary, ask: "Want me to clean up the safe stuff (merged branches + stale refs)?"
+After the summary, use `AskUserQuestion` with options **"Yes, clean it up"** / **"No, leave it"** to ask if the user wants to delete merged branches and prune stale refs.
 
 If yes, proceed with cleanup. If no, stop — just leave the report.
 
-For **unmerged branches**, always ask individually — don't delete them automatically. Summarize what's on each one (commit messages, how far ahead) so the user can make an informed call.
+For **unmerged branches**, ask individually using `AskUserQuestion` — include the branch name and commit summary in the question text, and offer **"Delete it"** / **"Keep it"**. Never delete them automatically.
 
 ### 4. Clean up (with approval)
 
@@ -92,5 +92,5 @@ After cleanup, run `git branch -a` and report the clean state. Keep it short.
 
 - **Never delete main** — skip it in all branch operations, even if it appears in `--merged` output.
 - **Worktree branches**: if a branch is checked out in an active worktree, `git branch -d` will fail — note it and skip rather than forcing.
-- **Unpushed commits on main**: flag these prominently and ask if the user wants to push, but don't push automatically.
+- **Unpushed commits on main**: flag these prominently and use `AskUserQuestion` with **"Push now"** / **"Leave it"** — don't push automatically.
 - **Nothing to clean**: just report "Repo looks clean" and stop.

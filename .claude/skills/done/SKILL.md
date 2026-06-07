@@ -43,12 +43,12 @@ Tell the user: "Main is updated — take a look at the running app and let me kn
 
 ### 5. GitHub issue
 
-Ask the user (or infer from context) whether the issue is fully resolved or partially done:
+If you can infer the issue number from context, use `AskUserQuestion` with **"Close it (fully done)"** / **"Leave it open (partially done)"** to ask how to handle it.
 
-- **Fully done**: close the issue with `gh issue close <number> --comment "Fixed in <branch>."`
-- **Partially done**: add a comment summarizing what was done and what's left, leave the issue open. Ask the user what to note if unclear.
+- **Fully done**: close with `gh issue close <number> --comment "Fixed in <branch>."`
+- **Partially done**: add a progress comment summarizing what was done and what's left, leave the issue open.
 
-If you don't know the issue number, ask. If there's no associated issue, skip this step.
+If you don't know the issue number, use `AskUserQuestion` asking for it (offer options if you can list candidates from `gh issue list`). If there's no associated issue, skip this step.
 
 ### 6. Delete the branch
 
