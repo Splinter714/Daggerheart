@@ -64,10 +64,11 @@ const EntityColumns = ({
   onOpenBrowser,
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
+  const edgePadding = isGrouped ? DASHBOARD_GAP * 2 : DASHBOARD_GAP
 
   // ─── Card panel renderer ────────────────────────────────────────────────────
 
-  const renderCardPanel = (group, flatIndex, cssClass) => {
+  const renderCardPanel = (group, flatIndex, cssClass, isFirstInGroup = false, isLastInGroup = false) => {
     const isSpacerPosition =
       !isGrouped &&
       removingCardSpacer &&
@@ -106,12 +107,14 @@ const EntityColumns = ({
           width: `${columnWidth}px`,
           flexShrink: 0, flexGrow: 0, flex: 'none',
           paddingRight: '0',
-          paddingTop: `${DASHBOARD_GAP}px`,
-          paddingBottom: `${DASHBOARD_GAP}px`,
+          paddingTop: isGrouped ? '0' : `${DASHBOARD_GAP}px`,
+          paddingBottom: isGrouped ? '0' : `${DASHBOARD_GAP}px`,
           scrollSnapAlign: 'start',
-          overflow: group.type === 'adversary' ? 'visible' : 'hidden',
+          overflow: isGrouped ? 'auto' : group.type === 'adversary' ? 'visible' : 'hidden',
           display: 'flex', flexDirection: 'column', alignItems: 'stretch',
-          height: 'auto',
+          height: isGrouped ? '100%' : 'auto',
+          scrollMarginLeft: isGrouped && isFirstInGroup ? DASHBOARD_GAP : undefined,
+          scrollMarginRight: isGrouped && isLastInGroup ? DASHBOARD_GAP : undefined,
           opacity: newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
           transition: 'opacity 0.2s ease',
         }}
@@ -294,7 +297,7 @@ const EntityColumns = ({
         const cssClass = isFirst ? 'dashboard-column dashboard-column--first'
           : isLast ? 'dashboard-column dashboard-column--last'
           : 'dashboard-column'
-        return renderCardPanel(group, startFlatIndex + i, cssClass)
+        return renderCardPanel(group, startFlatIndex + i, cssClass, i === 0, i === entries.length - 1)
       })
 
       items.push(
@@ -307,43 +310,62 @@ const EntityColumns = ({
             flexGrow: 0,
             flex: 'none',
             position: 'relative',
-            // No extra marginLeft — effectiveGap is now uniform for all gaps
-            // (handled by the scroll container's gap style).
+            height: '100%',
           }}
         >
-          {/* Vertical separator between adjacent group sections.
-              Centered in the effectiveGap: left = -(effectiveGap/2) - 0.5 */}
-          {needsDoubleGap && (
-            <div style={{
-              position: 'absolute',
-              left: -(effectiveGap / 2) - 0.5,
-              top: 0,
-              bottom: 0,
-              width: 1,
-              backgroundColor: 'var(--border)',
-              pointerEvents: 'none',
-            }} />
-          )}
+          {/* Bracket: filled rounded box behind cards */}
+          <div style={{
+            position: 'absolute',
+            top: GROUP_LABEL_BAR_HEIGHT / 2,
+            bottom: DASHBOARD_GAP,
+            left: -DASHBOARD_GAP,
+            right: -DASHBOARD_GAP,
+            border: '1px solid var(--bg-secondary)',
+            borderRadius: 5,
+            backgroundColor: 'var(--bg-secondary)',
+            zIndex: -1,
+            pointerEvents: 'none',
+          }} />
 
-          {/* Cards row — flex:1 so the wrapper fills the container height,
-              keeping the bottom bar at a consistent Y for all groups */}
+          {/* Label row — sticky pill */}
+          <div style={{
+            height: GROUP_LABEL_BAR_HEIGHT,
+            flexShrink: 0,
+            order: -1,
+            display: 'flex',
+            alignItems: 'center',
+            paddingLeft: `${DASHBOARD_GAP}px`,
+          }}>
+            <span style={{
+              position: 'sticky',
+              left: DASHBOARD_GAP,
+              zIndex: 1,
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--text-primary)',
+              whiteSpace: 'nowrap',
+              userSelect: 'none',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--text-secondary)',
+              borderRadius: '3px',
+              padding: '2px 8px',
+            }}>
+              {groupName}
+            </span>
+          </div>
+
+          {/* Cards row */}
           <div style={{
             display: 'flex',
             flexDirection: 'row',
-            gap: `${effectiveGap}px`,
+            gap: `${DASHBOARD_GAP}px`,
             alignItems: 'flex-start',
-            flex: 1,
+            height: `calc(100% - ${GROUP_LABEL_BAR_HEIGHT}px - ${DASHBOARD_GAP * 2}px)`,
           }}>
             {cards}
           </div>
-
-          {/* Bottom spacer bar — border-top visual only; label text is rendered
-              by the GroupLabelOverlay in DashboardView so it never scrolls */}
-          <div style={{
-            borderTop: '1px solid var(--border)',
-            height: GROUP_LABEL_BAR_HEIGHT,
-            flexShrink: 0,
-          }} />
         </div>
       )
     } else {
@@ -384,10 +406,11 @@ const EntityColumns = ({
       className="dashboard-scroll-container"
       onScroll={onScroll}
       style={{
-        // Uniform gap between all direct children (group wrappers + solo panels)
         gap: `${effectiveGap}px`,
-        // Reserve space at the bottom for the GroupLabelOverlay when grouping is on
-        paddingBottom: isGrouped ? `${GROUP_LABEL_BAR_HEIGHT}px` : undefined,
+        paddingLeft: `${edgePadding}px`,
+        paddingRight: `${edgePadding}px`,
+        scrollPaddingLeft: `${DASHBOARD_GAP}px`,
+        scrollPaddingRight: `${DASHBOARD_GAP}px`,
       }}
     >
       {items.length > 0 ? items : null}

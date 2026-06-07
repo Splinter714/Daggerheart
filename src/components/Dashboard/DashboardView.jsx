@@ -29,17 +29,13 @@ import './DashboardView.css'
 // it just snaps to the correct position when scrolling stops.
 const GROUP_LABEL_BAR_HEIGHT = 32
 
+const PILL_PADDING_LEFT = 8 // left inset from visible group edge
+
 const GroupLabelOverlay = ({ entityGroups, columnWidth, effectiveGap, scrollContainerRef }) => {
   const [labels, setLabels] = useState([])
-  const timerRef = useRef(null)
+  const rafRef = useRef(null)
 
-  const compute = useCallback(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
-    const scrollLeft = container.scrollLeft
-    const viewportWidth = container.clientWidth
-
-    // Build sections (same logic as EntityColumns buildSections)
+  const buildSections = useCallback(() => {
     const sections = []
     let i = 0
     while (i < entityGroups.length) {
@@ -56,56 +52,61 @@ const GroupLabelOverlay = ({ entityGroups, columnWidth, effectiveGap, scrollCont
         i++
       }
     }
+    return sections
+  }, [entityGroups])
+
+  const compute = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    const scrollLeft = container.scrollLeft
+    const viewportWidth = container.clientWidth
+    const sections = buildSections()
 
     const next = []
+    let leftmostClamped = false
     for (const { groupName, startFlatIndex, count } of sections) {
       const groupStart = DASHBOARD_GAP + startFlatIndex * (columnWidth + effectiveGap)
       const groupWidth  = count * columnWidth + (count - 1) * effectiveGap
       const groupEnd    = groupStart + groupWidth
 
-      // Group's visible range within the viewport
-      const visLeft  = Math.max(groupStart - scrollLeft, DASHBOARD_GAP)
-      const visRight = Math.min(groupEnd   - scrollLeft, viewportWidth - DASHBOARD_GAP)
-      if (visLeft >= visRight) continue  // not visible
+      const rawLeft  = groupStart - scrollLeft
+      const rawRight = groupEnd   - scrollLeft
 
-      // Centre of the visible slice, clamped so text doesn't bleed off either edge
-      const cx = (visLeft + visRight) / 2
-      next.push({ groupName, left: Math.round(cx) })
+      if (rawRight <= DASHBOARD_GAP) continue           // fully off left
+      if (rawLeft >= viewportWidth - DASHBOARD_GAP) continue  // fully off right
+
+      const isClipped = rawLeft < DASHBOARD_GAP
+      let left
+      if (isClipped && !leftmostClamped) {
+        // Only the leftmost partially-visible group gets the sticky pin
+        left = DASHBOARD_GAP + PILL_PADDING_LEFT
+        leftmostClamped = true
+      } else {
+        // All others track directly with their card — feel anchored
+        left = rawLeft + PILL_PADDING_LEFT
+      }
+      next.push({ groupName, left: Math.round(left) })
     }
     setLabels(next)
-  }, [entityGroups, columnWidth, effectiveGap, scrollContainerRef])
+  }, [buildSections, columnWidth, effectiveGap, scrollContainerRef])
 
-  // Update ONLY after scroll fully settles (including snap animation).
-  // scrollend fires after snap completes — that's the primary trigger.
-  // A long-debounce fallback covers browsers that don't yet fire scrollend.
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container) return
 
-    compute() // initial render
+    compute()
 
-    const supportsScrollEnd = 'onscrollend' in container
-
-    // scrollend: snap has finished, safe to update
-    const onScrollEnd = () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-      compute()
-    }
-
-    // Fallback for browsers without scrollend: long debounce so we wait past snap
     const onScroll = () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-      timerRef.current = setTimeout(compute, 500)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      rafRef.current = requestAnimationFrame(compute)
     }
 
-    container.addEventListener('scrollend', onScrollEnd)
-    if (!supportsScrollEnd) {
-      container.addEventListener('scroll', onScroll, { passive: true })
-    }
+    container.addEventListener('scroll', onScroll, { passive: true })
+    container.addEventListener('scrollend', compute)
     return () => {
-      container.removeEventListener('scrollend', onScrollEnd)
-      if (!supportsScrollEnd) container.removeEventListener('scroll', onScroll)
-      if (timerRef.current) clearTimeout(timerRef.current)
+      container.removeEventListener('scroll', onScroll)
+      container.removeEventListener('scrollend', compute)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [compute, scrollContainerRef])
 
@@ -114,14 +115,12 @@ const GroupLabelOverlay = ({ entityGroups, columnWidth, effectiveGap, scrollCont
   return (
     <div style={{
       position: 'absolute',
-      bottom: 0,
+      top: 0,
       left: 0,
       right: 0,
       height: GROUP_LABEL_BAR_HEIGHT,
       pointerEvents: 'none',
       zIndex: 6,
-      borderTop: '1px solid var(--border)',
-      backgroundColor: 'var(--bg-primary)',
     }}>
       {labels.map(({ groupName, left }) => (
         <span
@@ -130,14 +129,18 @@ const GroupLabelOverlay = ({ entityGroups, columnWidth, effectiveGap, scrollCont
             position: 'absolute',
             top: '50%',
             left,
-            transform: 'translate(-50%, -50%)',
-            fontSize: '0.72rem',
+            transform: 'translateY(-50%)',
+            fontSize: '0.68rem',
             fontWeight: 700,
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
-            color: 'var(--text-primary)',
+            color: 'var(--text-secondary)',
             whiteSpace: 'nowrap',
             userSelect: 'none',
+            background: 'var(--bg-primary)',
+            border: '1px solid var(--border)',
+            borderRadius: '3px',
+            padding: '2px 6px',
           }}
         >
           {groupName}
@@ -207,7 +210,7 @@ const DashboardContent = () => {
 
   // When grouping is active, widen all column gaps uniformly so the layout
   // calculation stays simple and cards never overflow the right edge.
-  const effectiveGap = groupBy !== 'none' ? DASHBOARD_GAP * 2 : DASHBOARD_GAP
+  const effectiveGap = groupBy !== 'none' ? DASHBOARD_GAP * 3 : DASHBOARD_GAP
 
   const { columnWidth } = useColumnLayout(scrollContainerRef, effectiveGap)
 
@@ -525,14 +528,6 @@ selectedCustomAdversaryId={selectedCustomAdversaryId}
             onChangeBpAdjustments={setBpAdjustments}
             availableBattlePoints={availableBattlePoints}
             spentBattlePoints={spentBattlePoints}
-          />
-        )}
-        {groupBy !== 'none' && (
-          <GroupLabelOverlay
-            entityGroups={entityGroups}
-            columnWidth={columnWidth}
-            effectiveGap={effectiveGap}
-            scrollContainerRef={scrollContainerRef}
           />
         )}
         <EntityColumns

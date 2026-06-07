@@ -11,7 +11,7 @@ const Panel = ({
   const baseStyle = {
     flex: 1,
     minWidth: 0,
-    background: 'var(--bg-primary)',
+    background: 'transparent',
     overflowY: 'auto',
     overflowX: isLeft ? 'auto' : 'hidden', // Right panel prevents horizontal spill
     display: isLeft ? 'block' : 'flex',
