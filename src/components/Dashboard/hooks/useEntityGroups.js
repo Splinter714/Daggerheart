@@ -5,6 +5,10 @@ import { applySort, getGroupLabel } from './useDashboardSortGroup'
  * Combines adversary groups (already grouped in state) with countdowns into
  * a single list for the rendering layer to treat each as a column.
  * Applies sort and optional grouping to adversary groups.
+ *
+ * When groupBy is active, every adversary entry carries a `groupName` string
+ * so EntityColumns can identify and wrap same-group runs into a single row
+ * with a shared sticky header above all the cards.
  */
 export const useEntityGroups = (adversaryGroups, countdowns, sortBy = 'name', sortDir = 'asc', groupBy = 'none') => {
   const getEntityGroups = useCallback(() => {
@@ -12,24 +16,15 @@ export const useEntityGroups = (adversaryGroups, countdowns, sortBy = 'name', so
 
     const sortedAdversaryGroups = applySort(adversaryGroups, sortBy, sortDir)
 
-    let lastGroupLabel = null
-
     sortedAdversaryGroups.forEach((group) => {
-      let groupLabel = null
-      if (groupBy !== 'none') {
-        const label = getGroupLabel(group, groupBy)
-        if (label !== lastGroupLabel) {
-          groupLabel = label
-          lastGroupLabel = label
-        }
-      }
+      const groupName = groupBy !== 'none' ? getGroupLabel(group, groupBy) : null
 
       groups.push({
         type: 'adversary',
         baseName: group.baseName,
         template: group,
         instances: group.instances,
-        groupLabel,
+        groupName,
       })
     })
 
@@ -39,6 +34,7 @@ export const useEntityGroups = (adversaryGroups, countdowns, sortBy = 'name', so
         baseName: countdown.name,
         template: countdown,
         instances: [countdown],
+        groupName: null,
       })
     })
 
