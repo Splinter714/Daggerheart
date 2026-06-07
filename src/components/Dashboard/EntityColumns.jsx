@@ -3,28 +3,75 @@ import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
 
-// Collect consecutive adversary entries with the same groupName into sections.
-function buildSections(entityGroups) {
-  const sections = []
-  let i = 0
-  while (i < entityGroups.length) {
-    const g = entityGroups[i]
-    if (g.groupName && g.type === 'adversary') {
-      const entries = [g]
-      let j = i + 1
-      while (j < entityGroups.length && entityGroups[j].groupName === g.groupName && entityGroups[j].type === 'adversary') {
-        entries.push(entityGroups[j])
-        j++
-      }
-      sections.push({ type: 'grouped', groupName: g.groupName, entries, startFlatIndex: i })
-      i = j
-    } else {
-      sections.push({ type: 'solo', entry: g, flatIndex: i })
-      i++
-    }
+// Width of each vertical group divider column (narrow but enough for rotated text)
+const DIVIDER_WIDTH = 20
+
+// Count how many group-boundary dividers appear strictly before flat index `i`
+// (a boundary is where groupName changes from one value to another non-null value)
+function numDividersBefore(flatIndex, groups) {
+  if (flatIndex === 0) return 0
+  let count = 0
+  let lastGN = groups[0]?.groupName ?? null
+  for (let i = 1; i < flatIndex; i++) {
+    const gn = groups[i]?.groupName ?? null
+    if (gn && gn !== lastGN) count++
+    lastGN = gn || lastGN  // keep last non-null groupName when transitioning
   }
-  return sections
+  return count
 }
+
+// Pixel scroll-left of a card at flat index `i`, accounting for any dividers before it
+function cardScrollPosition(flatIndex, groups, columnWidth) {
+  const divs = numDividersBefore(flatIndex, groups)
+  return DASHBOARD_GAP + flatIndex * (columnWidth + DASHBOARD_GAP) + divs * (DIVIDER_WIDTH + DASHBOARD_GAP)
+}
+
+const VerticalDivider = ({ groupName }) => (
+  <div style={{
+    width: DIVIDER_WIDTH,
+    flexShrink: 0,
+    flexGrow: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingTop: DASHBOARD_GAP,
+    paddingBottom: DASHBOARD_GAP,
+    scrollSnapAlign: 'none',
+    position: 'relative',
+  }}>
+    {/* Thin vertical line */}
+    <div style={{
+      position: 'absolute',
+      top: DASHBOARD_GAP,
+      bottom: DASHBOARD_GAP,
+      left: '50%',
+      width: 1,
+      backgroundColor: 'var(--border)',
+      transform: 'translateX(-50%)',
+    }} />
+    {/* Rotated group label, centered on the line */}
+    <div style={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%) rotate(180deg)',
+      writingMode: 'vertical-rl',
+      textOrientation: 'mixed',
+      fontSize: '0.68rem',
+      fontWeight: 700,
+      letterSpacing: '0.1em',
+      textTransform: 'uppercase',
+      color: 'var(--text-primary)',
+      backgroundColor: 'var(--bg-primary)',
+      padding: '8px 2px',
+      whiteSpace: 'nowrap',
+      userSelect: 'none',
+      pointerEvents: 'none',
+    }}>
+      {groupName}
+    </div>
+  </div>
+)
 
 const EntityColumns = ({
   entityGroups,
@@ -54,56 +101,8 @@ const EntityColumns = ({
   onOpenBrowser,
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
-  // Map of sectionKey → { el (label DOM node), startFlatIndex, count }
-  const labelInfoRef = useRef({})
 
-  // Reposition all group labels so each is centered over its visible cards.
-  // Called on scroll and whenever layout changes (columns, entityGroups).
-  const updateLabelPositions = useCallback(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
-    const viewportLeft = container.scrollLeft
-    const viewportRight = viewportLeft + container.clientWidth
-
-    Object.values(labelInfoRef.current).forEach(({ el, startFlatIndex, count }) => {
-      if (!el) return
-      const groupStart = DASHBOARD_GAP + startFlatIndex * (columnWidth + DASHBOARD_GAP)
-      const groupWidth = count * columnWidth + (count - 1) * DASHBOARD_GAP
-      const groupEnd = groupStart + groupWidth
-
-      // Intersection of group with viewport, relative to the group wrapper
-      const visibleLeft = Math.max(groupStart, viewportLeft) - groupStart
-      const visibleRight = Math.min(groupEnd, viewportRight) - groupStart
-      const centerX = (visibleLeft + visibleRight) / 2
-
-      // Clamp so the label never bleeds outside the group wrapper
-      const halfLabel = el.offsetWidth / 2
-      const clamped = Math.max(halfLabel, Math.min(groupWidth - halfLabel, centerX))
-
-      el.style.left = `${clamped}px`
-      // No CSS transition — immediate repositioning as user scrolls
-    })
-  }, [columnWidth, scrollContainerRef])
-
-  // Attach scroll listener and run once on mount / when layout changes
-  useEffect(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
-    updateLabelPositions()
-    container.addEventListener('scroll', updateLabelPositions, { passive: true })
-    return () => container.removeEventListener('scroll', updateLabelPositions)
-  }, [updateLabelPositions, entityGroups])
-
-  const registerLabel = (key, startFlatIndex, count) => (el) => {
-    if (el) {
-      labelInfoRef.current[key] = { el, startFlatIndex, count }
-    } else {
-      delete labelInfoRef.current[key]
-    }
-  }
-
-  // Render a card Panel for a single entity group entry
-  const renderCardPanel = (group, flatIndex, cssClass, insideGroup = false) => {
+  const renderCardPanel = (group, flatIndex, cssClass, currentDivCount) => {
     const isSpacerPosition =
       !isGrouped &&
       removingCardSpacer &&
@@ -140,8 +139,7 @@ const EntityColumns = ({
           width: `${columnWidth}px`,
           flexShrink: 0, flexGrow: 0, flex: 'none',
           paddingRight: '0',
-          // Cards inside a group wrapper get no top padding — the label area provides it
-          paddingTop: insideGroup ? '0' : `${DASHBOARD_GAP}px`,
+          paddingTop: `${DASHBOARD_GAP}px`,
           paddingBottom: `${DASHBOARD_GAP}px`,
           scrollSnapAlign: 'start',
           overflow: group.type === 'adversary' ? 'visible' : 'hidden',
@@ -226,7 +224,8 @@ const EntityColumns = ({
                       const updatedGroups = getEntityGroups()
                       const groupIndex = updatedGroups.findIndex(g => g.baseName === group.baseName && g.type === 'adversary')
                       if (groupIndex >= 0) {
-                        const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
+                        // Use divider-aware position formula
+                        const cardPosition = cardScrollPosition(groupIndex, updatedGroups, columnWidth)
                         const cardEnd = cardPosition + columnWidth
                         const margin = 10
                         const isVisible = cardPosition >= currentScroll - margin && cardEnd <= currentScroll + effectiveWidth + margin
@@ -234,9 +233,9 @@ const EntityColumns = ({
                           let targetScroll
                           if (cardEnd > currentScroll + effectiveWidth + margin) {
                             const visibleColumns = Math.round((containerWidth - DASHBOARD_GAP) / (columnWidth + DASHBOARD_GAP))
-                            targetScroll = (groupIndex - visibleColumns + 2) * (columnWidth + DASHBOARD_GAP)
+                            targetScroll = cardScrollPosition(Math.max(0, groupIndex - visibleColumns + 2), updatedGroups, columnWidth)
                           } else {
-                            targetScroll = groupIndex * (columnWidth + DASHBOARD_GAP)
+                            targetScroll = cardScrollPosition(groupIndex, updatedGroups, columnWidth) - DASHBOARD_GAP
                           }
                           smoothScrollTo(Math.max(0, targetScroll), 500)
                         }
@@ -264,7 +263,9 @@ const EntityColumns = ({
                       const c = scrollContainerRef.current
                       wasAtMaxScroll = Math.abs(c.scrollLeft - (c.scrollWidth - c.clientWidth)) < 1
                     }
-                    setRemovingCardSpacer({ baseName: group.baseName, groupIndex })
+                    // items-array index = flat index + number of dividers before it
+                    const itemsIndex = groupIndex + numDividersBefore(groupIndex, entityGroups)
+                    setRemovingCardSpacer({ baseName: group.baseName, groupIndex: itemsIndex })
                     setSpacerShrinking(false)
                     if (isLeftmostColumn && scrollContainerRef.current) scrollContainerRef.current.style.scrollSnapType = 'none'
                     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -306,106 +307,33 @@ const EntityColumns = ({
     )
   }
 
-  const sections = buildSections(entityGroups)
+  // Build the flat items array, injecting vertical dividers between groups
   const items = []
+  let lastGroupName = null
+  let divCount = 0
 
-  sections.forEach((section, sectionIndex) => {
-    const isFirstSection = sectionIndex === 0
-    const isLastSection = sectionIndex === sections.length - 1
+  entityGroups.forEach((group, index) => {
+    const isFirst = index === 0
+    const isLast = index === entityGroups.length - 1
+    const cssClass = isFirst ? 'dashboard-column dashboard-column--first'
+      : isLast ? 'dashboard-column dashboard-column--last'
+      : 'dashboard-column'
 
-    if (section.type === 'grouped') {
-      const { groupName, entries, startFlatIndex } = section
-      const sectionKey = `group-section-${groupName}-${startFlatIndex}`
-      const count = entries.length
-
-      const cards = entries.map((group, i) => {
-        const isFirst = isFirstSection && i === 0
-        const isLast = isLastSection && i === entries.length - 1
-        const cssClass = isFirst ? 'dashboard-column dashboard-column--first'
-          : isLast ? 'dashboard-column dashboard-column--last'
-          : 'dashboard-column'
-        return renderCardPanel(group, startFlatIndex + i, cssClass, true)
-      })
-
-      items.push(
-        <div
-          key={sectionKey}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexShrink: 0,
-            flexGrow: 0,
-            flex: 'none',
-          }}
-        >
-          {/* Label area: bracket line + centered label. Label position set by scroll handler. */}
-          <div style={{ position: 'relative', height: DASHBOARD_GAP + 24, flexShrink: 0 }}>
-            {/* Horizontal line spanning full group width */}
-            <div style={{
-              position: 'absolute',
-              left: 0, right: 0,
-              top: '50%',
-              height: 1,
-              backgroundColor: 'var(--border)',
-              pointerEvents: 'none',
-            }} />
-            {/* Left bracket cap */}
-            <div style={{
-              position: 'absolute',
-              left: 0, top: '50%',
-              transform: 'translateY(-50%)',
-              width: 1, height: 12,
-              backgroundColor: 'var(--border)',
-              pointerEvents: 'none',
-            }} />
-            {/* Right bracket cap */}
-            <div style={{
-              position: 'absolute',
-              right: 0, top: '50%',
-              transform: 'translateY(-50%)',
-              width: 1, height: 12,
-              backgroundColor: 'var(--border)',
-              pointerEvents: 'none',
-            }} />
-            {/* Label text: positioned by JS, centered over visible portion */}
-            <span
-              ref={registerLabel(sectionKey, startFlatIndex, count)}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                backgroundColor: 'var(--bg-primary)',
-                padding: '0 8px',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                color: 'var(--text-primary)',
-                whiteSpace: 'nowrap',
-                pointerEvents: 'none',
-                userSelect: 'none',
-              }}
-            >
-              {groupName}
-            </span>
-          </div>
-
-          {/* Cards row */}
-          <div style={{ display: 'flex', flexDirection: 'row', gap: `${DASHBOARD_GAP}px`, alignItems: 'stretch' }}>
-            {cards}
-          </div>
-        </div>
-      )
-    } else {
-      const { entry: group, flatIndex } = section
-      const cssClass = isFirstSection ? 'dashboard-column dashboard-column--first'
-        : isLastSection ? 'dashboard-column dashboard-column--last'
-        : 'dashboard-column'
-      items.push(renderCardPanel(group, flatIndex, cssClass, false))
+    // Inject a divider before each new group boundary (not before the very first group)
+    if (group.groupName && group.groupName !== lastGroupName) {
+      if (lastGroupName !== null) {
+        items.push(<VerticalDivider key={`divider-${group.groupName}-${index}`} groupName={group.groupName} />)
+        divCount++
+      }
+      lastGroupName = group.groupName
+    } else if (!group.groupName) {
+      lastGroupName = null
     }
+
+    items.push(renderCardPanel(group, index, cssClass, divCount))
   })
 
-  // Spacer for animated card removal (non-grouped mode only)
+  // Spacer for animated card removal (only when groupBy is off so no dividers exist)
   if (!isGrouped && removingCardSpacer && !items.some(item => item?.key === `spacer-${removingCardSpacer.baseName}`)) {
     const insertIndex = Math.min(removingCardSpacer.groupIndex, items.length)
     items.splice(insertIndex, 0,
