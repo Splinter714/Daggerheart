@@ -6,7 +6,7 @@ const WHITE_UNDERLINE = { color: 'var(--text-primary)', textDecoration: 'underli
 // Rules in order — longer/more specific patterns first
 const RULES = [
   // Trigger clauses — "When [condition]" up to (not including) the comma — white only
-  { regex: /\b(?:When|If)\b/g, style: WHITE_UNDERLINE },
+  { regex: /(?:^|(?<=[.!?]\s))(?:When|If)\b/g, style: WHITE_UNDERLINE },
   // Frequency limiter — "Once per scene/turn/round/encounter" — white only
   { regex: /\bOnce per (?:scene|turn|round|encounter)\b/gi, style: WHITE },
   // "You must spend/mark" — GM cost even though it uses "must"
