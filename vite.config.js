@@ -38,7 +38,7 @@ export default defineConfig({
       'irrigation-nothing-comfortable-occasions.trycloudflare.com'
     ],
     hmr: {
-      port: 5173,
+      port: 5179,
       host: 'localhost'
     },
     force: true // Force reload on changes

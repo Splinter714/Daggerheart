@@ -307,26 +307,53 @@ const EntityColumns = ({
             flexGrow: 0,
             flex: 'none',
             position: 'relative',
-            // No extra marginLeft — effectiveGap is now uniform for all gaps
-            // (handled by the scroll container's gap style).
+            height: '100%',
           }}
         >
-          {/* Vertical separator between adjacent group sections.
-              Centered in the effectiveGap: left = -(effectiveGap/2) - 0.5 */}
-          {needsDoubleGap && (
-            <div style={{
-              position: 'absolute',
-              left: -(effectiveGap / 2) - 0.5,
-              top: 0,
-              bottom: 0,
-              width: 1,
-              backgroundColor: 'var(--border)',
-              pointerEvents: 'none',
-            }} />
-          )}
+          {/* Bracket: filled rounded box behind cards */}
+          <div style={{
+            position: 'absolute',
+            top: GROUP_LABEL_BAR_HEIGHT / 2,
+            bottom: DASHBOARD_GAP,
+            left: -DASHBOARD_GAP,
+            right: -DASHBOARD_GAP,
+            border: '1px solid var(--bg-secondary)',
+            borderRadius: 5,
+            backgroundColor: 'var(--bg-secondary)',
+            zIndex: -1,
+            pointerEvents: 'none',
+          }} />
 
-          {/* Cards row — flex:1 so the wrapper fills the container height,
-              keeping the bottom bar at a consistent Y for all groups */}
+          {/* Label row — sticky pill */}
+          <div style={{
+            height: GROUP_LABEL_BAR_HEIGHT,
+            flexShrink: 0,
+            order: -1,
+            display: 'flex',
+            alignItems: 'center',
+            paddingLeft: `${DASHBOARD_GAP}px`,
+          }}>
+            <span style={{
+              position: 'sticky',
+              left: DASHBOARD_GAP,
+              zIndex: 1,
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--text-primary)',
+              whiteSpace: 'nowrap',
+              userSelect: 'none',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--text-secondary)',
+              borderRadius: '3px',
+              padding: '2px 8px',
+            }}>
+              {groupName}
+            </span>
+          </div>
+
+          {/* Cards row */}
           <div style={{
             display: 'flex',
             flexDirection: 'row',
@@ -336,14 +363,6 @@ const EntityColumns = ({
           }}>
             {cards}
           </div>
-
-          {/* Bottom spacer bar — border-top visual only; label text is rendered
-              by the GroupLabelOverlay in DashboardView so it never scrolls */}
-          <div style={{
-            borderTop: '1px solid var(--border)',
-            height: GROUP_LABEL_BAR_HEIGHT,
-            flexShrink: 0,
-          }} />
         </div>
       )
     } else {
@@ -386,8 +405,6 @@ const EntityColumns = ({
       style={{
         // Uniform gap between all direct children (group wrappers + solo panels)
         gap: `${effectiveGap}px`,
-        // Reserve space at the bottom for the GroupLabelOverlay when grouping is on
-        paddingBottom: isGrouped ? `${GROUP_LABEL_BAR_HEIGHT}px` : undefined,
       }}
     >
       {items.length > 0 ? items : null}
