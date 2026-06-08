@@ -613,9 +613,12 @@ const EntityColumns = ({
       }}
     >
       {items.length > 0 ? items : null}
-      {slideEnabled && browserOpenAtPosition === null && items.length > 0 && (
+      {slideEnabled && !isNarrow && browserOpenAtPosition === null && items.length > 0 && (
         // Trailing black space so the very last card can reach its start-snap
         // position (otherwise scroll-snap can't satisfy it and bounces back).
+        // Multi-column only: in narrow/single-column the card already fills the
+        // viewport at its snap, and the spacer's flex gap would leave a dead
+        // zone past the last card with no snap target.
         <div
           data-no-slide
           aria-hidden
