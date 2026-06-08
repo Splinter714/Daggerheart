@@ -768,15 +768,6 @@ const GameCard = ({
             />
                         </div>
                       )}
-        <FeaturesSection
-                              item={item}
-          isEditMode={isEditMode}
-                              onUpdate={onUpdate}
-                              handleFeatureDeleteClick={handleFeatureDeleteClick}
-                              deleteConfirmations={deleteConfirmations}
-                              getFeatureKey={getFeatureKey}
-                            />
-
         <StatusSection
                               item={item}
           instances={instances}
@@ -789,6 +780,15 @@ const GameCard = ({
           onAddInstance={onAddInstance}
           onRemoveInstance={onRemoveInstance}
         />
+
+        <FeaturesSection
+                              item={item}
+          isEditMode={isEditMode}
+                              onUpdate={onUpdate}
+                              handleFeatureDeleteClick={handleFeatureDeleteClick}
+                              deleteConfirmations={deleteConfirmations}
+                              getFeatureKey={getFeatureKey}
+                            />
 
         <DescriptionSection item={item} isEditMode={isEditMode} mode={mode} onUpdate={onUpdate} />
 
