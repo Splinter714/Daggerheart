@@ -115,6 +115,7 @@ const GameCard = ({
   const nameInputRef = useRef(null)
   const customCreatorRef = useRef(null)
   const cardRef = useRef(null)
+  const scrollableRef = useRef(null)
 
   // Quick edit mode — local toggle, saves immediately via onUpdate, no Save/Cancel needed
   const [quickEdit, setQuickEdit] = useState(false)
@@ -484,26 +485,8 @@ const GameCard = ({
                   >
                     <Minus size={14} />
                   </button>
-                  <div style={{
-                    backgroundColor: 'black',
-                    border: '1px solid white',
-                    borderRadius: '50%',
-                    minWidth: '24px',
-                    height: '24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingTop: '1px',
-                    paddingLeft: '3px',
-                    paddingRight: '3px',
-                    flexShrink: 0,
-                  }}>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'white' }}>
-                      {instances.length}
-                    </span>
-                  </div>
                   <button
-                    onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
+                    onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item); scrollableRef.current?.scrollTo({ top: 120, behavior: 'smooth' }) }}
                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center' }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)' }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
@@ -519,6 +502,7 @@ const GameCard = ({
 
         {/* Expandable Content Section - Scrollable */}
                   <div
+          ref={scrollableRef}
           style={{
           borderRadius: '0 0 8px 8px',
           flex: 1,
