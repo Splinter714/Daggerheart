@@ -111,7 +111,10 @@ const DashboardContent = () => {
     getEntityGroups,
     smoothScrollTo,
     browserOpenAtPosition,
-    columnWidth
+    columnWidth,
+    sortBy,
+    sortDir,
+    groupBy
   })
 
   // Handle editing an adversary
