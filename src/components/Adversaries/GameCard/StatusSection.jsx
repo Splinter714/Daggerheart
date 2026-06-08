@@ -67,7 +67,7 @@ const StatusSection = ({
       <div key={instance.id} data-instance-id={instance.id}>
         <div
           style={{
-            backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-card)',
+            backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'black',
             borderRadius: '6px',
             paddingTop: 0,
             paddingBottom: 0,
@@ -255,7 +255,14 @@ const StatusSection = ({
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
-          {instances.map((instance) => renderInstanceRow(instance))}
+          {[...instances]
+            .sort((a, b) => {
+              const aDead = (a.hp || 0) >= (a.hpMax || 1)
+              const bDead = (b.hp || 0) >= (b.hpMax || 1)
+              if (aDead !== bDead) return aDead ? 1 : -1
+              return (a.duplicateNumber || 1) - (b.duplicateNumber || 1)
+            })
+            .map((instance) => renderInstanceRow(instance))}
         </div>
       )}
     </div>
