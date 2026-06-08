@@ -1151,9 +1151,8 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
   const deleteAdversaryTimeouts = useRef({}) // Track timeouts for each custom adversary
   
   // Keyboard navigation state - track by item ID for stability
-  const [focusedRowIndex, setFocusedRowIndex] = useState(-1)
   const [focusedItemId, setFocusedItemId] = useState(null)
-  const rowRefs = useRef({}) // Refs for each row to scroll into view
+  const rowRefs = useRef({}) // Refs for each row (keyed by item id) to scroll into view
   
   // Export custom adversaries to CSV file
   const handleExportCustomAdversaries = () => {
@@ -1317,42 +1316,29 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
           importedAdversaries = importData.customAdversaries
         }
         
-        // Check for duplicates and merge
+        // Check for duplicates against existing custom content
         const existingAdversaries = customContent.adversaries || []
-        const mergedAdversaries = [...existingAdversaries]
-        
+
         let addedCount = 0
         let skippedCount = 0
-        
+
         importedAdversaries.forEach(importedAdv => {
           // Check if adversary with same name already exists
-          const exists = existingAdversaries.some(existing => 
+          const exists = existingAdversaries.some(existing =>
             existing.name === importedAdv.name && existing.source === importedAdv.source
           )
-          
+
           if (!exists) {
-            // Generate new ID to avoid conflicts
-            const newAdversary = {
-              ...importedAdv,
-              id: `custom-adv-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
-              hp: 0,
-              stress: 0
-            }
-            mergedAdversaries.push(newAdversary)
+            // Add via the React action — it assigns a fresh id and updates state
+            // in place, so no page reload is needed.
+            addCustomAdversary({ ...importedAdv, hp: 0, stress: 0 })
             addedCount++
           } else {
             skippedCount++
           }
         })
-        
-        // Update the custom content
+
         if (addedCount > 0) {
-          // Update localStorage directly
-          localStorage.setItem('daggerheart-custom-adversaries', JSON.stringify(mergedAdversaries))
-          
-          // Force a page reload to update the state
-          window.location.reload()
-          
           alert(`Import successful! Added ${addedCount} new adversaries${skippedCount > 0 ? `, skipped ${skippedCount} duplicates` : ''}.`)
         } else {
           alert('No new adversaries were added. All imported adversaries already exist.')
@@ -1528,7 +1514,6 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
     const typesChanged = prevTypesRef.current !== JSON.stringify(selectedTypes)
     
     if (searchChanged || tiersChanged || typesChanged) {
-      setFocusedRowIndex(-1)
       setFocusedItemId(null)
       prevSearchRef.current = searchTerm
       prevTiersRef.current = JSON.stringify(selectedTiers)
@@ -1556,18 +1541,24 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
       }
       
       const maxIndex = filteredAndSortedData.length - 1
-      
+      // Resolve the focused row's current position from its id, so navigation
+      // stays correct after the list is filtered or sorted.
+      const currentIndex = focusedItemId != null
+        ? filteredAndSortedData.findIndex(i => i.id === focusedItemId)
+        : -1
+
       if (event.key === 'ArrowDown') {
         event.preventDefault()
-        setFocusedRowIndex(prev => {
-          const next = prev < maxIndex ? prev + 1 : prev
+        {
+          const next = currentIndex < maxIndex ? currentIndex + 1 : currentIndex
           // Update focused item ID
           if (next >= 0 && next < filteredAndSortedData.length) {
-            setFocusedItemId(filteredAndSortedData[next]?.id || null)
+            const nextId = filteredAndSortedData[next]?.id || null
+            setFocusedItemId(nextId)
             // Scroll row into view - align bottom of focused row with bottom of container (ArrowDown)
-            if (rowRefs.current[next]) {
+            if (rowRefs.current[nextId]) {
               setTimeout(() => {
-                const rowElement = rowRefs.current[next]
+                const rowElement = rowRefs.current[nextId]
                 if (rowElement) {
                   const container = rowElement.closest('.browser-content')
                   if (container) {
@@ -1618,30 +1609,30 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
               }, 0)
             }
           }
-          return next
-        })
+        }
       } else if (event.key === 'ArrowUp') {
         event.preventDefault()
-        setFocusedRowIndex(prev => {
+        {
           // If at top or going above top, focus search input
-          if (prev <= 0) {
+          if (currentIndex <= 0) {
             setFocusedItemId(null)
             // Focus search input
             setTimeout(() => {
               const searchInput = document.querySelector('.browser-header input[type="text"]')
               searchInput?.focus()
             }, 0)
-            return -1
+            return
           }
-          
-          const next = prev - 1
+
+          const next = currentIndex - 1
           // Update focused item ID
           if (next >= 0 && next < filteredAndSortedData.length) {
-            setFocusedItemId(filteredAndSortedData[next]?.id || null)
+            const nextId = filteredAndSortedData[next]?.id || null
+            setFocusedItemId(nextId)
             // Scroll row into view with custom logic (ArrowUp)
-            if (rowRefs.current[next]) {
+            if (rowRefs.current[nextId]) {
               setTimeout(() => {
-                const rowElement = rowRefs.current[next]
+                const rowElement = rowRefs.current[nextId]
                 if (rowElement) {
                   const container = rowElement.closest('.browser-content')
                   if (container) {
@@ -1700,11 +1691,10 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
           } else {
             setFocusedItemId(null)
           }
-          return next
-        })
-      } else if (event.key === 'Enter' && focusedRowIndex >= 0 && focusedRowIndex <= maxIndex) {
+        }
+      } else if (event.key === 'Enter' && currentIndex >= 0 && currentIndex <= maxIndex) {
         event.preventDefault()
-        const focusedItem = filteredAndSortedData[focusedRowIndex]
+        const focusedItem = filteredAndSortedData[currentIndex]
         if (focusedItem && onAddItem) {
           onAddItem(focusedItem)
           // Keep focus on the same row after adding
@@ -1717,7 +1707,7 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [activeTab, filteredAndSortedData, focusedRowIndex, onAddItem])
+  }, [activeTab, filteredAndSortedData, focusedItemId, onAddItem])
 
   // Calculate remaining battle points budget
   const calculateRemainingBudget = () => {
@@ -1840,7 +1830,7 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
             />
           </thead>
           <tbody>
-            {filteredAndSortedData.map((item, index) => {
+            {filteredAndSortedData.map((item) => {
               return (
                 <BrowserRow
                   key={item.id}
@@ -1852,14 +1842,14 @@ const Browser = ({ type, onAddItem, onCancel = null, onRowClick, encounterItems 
                   pcCount={pcCount}
                   playerTier={playerTier}
                   remainingBudget={remainingBudget}
-                  isFocused={focusedItemId === item.id || focusedRowIndex === index}
+                  isFocused={focusedItemId === item.id}
                   onDeleteCustomAdversary={type === 'adversary' ? handleDeleteCustomAdversary : null}
                   isDeleteConfirmed={deleteAdversaryConfirmations[item.id] || false}
                   rowRef={(el) => {
                     if (el) {
-                      rowRefs.current[index] = el
+                      rowRefs.current[item.id] = el
                     } else {
-                      delete rowRefs.current[index]
+                      delete rowRefs.current[item.id]
                     }
                   }}
                 />
