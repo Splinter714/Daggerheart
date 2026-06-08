@@ -18,7 +18,7 @@ const ThresholdTag = ({ value }) => (
       width="40"
       height="32"
       viewBox="0 0 40 32"
-      fill="var(--bg-primary)"
+      fill="black"
       stroke="var(--text-secondary)"
       strokeWidth="1"
       strokeLinecap="round"
@@ -32,7 +32,7 @@ const ThresholdTag = ({ value }) => (
         position: 'absolute',
         fontSize: '0.8rem',
         fontWeight: 500,
-        color: 'var(--text-primary)',
+        color: 'white',
         textAlign: 'center',
         zIndex: 2,
         left: '50%',
@@ -67,7 +67,7 @@ const StatusSection = ({
       <div key={instance.id} data-instance-id={instance.id}>
         <div
           style={{
-            backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-primary)',
+            backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-card)',
             borderRadius: '6px',
             paddingTop: 0,
             paddingBottom: 0,
@@ -107,7 +107,7 @@ const StatusSection = ({
           )}
           <div
             style={{
-              backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-card)',
+              backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'black',
               border: '1px solid',
               borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
               borderRadius: '50%',
@@ -126,7 +126,7 @@ const StatusSection = ({
               style={{
                 fontSize: '0.8rem',
                 fontWeight: 600,
-                color: isInstanceDead ? 'var(--gray-400)' : 'var(--text-primary)',
+                color: isInstanceDead ? 'var(--gray-400)' : 'white',
               }}
             >
               {instance.duplicateNumber || 1}
@@ -209,7 +209,7 @@ const StatusSection = ({
               zIndex: 1,
             }}
           >
-            <rect x="20" y="6" width="260" height="24" fill="var(--bg-primary)" stroke="var(--text-secondary)" strokeWidth="1" rx="4" />
+            <rect x="20" y="6" width="260" height="24" fill="var(--bg-card)" stroke="var(--text-secondary)" strokeWidth="1" rx="4" />
           </svg>
           <div
             style={{

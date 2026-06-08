@@ -381,7 +381,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
                     height: '24px',
                     border: '1px solid var(--text-secondary)',
                     borderRadius: '4px',
-                    backgroundColor: 'transparent',
+                    backgroundColor: 'black',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -392,7 +392,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
                     style={{
                       fontSize: '0.8rem',
                       fontWeight: 600,
-                      color: 'var(--text-primary)'
+                      color: 'white'
                     }}
                   >
                     {bonus}
@@ -444,7 +444,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
                 style={{
                   fontSize: '0.8rem',
                   fontWeight: 600,
-                  color: 'var(--text-primary)'
+                  color: 'white'
                 }}
               >
                 {exp.modifier >= 0 ? '+' : ''}

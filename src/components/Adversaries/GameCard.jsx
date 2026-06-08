@@ -564,12 +564,22 @@ const GameCard = ({
             paddingTop: '1px',
                     width: '36px'
                 }}>
-                    <Hexagon 
-                      size={32} 
+                    <div style={{
+                      position: 'absolute',
+                      width: '22px',
+                      height: '22px',
+                      backgroundColor: 'black',
+                      clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                      zIndex: 0,
+                    }} />
+                    <Hexagon
+                      size={32}
                     strokeWidth={1}
                     style={{
                         color: 'var(--text-secondary)',
-                        transform: 'rotate(0deg)'
+                        transform: 'rotate(0deg)',
+                        position: 'relative',
+                        zIndex: 1,
                     }}
                   />
                     {isEditMode ? (
@@ -619,7 +629,8 @@ const GameCard = ({
                     fontSize: '0.8rem',
                     fontWeight: 600,
                     color: 'white',
-                    pointerEvents: 'none'
+                    pointerEvents: 'none',
+                    zIndex: 2,
                   }}>
                         {item.difficulty}
                   </span>
@@ -653,13 +664,23 @@ const GameCard = ({
             paddingTop: '1px',
                     width: '36px'
                   }}>
-                    <Locate 
-                      size={38} 
+                    <div style={{
+                      position: 'absolute',
+                      width: '22px',
+                      height: '22px',
+                      backgroundColor: 'black',
+                      transform: 'rotate(45deg)',
+                      zIndex: 0,
+                    }} />
+                    <Locate
+                      size={38}
                       strokeWidth={1}
-                      style={{ 
+                      style={{
                         color: 'var(--text-secondary)',
-                        transform: 'rotate(45deg)'
-                      }} 
+                        transform: 'rotate(45deg)',
+                        position: 'relative',
+                        zIndex: 1,
+                      }}
                     />
                     {isEditMode ? (
                       <input
@@ -731,7 +752,8 @@ const GameCard = ({
                         fontSize: '0.8rem',
                         fontWeight: 600,
                         color: 'white',
-                        pointerEvents: 'none'
+                        pointerEvents: 'none',
+                        zIndex: 2,
                       }}>
                         {(() => {
                           // If it's a string with dice notation (contains 'd'), display as-is
