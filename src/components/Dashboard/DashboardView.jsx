@@ -211,8 +211,9 @@ const DashboardContent = () => {
   // When grouping is active, widen all column gaps uniformly so the layout
   // calculation stays simple and cards never overflow the right edge.
   const effectiveGap = groupBy !== 'none' ? DASHBOARD_GAP * 3 : DASHBOARD_GAP
+  const edgePadding = groupBy !== 'none' ? DASHBOARD_GAP * 2 : DASHBOARD_GAP
 
-  const { columnWidth } = useColumnLayout(scrollContainerRef, effectiveGap)
+  const { columnWidth } = useColumnLayout(scrollContainerRef, effectiveGap, edgePadding)
 
   const { browserOpenAtPosition, handleOpenBrowser, handleCloseBrowser } = useBrowserOverlay({
     scrollContainerRef,

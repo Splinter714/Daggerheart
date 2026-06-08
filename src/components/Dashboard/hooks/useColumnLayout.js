@@ -7,11 +7,11 @@ const getMinColumnWidth = (columnCount) => {
 }
 
 // effectiveGap: the gap between every column (may be wider than DASHBOARD_GAP when grouping is on).
-// Container padding-left/right always stays DASHBOARD_GAP regardless of effectiveGap.
-const calculateColumnLayout = (width, effectiveGap = DASHBOARD_GAP) => {
+// edgePadding: the padding-left/right on the scroll container (may be wider than DASHBOARD_GAP when grouping is on).
+const calculateColumnLayout = (width, effectiveGap = DASHBOARD_GAP, edgePadding = DASHBOARD_GAP) => {
   if (width <= 0) return { visibleColumns: 1, columnWidth: getMinColumnWidth(1) }
 
-  const availableWidth = width - (DASHBOARD_GAP * 2)
+  const availableWidth = width - (edgePadding * 2)
   let layout = { visibleColumns: 1, columnWidth: availableWidth }
 
   for (let columns = 1; columns <= 5; columns += 1) {
@@ -39,11 +39,11 @@ const getInitialWidth = () => {
   return window.innerWidth
 }
 
-export const useColumnLayout = (scrollContainerRef, effectiveGap = DASHBOARD_GAP) => {
+export const useColumnLayout = (scrollContainerRef, effectiveGap = DASHBOARD_GAP, edgePadding = DASHBOARD_GAP) => {
   // Start with window width estimate to avoid weird initial render - will be measured accurately in useLayoutEffect
   const [containerWidth, setContainerWidth] = useState(getInitialWidth)
 
-  const layout = useMemo(() => calculateColumnLayout(containerWidth, effectiveGap), [containerWidth, effectiveGap])
+  const layout = useMemo(() => calculateColumnLayout(containerWidth, effectiveGap, edgePadding), [containerWidth, effectiveGap, edgePadding])
 
   useLayoutEffect(() => {
     const measureWidth = () => {

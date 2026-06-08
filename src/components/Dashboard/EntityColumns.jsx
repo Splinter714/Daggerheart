@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
+
+const SLIDE_PULL_FACTOR = 0.5
 
 // Collect consecutive same-groupName adversary entries into sections.
 function buildSections(entityGroups) {
@@ -65,6 +67,104 @@ const EntityColumns = ({
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
   const edgePadding = isGrouped ? DASHBOARD_GAP * 2 : DASHBOARD_GAP
+
+  // ─── Slide-in effect: pull off-screen sections toward viewer as you scroll ──
+
+  const rafRef = useRef(null)
+  const edgePaddingRef = useRef(edgePadding)
+  const isGroupedRef = useRef(isGrouped)
+  edgePaddingRef.current = edgePadding
+  isGroupedRef.current = isGrouped
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    // Reset a section to its un-slid state.
+    const resetSection = (child) => {
+      if (child.dataset.groupWrapper) {
+        const cardsRow = child.querySelector('[data-group-cards]')
+        const bracket = child.querySelector('[data-group-bracket]')
+        const label = child.querySelector('[data-group-label]')
+        if (cardsRow) for (const card of cardsRow.children) card.style.transform = ''
+        if (bracket) {
+          bracket.style.transform = ''
+          bracket.style.opacity = ''
+        }
+        if (label) label.style.transform = ''
+      } else if (child.style.transform) {
+        child.style.transform = ''
+      }
+    }
+
+    const clearTransforms = () => {
+      for (const child of container.children) {
+        if (child.dataset.noSlide) continue
+        resetSection(child)
+      }
+    }
+
+    const compute = () => {
+      if (!isGroupedRef.current) { clearTransforms(); return }
+      const scrollLeft = container.scrollLeft
+      const viewportWidth = container.clientWidth
+      const ep = edgePaddingRef.current
+      const rightEdge = scrollLeft + viewportWidth - ep
+
+      for (const el of container.children) {
+        if (el.dataset.noSlide) continue
+
+        if (el.dataset.groupWrapper) {
+          // Grouped section: slide each card independently so they cascade in
+          // one after another.
+          const wrapperLeft = el.offsetLeft
+          const cardsRow = el.querySelector('[data-group-cards]')
+          const bracket = el.querySelector('[data-group-bracket]')
+          const label = el.querySelector('[data-group-label]')
+          const cards = cardsRow ? cardsRow.children : []
+
+          // Read phase — measure each card's slide offset.
+          const writes = []
+          for (const card of cards) {
+            const overshoot = (wrapperLeft + card.offsetLeft + card.offsetWidth) - rightEdge
+            const offset = overshoot > 0 ? overshoot * SLIDE_PULL_FACTOR : 0
+            writes.push({ card, offset })
+          }
+
+          // Write phase
+          for (const { card, offset } of writes) {
+            card.style.transform = offset > 0 ? `translateX(${offset}px)` : ''
+          }
+          // The grouper (full-width, so it spills off the right edge while
+          // later cards are still offscreen) and the pill both ride in with the
+          // first card — no pop/flicker at snap.
+          const firstOffset = writes[0] ? writes[0].offset : 0
+          const firstTransform = firstOffset > 0 ? `translateX(${firstOffset}px)` : ''
+          if (label) label.style.transform = firstTransform
+          if (bracket) bracket.style.transform = firstTransform
+        } else {
+          const overshoot = (el.offsetLeft + el.offsetWidth) - rightEdge
+          el.style.transform = overshoot > 0 ? `translateX(${overshoot * SLIDE_PULL_FACTOR}px)` : ''
+        }
+      }
+    }
+
+    const onScroll = () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      rafRef.current = requestAnimationFrame(compute)
+    }
+
+    container.addEventListener('scroll', onScroll, { passive: true })
+    container.addEventListener('scrollend', compute)
+    compute()
+
+    return () => {
+      container.removeEventListener('scroll', onScroll)
+      container.removeEventListener('scrollend', compute)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      clearTransforms()
+    }
+  }, [scrollContainerRef])
 
   // ─── Card panel renderer ────────────────────────────────────────────────────
 
@@ -303,6 +403,7 @@ const EntityColumns = ({
       items.push(
         <div
           key={sectionKey}
+          data-group-wrapper
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -314,7 +415,7 @@ const EntityColumns = ({
           }}
         >
           {/* Bracket: filled rounded box behind cards */}
-          <div style={{
+          <div data-group-bracket style={{
             position: 'absolute',
             top: GROUP_LABEL_BAR_HEIGHT / 2,
             bottom: DASHBOARD_GAP,
@@ -328,7 +429,7 @@ const EntityColumns = ({
           }} />
 
           {/* Label row — sticky pill */}
-          <div style={{
+          <div data-group-label style={{
             height: GROUP_LABEL_BAR_HEIGHT,
             flexShrink: 0,
             order: -1,
@@ -357,7 +458,7 @@ const EntityColumns = ({
           </div>
 
           {/* Cards row */}
-          <div style={{
+          <div data-group-cards style={{
             display: 'flex',
             flexDirection: 'row',
             gap: `${DASHBOARD_GAP}px`,
@@ -410,12 +511,12 @@ const EntityColumns = ({
         paddingLeft: `${edgePadding}px`,
         paddingRight: `${edgePadding}px`,
         scrollPaddingLeft: `${DASHBOARD_GAP}px`,
-        scrollPaddingRight: `${DASHBOARD_GAP}px`,
+        scrollPaddingRight: `${edgePadding}px`,
       }}
     >
       {items.length > 0 ? items : null}
       {browserOpenAtPosition !== null && (
-        <div style={{ width: `${columnWidth}px`, flexShrink: 0, flexGrow: 0, flex: 'none', height: '100%' }} />
+        <div data-no-slide style={{ width: `${columnWidth}px`, flexShrink: 0, flexGrow: 0, flex: 'none', height: '100%' }} />
       )}
     </div>
   )
