@@ -1,14 +1,17 @@
 // Shared data loading utilities for adversaries and environments
 // Loads official, playtest, and custom content and merges them
+import { readFromStorage } from '../../state/StorageHelpers'
 
 export let adversariesData = { adversaries: [] }
 export let environmentsData = { environments: [] }
 let _dataLoaded = false
 
 // Load custom content from localStorage
+// Uses readFromStorage (try/catch) so corrupt JSON yields [] instead of
+// throwing an uncaught SyntaxError that would crash startup.
 export function loadCustomContent() {
-  const customAdversaries = JSON.parse(localStorage.getItem('daggerheart-custom-adversaries') || '[]')
-  const customEnvironments = JSON.parse(localStorage.getItem('daggerheart-custom-environments') || '[]')
+  const customAdversaries = readFromStorage('daggerheart-custom-adversaries') || []
+  const customEnvironments = readFromStorage('daggerheart-custom-environments') || []
   return { customAdversaries, customEnvironments }
 }
 
