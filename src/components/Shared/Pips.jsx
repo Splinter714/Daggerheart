@@ -245,6 +245,7 @@ const Pips = ({
   clickContainerWidth = 'auto', // Width of the clickable container ('auto', '100%', or specific value)
   centerPips = true, // Whether to center pips within the click container
   emptyColor = null, // Override the empty pip color from config
+  filledColor: filledColorProp = null, // Override the filled pip color from config
 }) => {
   const [showTooltipState, setShowTooltip] = useState(false)
   
@@ -253,7 +254,7 @@ const Pips = ({
   const effectiveMaxValue = maxValue || config.maxValue
   const safeValue = Math.max(0, Math.min(effectiveMaxValue, value))
   
-  const filledColor = config.filledColor
+  const filledColor = filledColorProp || config.filledColor
 
   // Handle click on individual pip
   const handlePipClick = (index, isFilled) => {
