@@ -106,35 +106,7 @@ const StatusSection = ({
               }}
             />
           )}
-          <div
-            style={{
-              backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'black',
-              border: '1px solid',
-              borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'white',
-              borderRadius: '50%',
-              width: '24px',
-              height: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingTop: '1px',
-              flexShrink: 0,
-              opacity: isInstanceDead ? 0.5 : 1,
-              marginRight: '0.375rem', // Specific spacing for instance number badge
-            }}
-          >
-            <span
-              style={{
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: isInstanceDead ? 'var(--gray-400)' : 'white',
-              }}
-            >
-              {instance.duplicateNumber || 1}
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.125rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.125rem', flex: 1 }}>
             <div style={{ opacity: isInstanceDead ? 0.3 : 1 }}>
               <Pips
                 type="adversaryHP"
@@ -180,6 +152,36 @@ const StatusSection = ({
                 />
               </div>
             )}
+          </div>
+
+          <div
+            style={{
+              backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'black',
+              border: '1px solid',
+              borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'white',
+              borderRadius: '50%',
+              minWidth: '24px',
+              height: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingTop: '1px',
+              paddingLeft: '3px',
+              paddingRight: '3px',
+              flexShrink: 0,
+              opacity: isInstanceDead ? 0.5 : 1,
+              marginLeft: '0.375rem',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: isInstanceDead ? 'var(--gray-400)' : 'white',
+              }}
+            >
+              {instance.duplicateNumber || 1}
+            </span>
           </div>
         </div>
       </div>
@@ -261,15 +263,28 @@ const StatusSection = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: 'var(--text-primary)',
                 borderLeft: '1px solid var(--border)',
                 borderRight: '1px solid var(--border)',
-                minWidth: '36px',
-                textAlign: 'center',
+                padding: '0 10px',
               }}>
-                {instances.length}
+                <div style={{
+                  backgroundColor: 'black',
+                  border: '1px solid white',
+                  borderRadius: '50%',
+                  minWidth: '24px',
+                  height: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  paddingTop: '1px',
+                  paddingLeft: '3px',
+                  paddingRight: '3px',
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'white' }}>
+                    {instances.length}
+                  </span>
+                </div>
               </span>
               <button
                 onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
