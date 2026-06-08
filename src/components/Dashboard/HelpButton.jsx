@@ -105,9 +105,11 @@ const HelpButton = ({ showFlyout, onFlyoutChange }) => {
           background: 'var(--bg-primary)',
           maxWidth: '280px'
         }}>
-            <img 
+            <img
               src={logoImage}
               alt="Daggerheart Community Content Logo"
+              width="639"
+              height="156"
               style={{
                 width: '100%',
                 maxWidth: '200px',

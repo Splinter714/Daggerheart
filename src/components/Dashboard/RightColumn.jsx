@@ -13,6 +13,7 @@ const ColumnHeader = ({ title }) => (
 const InfoContent = () => (
   <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem' }}>
     <img src={logoImage} alt="Daggerheart Community Content Logo"
+      width="639" height="156"
       style={{ width: '100%', maxWidth: '220px', height: 'auto', display: 'block', margin: '0 auto 1.25rem' }}
       onError={(e) => { e.target.style.display = 'none' }} />
     <div style={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
@@ -42,7 +43,7 @@ const groupsToEncounterItems = (adversaryGroups, pcCount) =>
 
 // mode: 'browser' | 'info' | 'receipt'
 const RightColumn = ({
-  mode, columnWidth, onClose,
+  open, mode, columnWidth, onClose,
   browserActiveTab, onTabChange,
   selectedCustomAdversaryId, onSelectCustomAdversary,
   onAddAdversaryFromBrowser,
@@ -82,7 +83,7 @@ const RightColumn = ({
       border: '1px solid var(--border)',
       borderRadius: '8px',
       boxShadow: '-4px 0 12px rgba(0,0,0,0.3)',
-      display: 'flex', flexDirection: 'column', overflow: 'hidden',
+      display: open ? 'flex' : 'none', flexDirection: 'column', overflow: 'hidden',
     }}>
       {mode === 'browser' && (
         <>
@@ -95,7 +96,7 @@ const RightColumn = ({
             onTabChange={onTabChange}
             selectedCustomAdversaryId={selectedCustomAdversaryId}
             onSelectCustomAdversary={onSelectCustomAdversary}
-            autoFocus={true}
+            autoFocus={open}
             hideImportExport={true}
             onClose={null}
             searchPlaceholder="Search adversaries"

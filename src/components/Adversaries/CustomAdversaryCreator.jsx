@@ -5,6 +5,7 @@ import ExperienceSection from './GameCard/ExperienceSection'
 import { getDefaultAdversaryValues } from './adversaryDefaults'
 import { getGuideRange, guideRanges, formatRange, formatAtkRange, isInRange, getDamagePools } from './adversaryGuideRanges'
 import { typeGuide, stressFearGuide } from './adversaryTypeGuide'
+import { DASHBOARD_GAP } from '../Dashboard/constants'
 
 // Load adversary data for autocomplete
 let adversariesData = { adversaries: [] }
@@ -506,6 +507,7 @@ const CustomAdversaryCreator = forwardRef(({
   allAdversaries = [],
   embedded = false,
   hideEmbeddedButtons = false,
+  columnWidth = null,
 }, ref) => {
   const nameInputRef = useRef(null)
   const gameCardNameInputRef = useRef(null)
@@ -543,10 +545,10 @@ const CustomAdversaryCreator = forwardRef(({
     const el = containerRef.current
     if (!el) return
     const observer = new ResizeObserver(([entry]) => {
-      setIsNarrow(entry.contentRect.width < 760)
+      setIsNarrow(entry.contentRect.width < 700)
     })
     observer.observe(el)
-    setIsNarrow(el.offsetWidth < 760)
+    setIsNarrow(el.offsetWidth < 700)
     return () => observer.disconnect()
   }, [embedded])
 
@@ -902,36 +904,18 @@ const CustomAdversaryCreator = forwardRef(({
       </div>
     )
 
-    const previewVisible = isNarrow ? activeTab === 'preview' : true
-    const buildVisible  = isNarrow ? activeTab === 'build'   : true
+    const cardStyle = {
+      flex: 1, minWidth: 0,
+      display: 'flex', flexDirection: 'column', overflow: 'hidden',
+      backgroundColor: 'var(--bg-primary)',
+      border: '1px solid var(--border)',
+      borderRadius: '8px',
+      boxShadow: '-4px 0 12px rgba(0,0,0,0.3)',
+    }
 
-    return (
-      <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, overflow: 'hidden' }}>
-        {ActionBar()}
-        <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
-
-        {/* ── Preview ───────────────────────────────────────────────────────── */}
-        {previewVisible && (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, borderLeft: isNarrow ? 'none' : '1px solid var(--border)', order: 2 }}>
-            <PanelHeader label="Preview" />
-            <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>
-              <GameCard
-                item={formItem}
-                type="adversary"
-                mode="expanded"
-                instances={previewInstances}
-                showAddRemoveButtons={false}
-                onUpdate={() => {}}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* ── Build ─────────────────────────────────────────────────────────── */}
-        {buildVisible && (
-        <div style={{ flex: 2, display: 'flex', flexDirection: 'column', minHeight: 0, borderRight: 'none', order: 1 }}>
-          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-            <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+    const formScrollContent = (
+      <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+        <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
 
               {/* Name */}
               <div style={{ ...sectionStyle, position: 'relative' }}>
@@ -1173,11 +1157,83 @@ const CustomAdversaryCreator = forwardRef(({
               </div>
 
             </div>
+        </div>
+    )
+
+    const previewContent = (
+      <>
+        <PanelHeader label="Preview" />
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>
+          <GameCard
+            item={formItem}
+            type="adversary"
+            mode="expanded"
+            instances={previewInstances}
+            showAddRemoveButtons={false}
+            onUpdate={() => {}}
+          />
+        </div>
+      </>
+    )
+
+    // Desktop panel mode: render two sibling absolute panels inside dashboard-main,
+    // exactly like RightColumn but one for the form and one for the preview.
+    if (columnWidth !== null) {
+      const panelStyle = {
+        position: 'absolute',
+        top: `${DASHBOARD_GAP}px`,
+        bottom: `${DASHBOARD_GAP}px`,
+        width: `${columnWidth}px`,
+        zIndex: 100,
+        backgroundColor: 'var(--bg-primary)',
+        border: '1px solid var(--border)',
+        borderRadius: '8px',
+        boxShadow: '-4px 0 12px rgba(0,0,0,0.3)',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+      }
+      return (
+        <>
+          <div style={{ ...panelStyle, right: `${DASHBOARD_GAP + columnWidth + DASHBOARD_GAP}px` }}>
+            {ActionBar()}
+            {formScrollContent}
+          </div>
+          <div style={{ ...panelStyle, right: `${DASHBOARD_GAP}px` }}>
+            {previewContent}
+          </div>
+        </>
+      )
+    }
+
+    if (isNarrow) {
+      return (
+        <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, overflow: 'hidden' }}>
+          {ActionBar()}
+          <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
+            {activeTab === 'preview' && (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                {previewContent}
+              </div>
+            )}
+            {activeTab === 'build' && (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                {formScrollContent}
+              </div>
+            )}
           </div>
         </div>
-        )}
+      )
+    }
 
-        </div>{/* end panel row */}
+    // Wide: two equal card panels side by side
+    return (
+      <div ref={containerRef} style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%', overflow: 'hidden', gap: '12px' }}>
+        <div style={cardStyle}>
+          {ActionBar()}
+          {formScrollContent}
+        </div>
+        <div style={cardStyle}>
+          {previewContent}
+        </div>
       </div>
     )
   }

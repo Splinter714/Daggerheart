@@ -373,14 +373,17 @@ const DashboardContent = () => {
         ) : (
           <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: `${columnWidth + DASHBOARD_GAP}px`, zIndex: 99, backgroundColor: 'var(--bg-primary)' }} />
         ))}
-        {rightColumnOpen && (
-          <RightColumn
+        {adversaryCreatorOpen && !isNarrow && (
+          <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: `${2 * columnWidth + 2 * DASHBOARD_GAP}px`, zIndex: 99, backgroundColor: 'var(--bg-primary)' }} />
+        )}
+        <RightColumn
+            open={rightColumnOpen}
             mode={rightColumnMode}
             columnWidth={columnWidth}
             onClose={handleCloseBrowser}
             browserActiveTab={browserActiveTab}
             onTabChange={setBrowserActiveTab}
-selectedCustomAdversaryId={selectedCustomAdversaryId}
+            selectedCustomAdversaryId={selectedCustomAdversaryId}
             onSelectCustomAdversary={setSelectedCustomAdversaryId}
             onAddAdversaryFromBrowser={handleAddAdversaryFromBrowser}
             pcCount={pcCount}
@@ -394,7 +397,6 @@ selectedCustomAdversaryId={selectedCustomAdversaryId}
             availableBattlePoints={availableBattlePoints}
             spentBattlePoints={spentBattlePoints}
           />
-        )}
         <EntityColumns
           entityGroups={entityGroups}
           columnWidth={columnWidth}
@@ -425,21 +427,33 @@ selectedCustomAdversaryId={selectedCustomAdversaryId}
             if (!rightColumnOpen) openRightColumn('browser')
           }}
         />
-      </div>
 
-      {/* Custom Adversary Creator */}
-      {adversaryCreatorOpen && (
-        isNarrow ? (
-          // Mobile: column slot (same mechanism as RightColumn, full viewport width)
-          <div style={{
-            position: 'fixed',
-            top: 0, right: 0, bottom: `${RAIL_SIZE}px`, left: 0,
-            zIndex: 200,
-            backgroundColor: 'var(--bg-primary)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}>
+        {/* Custom Adversary Creator — inside dashboard-main so position:absolute matches RightColumn */}
+        {adversaryCreatorOpen && (
+          isNarrow ? (
+            <div style={{
+              position: 'fixed',
+              top: 0, right: 0, bottom: `${RAIL_SIZE}px`, left: 0,
+              zIndex: 200,
+              backgroundColor: 'var(--bg-primary)',
+              display: 'flex', flexDirection: 'column', overflow: 'hidden',
+            }}>
+              <CustomAdversaryCreator
+                onSave={(adversaryData, id) => {
+                  if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
+                  setAdversaryCreatorOpen(false)
+                }}
+                onAddToEncounter={(adversaryData) => {
+                  createAdversary({ ...adversaryData })
+                  setAdversaryCreatorOpen(false)
+                }}
+                onCancelEdit={() => setAdversaryCreatorOpen(false)}
+                embedded={false}
+                autoFocus
+              />
+            </div>
+          ) : (
+            // Desktop: CustomAdversaryCreator renders two absolute column panels itself
             <CustomAdversaryCreator
               onSave={(adversaryData, id) => {
                 if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
@@ -452,31 +466,11 @@ selectedCustomAdversaryId={selectedCustomAdversaryId}
               onCancelEdit={() => setAdversaryCreatorOpen(false)}
               embedded={false}
               autoFocus
+              columnWidth={columnWidth}
             />
-          </div>
-        ) : (
-          // Desktop: centered modal with backdrop
-          <div
-            style={{ position: 'fixed', inset: 0, zIndex: 200, backgroundColor: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
-            onClick={() => setAdversaryCreatorOpen(false)}
-          >
-            <div
-              style={{ width: 'min(92vw, 960px)', height: 'min(90vh, 820px)', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)', borderRadius: '12px', boxShadow: '0 16px 48px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <CustomAdversaryCreator
-                onSave={(adversaryData, id) => {
-                  if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
-                  setAdversaryCreatorOpen(false)
-                }}
-                onCancelEdit={() => setAdversaryCreatorOpen(false)}
-                embedded={false}
-                autoFocus
-              />
-            </div>
-          </div>
-        )
-      )}
+          )
+        )}
+      </div>
 
 
       <PWAInstallPrompt />
