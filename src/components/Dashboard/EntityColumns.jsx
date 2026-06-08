@@ -372,7 +372,7 @@ const EntityColumns = ({
             flex: 'none',
           }}
         >
-          {/* Inset top-tab label — sits within group width, no surrounding box */}
+          {/* Inset top-tab label with L-shaped line to group right edge */}
           <div style={{
             height: 24,
             display: 'flex',
@@ -381,6 +381,7 @@ const EntityColumns = ({
             <span style={{
               position: 'sticky',
               left: DASHBOARD_GAP,
+              flexShrink: 0,
               fontSize: '0.72rem',
               fontWeight: 700,
               letterSpacing: '0.14em',
@@ -395,6 +396,22 @@ const EntityColumns = ({
             }}>
               {groupName}
             </span>
+            {/* L-shaped connector: horizontal line → rounded corner → drops down */}
+            <div style={{
+              flex: 1,
+              marginLeft: 4,
+              alignSelf: 'stretch',
+              display: 'flex',
+              alignItems: 'center',
+            }}>
+              <div style={{
+                flex: 1,
+                height: '60%',
+                borderTop: '1px solid var(--text-secondary)',
+                borderRight: '1px solid var(--text-secondary)',
+                borderTopRightRadius: 4,
+              }} />
+            </div>
           </div>
           {/* Cards row */}
           <div style={{
@@ -471,18 +488,6 @@ const EntityColumns = ({
       }}
     >
       {items.length > 0 ? items : null}
-      {isGrouped && !isNarrow && browserOpenAtPosition === null && items.length > 0 && (
-        <div
-          aria-hidden
-          style={{
-            width: `calc(100% - ${columnWidth}px)`,
-            flexShrink: 0, flexGrow: 0, flex: 'none',
-            height: '100%',
-            scrollSnapAlign: 'none',
-            pointerEvents: 'none',
-          }}
-        />
-      )}
       {browserOpenAtPosition !== null && (
         <div data-no-slide style={{ width: `${columnWidth}px`, flexShrink: 0, flexGrow: 0, flex: 'none', height: '100%' }} />
       )}
