@@ -249,37 +249,51 @@ const StatusSection = ({
         paddingRight: CARD_SPACE_H,
       }}
     >
-      {/* Threshold badge + instance count controls */}
-      {(showControls || renderThresholds()) && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {showControls && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }}>
-              <button
-                onClick={(e) => { e.stopPropagation(); onRemoveInstance && onRemoveInstance(item.id) }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center', borderRadius: '4px' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
-                title="Remove one"
-              >
-                <Minus size={16} />
-              </button>
-              <span style={{ minWidth: '18px', textAlign: 'center', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                {instances.length}
-              </span>
-              <button
-                onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center', borderRadius: '4px' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
-                title="Add another"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-          )}
-          {renderThresholds()}
+      {/* Instance count controls */}
+      {showControls && (
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            border: '1px solid var(--border)',
+            borderRadius: '6px',
+            overflow: 'hidden',
+          }}>
+            <button
+              onClick={(e) => { e.stopPropagation(); onRemoveInstance && onRemoveInstance(item.id) }}
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '3px 8px', display: 'flex', alignItems: 'center' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
+              title="Remove one"
+            >
+              <Minus size={14} />
+            </button>
+            <span style={{
+              padding: '3px 10px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              borderLeft: '1px solid var(--border)',
+              borderRight: '1px solid var(--border)',
+              minWidth: '28px',
+              textAlign: 'center',
+            }}>
+              {instances.length}
+            </span>
+            <button
+              onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '3px 8px', display: 'flex', alignItems: 'center' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
+              title="Add another"
+            >
+              <Plus size={14} />
+            </button>
+          </div>
         </div>
       )}
+      {/* Threshold badge */}
+      {renderThresholds()}
       {isEditMode ? (
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (
