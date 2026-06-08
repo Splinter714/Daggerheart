@@ -16,7 +16,10 @@ export const useAdversaryAddition = ({
   getEntityGroups,
   smoothScrollTo,
   browserOpenAtPosition,
-  columnWidth
+  columnWidth,
+  sortBy,
+  sortDir,
+  groupBy
 }) => {
   return useCallback(
     (itemData) => {
@@ -70,36 +73,69 @@ export const useAdversaryAddition = ({
             }
 
             if (isNewAdversary) {
-              const initialScrollWidth = container.scrollWidth
-              setTimeout(() => {
-                if (!scrollContainerRef.current) return
-                const updatedContainer = scrollContainerRef.current
-
-                const maybeScroll = () => {
+              const isDefaultOrder = groupBy === 'none' && sortBy === 'name' && sortDir === 'asc'
+              if (isDefaultOrder) {
+                const initialScrollWidth = container.scrollWidth
+                setTimeout(() => {
                   if (!scrollContainerRef.current) return
-                  const finalContainer = scrollContainerRef.current
-                  const maxScroll = finalContainer.scrollWidth - finalContainer.clientWidth
-                  const distance = maxScroll - scrollLeftBeforeAdd
-                  const scrollWidthIncreased = finalContainer.scrollWidth > scrollWidthBeforeAdd
+                  const updatedContainer = scrollContainerRef.current
 
-                  if (scrollWidthIncreased && Math.abs(distance) < 1) {
-                    // When browser is open, don't over-scroll past maxScroll (no AddColumn to scroll past)
-                    smoothScrollTo(browserOpenAtPosition !== null ? maxScroll : maxScroll + 10, 500)
-                  } else if (Math.abs(distance) > 1) {
-                    smoothScrollTo(maxScroll, 500)
+                  const maybeScroll = () => {
+                    if (!scrollContainerRef.current) return
+                    const finalContainer = scrollContainerRef.current
+                    const maxScroll = finalContainer.scrollWidth - finalContainer.clientWidth
+                    const distance = maxScroll - scrollLeftBeforeAdd
+                    const scrollWidthIncreased = finalContainer.scrollWidth > scrollWidthBeforeAdd
+
+                    if (scrollWidthIncreased && Math.abs(distance) < 1) {
+                      smoothScrollTo(browserOpenAtPosition !== null ? maxScroll : maxScroll + 10, 500)
+                    } else if (Math.abs(distance) > 1) {
+                      smoothScrollTo(maxScroll, 500)
+                    }
                   }
-                }
 
-                if (updatedContainer.scrollWidth !== initialScrollWidth) {
-                  requestAnimationFrame(() => {
+                  if (updatedContainer.scrollWidth !== initialScrollWidth) {
                     requestAnimationFrame(() => {
-                      maybeScroll()
+                      requestAnimationFrame(() => {
+                        maybeScroll()
+                      })
                     })
-                  })
-                } else {
-                  maybeScroll()
-                }
-              }, 10)
+                  } else {
+                    maybeScroll()
+                  }
+                }, 10)
+              } else {
+                // In grouped/sorted mode the new card lands at its sorted position, not the end.
+                // Reuse the same visibility logic as the existing-group path.
+                setTimeout(() => {
+                  if (!scrollContainerRef.current) return
+                  const updatedGroups = getEntityGroups()
+                  const groupIndex = updatedGroups.findIndex((g) => g.baseName === baseName && g.type === 'adversary')
+                  if (groupIndex >= 0) {
+                    const c = scrollContainerRef.current
+                    const currentScroll = c.scrollLeft
+                    const containerWidth = c.clientWidth
+                    const effectiveWidth = browserOpenAtPosition !== null
+                      ? containerWidth - columnWidth - DASHBOARD_GAP
+                      : containerWidth
+                    const cardPosition = DASHBOARD_GAP + groupIndex * (columnWidth + DASHBOARD_GAP)
+                    const cardEnd = cardPosition + columnWidth
+                    const margin = 10
+                    const isVisible = cardPosition >= currentScroll - margin && cardEnd <= currentScroll + effectiveWidth + margin
+                    if (!isVisible) {
+                      let targetScroll
+                      if (cardEnd > currentScroll + effectiveWidth + margin) {
+                        const visibleColumns = Math.round((containerWidth - DASHBOARD_GAP) / (columnWidth + DASHBOARD_GAP))
+                        const lastVisibleSlot = browserOpenAtPosition !== null ? visibleColumns - 2 : visibleColumns - 1
+                        targetScroll = (groupIndex - lastVisibleSlot) * (columnWidth + DASHBOARD_GAP)
+                      } else {
+                        targetScroll = groupIndex * (columnWidth + DASHBOARD_GAP)
+                      }
+                      smoothScrollTo(Math.max(0, targetScroll), 500)
+                    }
+                  }
+                }, 10)
+              }
             } else {
               const updatedGroups = getEntityGroups()
               const groupIndex = updatedGroups.findIndex((g) => g.baseName === baseName && g.type === 'adversary')
@@ -144,10 +180,13 @@ export const useAdversaryAddition = ({
       createAdversary,
       entityGroups,
       getEntityGroups,
+      groupBy,
       pcCount,
       scrollContainerRef,
       setNewCards,
-      smoothScrollTo
+      smoothScrollTo,
+      sortBy,
+      sortDir
     ]
   )
 }
