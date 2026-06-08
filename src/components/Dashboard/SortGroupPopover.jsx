@@ -44,7 +44,11 @@ const SortGroupPopover = ({ anchorRef, placement, sortBy, sortDir, groupBy, onSo
     if (placement === 'right') {
       return { right: `calc(100vw - ${rect.left}px + 6px)`, top: `${rect.top}px` }
     }
-    return { left: `${rect.left}px`, bottom: `calc(100vh - ${rect.top}px + 6px)` }
+    // Bottom placement (mobile): clamp left so popover stays within viewport
+    const minWidth = 190
+    const margin = 8
+    const left = Math.max(margin, Math.min(rect.left, window.innerWidth - minWidth - margin))
+    return { left: `${left}px`, bottom: `calc(100vh - ${rect.top}px + 6px)` }
   }
 
   const pos = getPosition()
