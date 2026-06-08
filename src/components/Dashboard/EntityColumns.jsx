@@ -515,6 +515,21 @@ const EntityColumns = ({
       }}
     >
       {items.length > 0 ? items : null}
+      {isGrouped && browserOpenAtPosition === null && items.length > 0 && (
+        // Trailing black space so the very last card can reach its start-snap
+        // position (otherwise scroll-snap can't satisfy it and bounces back).
+        <div
+          data-no-slide
+          aria-hidden
+          style={{
+            width: `calc(100% - ${columnWidth + effectiveGap - DASHBOARD_GAP}px)`,
+            flexShrink: 0, flexGrow: 0, flex: 'none',
+            height: '100%',
+            scrollSnapAlign: 'none',
+            pointerEvents: 'none',
+          }}
+        />
+      )}
       {browserOpenAtPosition !== null && (
         <div data-no-slide style={{ width: `${columnWidth}px`, flexShrink: 0, flexGrow: 0, flex: 'none', height: '100%' }} />
       )}
