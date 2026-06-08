@@ -60,15 +60,6 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
       onMouseLeave={e => { if (!active) e.currentTarget.style.color = active ? 'var(--purple)' : 'var(--text-secondary)' }}
     >
       <Icon size={22} strokeWidth={1.6} />
-      {id === 'sort' && active && (
-        <span style={{
-          position: 'absolute',
-          top: 6, right: 6,
-          width: 6, height: 6,
-          borderRadius: '50%',
-          backgroundColor: 'var(--purple)',
-        }} />
-      )}
     </button>
   )
 

@@ -486,7 +486,7 @@ selectedCustomAdversaryId={selectedCustomAdversaryId}
           placement={navPlacement}
           activeId={navActiveId}
           onAction={handleNavAction}
-          sortActive={groupBy !== 'none' || sortBy !== 'name' || sortDir !== 'asc'}
+          sortActive={sortGroupOpen}
           sortButtonRef={sortGroupButtonRef}
           onSortToggle={() => setSortGroupOpen(v => !v)}
         />
