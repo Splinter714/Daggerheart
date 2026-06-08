@@ -1,15 +1,7 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
-
-const SLIDE_PULL_FACTOR = 0.5
-// In narrow/single-column layout a column ≈ the whole viewport, so a
-// viewport-proportional offset shoves the entire screen and reads as the snap
-// overshooting. Use a gentler factor AND clamp the offset to a small fixed
-// peek so it stays a subtle hint of the next card.
-const SLIDE_PULL_FACTOR_NARROW = 0.2
-const SLIDE_MAX_PEEK_NARROW = 28
 
 // Collect consecutive same-groupName adversary entries into sections.
 function buildSections(entityGroups) {
@@ -40,8 +32,6 @@ function buildSections(entityGroups) {
 function cardScrollPosition(flatIndex, columnWidth, effectiveGap) {
   return DASHBOARD_GAP + flatIndex * (columnWidth + effectiveGap)
 }
-
-const GROUP_LABEL_BAR_HEIGHT = 32
 
 const EntityColumns = ({
   entityGroups,
@@ -78,115 +68,6 @@ const EntityColumns = ({
   // size group-level removal spacers correctly.
   const sectionWidthFor = (entryCount) =>
     entryCount * columnWidth + Math.max(0, entryCount - 1) * DASHBOARD_GAP
-  const edgePadding = isGrouped ? DASHBOARD_GAP * 2 : DASHBOARD_GAP
-
-  // ─── Slide-in effect: pull off-screen sections toward viewer as you scroll ──
-
-  const slideEnabled = isGrouped
-  // Tame the pull in narrow/single-column layout so it doesn't overshoot.
-  const pullFactor = isNarrow ? SLIDE_PULL_FACTOR_NARROW : SLIDE_PULL_FACTOR
-  const maxPeek = isNarrow ? SLIDE_MAX_PEEK_NARROW : Infinity
-
-  const rafRef = useRef(null)
-  const edgePaddingRef = useRef(edgePadding)
-  const isGroupedRef = useRef(slideEnabled)
-  const pullFactorRef = useRef(pullFactor)
-  const maxPeekRef = useRef(maxPeek)
-  edgePaddingRef.current = edgePadding
-  isGroupedRef.current = slideEnabled
-  pullFactorRef.current = pullFactor
-  maxPeekRef.current = maxPeek
-
-  useEffect(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
-
-    // Reset a section to its un-slid state.
-    const resetSection = (child) => {
-      if (child.dataset.groupWrapper) {
-        const cardsRow = child.querySelector('[data-group-cards]')
-        const bracket = child.querySelector('[data-group-bracket]')
-        const label = child.querySelector('[data-group-label]')
-        if (cardsRow) for (const card of cardsRow.children) card.style.transform = ''
-        if (bracket) {
-          bracket.style.transform = ''
-          bracket.style.opacity = ''
-        }
-        if (label) label.style.transform = ''
-      } else if (child.style.transform) {
-        child.style.transform = ''
-      }
-    }
-
-    const clearTransforms = () => {
-      for (const child of container.children) {
-        if (child.dataset.noSlide) continue
-        resetSection(child)
-      }
-    }
-
-    const compute = () => {
-      if (!isGroupedRef.current) { clearTransforms(); return }
-      const scrollLeft = container.scrollLeft
-      const viewportWidth = container.clientWidth
-      const ep = edgePaddingRef.current
-      const rightEdge = scrollLeft + viewportWidth - ep
-
-      for (const el of container.children) {
-        if (el.dataset.noSlide) continue
-
-        if (el.dataset.groupWrapper) {
-          // Grouped section: slide each card independently so they cascade in
-          // one after another.
-          const wrapperLeft = el.offsetLeft
-          const cardsRow = el.querySelector('[data-group-cards]')
-          const bracket = el.querySelector('[data-group-bracket]')
-          const label = el.querySelector('[data-group-label]')
-          const cards = cardsRow ? cardsRow.children : []
-
-          // Read phase — measure each card's slide offset.
-          const writes = []
-          for (const card of cards) {
-            const overshoot = (wrapperLeft + card.offsetLeft + card.offsetWidth) - rightEdge
-            const offset = overshoot > 0 ? Math.min(overshoot * pullFactorRef.current, maxPeekRef.current) : 0
-            writes.push({ card, offset })
-          }
-
-          // Write phase
-          for (const { card, offset } of writes) {
-            card.style.transform = offset > 0 ? `translateX(${offset}px)` : ''
-          }
-          // The grouper (full-width, so it spills off the right edge while
-          // later cards are still offscreen) and the pill both ride in with the
-          // first card — no pop/flicker at snap.
-          const firstOffset = writes[0] ? writes[0].offset : 0
-          const firstTransform = firstOffset > 0 ? `translateX(${firstOffset}px)` : ''
-          if (label) label.style.transform = firstTransform
-          if (bracket) bracket.style.transform = firstTransform
-        } else {
-          const overshoot = (el.offsetLeft + el.offsetWidth) - rightEdge
-          const offset = overshoot > 0 ? Math.min(overshoot * pullFactorRef.current, maxPeekRef.current) : 0
-          el.style.transform = offset > 0 ? `translateX(${offset}px)` : ''
-        }
-      }
-    }
-
-    const onScroll = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      rafRef.current = requestAnimationFrame(compute)
-    }
-
-    container.addEventListener('scroll', onScroll, { passive: true })
-    container.addEventListener('scrollend', compute)
-    compute()
-
-    return () => {
-      container.removeEventListener('scroll', onScroll)
-      container.removeEventListener('scrollend', compute)
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      clearTransforms()
-    }
-  }, [scrollContainerRef, slideEnabled, isNarrow])
 
   // ─── Card panel renderer ────────────────────────────────────────────────────
 
@@ -198,7 +79,7 @@ const EntityColumns = ({
       (!isGrouped || removingCardSpacer.isWithinGroup)
 
     if (isSpacerPosition) {
-      const spacerPad = isGrouped ? '0px' : spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`
+      const spacerPad = spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`
       return (
         <Panel
           key={`spacer-${removingCardSpacer.baseName}`}
@@ -230,14 +111,14 @@ const EntityColumns = ({
           width: `${columnWidth}px`,
           flexShrink: 0, flexGrow: 0, flex: 'none',
           paddingRight: '0',
-          paddingTop: isGrouped ? '0' : `${DASHBOARD_GAP}px`,
-          paddingBottom: isGrouped ? '0' : `${DASHBOARD_GAP}px`,
+          paddingTop: `${DASHBOARD_GAP}px`,
+          paddingBottom: `${DASHBOARD_GAP}px`,
           scrollSnapAlign: 'start',
-          overflow: isGrouped ? 'auto' : group.type === 'adversary' ? 'visible' : 'hidden',
+          overflow: group.type === 'adversary' ? 'visible' : 'hidden',
           display: 'flex', flexDirection: 'column', alignItems: 'stretch',
-          height: isGrouped ? '100%' : 'auto',
-          scrollMarginLeft: isGrouped && isFirstInGroup ? DASHBOARD_GAP : undefined,
-          scrollMarginRight: isGrouped && isLastInGroup ? DASHBOARD_GAP : undefined,
+          height: 'auto',
+          scrollMarginLeft: isFirstInGroup ? DASHBOARD_GAP : undefined,
+          scrollMarginRight: isLastInGroup ? DASHBOARD_GAP : undefined,
           opacity: newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
           transition: 'opacity 0.2s ease',
         }}
@@ -485,67 +366,36 @@ const EntityColumns = ({
           data-group-wrapper
           style={{
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: 'row',
             flexShrink: 0,
             flexGrow: 0,
             flex: 'none',
             position: 'relative',
-            height: '100%',
+            gap: `${DASHBOARD_GAP}px`,
           }}
         >
-          {/* Bracket: filled rounded box behind cards */}
-          <div data-group-bracket style={{
+          {/* Inset top-tab label */}
+          <span style={{
             position: 'absolute',
-            top: GROUP_LABEL_BAR_HEIGHT / 2,
-            bottom: DASHBOARD_GAP,
-            left: -DASHBOARD_GAP,
-            right: -DASHBOARD_GAP,
-            border: '1px solid var(--bg-secondary)',
-            borderRadius: 5,
-            backgroundColor: 'var(--bg-secondary)',
-            zIndex: -1,
+            top: DASHBOARD_GAP,
+            left: DASHBOARD_GAP,
+            zIndex: 2,
             pointerEvents: 'none',
-          }} />
-
-          {/* Label row — sticky pill */}
-          <div data-group-label style={{
-            height: GROUP_LABEL_BAR_HEIGHT,
-            flexShrink: 0,
-            order: -1,
-            display: 'flex',
-            alignItems: 'center',
-            paddingLeft: `${DASHBOARD_GAP}px`,
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: 'var(--text-primary)',
+            whiteSpace: 'nowrap',
+            userSelect: 'none',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--text-secondary)',
+            borderRadius: '3px',
+            padding: '2px 8px',
           }}>
-            <span style={{
-              position: 'sticky',
-              left: DASHBOARD_GAP,
-              zIndex: 1,
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'var(--text-primary)',
-              whiteSpace: 'nowrap',
-              userSelect: 'none',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--text-secondary)',
-              borderRadius: '3px',
-              padding: '2px 8px',
-            }}>
-              {groupName}
-            </span>
-          </div>
-
-          {/* Cards row */}
-          <div data-group-cards style={{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: `${DASHBOARD_GAP}px`,
-            alignItems: 'flex-start',
-            height: `calc(100% - ${GROUP_LABEL_BAR_HEIGHT}px - ${DASHBOARD_GAP * 2}px)`,
-          }}>
-            {cards}
-          </div>
+            {groupName}
+          </span>
+          {cards}
         </div>
       )
     } else {
@@ -606,31 +456,13 @@ const EntityColumns = ({
       onScroll={onScroll}
       style={{
         gap: `${effectiveGap}px`,
-        paddingLeft: `${edgePadding}px`,
-        paddingRight: `${edgePadding}px`,
+        paddingLeft: `${DASHBOARD_GAP}px`,
+        paddingRight: `${DASHBOARD_GAP}px`,
         scrollPaddingLeft: `${DASHBOARD_GAP}px`,
-        scrollPaddingRight: `${edgePadding}px`,
+        scrollPaddingRight: `${DASHBOARD_GAP}px`,
       }}
     >
       {items.length > 0 ? items : null}
-      {slideEnabled && !isNarrow && browserOpenAtPosition === null && items.length > 0 && (
-        // Trailing black space so the very last card can reach its start-snap
-        // position (otherwise scroll-snap can't satisfy it and bounces back).
-        // Multi-column only: in narrow/single-column the card already fills the
-        // viewport at its snap, and the spacer's flex gap would leave a dead
-        // zone past the last card with no snap target.
-        <div
-          data-no-slide
-          aria-hidden
-          style={{
-            width: `calc(100% - ${columnWidth + effectiveGap - DASHBOARD_GAP}px)`,
-            flexShrink: 0, flexGrow: 0, flex: 'none',
-            height: '100%',
-            scrollSnapAlign: 'none',
-            pointerEvents: 'none',
-          }}
-        />
-      )}
       {browserOpenAtPosition !== null && (
         <div data-no-slide style={{ width: `${columnWidth}px`, flexShrink: 0, flexGrow: 0, flex: 'none', height: '100%' }} />
       )}
