@@ -117,8 +117,8 @@ const EntityColumns = ({
           overflow: group.type === 'adversary' ? 'visible' : 'hidden',
           display: 'flex', flexDirection: 'column', alignItems: 'stretch',
           height: 'auto',
-          scrollMarginLeft: isFirstInGroup ? DASHBOARD_GAP : undefined,
-          scrollMarginRight: isLastInGroup ? DASHBOARD_GAP : undefined,
+          scrollMarginLeft: undefined,
+          scrollMarginRight: undefined,
           opacity: newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
           transition: 'opacity 0.2s ease',
         }}
@@ -377,9 +377,10 @@ const EntityColumns = ({
             height: 24,
             display: 'flex',
             alignItems: 'center',
-            paddingLeft: `${DASHBOARD_GAP}px`,
           }}>
             <span style={{
+              position: 'sticky',
+              left: DASHBOARD_GAP,
               fontSize: '0.72rem',
               fontWeight: 700,
               letterSpacing: '0.14em',
