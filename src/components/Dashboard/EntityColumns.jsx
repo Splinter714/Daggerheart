@@ -127,9 +127,9 @@ const EntityColumns = ({
           paddingTop: `${DASHBOARD_GAP}px`,
           paddingBottom: `${DASHBOARD_GAP}px`,
           scrollSnapAlign: 'start',
-          overflow: group.type === 'adversary' ? 'visible' : 'hidden',
+          overflow: isGrouped ? 'auto' : group.type === 'adversary' ? 'visible' : 'hidden',
           display: 'flex', flexDirection: 'column', alignItems: 'stretch',
-          height: 'auto',
+          height: isGrouped ? '100%' : 'auto',
           scrollMarginLeft: undefined,
           scrollMarginRight: undefined,
           opacity: newCards.has(`${group.type}-${group.baseName}`) ? 0 : 1,
@@ -384,6 +384,7 @@ const EntityColumns = ({
             flexShrink: 0,
             flexGrow: 0,
             flex: 'none',
+            height: '100%',
           }}
         >
           {/* Inset top-tab label — full-width frame renders behind the pill.
@@ -444,6 +445,8 @@ const EntityColumns = ({
             display: 'flex',
             flexDirection: 'row',
             gap: `${DASHBOARD_GAP}px`,
+            flex: 1,
+            minHeight: 0,
           }}>
             {cards}
           </div>
