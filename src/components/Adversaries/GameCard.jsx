@@ -639,7 +639,7 @@ const GameCard = ({
                   <div style={{
                     fontSize: '0.875rem',
                     lineHeight: 1.4,
-                    color: 'var(--text-secondary)',
+                    color: 'var(--text-primary)',
                     marginLeft: '44px'
                   }}>
                     Difficulty
@@ -770,7 +770,7 @@ const GameCard = ({
                 <div style={{
                   fontSize: '0.875rem',
                     lineHeight: 1.4,
-                    color: 'var(--text-secondary)',
+                    color: 'var(--text-primary)',
                     marginLeft: '44px'
                   }}>
                     Attack

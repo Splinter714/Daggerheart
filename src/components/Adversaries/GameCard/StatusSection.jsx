@@ -209,7 +209,7 @@ const StatusSection = ({
               zIndex: 1,
             }}
           >
-            <rect x="20" y="6" width="260" height="24" fill="var(--bg-card)" stroke="var(--text-secondary)" strokeWidth="1" rx="4" />
+            <rect x="20" y="6" width="260" height="24" fill="var(--bg-primary)" stroke="var(--text-secondary)" strokeWidth="1" rx="4" />
           </svg>
           <div
             style={{

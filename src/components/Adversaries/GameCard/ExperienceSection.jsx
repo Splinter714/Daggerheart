@@ -399,7 +399,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
                   </span>
                 </div>
               </div>
-              <span style={{ marginLeft: '32px' }}>{name}</span>
+              <span style={{ marginLeft: '32px', color: 'var(--text-primary)' }}>{name}</span>
             </div>
           )
         }
@@ -452,7 +452,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
               </span>
             </div>
           </div>
-          <span style={{ marginLeft: '32px' }}>{exp.name}</span>
+          <span style={{ marginLeft: '32px', color: 'var(--text-primary)' }}>{exp.name}</span>
         </div>
       )
     })}
