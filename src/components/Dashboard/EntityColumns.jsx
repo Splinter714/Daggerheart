@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useCallback } from 'react'
 import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
@@ -63,6 +63,19 @@ const EntityColumns = ({
   onOpenBrowser,
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
+
+  // Measure the actual rendered pill height so the frame line sits exactly at
+  // the pill's vertical midpoint and the hook drop = exactly half the pill height.
+  const GROUP_TAB_TOP_SPACE = DASHBOARD_GAP // px above pill top
+  const [pillHeight, setPillHeight] = useState(22) // updated on first render
+  const pillMeasureRef = useCallback(node => {
+    if (node) {
+      const h = node.getBoundingClientRect().height
+      if (h > 0) setPillHeight(h)
+    }
+  }, [])
+  const groupTabBarHeight = Math.round(GROUP_TAB_TOP_SPACE + pillHeight)
+  const groupLineY = Math.round(GROUP_TAB_TOP_SPACE + pillHeight * 0.35)
 
   // When groupBy is active, compute each section's total width so we can
   // size group-level removal spacers correctly.
@@ -340,6 +353,7 @@ const EntityColumns = ({
 
   const sections = buildSections(entityGroups)
   const items = []
+  let firstGroupSeen = false
 
   sections.forEach((section, sectionIndex) => {
     const isFirstSection = sectionIndex === 0
@@ -372,52 +386,59 @@ const EntityColumns = ({
             flex: 'none',
           }}
         >
-          {/* Inset top-tab label — full-width frame renders behind the pill */}
-          <div style={{
-            height: 24,
-            display: 'flex',
-            alignItems: 'center',
-            position: 'relative',
-          }}>
-            {/* Full-width L-frame: continuous top line + left drop + right drop, always behind pill */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              pointerEvents: 'none',
-            }}>
+          {/* Inset top-tab label — full-width frame renders behind the pill.
+              groupLineY and groupTabBarHeight are derived from the actual measured
+              pill height, so the rail sits exactly at the pill's midpoint and the
+              hook drop equals exactly half the pill height. */}
+          {(() => {
+            const isFirst = !firstGroupSeen
+            if (isFirst) firstGroupSeen = true
+            return (
               <div style={{
-                width: '100%',
-                height: '60%',
-                borderTop: '1px solid var(--text-secondary)',
-                borderLeft: '1px solid var(--text-secondary)',
-                borderRight: '1px solid var(--text-secondary)',
-                borderTopLeftRadius: 4,
-                borderTopRightRadius: 4,
-              }} />
-            </div>
-            {/* Pill — sticky, sits on top of the frame line */}
-            <span style={{
-              position: 'sticky',
-              left: 0,
-              flexShrink: 0,
-              zIndex: 1,
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'var(--text-primary)',
-              whiteSpace: 'nowrap',
-              userSelect: 'none',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--text-secondary)',
-              borderRadius: '3px',
-              padding: '2px 8px',
-            }}>
-              {groupName}
-            </span>
-          </div>
+                height: groupTabBarHeight,
+                display: 'flex',
+                alignItems: 'flex-start',
+                position: 'relative',
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: groupLineY,
+                  left: 0,
+                  right: 0,
+                  bottom: 6,
+                  borderTop: '1px solid var(--text-secondary)',
+                  borderLeft: '1px solid var(--text-secondary)',
+                  borderRight: '1px solid var(--text-secondary)',
+                  borderTopLeftRadius: 4,
+                  borderTopRightRadius: 4,
+                  pointerEvents: 'none',
+                }} />
+                <span
+                  ref={isFirst ? pillMeasureRef : undefined}
+                  style={{
+                    position: 'sticky',
+                    left: 0,
+                    flexShrink: 0,
+                    zIndex: 1,
+                    marginTop: GROUP_TAB_TOP_SPACE,
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-primary)',
+                    whiteSpace: 'nowrap',
+                    userSelect: 'none',
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--text-secondary)',
+                    borderRadius: '6px',
+                    padding: '3px 9px',
+                  }}
+                >
+                  {groupName}
+                </span>
+              </div>
+            )
+          })()}
           {/* Cards row */}
           <div style={{
             display: 'flex',
