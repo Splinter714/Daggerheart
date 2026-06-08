@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { DASHBOARD_GAP } from '../constants'
 
 /**
@@ -21,6 +21,9 @@ export const useAdversaryAddition = ({
   sortDir,
   groupBy
 }) => {
+  const getEntityGroupsRef = useRef(getEntityGroups)
+  useEffect(() => { getEntityGroupsRef.current = getEntityGroups }, [getEntityGroups])
+
   return useCallback(
     (itemData) => {
       const baseName = itemData.baseName || itemData.name?.replace(/\s+\(\d+\)$/, '') || itemData.name
@@ -109,7 +112,7 @@ export const useAdversaryAddition = ({
                 // Reuse the same visibility logic as the existing-group path.
                 setTimeout(() => {
                   if (!scrollContainerRef.current) return
-                  const updatedGroups = getEntityGroups()
+                  const updatedGroups = getEntityGroupsRef.current()
                   const groupIndex = updatedGroups.findIndex((g) => g.baseName === baseName && g.type === 'adversary')
                   if (groupIndex >= 0) {
                     const c = scrollContainerRef.current
@@ -137,7 +140,7 @@ export const useAdversaryAddition = ({
                 }, 10)
               }
             } else {
-              const updatedGroups = getEntityGroups()
+              const updatedGroups = getEntityGroupsRef.current()
               const groupIndex = updatedGroups.findIndex((g) => g.baseName === baseName && g.type === 'adversary')
               if (groupIndex >= 0) {
                 const container = scrollContainerRef.current
@@ -179,7 +182,6 @@ export const useAdversaryAddition = ({
       createAdversariesBulk,
       createAdversary,
       entityGroups,
-      getEntityGroups,
       groupBy,
       pcCount,
       scrollContainerRef,
