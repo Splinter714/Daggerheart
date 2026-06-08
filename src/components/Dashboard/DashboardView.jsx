@@ -24,132 +24,6 @@ import NavRail, { RAIL_SIZE } from './NavRail'
 import SortGroupPopover from './SortGroupPopover'
 import './DashboardView.css'
 
-// Fixed bottom label bar for group names.
-// Lives outside the scroll container so text is never physically scrolled —
-// it just snaps to the correct position when scrolling stops.
-const GROUP_LABEL_BAR_HEIGHT = 32
-
-const PILL_PADDING_LEFT = 8 // left inset from visible group edge
-
-const GroupLabelOverlay = ({ entityGroups, columnWidth, effectiveGap, scrollContainerRef }) => {
-  const [labels, setLabels] = useState([])
-  const rafRef = useRef(null)
-
-  const buildSections = useCallback(() => {
-    const sections = []
-    let i = 0
-    while (i < entityGroups.length) {
-      const g = entityGroups[i]
-      if (g.groupName && g.type === 'adversary') {
-        const start = i
-        let j = i + 1
-        while (j < entityGroups.length &&
-               entityGroups[j].groupName === g.groupName &&
-               entityGroups[j].type === 'adversary') j++
-        sections.push({ groupName: g.groupName, startFlatIndex: start, count: j - start })
-        i = j
-      } else {
-        i++
-      }
-    }
-    return sections
-  }, [entityGroups])
-
-  const compute = useCallback(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
-    const scrollLeft = container.scrollLeft
-    const viewportWidth = container.clientWidth
-    const sections = buildSections()
-
-    const next = []
-    let leftmostClamped = false
-    for (const { groupName, startFlatIndex, count } of sections) {
-      const groupStart = DASHBOARD_GAP + startFlatIndex * (columnWidth + effectiveGap)
-      const groupWidth  = count * columnWidth + (count - 1) * effectiveGap
-      const groupEnd    = groupStart + groupWidth
-
-      const rawLeft  = groupStart - scrollLeft
-      const rawRight = groupEnd   - scrollLeft
-
-      if (rawRight <= DASHBOARD_GAP) continue           // fully off left
-      if (rawLeft >= viewportWidth - DASHBOARD_GAP) continue  // fully off right
-
-      const isClipped = rawLeft < DASHBOARD_GAP
-      let left
-      if (isClipped && !leftmostClamped) {
-        // Only the leftmost partially-visible group gets the sticky pin
-        left = DASHBOARD_GAP + PILL_PADDING_LEFT
-        leftmostClamped = true
-      } else {
-        // All others track directly with their card — feel anchored
-        left = rawLeft + PILL_PADDING_LEFT
-      }
-      next.push({ groupName, left: Math.round(left) })
-    }
-    setLabels(next)
-  }, [buildSections, columnWidth, effectiveGap, scrollContainerRef])
-
-  useEffect(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
-
-    compute()
-
-    const onScroll = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      rafRef.current = requestAnimationFrame(compute)
-    }
-
-    container.addEventListener('scroll', onScroll, { passive: true })
-    container.addEventListener('scrollend', compute)
-    return () => {
-      container.removeEventListener('scroll', onScroll)
-      container.removeEventListener('scrollend', compute)
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    }
-  }, [compute, scrollContainerRef])
-
-  if (labels.length === 0) return null
-
-  return (
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: GROUP_LABEL_BAR_HEIGHT,
-      pointerEvents: 'none',
-      zIndex: 6,
-    }}>
-      {labels.map(({ groupName, left }) => (
-        <span
-          key={groupName}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left,
-            transform: 'translateY(-50%)',
-            fontSize: '0.68rem',
-            fontWeight: 700,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            color: 'var(--text-secondary)',
-            whiteSpace: 'nowrap',
-            userSelect: 'none',
-            background: 'var(--bg-primary)',
-            border: '1px solid var(--border)',
-            borderRadius: '3px',
-            padding: '2px 6px',
-          }}
-        >
-          {groupName}
-        </span>
-      ))}
-    </div>
-  )
-}
-
 // Main Dashboard View Component
 const DashboardContent = () => {
   const {
@@ -208,10 +82,8 @@ const DashboardContent = () => {
 
   const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, countdowns, sortBy, sortDir, groupBy)
 
-  // When grouping is active, widen all column gaps uniformly so the layout
-  // calculation stays simple and cards never overflow the right edge.
-  const effectiveGap = groupBy !== 'none' ? DASHBOARD_GAP * 3 : DASHBOARD_GAP
-  const edgePadding = groupBy !== 'none' ? DASHBOARD_GAP * 2 : DASHBOARD_GAP
+  const effectiveGap = DASHBOARD_GAP
+  const edgePadding = DASHBOARD_GAP
 
   const { columnWidth } = useColumnLayout(scrollContainerRef, effectiveGap, edgePadding)
 
