@@ -231,11 +231,11 @@ const PIP_TYPES = {
   },
 }
 
-const Pips = ({ 
-  type = 'fear', 
-  value = 0, 
-  maxValue, 
-  onChange, 
+const Pips = ({
+  type = 'fear',
+  value = 0,
+  maxValue,
+  onChange,
   size = 'lg',
   showTooltip = true,
   containerStyle = {},
@@ -243,7 +243,8 @@ const Pips = ({
   onPipClick = null, // Individual pip click handler
   enableBoundaryClick = false, // Enable boundary-based clicking (like fear pips)
   clickContainerWidth = 'auto', // Width of the clickable container ('auto', '100%', or specific value)
-  centerPips = true // Whether to center pips within the click container
+  centerPips = true, // Whether to center pips within the click container
+  emptyColor = null, // Override the empty pip color from config
 }) => {
   const [showTooltipState, setShowTooltip] = useState(false)
   
@@ -349,7 +350,7 @@ const Pips = ({
               const IconComponent = config.icon
               const isFontAwesome = IconComponent && typeof IconComponent === 'object' && IconComponent.iconName
               
-              const currentColor = isFilled ? filledColor : config.emptyColor
+              const currentColor = isFilled ? filledColor : (emptyColor || config.emptyColor)
               return (
                 <span 
                   key={pipIndex} 

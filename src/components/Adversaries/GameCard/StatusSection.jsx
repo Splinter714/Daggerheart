@@ -67,7 +67,7 @@ const StatusSection = ({
       <div key={instance.id} data-instance-id={instance.id}>
         <div
           style={{
-            backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'black',
+            backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-card)',
             borderRadius: '6px',
             paddingTop: 0,
             paddingBottom: 0,
@@ -109,7 +109,7 @@ const StatusSection = ({
             style={{
               backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'black',
               border: '1px solid',
-              borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
+              borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'white',
               borderRadius: '50%',
               width: '24px',
               height: '24px',
@@ -152,6 +152,7 @@ const StatusSection = ({
                 }}
                 containerStyle={{ height: 'auto', padding: '0' }}
                 pipStyle={{ fontSize: '1rem', width: '1.25rem', height: '1.25rem' }}
+                emptyColor="white"
                 size="lg"
                 showTooltip={false}
               />
@@ -170,6 +171,7 @@ const StatusSection = ({
                   }}
                   containerStyle={{ height: 'auto', padding: '0' }}
                   pipStyle={{ fontSize: '1rem', width: '1.25rem', height: '1.25rem' }}
+                  emptyColor="white"
                   size="lg"
                   showTooltip={false}
                 />
