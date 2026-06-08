@@ -152,8 +152,8 @@ const StatusSection = ({
                 }}
                 containerStyle={{ height: 'auto', padding: '0' }}
                 pipStyle={{ fontSize: '1rem', width: '1.25rem', height: '1.25rem' }}
-                emptyColor="var(--gray-600)"
-                filledColor="var(--gray-200)"
+                emptyColor="var(--gray-200)"
+                filledColor="var(--gray-600)"
                 size="lg"
                 showTooltip={false}
               />

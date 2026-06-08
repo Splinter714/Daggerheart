@@ -27,7 +27,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
           style={{
             flex: 1,
             border: 'none',
-            borderTop: '1px solid var(--border)',
+            borderTop: '1px solid white',
             margin: 0,
           }}
         />
@@ -36,7 +36,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
             margin: 0,
             fontSize: '0.75rem',
             fontWeight: '500',
-            color: 'var(--text-secondary)',
+            color: 'white',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
           }}

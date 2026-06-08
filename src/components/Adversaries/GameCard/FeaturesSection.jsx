@@ -9,7 +9,7 @@ const FeatureDivider = ({ title }) => (
       style={{
         flex: 1,
         border: 'none',
-        borderTop: '1px solid var(--border)',
+        borderTop: '1px solid white',
         margin: 0,
       }}
     />
@@ -18,7 +18,7 @@ const FeatureDivider = ({ title }) => (
         margin: 0,
         fontSize: '0.8rem',
         fontWeight: '600',
-        color: 'var(--text-secondary)',
+        color: 'white',
         textTransform: 'uppercase',
         letterSpacing: '0.5px',
       }}
