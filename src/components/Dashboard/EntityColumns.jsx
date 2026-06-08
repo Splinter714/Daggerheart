@@ -4,6 +4,12 @@ import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
 
 const SLIDE_PULL_FACTOR = 0.5
+// In narrow/single-column layout a column ≈ the whole viewport, so a
+// viewport-proportional offset shoves the entire screen and reads as the snap
+// overshooting. Use a gentler factor AND clamp the offset to a small fixed
+// peek so it stays a subtle hint of the next card.
+const SLIDE_PULL_FACTOR_NARROW = 0.2
+const SLIDE_MAX_PEEK_NARROW = 28
 
 // Collect consecutive same-groupName adversary entries into sections.
 function buildSections(entityGroups) {
@@ -41,6 +47,7 @@ const EntityColumns = ({
   entityGroups,
   columnWidth,
   effectiveGap = DASHBOARD_GAP,
+  isNarrow = false,
   scrollContainerRef,
   onScroll,
   newCards,
@@ -66,15 +73,29 @@ const EntityColumns = ({
   onOpenBrowser,
 }) => {
   const isGrouped = entityGroups.some(g => g.groupName)
+
+  // When groupBy is active, compute each section's total width so we can
+  // size group-level removal spacers correctly.
+  const sectionWidthFor = (entryCount) =>
+    entryCount * columnWidth + Math.max(0, entryCount - 1) * DASHBOARD_GAP
   const edgePadding = isGrouped ? DASHBOARD_GAP * 2 : DASHBOARD_GAP
 
   // ─── Slide-in effect: pull off-screen sections toward viewer as you scroll ──
 
+  const slideEnabled = isGrouped
+  // Tame the pull in narrow/single-column layout so it doesn't overshoot.
+  const pullFactor = isNarrow ? SLIDE_PULL_FACTOR_NARROW : SLIDE_PULL_FACTOR
+  const maxPeek = isNarrow ? SLIDE_MAX_PEEK_NARROW : Infinity
+
   const rafRef = useRef(null)
   const edgePaddingRef = useRef(edgePadding)
-  const isGroupedRef = useRef(isGrouped)
+  const isGroupedRef = useRef(slideEnabled)
+  const pullFactorRef = useRef(pullFactor)
+  const maxPeekRef = useRef(maxPeek)
   edgePaddingRef.current = edgePadding
-  isGroupedRef.current = isGrouped
+  isGroupedRef.current = slideEnabled
+  pullFactorRef.current = pullFactor
+  maxPeekRef.current = maxPeek
 
   useEffect(() => {
     const container = scrollContainerRef.current
@@ -127,7 +148,7 @@ const EntityColumns = ({
           const writes = []
           for (const card of cards) {
             const overshoot = (wrapperLeft + card.offsetLeft + card.offsetWidth) - rightEdge
-            const offset = overshoot > 0 ? overshoot * SLIDE_PULL_FACTOR : 0
+            const offset = overshoot > 0 ? Math.min(overshoot * pullFactorRef.current, maxPeekRef.current) : 0
             writes.push({ card, offset })
           }
 
@@ -144,7 +165,8 @@ const EntityColumns = ({
           if (bracket) bracket.style.transform = firstTransform
         } else {
           const overshoot = (el.offsetLeft + el.offsetWidth) - rightEdge
-          el.style.transform = overshoot > 0 ? `translateX(${overshoot * SLIDE_PULL_FACTOR}px)` : ''
+          const offset = overshoot > 0 ? Math.min(overshoot * pullFactorRef.current, maxPeekRef.current) : 0
+          el.style.transform = offset > 0 ? `translateX(${offset}px)` : ''
         }
       }
     }
@@ -164,18 +186,19 @@ const EntityColumns = ({
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
       clearTransforms()
     }
-  }, [scrollContainerRef])
+  }, [scrollContainerRef, slideEnabled, isNarrow])
 
   // ─── Card panel renderer ────────────────────────────────────────────────────
 
   const renderCardPanel = (group, flatIndex, cssClass, isFirstInGroup = false, isLastInGroup = false) => {
     const isSpacerPosition =
-      !isGrouped &&
       removingCardSpacer &&
       removingCardSpacer.baseName === group.baseName &&
-      group.type === 'adversary'
+      group.type === 'adversary' &&
+      (!isGrouped || removingCardSpacer.isWithinGroup)
 
     if (isSpacerPosition) {
+      const spacerPad = isGrouped ? '0px' : spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`
       return (
         <Panel
           key={`spacer-${removingCardSpacer.baseName}`}
@@ -183,8 +206,8 @@ const EntityColumns = ({
             width: spacerShrinking ? '0px' : `${columnWidth}px`,
             flexShrink: 0, flexGrow: 0, flex: 'none',
             paddingRight: '0',
-            paddingTop: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
-            paddingBottom: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
+            paddingTop: spacerPad,
+            paddingBottom: spacerPad,
             scrollSnapAlign: 'none', overflow: 'hidden',
             display: 'flex', flexDirection: 'column', alignItems: 'stretch',
             height: '100%', opacity: 0,
@@ -366,6 +389,62 @@ const EntityColumns = ({
                       }, 50)
                     }))
                   }))
+                } else if (isLastInstance && isGrouped) {
+                  // Find the section this group belongs to, to know if the whole
+                  // section is going away or just one card within it.
+                  const currentSections = buildSections(entityGroups)
+                  const owningSection = currentSections.find(
+                    s => s.type === 'grouped' &&
+                         s.entries.some(e => e.baseName === group.baseName)
+                  )
+                  const isLastInSection = owningSection && owningSection.entries.length === 1
+
+                  if (isLastInSection) {
+                    // Whole group-wrapper disappears — animate a section-level spacer.
+                    const gw = sectionWidthFor(owningSection.entries.length)
+                    setRemovingCardSpacer({
+                      baseName: group.baseName,
+                      groupIndex: owningSection.startFlatIndex,
+                      groupName: owningSection.groupName,
+                      groupWidth: gw,
+                      isGroupedSection: true,
+                    })
+                    setSpacerShrinking(false)
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                      instancesToDelete.forEach(inst => deleteAdversary(inst.id))
+                      requestAnimationFrame(() => requestAnimationFrame(() => {
+                        setTimeout(() => {
+                          setSpacerShrinking(true)
+                          setTimeout(() => {
+                            setRemovingCardSpacer(null)
+                            setSpacerShrinking(false)
+                          }, 300)
+                        }, 50)
+                      }))
+                    }))
+                  } else {
+                    // One card disappearing from within a multi-card section.
+                    const groupIndex = entityGroups.findIndex(
+                      g => g.baseName === group.baseName && g.type === 'adversary')
+                    setRemovingCardSpacer({
+                      baseName: group.baseName,
+                      groupIndex,
+                      isWithinGroup: true,
+                    })
+                    setSpacerShrinking(false)
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                      instancesToDelete.forEach(inst => deleteAdversary(inst.id))
+                      requestAnimationFrame(() => requestAnimationFrame(() => {
+                        setTimeout(() => {
+                          setSpacerShrinking(true)
+                          setTimeout(() => {
+                            setRemovingCardSpacer(null)
+                            setSpacerShrinking(false)
+                          }, 300)
+                        }, 50)
+                      }))
+                    }))
+                  }
                 } else {
                   instancesToDelete.forEach(inst => deleteAdversary(inst.id))
                 }
@@ -478,27 +557,46 @@ const EntityColumns = ({
     }
   })
 
-  // Spacer for animated card removal (non-grouped mode only)
-  if (!isGrouped && removingCardSpacer &&
-      !items.some(item => item?.key === `spacer-${removingCardSpacer.baseName}`)) {
-    const insertIndex = Math.min(removingCardSpacer.groupIndex, items.length)
-    items.splice(insertIndex, 0,
-      <Panel
-        key={`spacer-${removingCardSpacer.baseName}`}
-        className="dashboard-column"
-        style={{
-          width: spacerShrinking ? '0px' : `${columnWidth}px`,
-          flexShrink: 0, flexGrow: 0, flex: 'none',
-          paddingRight: '0',
-          paddingTop: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
-          paddingBottom: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
-          scrollSnapAlign: 'none', overflow: 'hidden',
-          display: 'flex', flexDirection: 'column', alignItems: 'stretch',
-          height: '100%', opacity: 0,
-          transition: 'width 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease',
-        }}
-      />
-    )
+  // Spacer for animated card removal — ungrouped mode OR grouped-section removal.
+  if (removingCardSpacer && !items.some(item => item?.key === `spacer-${removingCardSpacer.baseName}`)) {
+    if (!isGrouped) {
+      // Ungrouped: plain column-width spacer
+      const insertIndex = Math.min(removingCardSpacer.groupIndex, items.length)
+      items.splice(insertIndex, 0,
+        <Panel
+          key={`spacer-${removingCardSpacer.baseName}`}
+          className="dashboard-column"
+          style={{
+            width: spacerShrinking ? '0px' : `${columnWidth}px`,
+            flexShrink: 0, flexGrow: 0, flex: 'none',
+            paddingRight: '0',
+            paddingTop: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
+            paddingBottom: spacerShrinking ? '0px' : `${DASHBOARD_GAP}px`,
+            scrollSnapAlign: 'none', overflow: 'hidden',
+            display: 'flex', flexDirection: 'column', alignItems: 'stretch',
+            height: '100%', opacity: 0,
+            transition: 'width 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease',
+          }}
+        />
+      )
+    } else if (removingCardSpacer.isGroupedSection) {
+      // Grouped: a whole group-wrapper just vanished — hold its spot then shrink.
+      const insertIndex = Math.min(removingCardSpacer.groupIndex, items.length)
+      items.splice(insertIndex, 0,
+        <div
+          key={`spacer-${removingCardSpacer.baseName}`}
+          data-no-slide
+          style={{
+            width: spacerShrinking ? '0px' : `${removingCardSpacer.groupWidth}px`,
+            flexShrink: 0, flexGrow: 0, flex: 'none',
+            height: '100%',
+            overflow: 'hidden',
+            opacity: 0,
+            transition: 'width 0.3s ease',
+          }}
+        />
+      )
+    }
   }
 
   return (
@@ -515,7 +613,7 @@ const EntityColumns = ({
       }}
     >
       {items.length > 0 ? items : null}
-      {isGrouped && browserOpenAtPosition === null && items.length > 0 && (
+      {slideEnabled && browserOpenAtPosition === null && items.length > 0 && (
         // Trailing black space so the very last card can reach its start-snap
         // position (otherwise scroll-snap can't satisfy it and bounces back).
         <div

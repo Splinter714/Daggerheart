@@ -535,6 +535,7 @@ selectedCustomAdversaryId={selectedCustomAdversaryId}
           entityGroups={entityGroups}
           columnWidth={columnWidth}
           effectiveGap={effectiveGap}
+          isNarrow={isNarrow}
           scrollContainerRef={scrollContainerRef}
           onScroll={handleScroll}
           newCards={newCards}
