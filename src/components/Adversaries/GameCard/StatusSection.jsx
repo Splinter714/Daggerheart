@@ -250,7 +250,7 @@ const StatusSection = ({
         paddingRight: CARD_SPACE_H,
       }}
     >
-      <SectionHeader title="Status" />
+      {renderThresholds()}
       {isEditMode ? (
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (
@@ -258,7 +258,6 @@ const StatusSection = ({
           {instances.map((instance) => renderInstanceRow(instance))}
         </div>
       )}
-      {renderThresholds()}
     </div>
   )
 }
