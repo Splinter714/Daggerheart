@@ -199,8 +199,9 @@ const StatusSection = ({
           backgroundColor: 'var(--bg-primary)',
           border: '1px solid var(--text-secondary)',
           borderRadius: '4px',
-          padding: '4px 6px',
-          minHeight: '28px',
+          padding: '0 6px',
+          height: '24px',
+          overflow: 'visible',
         }}
       >
         {isEditMode ? (
@@ -233,21 +234,23 @@ const StatusSection = ({
         paddingRight: CARD_SPACE_H,
       }}
     >
-      {/* Controls + threshold in one row */}
+      {/* Threshold left, controls right */}
       {(showControls || renderThresholds()) && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {renderThresholds()}
           {showControls && (
             <div style={{
               display: 'inline-flex',
-              alignItems: 'center',
+              alignItems: 'stretch',
               border: '1px solid var(--border)',
               borderRadius: '6px',
               overflow: 'hidden',
               flexShrink: 0,
+              height: '36px',
             }}>
               <button
                 onClick={(e) => { e.stopPropagation(); onRemoveInstance && onRemoveInstance(item.id) }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '3px 8px', display: 'flex', alignItems: 'center' }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0 12px', display: 'flex', alignItems: 'center' }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
                 title="Remove one"
@@ -255,20 +258,22 @@ const StatusSection = ({
                 <Minus size={14} />
               </button>
               <span style={{
-                padding: '3px 10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 fontSize: '0.8rem',
                 fontWeight: 600,
                 color: 'var(--text-primary)',
                 borderLeft: '1px solid var(--border)',
                 borderRight: '1px solid var(--border)',
-                minWidth: '28px',
+                minWidth: '36px',
                 textAlign: 'center',
               }}>
                 {instances.length}
               </span>
               <button
                 onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '3px 8px', display: 'flex', alignItems: 'center' }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0 12px', display: 'flex', alignItems: 'center' }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
                 title="Add another"
@@ -277,7 +282,6 @@ const StatusSection = ({
               </button>
             </div>
           )}
-          {renderThresholds()}
         </div>
       )}
       {isEditMode ? (
