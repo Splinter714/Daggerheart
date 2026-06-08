@@ -191,49 +191,33 @@ const StatusSection = ({
     return (
       <div
         style={{
+          flex: 1,
           display: 'flex',
           alignItems: 'center',
-          paddingTop: '1px',
-          position: 'relative',
-          flex: 1,
+          justifyContent: 'center',
+          gap: '0.375rem',
+          backgroundColor: 'var(--bg-primary)',
+          border: '1px solid var(--text-secondary)',
+          borderRadius: '4px',
+          padding: '4px 6px',
+          minHeight: '28px',
         }}
       >
-          <svg
-            width="300"
-            height="36"
-            viewBox="0 0 300 36"
-            style={{
-              position: 'absolute',
-              zIndex: 1,
-            }}
-          >
-            <rect x="20" y="6" width="260" height="24" fill="var(--bg-primary)" stroke="var(--text-secondary)" strokeWidth="1" rx="4" />
-          </svg>
-          <div
-            style={{
-              position: 'relative',
-              zIndex: 2,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.375rem', // Specific spacing for thresholds graphic elements
-            }}
-          >
-            {isEditMode ? (
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem' }}>
-                <ThresholdInput label="Minor" value={item.thresholds?.major} onChange={(val) => updateThreshold('major', val, onUpdate, item)} />
-                <ThresholdInput label="Major" value={item.thresholds?.severe} onChange={(val) => updateThreshold('severe', val, onUpdate, item)} />
-              </div>
-            ) : (
-              <>
-                <ThresholdLabel text="Minor" />
-                <ThresholdTag value={item.thresholds?.major || 7} />
-                <ThresholdLabel text="Major" />
-                <ThresholdTag value={item.thresholds?.severe || 14} />
-                <ThresholdLabel text="Severe" />
-              </>
-            )}
+        {isEditMode ? (
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem' }}>
+            <ThresholdInput label="Minor" value={item.thresholds?.major} onChange={(val) => updateThreshold('major', val, onUpdate, item)} />
+            <ThresholdInput label="Major" value={item.thresholds?.severe} onChange={(val) => updateThreshold('severe', val, onUpdate, item)} />
           </div>
-        </div>
+        ) : (
+          <>
+            <ThresholdLabel text="Minor" />
+            <ThresholdTag value={item.thresholds?.major || 7} />
+            <ThresholdLabel text="Major" />
+            <ThresholdTag value={item.thresholds?.severe || 14} />
+            <ThresholdLabel text="Severe" />
+          </>
+        )}
+      </div>
     )
   }
 
@@ -249,51 +233,53 @@ const StatusSection = ({
         paddingRight: CARD_SPACE_H,
       }}
     >
-      {/* Instance count controls */}
-      {showControls && (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            border: '1px solid var(--border)',
-            borderRadius: '6px',
-            overflow: 'hidden',
-          }}>
-            <button
-              onClick={(e) => { e.stopPropagation(); onRemoveInstance && onRemoveInstance(item.id) }}
-              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '3px 8px', display: 'flex', alignItems: 'center' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
-              title="Remove one"
-            >
-              <Minus size={14} />
-            </button>
-            <span style={{
-              padding: '3px 10px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              color: 'var(--text-primary)',
-              borderLeft: '1px solid var(--border)',
-              borderRight: '1px solid var(--border)',
-              minWidth: '28px',
-              textAlign: 'center',
+      {/* Controls + threshold in one row */}
+      {(showControls || renderThresholds()) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {showControls && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              border: '1px solid var(--border)',
+              borderRadius: '6px',
+              overflow: 'hidden',
+              flexShrink: 0,
             }}>
-              {instances.length}
-            </span>
-            <button
-              onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
-              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '3px 8px', display: 'flex', alignItems: 'center' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
-              title="Add another"
-            >
-              <Plus size={14} />
-            </button>
-          </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); onRemoveInstance && onRemoveInstance(item.id) }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '3px 8px', display: 'flex', alignItems: 'center' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
+                title="Remove one"
+              >
+                <Minus size={14} />
+              </button>
+              <span style={{
+                padding: '3px 10px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                borderLeft: '1px solid var(--border)',
+                borderRight: '1px solid var(--border)',
+                minWidth: '28px',
+                textAlign: 'center',
+              }}>
+                {instances.length}
+              </span>
+              <button
+                onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '3px 8px', display: 'flex', alignItems: 'center' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
+                title="Add another"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+          )}
+          {renderThresholds()}
         </div>
       )}
-      {/* Threshold badge */}
-      {renderThresholds()}
       {isEditMode ? (
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (
