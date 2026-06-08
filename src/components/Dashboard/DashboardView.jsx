@@ -60,17 +60,7 @@ const DashboardContent = () => {
   const { sortBy, sortDir, groupBy, setSortBy, setGroupBy } = useDashboardSortGroup()
 
   // Narrow screen detection for NavRail placement
-  const [isNarrow, setIsNarrow] = useState(false)
   const dashboardRootRef = useRef(null)
-  useEffect(() => {
-    const el = dashboardRootRef.current
-    if (!el) return
-    const observer = new ResizeObserver(([entry]) => {
-      setIsNarrow(entry.contentRect.width < 760)
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
 
   // Column layout state
   const [newCards, setNewCards] = useState(new Set())
@@ -85,7 +75,8 @@ const DashboardContent = () => {
   const effectiveGap = DASHBOARD_GAP
   const edgePadding = DASHBOARD_GAP
 
-  const { columnWidth } = useColumnLayout(scrollContainerRef, effectiveGap, edgePadding)
+  const { columnWidth, visibleColumns } = useColumnLayout(scrollContainerRef, effectiveGap, edgePadding, RAIL_SIZE)
+  const isNarrow = visibleColumns < 2
 
   const { browserOpenAtPosition, handleOpenBrowser, handleCloseBrowser } = useBrowserOverlay({
     scrollContainerRef,
