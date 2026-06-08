@@ -1,5 +1,4 @@
 import React from 'react'
-import { Plus, Minus } from 'lucide-react'
 import Pips from '../../Shared/Pips'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
@@ -55,8 +54,6 @@ const StatusSection = ({
   onApplyDamage,
   onApplyHealing,
   onApplyStressChange,
-  onAddInstance,
-  onRemoveInstance,
 }) => {
   const shouldShowStatus =
     (instances && instances.length > 0) || (item.type !== 'Minion' && (item.thresholds || isEditMode))
@@ -224,8 +221,6 @@ const StatusSection = ({
     )
   }
 
-  const showControls = !isEditMode && (onAddInstance || onRemoveInstance)
-
   return (
     <div
       style={{
@@ -236,69 +231,7 @@ const StatusSection = ({
         paddingRight: CARD_SPACE_H,
       }}
     >
-      {/* Threshold left, controls right */}
-      {(showControls || renderThresholds()) && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {renderThresholds()}
-          {showControls && (
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'stretch',
-              border: '1px solid var(--border)',
-              borderRadius: '6px',
-              overflow: 'hidden',
-              flexShrink: 0,
-              height: '36px',
-            }}>
-              <button
-                onClick={(e) => { e.stopPropagation(); onRemoveInstance && onRemoveInstance(item.id) }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0 12px', display: 'flex', alignItems: 'center' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
-                title="Remove one"
-              >
-                <Minus size={14} />
-              </button>
-              <span style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderLeft: '1px solid var(--border)',
-                borderRight: '1px solid var(--border)',
-                padding: '0 10px',
-              }}>
-                <div style={{
-                  backgroundColor: 'black',
-                  border: '1px solid white',
-                  borderRadius: '50%',
-                  minWidth: '24px',
-                  height: '24px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  paddingTop: '1px',
-                  paddingLeft: '3px',
-                  paddingRight: '3px',
-                  flexShrink: 0,
-                }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'white' }}>
-                    {instances.length}
-                  </span>
-                </div>
-              </span>
-              <button
-                onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0 12px', display: 'flex', alignItems: 'center' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
-                title="Add another"
-              >
-                <Plus size={14} />
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+      {renderThresholds()}
       {isEditMode ? (
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (

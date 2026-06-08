@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Hexagon, Locate, Check } from 'lucide-react'
+import { X, Hexagon, Locate, Check, Plus, Minus } from 'lucide-react'
 import ContainerWithTab from '../Dashboard/ContainerWithTab'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
 import FeaturesSection from './GameCard/FeaturesSection'
@@ -421,7 +421,7 @@ const GameCard = ({
             gap: 0
           }}>
             {/* Name row */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
               {/* Name */}
               <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
                 {isEditMode ? (
@@ -464,6 +464,55 @@ const GameCard = ({
                 )}
               </div>
 
+              {/* Instance controls — right side of header */}
+              {!isEditMode && (onAddInstance || onRemoveInstance) && (
+                <div style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '2px',
+                }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onRemoveInstance && onRemoveInstance(item.id) }}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
+                    title="Remove one"
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <div style={{
+                    backgroundColor: 'black',
+                    border: '1px solid white',
+                    borderRadius: '50%',
+                    minWidth: '24px',
+                    height: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingTop: '1px',
+                    paddingLeft: '3px',
+                    paddingRight: '3px',
+                    flexShrink: 0,
+                  }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'white' }}>
+                      {instances.length}
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
+                    title="Add another"
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
