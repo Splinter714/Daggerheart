@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Hexagon, Locate, Check, Plus, Minus } from 'lucide-react'
+import { X, Hexagon, Locate, Check } from 'lucide-react'
 import ContainerWithTab from '../Dashboard/ContainerWithTab'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
 import FeaturesSection from './GameCard/FeaturesSection'
@@ -10,7 +10,6 @@ import { CARD_SPACE_H, CARD_SPACE_V } from './GameCard/constants'
 import { DASHBOARD_GAP, TAB_HEIGHT } from '../Dashboard/constants'
 import { highlightCardText } from './GameCard/textHighlighter'
 import TabButtons from './GameCard/TabButtons'
-import useCardScroll from './GameCard/hooks/useCardScroll'
 // ============================================================================
 // Reusable Components
 // ============================================================================
@@ -113,7 +112,6 @@ const GameCard = ({
   onCancelEdit = null, // Handler for canceling edit
   isStockAdversary = false, // Whether this is a stock adversary (needs Save As)
 }) => {
-  const { scrollableContentRef } = useCardScroll(instances)
   const nameInputRef = useRef(null)
   const customCreatorRef = useRef(null)
   const cardRef = useRef(null)
@@ -423,23 +421,8 @@ const GameCard = ({
             gap: 0
           }}>
             {/* Name row */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              {/* Left: − button */}
-              <div style={{ flexShrink: 0, width: '28px' }}>
-                {onRemoveInstance && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onRemoveInstance(item.id) }}
-                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
-                    title="Remove one"
-                  >
-                    <Minus size={18} />
-                  </button>
-                )}
-              </div>
-
-              {/* Center: name */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              {/* Name */}
               <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
                 {isEditMode ? (
                   <input
@@ -481,27 +464,12 @@ const GameCard = ({
                 )}
               </div>
 
-              {/* Right: + button */}
-              <div style={{ flexShrink: 0, width: '28px', display: 'flex', justifyContent: 'flex-end' }}>
-                {onAddInstance && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onAddInstance(item) }}
-                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', borderRadius: '4px' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'none' }}
-                    title="Add another"
-                  >
-                    <Plus size={18} />
-                  </button>
-                )}
-              </div>
             </div>
           </div>
         </div>
 
         {/* Expandable Content Section - Scrollable */}
-                  <div 
-          ref={scrollableContentRef}
+                  <div
           style={{
           borderRadius: '0 0 8px 8px',
           flex: 1,
