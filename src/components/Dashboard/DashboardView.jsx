@@ -30,7 +30,6 @@ const DashboardContent = () => {
     adversaries,
     adversaryGroups,
     environments,
-    countdowns,
     fear,
     partySize,
     customContent,
@@ -43,7 +42,6 @@ const DashboardContent = () => {
     addCustomAdversary,
     updateCustomAdversary,
     updateEnvironment,
-    updateCountdown,
   } = useGameState()
 
   const pcCount = partySize || 4
@@ -70,7 +68,7 @@ const DashboardContent = () => {
 
   useMinionSync(adversaryGroups, pcCount, createAdversariesBulk, deleteAdversary)
 
-  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, countdowns, sortBy, sortDir, groupBy)
+  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, sortBy, sortDir, groupBy)
 
   const effectiveGap = DASHBOARD_GAP
   const edgePadding = DASHBOARD_GAP
@@ -413,7 +411,6 @@ selectedCustomAdversaryId={selectedCustomAdversaryId}
           handleCancelEdit={handleCancelEdit}
           updateAdversary={updateAdversary}
           updateEnvironment={updateEnvironment}
-          updateCountdown={updateCountdown}
           adversaries={adversaries}
           handleEditAdversary={handleEditAdversary}
           createAdversary={createAdversary}

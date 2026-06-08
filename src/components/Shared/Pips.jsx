@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { 
-  faSkull, 
-  faHeart, 
+import {
+  faSkull,
+  faHeart,
   faFire,
-  faClock 
 } from '@fortawesome/free-solid-svg-icons'
 import { Droplet, Activity } from 'lucide-react'
 
@@ -98,35 +97,6 @@ const PIP_TYPES = {
     tooltipInstructions: [
       { text: 'Left of boundary:', description: 'Click to decrease stress by 1' },
       { text: 'Right of boundary:', description: 'Click to increase stress by 1' }
-    ]
-  },
-  countdown: {
-    icon: faClock,
-    maxValue: 6,
-    containerStyle: {
-      display: 'inline-block',
-      width: 'auto',
-      height: '100%',
-      padding: '0.125rem',
-      textAlign: 'center'
-    },
-    pipStyle: {
-      fontSize: 'var(--text-sm)',
-      fontWeight: 600,
-      transition: 'color 0.3s ease',
-      height: '1.5rem',
-      width: '1.5rem',
-      display: 'inline-block',
-      textAlign: 'center',
-      lineHeight: '1.5rem',
-      flexShrink: 0
-    },
-    filledColor: 'var(--text-secondary)', // Default gray
-    emptyColor: 'var(--text-secondary)',
-    tooltipTitle: 'Click anywhere to adjust countdown:',
-    tooltipInstructions: [
-      { text: 'Left of boundary:', description: 'Click to decrease countdown by 1' },
-      { text: 'Right of boundary:', description: 'Click to increase countdown by 1' }
     ]
   },
   // Dot-based pips
@@ -259,34 +229,6 @@ const PIP_TYPES = {
       { text: 'Empty pip:', description: 'Click to increase stress' }
     ]
   },
-  countdownDistributed: {
-    icon: faClock,
-    maxValue: 6,
-    containerStyle: {
-      display: 'inline-block',
-      width: 'auto',
-      height: '100%',
-      padding: '0.125rem',
-      textAlign: 'center'
-    },
-    pipStyle: {
-      fontSize: 'var(--text-sm)',
-      fontWeight: 600,
-      transition: 'color 0.3s ease',
-      height: '1.5rem',
-      width: '1.5rem',
-      display: 'inline-block',
-      textAlign: 'center',
-      lineHeight: '1.5rem',
-      flexShrink: 0
-    },
-    filledColor: 'var(--text-secondary)', // Will be overridden by countdownType
-    emptyColor: 'var(--text-secondary)',
-    tooltipTitle: 'Countdown progress:',
-    tooltipInstructions: [
-      { text: 'Progress:', description: 'Current countdown value' }
-    ]
-  }
 }
 
 const Pips = ({ 
@@ -298,8 +240,6 @@ const Pips = ({
   showTooltip = true,
   containerStyle = {},
   pipStyle = {},
-  countdownType = null, // For countdown type-based colors
-  distributedGroups = null, // For distributed countdown pips (e.g., [5, 3] for groups of 5 and 3)
   onPipClick = null, // Individual pip click handler
   enableBoundaryClick = false, // Enable boundary-based clicking (like fear pips)
   clickContainerWidth = 'auto', // Width of the clickable container ('auto', '100%', or specific value)
@@ -312,18 +252,8 @@ const Pips = ({
   const effectiveMaxValue = maxValue || config.maxValue
   const safeValue = Math.max(0, Math.min(effectiveMaxValue, value))
   
-  // Handle countdown type-based colors
-  let filledColor = config.filledColor
-  if (type === 'countdown' && countdownType) {
-    if (['progress', 'dynamic-progress', 'simple-hope'].includes(countdownType)) {
-      filledColor = 'var(--gold)'
-    } else if (['consequence', 'dynamic-consequence', 'simple-fear'].includes(countdownType)) {
-      filledColor = 'var(--purple)'
-    } else if (['long-term', 'standard'].includes(countdownType)) {
-      filledColor = 'var(--text-secondary)'
-    }
-  }
-  
+  const filledColor = config.filledColor
+
   // Handle click on individual pip
   const handlePipClick = (index, isFilled) => {
     if (onPipClick) {
@@ -388,21 +318,7 @@ const Pips = ({
     }
   }
 
-  // Generate pip groups for distributed countdowns
-  const generatePipGroups = () => {
-    if (!distributedGroups || type !== 'countdownDistributed') {
-      return [{ start: 0, end: effectiveMaxValue, groupIndex: 0 }]
-    }
-    
-    let currentIndex = 0
-    return distributedGroups.map((groupSize, groupIndex) => {
-      const group = { start: currentIndex, end: currentIndex + groupSize, groupIndex }
-      currentIndex += groupSize
-      return group
-    })
-  }
-
-  const pipGroups = generatePipGroups()
+  const pipGroups = [{ start: 0, end: effectiveMaxValue, groupIndex: 0 }]
   
   // Render pips content
   const renderPips = () => (

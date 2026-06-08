@@ -915,24 +915,6 @@ const GameCard = ({
     return renderExpandedAdversary()
   }
 
-  // For unsupported types, show coming soon message
-    const hasExpandedRenderer = (type === 'adversary' || type === 'adversaries')
-    
-    if (!hasExpandedRenderer) {
-      return (
-        <div className={getCardClassName()} style={getCardStyle(true)}>
-          <div style={styles.rowMain}>
-            <h4 style={styles.rowTitle}>{renderTitle()}</h4>
-            <div style={styles.rowMeta}>{renderMeta()}</div>
-          </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
-            Expanded view coming soon for {type}
-          </p>
-        </div>
-      )
-  }
-
-  // Default fallback - should not reach here
   return null
 }
 

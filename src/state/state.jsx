@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { readFromStorage, writeToStorage } from './StorageHelpers'
 import { useAdversaryState } from './useAdversaryState'
-import { useCountdownState } from './useCountdownState'
 import { useEnvironmentState } from './useEnvironmentState'
 import { useEncounterState } from './useEncounterState'
 import { useGameSettingsState } from './useGameSettingsState'
@@ -17,7 +16,6 @@ export const GameStateProvider = ({ children }) => {
     const savedState = readFromStorage('daggerheart-game-state')
     return savedState || {
     fear: { value: 0, visible: false },
-    countdowns: [],
     adversaries: [],
     environments: [],
     partySize: 4,
@@ -29,7 +27,6 @@ export const GameStateProvider = ({ children }) => {
   // Initialize all domain state modules with loaded values
   const gameSettings = useGameSettingsState(initialState.fear, initialState.partySize)
   const adversaryState = useAdversaryState(initialState.adversaries || [])
-  const countdownState = useCountdownState(initialState.countdowns || [])
   const environmentState = useEnvironmentState(initialState.environments || [])
   const encounterState = useEncounterState(
     initialState.savedEncounters || [],
@@ -45,7 +42,6 @@ export const GameStateProvider = ({ children }) => {
   // Compose gameState object for backward compatibility
   const gameState = {
     fear: gameSettings.fear,
-    countdowns: countdownState.countdowns,
     adversaries: adversaryState.adversaries,
     environments: environmentState.environments,
     partySize: gameSettings.partySize,
@@ -67,13 +63,6 @@ export const GameStateProvider = ({ children }) => {
     saveEncounter: encounterState.saveEncounter,
     loadEncounter: encounterState.loadEncounter,
     deleteEncounter: encounterState.deleteEncounter,
-    // Countdown actions
-    createCountdown: countdownState.createCountdown,
-    updateCountdown: countdownState.updateCountdown,
-    deleteCountdown: countdownState.deleteCountdown,
-    advanceCountdown: countdownState.advanceCountdown,
-    incrementCountdown: countdownState.incrementCountdown,
-    decrementCountdown: countdownState.decrementCountdown,
     // Adversary actions
     adversaryGroups: adversaryState.groups,
     createAdversary: adversaryState.createAdversary,
@@ -109,13 +98,12 @@ export const useGameState = () => {
       
       // State
       fear: { value: 0, visible: false },
-      countdowns: [],
       adversaries: [],
       environments: [],
       partySize: 4,
       savedEncounters: [],
       customContent: { adversaries: [], environments: [] },
-      
+
       // Actions (no-op functions)
       updateFear: () => {},
       updatePartySize: () => {},
@@ -123,12 +111,6 @@ export const useGameState = () => {
       saveEncounter: () => {},
       loadEncounter: () => {},
       deleteEncounter: () => {},
-      createCountdown: () => {},
-      updateCountdown: () => {},
-      deleteCountdown: () => {},
-      advanceCountdown: () => {},
-      incrementCountdown: () => {},
-      decrementCountdown: () => {},
       createAdversary: () => {},
       updateAdversary: () => {},
       deleteAdversary: () => {},
@@ -138,19 +120,17 @@ export const useGameState = () => {
       addCustomAdversary: () => {},
       updateCustomAdversary: () => {},
       deleteCustomAdversary: () => {},
-      
+
       // Computed values
-      hasCountdowns: false,
       hasAdversaries: false,
       hasEnvironments: false,
-      
+
       // Helper functions
-      getCountdownById: () => null,
       getAdversaryById: () => null,
       getEnvironmentById: () => null,
     }
   }
-  
+
   const { gameState, customContent, ...actions } = context
   
   // Ensure gameState exists and has the expected structure
@@ -162,13 +142,12 @@ export const useGameState = () => {
       
       // State
       fear: { value: 0, visible: false },
-      countdowns: [],
       adversaries: [],
       environments: [],
       partySize: 4,
       savedEncounters: [],
       customContent: { adversaries: [], environments: [] },
-      
+
       // Actions (no-op functions)
       updateFear: () => {},
       updatePartySize: () => {},
@@ -176,12 +155,6 @@ export const useGameState = () => {
       saveEncounter: () => {},
       loadEncounter: () => {},
       deleteEncounter: () => {},
-      createCountdown: () => {},
-      updateCountdown: () => {},
-      deleteCountdown: () => {},
-      advanceCountdown: () => {},
-      incrementCountdown: () => {},
-      decrementCountdown: () => {},
       createAdversary: () => {},
       updateAdversary: () => {},
       deleteAdversary: () => {},
@@ -191,20 +164,18 @@ export const useGameState = () => {
       addCustomAdversary: () => {},
       updateCustomAdversary: () => {},
       deleteCustomAdversary: () => {},
-      
+
       // Computed values
-      hasCountdowns: false,
       hasAdversaries: false,
       hasEnvironments: false,
-      
+
       // Helper functions
-      getCountdownById: () => null,
       getAdversaryById: () => null,
       getEnvironmentById: () => null,
     }
   }
-  
-  const { fear, countdowns, adversaries, environments, partySize, savedEncounters } = gameState
+
+  const { fear, adversaries, environments, partySize, savedEncounters } = gameState
   
   return {
     // Include the full gameState for components that need it
@@ -215,24 +186,21 @@ export const useGameState = () => {
     
     // State
     fear,
-    countdowns,
     adversaries,
     adversaryGroups: context.adversaryGroups || [],
     environments,
     partySize,
     savedEncounters,
     customContent,
-    
+
     // Actions
     ...actions,
-    
+
     // Computed values
-    hasCountdowns: countdowns.length > 0,
     hasAdversaries: adversaries.length > 0,
     hasEnvironments: environments.length > 0,
-    
+
     // Helper functions
-    getCountdownById: (id) => countdowns.find(c => c.id === id),
     getAdversaryById: (id) => adversaries.find(a => a.id === id),
     getEnvironmentById: (id) => environments.find(e => e.id === id),
   }

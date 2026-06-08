@@ -49,7 +49,6 @@ const EntityColumns = ({
   handleCancelEdit,
   updateAdversary,
   updateEnvironment,
-  updateCountdown,
   adversaries,
   handleEditAdversary,
   createAdversary,
@@ -179,8 +178,7 @@ const EntityColumns = ({
             : undefined}
           onUpdate={
             group.type === 'adversary' ? updateAdversary
-              : group.type === 'environment' ? updateEnvironment
-              : updateCountdown}
+              : updateEnvironment}
           adversaries={adversaries}
           showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary'}
           onEdit={group.type === 'adversary' ? itemId => handleEditAdversary(itemId) : undefined}
