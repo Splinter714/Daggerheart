@@ -372,16 +372,37 @@ const EntityColumns = ({
             flex: 'none',
           }}
         >
-          {/* Inset top-tab label with L-shaped line to group right edge */}
+          {/* Inset top-tab label — full-width frame renders behind the pill */}
           <div style={{
             height: 24,
             display: 'flex',
             alignItems: 'center',
+            position: 'relative',
           }}>
+            {/* Full-width L-frame: continuous top line + left drop + right drop, always behind pill */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              pointerEvents: 'none',
+            }}>
+              <div style={{
+                width: '100%',
+                height: '60%',
+                borderTop: '1px solid var(--text-secondary)',
+                borderLeft: '1px solid var(--text-secondary)',
+                borderRight: '1px solid var(--text-secondary)',
+                borderTopLeftRadius: 4,
+                borderTopRightRadius: 4,
+              }} />
+            </div>
+            {/* Pill — sticky, sits on top of the frame line */}
             <span style={{
               position: 'sticky',
-              left: DASHBOARD_GAP,
+              left: 0,
               flexShrink: 0,
+              zIndex: 1,
               fontSize: '0.72rem',
               fontWeight: 700,
               letterSpacing: '0.14em',
@@ -396,22 +417,6 @@ const EntityColumns = ({
             }}>
               {groupName}
             </span>
-            {/* L-shaped connector: horizontal line → rounded corner → drops down */}
-            <div style={{
-              flex: 1,
-              marginLeft: 4,
-              alignSelf: 'stretch',
-              display: 'flex',
-              alignItems: 'center',
-            }}>
-              <div style={{
-                flex: 1,
-                height: '60%',
-                borderTop: '1px solid var(--text-secondary)',
-                borderRight: '1px solid var(--text-secondary)',
-                borderTopRightRadius: 4,
-              }} />
-            </div>
           </div>
           {/* Cards row */}
           <div style={{
