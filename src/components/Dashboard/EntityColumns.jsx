@@ -366,36 +366,43 @@ const EntityColumns = ({
           data-group-wrapper
           style={{
             display: 'flex',
-            flexDirection: 'row',
+            flexDirection: 'column',
             flexShrink: 0,
             flexGrow: 0,
             flex: 'none',
-            position: 'relative',
-            gap: `${DASHBOARD_GAP}px`,
           }}
         >
-          {/* Inset top-tab label */}
-          <span style={{
-            position: 'absolute',
-            top: DASHBOARD_GAP,
-            left: DASHBOARD_GAP,
-            zIndex: 2,
-            pointerEvents: 'none',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: 'var(--text-primary)',
-            whiteSpace: 'nowrap',
-            userSelect: 'none',
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--text-secondary)',
-            borderRadius: '3px',
-            padding: '2px 8px',
+          {/* Inset top-tab label — sits within group width, no surrounding box */}
+          <div style={{
+            height: 24,
+            display: 'flex',
+            alignItems: 'center',
+            paddingLeft: `${DASHBOARD_GAP}px`,
           }}>
-            {groupName}
-          </span>
-          {cards}
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--text-primary)',
+              whiteSpace: 'nowrap',
+              userSelect: 'none',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--text-secondary)',
+              borderRadius: '3px',
+              padding: '2px 8px',
+            }}>
+              {groupName}
+            </span>
+          </div>
+          {/* Cards row */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: `${DASHBOARD_GAP}px`,
+          }}>
+            {cards}
+          </div>
         </div>
       )
     } else {
@@ -463,6 +470,18 @@ const EntityColumns = ({
       }}
     >
       {items.length > 0 ? items : null}
+      {isGrouped && !isNarrow && browserOpenAtPosition === null && items.length > 0 && (
+        <div
+          aria-hidden
+          style={{
+            width: `calc(100% - ${columnWidth}px)`,
+            flexShrink: 0, flexGrow: 0, flex: 'none',
+            height: '100%',
+            scrollSnapAlign: 'none',
+            pointerEvents: 'none',
+          }}
+        />
+      )}
       {browserOpenAtPosition !== null && (
         <div data-no-slide style={{ width: `${columnWidth}px`, flexShrink: 0, flexGrow: 0, flex: 'none', height: '100%' }} />
       )}
