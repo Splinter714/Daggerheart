@@ -10,6 +10,10 @@ const NAV_ITEMS = [
   { id: 'info',     Icon: Info,          label: 'App info'          },
 ]
 
+const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+              window.navigator.standalone === true ||
+              document.referrer.includes('android-app://')
+
 const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButtonRef, onSortToggle }) => {
   const isRight = placement === 'right'
 
@@ -31,7 +35,9 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
         borderTop: '1px solid var(--border)',
         paddingLeft: 'env(safe-area-inset-left, 0)',
         paddingRight: 'env(safe-area-inset-right, 0)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0)',
+        paddingBottom: isPWA
+          ? 'calc(env(safe-area-inset-bottom, 0px) + 1rem)'
+          : 'env(safe-area-inset-bottom, 0)',
       }
 
   const renderButton = ({ id, Icon, label, active, onClick, btnRef }) => (
@@ -90,4 +96,4 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
 }
 
 export default NavRail
-export { RAIL_SIZE }
+export { RAIL_SIZE, isPWA }

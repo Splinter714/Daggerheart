@@ -20,7 +20,7 @@ import { useSmoothScroll } from './hooks/useSmoothScroll'
 import { useEntityGroups } from './hooks/useEntityGroups'
 import { useAdversaryAddition } from './hooks/useAdversaryAddition'
 import { useDashboardSortGroup } from './hooks/useDashboardSortGroup'
-import NavRail, { RAIL_SIZE } from './NavRail'
+import NavRail, { RAIL_SIZE, isPWA } from './NavRail'
 import SortGroupPopover from './SortGroupPopover'
 import './DashboardView.css'
 
@@ -316,7 +316,9 @@ const DashboardContent = () => {
 
   const navPlacement = isNarrow ? 'bottom' : 'right'
   const railPadding = isNarrow
-    ? { paddingBottom: `${RAIL_SIZE}px` }
+    ? { paddingBottom: isPWA
+        ? `calc(${RAIL_SIZE}px + env(safe-area-inset-bottom, 0px) + 1rem)`
+        : `calc(${RAIL_SIZE}px + env(safe-area-inset-bottom, 0px))` }
     : { paddingRight: `${RAIL_SIZE}px` }
 
   const rightColumnOpen = browserOpenAtPosition !== null
@@ -433,7 +435,7 @@ const DashboardContent = () => {
           isNarrow ? (
             <div style={{
               position: 'fixed',
-              top: 0, right: 0, bottom: `${RAIL_SIZE}px`, left: 0,
+              top: 0, right: 0, bottom: isPWA ? `calc(${RAIL_SIZE}px + env(safe-area-inset-bottom, 0px) + 1rem)` : `calc(${RAIL_SIZE}px + env(safe-area-inset-bottom, 0px))`, left: 0,
               zIndex: 200,
               backgroundColor: 'var(--bg-primary)',
               display: 'flex', flexDirection: 'column', overflow: 'hidden',
