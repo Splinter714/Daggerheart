@@ -434,8 +434,8 @@ const DashboardContent = () => {
         {adversaryCreatorOpen && (
           isNarrow ? (
             <div style={{
-              position: 'fixed',
-              top: 0, right: 0, bottom: isPWA ? `calc(${RAIL_SIZE}px + env(safe-area-inset-bottom, 0px) + 1rem)` : `calc(${RAIL_SIZE}px + env(safe-area-inset-bottom, 0px))`, left: 0,
+              position: 'absolute',
+              inset: 0,
               zIndex: 200,
               backgroundColor: 'var(--bg-primary)',
               display: 'flex', flexDirection: 'column', overflow: 'hidden',
@@ -443,6 +443,11 @@ const DashboardContent = () => {
               <CustomAdversaryCreator
                 onSave={(adversaryData, id) => {
                   if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
+                  setAdversaryCreatorOpen(false)
+                }}
+                onSaveAndAdd={(adversaryData) => {
+                  addCustomAdversary(adversaryData)
+                  createAdversary({ ...adversaryData })
                   setAdversaryCreatorOpen(false)
                 }}
                 onAddToEncounter={(adversaryData) => {

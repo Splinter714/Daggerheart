@@ -244,24 +244,32 @@ const StatusSection = ({
             {showControls && (
               <button
                 onClick={(e) => { e.stopPropagation(); onRemoveInstance && onRemoveInstance(item.id) }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
+                style={{
+                  width: '24px', height: '24px', flexShrink: 0,
+                  background: 'transparent', border: '1px solid var(--text-secondary)',
+                  borderRadius: '4px', color: 'white',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: 0,
+                }}
                 title="Remove one"
               >
-                <Minus size={14} />
+                <Minus size={12} />
               </button>
             )}
             {thresholdsEl}
             {showControls && (
               <button
                 onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
+                style={{
+                  width: '24px', height: '24px', flexShrink: 0,
+                  background: 'transparent', border: '1px solid var(--text-secondary)',
+                  borderRadius: '4px', color: 'white',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: 0,
+                }}
                 title="Add another"
               >
-                <Plus size={14} />
+                <Plus size={12} />
               </button>
             )}
           </div>
