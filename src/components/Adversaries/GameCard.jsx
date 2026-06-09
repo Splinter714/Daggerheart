@@ -122,7 +122,7 @@ const GameCard = ({
   useEffect(() => {
     const prev = prevInstancesLengthRef.current
     prevInstancesLengthRef.current = instances.length
-    if (instances.length <= prev || !scrollableRef.current) return
+    if (instances.length === prev || !scrollableRef.current) return
 
     const aliveInstances = instances.filter(i => (i.hp || 0) < (i.hpMax || 1))
     if (!aliveInstances.length) return
