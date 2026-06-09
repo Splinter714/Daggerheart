@@ -658,7 +658,7 @@ const BrowserTableHeader = ({
         { key: 'name', label: 'Name' },
         { key: 'tier', label: 'Tier', hasFilter: true },
         { key: 'type', label: 'Type', hasFilter: true },
-        { key: 'difficulty', label: 'Diff' }
+        { key: 'source', label: 'Src' }
       ]
     }
     return []
@@ -1064,12 +1064,46 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
         </>
       )
     } else if (type === 'environment') {
+      const sourceCell = (
+        <td key="source" style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', borderBottom: 'none', outline: 'none'}} rowSpan={item.description ? 2 : 1}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', margin: '0 auto' }}>
+            <BookOpen size={14} style={{ color: 'var(--text-secondary)', opacity: 0.7 }} title={item.source || 'SRD'} />
+          </div>
+        </td>
+      )
+
+      if (item.description) {
+        return [
+          [
+            <td key="name" style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left', borderBottom: 'none', padding: '0.25rem 0.25rem 0 0.5rem', outline: 'none'}}>
+              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+                <div style={{ fontWeight: '600' }}>{item.name || ''}</div>
+              </div>
+            </td>,
+            <td key="tier" style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center', borderBottom: 'none', padding: '0.25rem 0.25rem 0 0.25rem', outline: 'none'}}>{item.tier}</td>,
+            <td key="type" style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center', borderBottom: 'none', padding: '0.25rem 0.25rem 0 0.25rem', outline: 'none'}}>{item.type}</td>,
+            sourceCell,
+          ],
+          [
+            <td key="desc" colSpan={3} style={{...styles.rowCell, textAlign: 'left', padding: '0 0.25rem 0.25rem 0.5rem', borderTop: 'none', borderBottom: 'none', outline: 'none'}}>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {item.description}
+              </div>
+            </td>
+          ]
+        ]
+      }
+
       return (
         <>
-          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left'}}>{item.name || item.baseName || ''}</td>
-          <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center'}}>{item.tier}</td>
-          <td style={{...styles.rowCell, width: '100px', minWidth: '100px', maxWidth: '100px', textAlign: 'center'}}>{item.type}</td>
-          <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center'}}>{item.difficulty}</td>
+          <td style={{...styles.rowCell, width: 'auto', minWidth: '0', textAlign: 'left', paddingLeft: '0.5rem'}}>
+            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontWeight: '600' }}>{item.name || ''}</div>
+            </div>
+          </td>
+          <td style={{...styles.rowCell, width: '40px', minWidth: '40px', maxWidth: '40px', textAlign: 'center'}}>{item.tier}</td>
+          <td style={{...styles.rowCell, width: '80px', minWidth: '80px', maxWidth: '80px', textAlign: 'center'}}>{item.type}</td>
+          {sourceCell}
         </>
       )
     }
@@ -1099,7 +1133,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
               ...(index === 1 ? { borderTop: 'none', height: 'auto', outline: 'none' } : {})
             }}
             onClick={() => {
-              if (type === 'adversary') {
+              if (type === 'adversary' || type === 'environment') {
                 handleAdd()
               } else if (onRowClick) {
                 onRowClick(item, type)
@@ -1126,7 +1160,7 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
           ...(isFocused ? styles.rowFocused : {})
         }}
         onClick={() => {
-          if (type === 'adversary') {
+          if (type === 'adversary' || type === 'environment') {
             handleAdd()
           } else if (onRowClick) {
             onRowClick(item, type)
