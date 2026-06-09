@@ -41,7 +41,9 @@ const DashboardContent = () => {
     deleteAdversary,
     addCustomAdversary,
     updateCustomAdversary,
+    createEnvironment,
     updateEnvironment,
+    deleteEnvironment,
   } = useGameState()
 
   const pcCount = partySize || 4
@@ -68,7 +70,7 @@ const DashboardContent = () => {
 
   useMinionSync(adversaryGroups, pcCount, createAdversariesBulk, deleteAdversary)
 
-  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, sortBy, sortDir, groupBy)
+  const { entityGroups, getEntityGroups } = useEntityGroups(adversaryGroups, environments, sortBy, sortDir, groupBy)
 
   const effectiveGap = DASHBOARD_GAP
   const edgePadding = DASHBOARD_GAP
@@ -388,6 +390,7 @@ const DashboardContent = () => {
             selectedCustomAdversaryId={selectedCustomAdversaryId}
             onSelectCustomAdversary={setSelectedCustomAdversaryId}
             onAddAdversaryFromBrowser={handleAddAdversaryFromBrowser}
+            onAddEnvironmentFromBrowser={createEnvironment}
             pcCount={pcCount}
             updatePartySize={updatePartySize}
             adversaryGroups={adversaryGroups}
@@ -423,6 +426,7 @@ const DashboardContent = () => {
           smoothScrollTo={smoothScrollTo}
           getEntityGroups={getEntityGroups}
           deleteAdversary={deleteAdversary}
+          deleteEnvironment={deleteEnvironment}
           setRemovingCardSpacer={setRemovingCardSpacer}
           setSpacerShrinking={setSpacerShrinking}
           onOpenBrowser={() => {

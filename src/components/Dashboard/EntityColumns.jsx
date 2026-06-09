@@ -3,18 +3,16 @@ import Panel from './Panels'
 import GameCard from '../Adversaries/GameCard'
 import { DASHBOARD_GAP } from './constants'
 
-// Collect consecutive same-groupName adversary entries into sections.
+// Collect consecutive same-groupName entries into sections (any entity type).
 function buildSections(entityGroups) {
   const sections = []
   let i = 0
   while (i < entityGroups.length) {
     const g = entityGroups[i]
-    if (g.groupName && g.type === 'adversary') {
+    if (g.groupName) {
       const entries = [g]
       let j = i + 1
-      while (j < entityGroups.length &&
-             entityGroups[j].groupName === g.groupName &&
-             entityGroups[j].type === 'adversary') {
+      while (j < entityGroups.length && entityGroups[j].groupName === g.groupName) {
         entries.push(entityGroups[j])
         j++
       }
@@ -57,6 +55,7 @@ const EntityColumns = ({
   smoothScrollTo,
   getEntityGroups,
   deleteAdversary,
+  deleteEnvironment,
   setRemovingCardSpacer,
   setSpacerShrinking,
   onOpenBrowser,
@@ -179,6 +178,9 @@ const EntityColumns = ({
           onUpdate={
             group.type === 'adversary' ? updateAdversary
               : updateEnvironment}
+          onDelete={group.type === 'environment' && deleteEnvironment
+            ? () => deleteEnvironment(group.instances[0].id)
+            : undefined}
           adversaries={adversaries}
           showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary'}
           onEdit={group.type === 'adversary' ? itemId => handleEditAdversary(itemId) : undefined}

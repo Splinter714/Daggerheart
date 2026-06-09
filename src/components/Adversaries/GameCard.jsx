@@ -111,6 +111,7 @@ const GameCard = ({
   onSaveCustomAdversary = null, // Handler for saving custom adversary
   onCancelEdit = null, // Handler for canceling edit
   isStockAdversary = false, // Whether this is a stock adversary (needs Save As)
+  onDelete = null, // Handler for removing an environment from the session
 }) => {
   const nameInputRef = useRef(null)
   const customCreatorRef = useRef(null)
@@ -828,6 +829,148 @@ const GameCard = ({
   }
 
   // ============================================================================
+  // ENVIRONMENT EXPANDED VIEW
+  // ============================================================================
+
+  const renderExpandedEnvironment = () => {
+    const env = item
+
+    const FeatureDivider = ({ title }) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginTop: CARD_SPACE_V }}>
+        <hr style={{ flex: 1, border: 'none', borderTop: '1px solid white', margin: 0 }} />
+        <h4 style={{ margin: 0, fontSize: '0.8rem', fontWeight: 600, color: 'white', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          {title}
+        </h4>
+      </div>
+    )
+
+    const renderFeatures = (featureType, label) => {
+      const features = (env.features || []).filter(f => f.type === featureType)
+      if (!features.length) return null
+      return (
+        <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H }}>
+          <FeatureDivider title={label} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V, marginTop: CARD_SPACE_V }}>
+            {features.map((f, i) => (
+              <div key={i}>
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{f.name}</span>
+                {f.description && (
+                  <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)', marginLeft: CARD_SPACE_H, marginTop: '2px' }}>
+                    {highlightCardText(f.description)}
+                  </div>
+                )}
+                {f.details && f.details.length > 0 && (
+                  <ul style={{ margin: '4px 0 0', paddingLeft: '1.25rem', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                    {f.details.map((d, di) => <li key={di}>{d}</li>)}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    const tabContent = onDelete ? (
+      <button
+        onClick={(e) => { e.stopPropagation(); onDelete() }}
+        style={{
+          background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+          color: 'var(--text-secondary)', borderRadius: '4px',
+          padding: '0.375rem 0.75rem', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: '0.375rem',
+          fontSize: '0.875rem', fontWeight: 500, transition: 'all 0.2s ease',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.color = 'var(--danger)' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
+      >
+        <X size={14} />
+        <span>Remove</span>
+      </button>
+    ) : null
+
+    return (
+      <ContainerWithTab
+        tabContent={tabContent}
+        showTab={!!onDelete}
+        tabBorderColor='var(--border)'
+        containerBackgroundColor={getCardStyle(true).backgroundColor}
+        containerBorderColor='var(--border)'
+        containerBorderRadius="8px"
+        containerOverflow="hidden"
+        containerStyle={{
+          padding: 0, height: 'auto',
+          maxHeight: onDelete ? `calc(100vh - ${2 * DASHBOARD_GAP + TAB_HEIGHT}px)` : `calc(100vh - ${2 * DASHBOARD_GAP}px)`,
+          minHeight: 0,
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+          {/* Header */}
+          <div className="border-b" style={{
+            paddingTop: CARD_SPACE_V, paddingBottom: CARD_SPACE_V,
+            paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H,
+            flexShrink: 0, backgroundColor: 'var(--bg-card)',
+            borderRadius: '8px 8px 0 0',
+          }}>
+            <h4 style={{
+              ...styles.rowTitle, margin: 0, fontSize: '1.1rem',
+              textTransform: 'uppercase', textAlign: 'center',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {env.name}
+            </h4>
+          </div>
+
+          {/* Scrollable content */}
+          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }} className="invisible-scrollbar">
+            {/* Metadata pill: type · tier · difficulty */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
+              <div style={{
+                display: 'inline-flex', gap: '0.35rem', alignItems: 'center',
+                fontSize: '0.9rem', backgroundColor: 'black',
+                border: '1px solid var(--text-secondary)', borderRadius: '4px',
+                height: '24px', padding: '0 10px',
+              }}>
+                <span style={{ color: 'white' }}>{env.type}</span>
+                <span style={{ color: 'white' }}>· T{env.tier}</span>
+                {env.difficulty != null && <span style={{ color: 'white' }}>· {env.difficulty}</span>}
+              </div>
+            </div>
+
+            {/* Impulses */}
+            {env.impulses && (
+              <div style={{ padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`, textAlign: 'center' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                  {env.impulses}
+                </span>
+              </div>
+            )}
+
+            {/* Features */}
+            {renderFeatures('Passive', 'Passives')}
+            {renderFeatures('Action', 'Actions')}
+            {renderFeatures('Reaction', 'Reactions')}
+
+            {/* Potential Adversaries */}
+            {env.potentialAdversaries && env.potentialAdversaries.length > 0 && (
+              <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, paddingBottom: CARD_SPACE_V }}>
+                <FeatureDivider title="Potential Adversaries" />
+                <div style={{ marginTop: CARD_SPACE_V, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  {env.potentialAdversaries.map((adv, i) => (
+                    <div key={i} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{adv}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{ height: CARD_SPACE_V }} />
+          </div>
+        </div>
+      </ContainerWithTab>
+    )
+  }
+
+  // ============================================================================
   // MAIN RENDER
   // ============================================================================
 
@@ -932,6 +1075,11 @@ const GameCard = ({
         />
       </ContainerWithTab>
     )
+  }
+
+  // Render environment card
+  if (type === 'environment') {
+    return renderExpandedEnvironment()
   }
 
   // When showCustomCreator is true, use edit mode instead

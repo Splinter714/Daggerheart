@@ -2,25 +2,37 @@ import { useCallback, useMemo } from 'react'
 import { applySort, getGroupLabel } from './useDashboardSortGroup'
 
 /**
- * Builds the ordered list of adversary groups for the rendering layer to treat
- * each as a column. Applies sort and optional grouping to adversary groups.
- *
- * When groupBy is active, every adversary entry carries a `groupName` string
- * so EntityColumns can identify and wrap same-group runs into a single row
- * with a shared sticky header above all the cards.
+ * Builds the ordered list of entity groups (environments + adversaries) for
+ * the rendering layer. Environments always appear first with a fixed groupName
+ * of "environment: [type]". Adversaries follow with optional grouping.
  */
-export const useEntityGroups = (adversaryGroups, sortBy = 'name', sortDir = 'asc', groupBy = 'none') => {
+export const useEntityGroups = (adversaryGroups, environments = [], sortBy = 'name', sortDir = 'asc', groupBy = 'none') => {
   const getEntityGroups = useCallback(() => {
-    const sortedAdversaryGroups = applySort(adversaryGroups, sortBy, sortDir, groupBy)
+    // Environments always come first, sorted by type then name, always grouped
+    const envGroups = [...environments]
+      .sort((a, b) => {
+        const tc = (a.type || '').localeCompare(b.type || '')
+        return tc !== 0 ? tc : (a.name || '').localeCompare(b.name || '')
+      })
+      .map((env) => ({
+        type: 'environment',
+        baseName: env.name,
+        template: env,
+        instances: [env],
+        groupName: `environment: ${(env.type || 'unknown').toLowerCase()}`,
+      }))
 
-    return sortedAdversaryGroups.map((group) => ({
+    const sortedAdversaryGroups = applySort(adversaryGroups, sortBy, sortDir, groupBy)
+    const advGroups = sortedAdversaryGroups.map((group) => ({
       type: 'adversary',
       baseName: group.baseName,
       template: group,
       instances: group.instances,
       groupName: groupBy !== 'none' ? getGroupLabel(group, groupBy) : null,
     }))
-  }, [adversaryGroups, sortBy, sortDir, groupBy])
+
+    return [...envGroups, ...advGroups]
+  }, [adversaryGroups, environments, sortBy, sortDir, groupBy])
 
   const entityGroups = useMemo(() => getEntityGroups(), [getEntityGroups])
 
