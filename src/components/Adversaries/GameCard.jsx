@@ -478,17 +478,20 @@ const GameCard = ({
                   <h4 style={{
                     ...styles.rowTitle,
                     color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
-                    textAlign: 'center',
                     margin: 0,
                     fontSize: '1.1rem',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
                     textTransform: 'uppercase',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    minWidth: 0,
                   }}>
-                    {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
+                    </span>
                     {(onAddInstance || onRemoveInstance) && (
-                      <span style={{ fontSize: '0.85rem', fontWeight: 400, color: 'var(--text-secondary)', marginLeft: '4px', verticalAlign: 'middle' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 400, color: 'var(--text-secondary)', flexShrink: 0 }}>
                         ({instances.length})
                       </span>
                     )}
