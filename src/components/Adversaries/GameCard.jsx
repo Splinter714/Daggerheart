@@ -517,6 +517,26 @@ const GameCard = ({
 
 
 
+        {/* Standard Attack Pill */}
+        {!isEditMode && item.weapon && (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
+            <div style={{
+              display: 'inline-flex',
+              gap: '0.35rem',
+              alignItems: 'baseline',
+              fontSize: '0.9rem',
+              backgroundColor: 'black',
+              border: '1px solid var(--text-secondary)',
+              borderRadius: '6px',
+              padding: '3px 14px',
+            }}>
+              <span style={{ color: 'white' }}>{item.weapon}</span>
+              {item.range && <span style={{ color: 'white' }}>· {highlightCardText(item.range)}</span>}
+              {item.damage && <span style={{ color: 'white' }}>· {highlightCardText(item.damage)}</span>}
+            </div>
+          </div>
+        )}
+
         {/* Stats and Experiences - Two Column Layout */}
         {((item.difficulty || item.atk !== undefined || (item.thresholds && item.type !== 'Minion') || (item.experience && item.experience.length > 0)) || isEditMode) && (
           <div style={{

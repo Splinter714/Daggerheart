@@ -236,35 +236,16 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
   const renderFeatureCategory = (type, title) => {
     const features = (item.features || []).filter((f) => f.type === type)
     const hasCategoryFeatures = features.length > 0
-    const showAttackRow = type === 'Action' && hasStandardAttack && !isEditMode
 
-    if (!hasCategoryFeatures && !isEditMode && !showAttackRow) return null
+    if (!hasCategoryFeatures && !isEditMode) return null
 
     const featuresToShow = isEditMode && features.length === 0 ? [{ type, name: '', description: '' }] : features
-    const isFirstCategory = type === 'Action' && (!hasStandardAttack || !isEditMode)
+    const isFirstCategory = type === 'Action'
 
     return (
       <div style={isFirstCategory ? {} : { marginTop: CARD_SPACE_V }}>
         <FeatureDivider title={title} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
-          {showAttackRow && (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <div style={{
-                display: 'inline-flex',
-                gap: '0.35rem',
-                alignItems: 'baseline',
-                fontSize: '0.9rem',
-                backgroundColor: 'black',
-                border: '1px solid var(--text-secondary)',
-                borderRadius: '6px',
-                padding: '3px 14px',
-              }}>
-                <span style={{ color: 'white' }}>{item.weapon}</span>
-                {item.range && <span style={{ color: 'white' }}>· {highlightCardText(item.range)}</span>}
-                {item.damage && <span style={{ color: 'white' }}>· {highlightCardText(item.damage)}</span>}
-              </div>
-            </div>
-          )}
           {isEditMode
             ? featuresToShow.map((feature, featureIndex) => renderFeatureEditor(feature, title.slice(0, -1), type, featureIndex))
             : (hasCategoryFeatures ? renderFeatureList(featuresToShow, `Describe the ${title.toLowerCase()}`) : null)}

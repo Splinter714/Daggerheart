@@ -55,6 +55,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
               fontSize: '0.875rem',
               color: 'var(--text-secondary)',
               lineHeight: 1.4,
+              textAlign: 'center',
             }}
           >
             {item.motives + (!item.motives.endsWith('.') ? '.' : '')}
