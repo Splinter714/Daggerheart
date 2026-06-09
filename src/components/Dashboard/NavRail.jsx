@@ -17,27 +17,6 @@ const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
 const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButtonRef, onSortToggle }) => {
   const isRight = placement === 'right'
 
-  const railStyle = isRight
-    ? {
-        position: 'fixed',
-        top: 0, right: 0, bottom: 0,
-        width: `${RAIL_SIZE}px`,
-        flexDirection: 'column',
-        borderLeft: '1px solid var(--border)',
-        paddingTop: '0.5rem',
-        paddingBottom: 'env(safe-area-inset-bottom, 0.5rem)',
-      }
-    : {
-        position: 'fixed',
-        left: 0, right: 0, bottom: 0,
-        height: isPWA ? `calc(${RAIL_SIZE}px + 2.5rem)` : `${RAIL_SIZE}px`,
-        flexDirection: 'row',
-        borderTop: '1px solid var(--border)',
-        paddingLeft: 'env(safe-area-inset-left, 0)',
-        paddingRight: 'env(safe-area-inset-right, 0)',
-        paddingBottom: isPWA ? '2.5rem' : '0',
-      }
-
   const renderButton = ({ id, Icon, label, active, onClick, btnRef }) => (
     <button
       key={id}
@@ -67,16 +46,8 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
     </button>
   )
 
-  return (
-    <div style={{
-      ...railStyle,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: isRight ? 'flex-start' : 'space-around',
-      gap: isRight ? '0.25rem' : 0,
-      backgroundColor: 'var(--bg-primary)',
-      zIndex: 100,
-    }}>
+  const buttons = (
+    <>
       {NAV_ITEMS.map(({ id, Icon, label }) => {
         const active = activeId === id
         return renderButton({ id, Icon, label, active, onClick: () => onAction(id) })
@@ -89,6 +60,55 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
         onClick: onSortToggle,
         btnRef: sortButtonRef,
       })}
+    </>
+  )
+
+  if (isRight) {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0, right: 0, bottom: 0,
+        width: `${RAIL_SIZE}px`,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        gap: '0.25rem',
+        borderLeft: '1px solid var(--border)',
+        paddingTop: '0.5rem',
+        paddingBottom: 'env(safe-area-inset-bottom, 0.5rem)',
+        backgroundColor: 'var(--bg-primary)',
+        zIndex: 100,
+      }}>
+        {buttons}
+      </div>
+    )
+  }
+
+  // Bottom placement: outer wrapper auto-sizes to children so border-box
+  // doesn't compress the button row; spacer div handles PWA home-indicator gap.
+  return (
+    <div style={{
+      position: 'fixed',
+      left: 0, right: 0, bottom: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      borderTop: '1px solid var(--border)',
+      backgroundColor: 'var(--bg-primary)',
+      zIndex: 100,
+    }}>
+      <div style={{
+        height: `${RAIL_SIZE}px`,
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        paddingLeft: 'env(safe-area-inset-left, 0)',
+        paddingRight: 'env(safe-area-inset-right, 0)',
+      }}>
+        {buttons}
+      </div>
+      {isPWA && <div aria-hidden="true" style={{ height: '2rem', flexShrink: 0 }} />}
     </div>
   )
 }
