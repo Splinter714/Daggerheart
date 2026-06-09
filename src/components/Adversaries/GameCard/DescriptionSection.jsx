@@ -11,6 +11,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
         display: 'flex',
         flexDirection: 'column',
         gap: CARD_SPACE_V,
+        paddingTop: '0.75rem',
         paddingLeft: CARD_SPACE_H,
         paddingRight: CARD_SPACE_H,
         textAlign: 'center',

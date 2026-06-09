@@ -250,10 +250,8 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
           {type === 'Action' && item.motives && !isEditMode && (
             <div style={{
               fontSize: '0.875rem',
-              fontStyle: 'italic',
               color: 'var(--text-secondary)',
               lineHeight: 1.4,
-              textAlign: 'center',
             }}>
               {highlightCardText(item.motives + (!item.motives.endsWith('.') ? '.' : ''))}
             </div>
@@ -267,11 +265,11 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
                 fontSize: '0.9rem',
                 backgroundColor: 'black',
                 border: '1px solid var(--text-secondary)',
-                borderRadius: '999px',
+                borderRadius: '6px',
                 padding: '3px 14px',
               }}>
-                <span style={{ fontWeight: 600, color: 'white' }}>{item.weapon}</span>
-                {item.range && <span style={{ color: 'var(--text-secondary)' }}>· {highlightCardText(item.range)}</span>}
+                <span style={{ color: 'white' }}>{item.weapon}</span>
+                {item.range && <span style={{ color: 'white' }}>· {highlightCardText(item.range)}</span>}
                 {item.damage && <span style={{ color: 'white' }}>· {highlightCardText(item.damage)}</span>}
               </div>
             </div>
