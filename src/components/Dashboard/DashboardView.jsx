@@ -443,6 +443,11 @@ const DashboardContent = () => {
                   if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
                   setAdversaryCreatorOpen(false)
                 }}
+                onSaveAndAdd={(adversaryData) => {
+                  addCustomAdversary(adversaryData)
+                  createAdversary({ ...adversaryData })
+                  setAdversaryCreatorOpen(false)
+                }}
                 onAddToEncounter={(adversaryData) => {
                   createAdversary({ ...adversaryData })
                   setAdversaryCreatorOpen(false)
