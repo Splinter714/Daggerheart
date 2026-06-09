@@ -31,13 +31,4 @@
   display: flex;
 }
 
-@media (max-width: 800px) {
-  .dashboard-scroll-container {
-    scrollbar-width: none;
-  }
-  .dashboard-scroll-container::-webkit-scrollbar {
-    display: none;
-  }
-}
-
 
