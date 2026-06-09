@@ -431,32 +431,39 @@ const DashboardContent = () => {
         {/* Custom Adversary Creator — inside dashboard-main so position:absolute matches RightColumn */}
         {adversaryCreatorOpen && (
           isNarrow ? (
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              zIndex: 200,
-              backgroundColor: 'var(--bg-primary)',
-              display: 'flex', flexDirection: 'column', overflow: 'hidden',
-            }}>
-              <CustomAdversaryCreator
-                onSave={(adversaryData, id) => {
-                  if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
-                  setAdversaryCreatorOpen(false)
-                }}
-                onSaveAndAdd={(adversaryData) => {
-                  addCustomAdversary(adversaryData)
-                  createAdversary({ ...adversaryData })
-                  setAdversaryCreatorOpen(false)
-                }}
-                onAddToEncounter={(adversaryData) => {
-                  createAdversary({ ...adversaryData })
-                  setAdversaryCreatorOpen(false)
-                }}
-                onCancelEdit={() => setAdversaryCreatorOpen(false)}
-                embedded={false}
-                autoFocus
-              />
-            </div>
+            <>
+              <div style={{ position: 'absolute', inset: 0, zIndex: 99, backgroundColor: 'var(--bg-primary)' }} />
+              <div style={{
+                position: 'absolute',
+                top: `${DASHBOARD_GAP}px`, right: `${DASHBOARD_GAP}px`,
+                bottom: `${DASHBOARD_GAP}px`, left: `${DASHBOARD_GAP}px`,
+                zIndex: 100,
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                boxShadow: '-4px 0 12px rgba(0,0,0,0.3)',
+                display: 'flex', flexDirection: 'column', overflow: 'hidden',
+              }}>
+                <CustomAdversaryCreator
+                  onSave={(adversaryData, id) => {
+                    if (id) { updateCustomAdversary(id, adversaryData) } else { addCustomAdversary(adversaryData) }
+                    setAdversaryCreatorOpen(false)
+                  }}
+                  onSaveAndAdd={(adversaryData) => {
+                    addCustomAdversary(adversaryData)
+                    createAdversary({ ...adversaryData })
+                    setAdversaryCreatorOpen(false)
+                  }}
+                  onAddToEncounter={(adversaryData) => {
+                    createAdversary({ ...adversaryData })
+                    setAdversaryCreatorOpen(false)
+                  }}
+                  onCancelEdit={() => setAdversaryCreatorOpen(false)}
+                  embedded={false}
+                  autoFocus
+                />
+              </div>
+            </>
           ) : (
             // Desktop: CustomAdversaryCreator renders two absolute column panels itself
             <CustomAdversaryCreator
