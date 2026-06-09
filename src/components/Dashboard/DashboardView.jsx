@@ -439,7 +439,7 @@ const DashboardContent = () => {
                 bottom: `${DASHBOARD_GAP}px`, left: `${DASHBOARD_GAP}px`,
                 zIndex: 100,
                 backgroundColor: 'var(--bg-primary)',
-                border: '1px solid var(--border)',
+                border: '2px solid var(--border)',
                 borderRadius: '8px',
                 boxShadow: '-4px 0 12px rgba(0,0,0,0.3)',
                 display: 'flex', flexDirection: 'column', overflow: 'hidden',

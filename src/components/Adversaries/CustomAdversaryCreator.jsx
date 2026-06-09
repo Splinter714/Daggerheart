@@ -956,7 +956,7 @@ const CustomAdversaryCreator = forwardRef(({
       flex: 1, minWidth: 0,
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
       backgroundColor: 'var(--bg-primary)',
-      border: '1px solid var(--border)',
+      border: '2px solid var(--border)',
       borderRadius: '8px',
       boxShadow: '-4px 0 12px rgba(0,0,0,0.3)',
     }
@@ -1289,7 +1289,7 @@ const CustomAdversaryCreator = forwardRef(({
         width: `${columnWidth}px`,
         zIndex: 100,
         backgroundColor: 'var(--bg-primary)',
-        border: '1px solid var(--border)',
+        border: '2px solid var(--border)',
         borderRadius: '8px',
         boxShadow: '-4px 0 12px rgba(0,0,0,0.3)',
         display: 'flex', flexDirection: 'column', overflow: 'hidden',

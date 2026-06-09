@@ -428,7 +428,7 @@ const EntityColumns = ({
                     whiteSpace: 'nowrap',
                     userSelect: 'none',
                     background: 'var(--bg-card)',
-                    border: '1px solid var(--border)',
+                    border: '2px solid var(--border)',
                     borderRadius: '6px',
                     padding: '3px 9px',
                   }}
