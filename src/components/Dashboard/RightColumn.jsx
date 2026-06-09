@@ -1,7 +1,7 @@
 import React from 'react'
 import Browser from '../Browser/Browser'
 import EncounterReceipt from './EncounterReceipt'
-import { DASHBOARD_GAP } from './constants'
+import { DASHBOARD_GAP, PANEL_BORDER, PANEL_BORDER_RADIUS, PANEL_BOX_SHADOW } from './constants'
 import logoImage from '../../assets/daggerheart-logo.svg'
 
 const ColumnHeader = ({ title }) => (
@@ -80,9 +80,9 @@ const RightColumn = ({
       width: `${columnWidth}px`,
       zIndex: 100,
       backgroundColor: 'var(--bg-primary)',
-      border: '2px solid var(--border)',
-      borderRadius: '8px',
-      boxShadow: '-4px 0 12px rgba(0,0,0,0.3)',
+      border: PANEL_BORDER,
+      borderRadius: PANEL_BORDER_RADIUS,
+      boxShadow: PANEL_BOX_SHADOW,
       display: open ? 'flex' : 'none', flexDirection: 'column', overflow: 'hidden',
     }}>
       {mode === 'browser' && (

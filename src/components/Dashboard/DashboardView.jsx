@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { useGameState } from '../../state/state'
-import { DASHBOARD_GAP } from './constants'
+import { DASHBOARD_GAP, PANEL_BORDER, PANEL_BORDER_RADIUS, PANEL_BOX_SHADOW } from './constants'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import { useAppKeyboardShortcuts } from './useAppKeyboardShortcuts'
 import {
@@ -439,9 +439,9 @@ const DashboardContent = () => {
                 bottom: `${DASHBOARD_GAP}px`, left: `${DASHBOARD_GAP}px`,
                 zIndex: 100,
                 backgroundColor: 'var(--bg-primary)',
-                border: '2px solid var(--border)',
-                borderRadius: '8px',
-                boxShadow: '-4px 0 12px rgba(0,0,0,0.3)',
+                border: PANEL_BORDER,
+                borderRadius: PANEL_BORDER_RADIUS,
+                boxShadow: PANEL_BOX_SHADOW,
                 display: 'flex', flexDirection: 'column', overflow: 'hidden',
               }}>
                 <CustomAdversaryCreator
