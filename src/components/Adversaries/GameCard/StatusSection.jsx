@@ -200,6 +200,8 @@ const StatusSection = ({
           padding: '0 6px',
           height: '24px',
           overflow: 'visible',
+          alignSelf: 'center',
+          width: 'fit-content',
         }}
       >
         {isEditMode ? (
