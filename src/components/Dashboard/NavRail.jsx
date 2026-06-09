@@ -30,7 +30,7 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
     : {
         position: 'fixed',
         left: 0, right: 0, bottom: 0,
-        height: `${RAIL_SIZE}px`,
+        height: isPWA ? `calc(${RAIL_SIZE}px + 2.5rem)` : `${RAIL_SIZE}px`,
         flexDirection: 'row',
         borderTop: '1px solid var(--border)',
         paddingLeft: 'env(safe-area-inset-left, 0)',
