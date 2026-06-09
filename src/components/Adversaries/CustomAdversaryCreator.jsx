@@ -1206,19 +1206,13 @@ const CustomAdversaryCreator = forwardRef(({
 
     if (isNarrow) {
       return (
-        <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, overflow: 'hidden' }}>
-          {ActionBar()}
-          <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
-            {activeTab === 'preview' && (
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                {previewContent}
-              </div>
-            )}
-            {activeTab === 'build' && (
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                {formScrollContent}
-              </div>
-            )}
+        <div ref={containerRef} style={{ display: 'flex', height: '100%', minHeight: 0, overflow: 'hidden', padding: '8px' }}>
+          <div style={{ ...cardStyle, flex: 1 }}>
+            {ActionBar()}
+            {activeTab === 'build'
+              ? formScrollContent
+              : <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>{previewContent}</div>
+            }
           </div>
         </div>
       )

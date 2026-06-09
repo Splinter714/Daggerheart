@@ -1,13 +1,12 @@
 import React from 'react'
-import { Library, Wand2, Info, ClipboardList, ArrowUpDown } from 'lucide-react'
+import { Plus, Wand2, Info, ClipboardList, ArrowUpDown } from 'lucide-react'
 
 const RAIL_SIZE = 52
 
 const NAV_ITEMS = [
-  { id: 'browse',   Icon: Library,       label: 'Add adversaries'   },
+  { id: 'browse',   Icon: Plus,          label: 'Add adversaries'   },
   { id: 'receipt',  Icon: ClipboardList, label: 'Encounter info'    },
   { id: 'create',   Icon: Wand2,         label: 'Create custom'     },
-  { id: 'info',     Icon: Info,          label: 'App info'          },
 ]
 
 const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
@@ -59,6 +58,13 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
         active: sortActive,
         onClick: onSortToggle,
         btnRef: sortButtonRef,
+      })}
+      {renderButton({
+        id: 'info',
+        Icon: Info,
+        label: 'App info',
+        active: activeId === 'info',
+        onClick: () => onAction('info'),
       })}
     </>
   )
