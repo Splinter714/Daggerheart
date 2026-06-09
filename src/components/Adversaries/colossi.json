@@ -1,0 +1,388 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "source": "Daggerheart Campaign Frame: Colossus",
+    "lastUpdated": "2026-06-09",
+    "totalColossi": 4,
+    "notes": "Colossus adversaries have a framework stat block that applies colossus-wide (thresholds, stress, experiences, framework features) plus individual segment stat blocks. Each segment has its own HP, difficulty, attack, and features. Segments track Broken (half HP marked) and Destroyed (all HP marked) states. When all HP of a segment are marked it is Destroyed; features may trigger on Broken or Destroyed."
+  },
+  "segmentRoleOrder": {
+    "description": "Sort order for segment roles within a colossus display. Lower number = displayed first.",
+    "roles": {
+      "head": 1,
+      "neck": 2,
+      "torso": 3,
+      "body": 3,
+      "shell": 3,
+      "cavity": 3,
+      "arm": 4,
+      "claw": 4,
+      "wing": 4,
+      "foreleg": 5,
+      "hindleg": 6,
+      "leg": 6,
+      "talon": 6,
+      "tail": 7
+    }
+  },
+  "colossi": [
+    {
+      "id": "ikeri",
+      "name": "Ikeri, Injuries Untold",
+      "tier": 1,
+      "type": "Colossus",
+      "description": "This apelike creature has the face of a bird, its enormous beak lined with jagged ridges. Scars cross its grey-green hide from ancient battles long forgotten.",
+      "motivesAndTactics": "Entangle, intimidate, peck, stomp",
+      "size": "95 ft. tall, 60 ft. wide",
+      "segmentsSummary": "2 Legs, 2 Arms, 1 Torso, and 1 Head",
+      "thresholds": {
+        "major": 11,
+        "severe": 22
+      },
+      "stress": 6,
+      "experience": [
+        { "name": "Eagle Eyes", "modifier": 3 },
+        { "name": "Huge", "modifier": 2 }
+      ],
+      "source": "Daggerheart Campaign Frame: Colossus",
+      "features": [
+        {
+          "name": "Colossal Power",
+          "type": "Reaction",
+          "description": "When Ikeri fails an attack, you gain a Fear."
+        },
+        {
+          "name": "Swatting Pests",
+          "type": "Reaction",
+          "description": "When a PC moves within Very Close range of Ikeri, it can immediately make an attack against them."
+        }
+      ],
+      "segments": [
+        {
+          "id": "ikeri-head",
+          "name": "Head",
+          "role": "head",
+          "count": 1,
+          "adjacentSegments": ["Torso"],
+          "difficulty": 16,
+          "hp": 5,
+          "atk": 2,
+          "weapon": "Peck",
+          "range": "Melee",
+          "damage": "1d10+1 phy",
+          "features": [
+            {
+              "name": "Fatal",
+              "type": "Passive",
+              "description": "When the Head is Destroyed, Ikeri is defeated."
+            },
+            {
+              "name": "Strike (Melee)",
+              "type": "Passive",
+              "description": "The Head is immune to damage from attacks not made within Melee range."
+            },
+            {
+              "name": "Follow-Up",
+              "type": "Reaction",
+              "description": "When the Head succeeds on an attack against a target, it can immediately make an attack against another target it hasn't attacked during this GM turn."
+            }
+          ]
+        },
+        {
+          "id": "ikeri-torso",
+          "name": "Torso",
+          "role": "torso",
+          "count": 1,
+          "adjacentSegments": ["Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg"],
+          "difficulty": 15,
+          "hp": 7,
+          "atk": 1,
+          "weapon": "Grab",
+          "range": "Close",
+          "damage": "1d6+1 phy",
+          "features": [
+            {
+              "name": "Colossal Grip",
+              "type": "Action",
+              "description": "Mark a Stress. A target within Close range must make an Agility Reaction Roll against Ikeri's difficulty or become Restrained until the end of the next round."
+            },
+            {
+              "name": "Rampage",
+              "type": "Reaction",
+              "description": "When the Torso is Broken, Ikeri immediately makes a free attack against all targets within Close range."
+            }
+          ]
+        },
+        {
+          "id": "ikeri-arm",
+          "name": "Arm",
+          "role": "arm",
+          "count": 2,
+          "adjacentSegments": ["Torso"],
+          "difficulty": 14,
+          "hp": 5,
+          "atk": 1,
+          "weapon": "Swat",
+          "range": "Very Close",
+          "damage": "1d8+1 phy",
+          "features": [
+            {
+              "name": "Off-Hand",
+              "type": "Passive",
+              "description": "Each Arm acts independently. When one Arm is Destroyed, the other can still act normally."
+            },
+            {
+              "name": "Haul",
+              "type": "Action",
+              "description": "A target Restrained by the Torso's Colossal Grip can be hurled up to Far range by this Arm, taking 1d8+1 physical damage on landing and becoming Prone."
+            }
+          ]
+        },
+        {
+          "id": "ikeri-leg",
+          "name": "Leg",
+          "role": "leg",
+          "count": 2,
+          "adjacentSegments": ["Torso"],
+          "difficulty": 14,
+          "hp": 5,
+          "atk": 1,
+          "weapon": "Stomp",
+          "range": "Very Close",
+          "damage": "1d6+3 phy",
+          "features": [
+            {
+              "name": "Groundbreaking",
+              "type": "Action",
+              "description": "All creatures within Very Close range must succeed on an Agility Reaction Roll or be knocked Prone and become Vulnerable until they next act."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "daktadae",
+      "name": "Daktadae, the Writhing Tide",
+      "tier": 2,
+      "type": "Colossus",
+      "description": "A titanic serpentine creature with a centipede's many limbs, its scales shifting between deep blue and black as it moves. Each segment of its body can strike independently.",
+      "motivesAndTactics": "Constrict, sweep, overwhelm, crush",
+      "size": "TODO",
+      "segmentsSummary": "TODO",
+      "thresholds": {
+        "major": 14,
+        "severe": 28
+      },
+      "stress": 6,
+      "experience": [
+        { "name": "TODO", "modifier": 3 }
+      ],
+      "source": "Daggerheart Campaign Frame: Colossus",
+      "features": [
+        {
+          "name": "TODO",
+          "type": "Passive",
+          "description": "TODO"
+        }
+      ],
+      "segments": [
+        {
+          "id": "daktadae-head",
+          "name": "Head",
+          "role": "head",
+          "count": 1,
+          "adjacentSegments": ["Torso"],
+          "difficulty": 18,
+          "hp": 6,
+          "atk": 2,
+          "weapon": "Bite",
+          "range": "Melee",
+          "damage": "2d8+3 phy",
+          "features": [
+            {
+              "name": "TODO",
+              "type": "Passive",
+              "description": "TODO"
+            }
+          ]
+        },
+        {
+          "id": "daktadae-torso",
+          "name": "Torso",
+          "role": "torso",
+          "count": 1,
+          "adjacentSegments": ["Head", "Tail"],
+          "difficulty": 17,
+          "hp": 9,
+          "atk": 2,
+          "weapon": "Constrict",
+          "range": "Close",
+          "damage": "2d6+3 phy",
+          "features": [
+            {
+              "name": "TODO",
+              "type": "Action",
+              "description": "TODO"
+            }
+          ]
+        },
+        {
+          "id": "daktadae-tail",
+          "name": "Tail",
+          "role": "tail",
+          "count": 1,
+          "adjacentSegments": ["Torso"],
+          "difficulty": 17,
+          "hp": 7,
+          "atk": 2,
+          "weapon": "Lash",
+          "range": "Close",
+          "damage": "2d6+2 phy",
+          "features": [
+            {
+              "name": "TODO",
+              "type": "Reaction",
+              "description": "TODO"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poy",
+      "name": "Poy, the Mountain's Hunger",
+      "tier": 3,
+      "type": "Colossus",
+      "description": "A creature of stone and earth that resembles a mountain given terrible life, its body a craggy mass of rock and ancient ore.",
+      "motivesAndTactics": "Crush, endure, shatter, bury",
+      "size": "TODO",
+      "segmentsSummary": "TODO",
+      "thresholds": {
+        "major": 20,
+        "severe": 40
+      },
+      "stress": 6,
+      "experience": [
+        { "name": "TODO", "modifier": 3 }
+      ],
+      "source": "Daggerheart Campaign Frame: Colossus",
+      "features": [
+        {
+          "name": "TODO",
+          "type": "Passive",
+          "description": "TODO"
+        }
+      ],
+      "segments": [
+        {
+          "id": "poy-head",
+          "name": "Head",
+          "role": "head",
+          "count": 1,
+          "adjacentSegments": ["Torso"],
+          "difficulty": 20,
+          "hp": 8,
+          "atk": 3,
+          "weapon": "TODO",
+          "range": "Melee",
+          "damage": "3d8+5 phy",
+          "features": [
+            {
+              "name": "TODO",
+              "type": "Passive",
+              "description": "TODO"
+            }
+          ]
+        },
+        {
+          "id": "poy-torso",
+          "name": "Torso",
+          "role": "torso",
+          "count": 1,
+          "adjacentSegments": ["Head"],
+          "difficulty": 19,
+          "hp": 11,
+          "atk": 3,
+          "weapon": "TODO",
+          "range": "Close",
+          "damage": "3d6+5 phy",
+          "features": [
+            {
+              "name": "TODO",
+              "type": "Action",
+              "description": "TODO"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kelir",
+      "name": "Kelir, the End of Days",
+      "tier": 4,
+      "type": "Colossus",
+      "description": "An apocalyptic entity of immeasurable scale, whose very presence warps the sky and sunders the earth beneath its footfalls.",
+      "motivesAndTactics": "Obliterate, consume, unmake",
+      "size": "TODO",
+      "segmentsSummary": "TODO",
+      "thresholds": {
+        "major": 28,
+        "severe": 55
+      },
+      "stress": 6,
+      "experience": [
+        { "name": "TODO", "modifier": 4 }
+      ],
+      "source": "Daggerheart Campaign Frame: Colossus",
+      "features": [
+        {
+          "name": "TODO",
+          "type": "Passive",
+          "description": "TODO"
+        }
+      ],
+      "segments": [
+        {
+          "id": "kelir-head",
+          "name": "Head",
+          "role": "head",
+          "count": 1,
+          "adjacentSegments": ["Torso"],
+          "difficulty": 22,
+          "hp": 10,
+          "atk": 4,
+          "weapon": "TODO",
+          "range": "Melee",
+          "damage": "4d8+12 phy",
+          "features": [
+            {
+              "name": "TODO",
+              "type": "Passive",
+              "description": "TODO"
+            }
+          ]
+        },
+        {
+          "id": "kelir-torso",
+          "name": "Torso",
+          "role": "torso",
+          "count": 1,
+          "adjacentSegments": ["Head"],
+          "difficulty": 21,
+          "hp": 13,
+          "atk": 4,
+          "weapon": "TODO",
+          "range": "Close",
+          "damage": "4d6+10 phy",
+          "features": [
+            {
+              "name": "TODO",
+              "type": "Action",
+              "description": "TODO"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
