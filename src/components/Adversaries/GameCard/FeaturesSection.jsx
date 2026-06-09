@@ -9,7 +9,7 @@ const FeatureDivider = ({ title }) => (
       style={{
         flex: 1,
         border: 'none',
-        borderTop: '1px solid white',
+        borderTop: '1px solid var(--text-secondary)',
         margin: 0,
       }}
     />

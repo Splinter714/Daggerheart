@@ -657,7 +657,6 @@ const GameCard = ({
               {(item.atk !== undefined || isEditMode) && (
                   <div style={{
                   position: 'relative',
-                  marginBottom: '0.75rem'
                 }}>
                   <div style={{
                     position: 'absolute',
