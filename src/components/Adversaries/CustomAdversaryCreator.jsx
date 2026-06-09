@@ -500,6 +500,7 @@ const CustomAdversaryCreator = forwardRef(({
   onRefresh,
   onAddItem,
   onAddToEncounter,
+  onSaveAndAdd,
   editingAdversary,
   onCancelEdit,
   isStockAdversary = false,
@@ -777,6 +778,26 @@ const CustomAdversaryCreator = forwardRef(({
     }
   }
 
+  const handleSaveAndAdd = async () => {
+    if (!formData.name.trim() || !onSaveAndAdd) return
+    setIsSaving(true)
+    try {
+      const filterBlank = (exps) =>
+        (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier !== undefined && e.modifier !== 0))
+      const baseName = formData.name.trim()
+      const data = {
+        ...formData, baseName, name: baseName,
+        experience: filterBlank(formData.experience),
+        hp: 0, stress: 0, source: 'Homebrew',
+      }
+      await onSaveAndAdd(data)
+    } catch (err) {
+      console.error('Error saving and adding adversary:', err)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const handleAddToEncounter = async () => {
     if (!formData.name.trim() || !onAddToEncounter) return
     setIsSaving(true)
@@ -912,6 +933,49 @@ const CustomAdversaryCreator = forwardRef(({
       borderRadius: '8px',
       boxShadow: '-4px 0 12px rgba(0,0,0,0.3)',
     }
+
+    const btnBase = {
+      padding: '0.3rem 0.7rem', minHeight: '44px',
+      borderRadius: '5px', fontSize: '0.8rem', cursor: 'pointer',
+      flexShrink: 0, whiteSpace: 'nowrap',
+    }
+
+    const MobileActionBar = () => (
+      <div style={{
+        flex: '0 0 auto', display: 'flex', alignItems: 'center',
+        padding: '0.5rem 0.75rem', borderTop: '1px solid var(--border)', gap: '0.5rem',
+      }}>
+        <button
+          onClick={() => setActiveTab(v => v === 'build' ? 'preview' : 'build')}
+          style={{
+            ...btnBase,
+            background: activeTab === 'preview' ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent',
+            border: `1px solid ${activeTab === 'preview' ? 'var(--purple)' : 'var(--border)'}`,
+            color: activeTab === 'preview' ? 'var(--purple)' : 'var(--text-secondary)',
+          }}
+        >{activeTab === 'preview' ? '← Form' : 'Preview'}</button>
+
+        <div style={{ flex: 1 }} />
+
+        {onCancelEdit && (
+          <button onClick={onCancelEdit} style={{ ...btnBase, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
+            Cancel
+          </button>
+        )}
+        <button
+          onClick={handleSave}
+          disabled={!canAct}
+          style={{ ...btnBase, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)', ...(canAct ? {} : disabledStyle) }}
+        >{isSaving ? 'Saving…' : 'Save'}</button>
+        {onSaveAndAdd && (
+          <button
+            onClick={handleSaveAndAdd}
+            disabled={!canAct}
+            style={{ ...btnBase, background: canAct ? 'var(--purple)' : 'var(--gray-600)', border: 'none', color: 'white', fontWeight: '600', ...(canAct ? {} : disabledStyle) }}
+          >{isSaving ? 'Saving…' : 'Save & Add'}</button>
+        )}
+      </div>
+    )
 
     const formScrollContent = (
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
@@ -1208,11 +1272,11 @@ const CustomAdversaryCreator = forwardRef(({
       return (
         <div ref={containerRef} style={{ display: 'flex', height: '100%', minHeight: 0, overflow: 'hidden', padding: '8px' }}>
           <div style={{ ...cardStyle, flex: 1 }}>
-            {ActionBar()}
             {activeTab === 'build'
               ? formScrollContent
               : <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>{previewContent}</div>
             }
+            {MobileActionBar()}
           </div>
         </div>
       )
