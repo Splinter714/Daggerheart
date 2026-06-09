@@ -116,6 +116,31 @@ const GameCard = ({
   const customCreatorRef = useRef(null)
   const cardRef = useRef(null)
   const scrollableRef = useRef(null)
+  const prevInstancesLengthRef = useRef(instances.length)
+
+  // Scroll newly added instance into view (minimum scroll, only if needed)
+  useEffect(() => {
+    const prev = prevInstancesLengthRef.current
+    prevInstancesLengthRef.current = instances.length
+    if (instances.length <= prev || !scrollableRef.current) return
+
+    const aliveInstances = instances.filter(i => (i.hp || 0) < (i.hpMax || 1))
+    if (!aliveInstances.length) return
+    const newest = aliveInstances.reduce((a, b) => (a.duplicateNumber || 1) > (b.duplicateNumber || 1) ? a : b)
+
+    requestAnimationFrame(() => {
+      const el = scrollableRef.current?.querySelector(`[data-instance-id="${newest.id}"]`)
+      if (!el) return
+      const scrollable = scrollableRef.current
+      const elRect = el.getBoundingClientRect()
+      const sRect = scrollable.getBoundingClientRect()
+      if (elRect.top < sRect.top) {
+        scrollable.scrollBy({ top: elRect.top - sRect.top - 8, behavior: 'smooth' })
+      } else if (elRect.bottom > sRect.bottom) {
+        scrollable.scrollBy({ top: elRect.bottom - sRect.bottom + 8, behavior: 'smooth' })
+      }
+    })
+  }, [instances.length])
 
   // Quick edit mode — local toggle, saves immediately via onUpdate, no Save/Cancel needed
   const [quickEdit, setQuickEdit] = useState(false)
@@ -486,7 +511,7 @@ const GameCard = ({
                     <Minus size={14} />
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item); scrollableRef.current?.scrollTo({ top: 120, behavior: 'smooth' }) }}
+                    onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center' }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)' }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
