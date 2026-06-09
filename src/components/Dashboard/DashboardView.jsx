@@ -316,7 +316,7 @@ const DashboardContent = () => {
 
   const navPlacement = isNarrow ? 'bottom' : 'right'
   const railPadding = isNarrow
-    ? { paddingBottom: isPWA ? `calc(${RAIL_SIZE}px + 2.5rem)` : `${RAIL_SIZE}px` }
+    ? { paddingBottom: isPWA ? `calc(${RAIL_SIZE}px + 2rem)` : `${RAIL_SIZE}px` }
     : { paddingRight: `${RAIL_SIZE}px` }
 
   const rightColumnOpen = browserOpenAtPosition !== null
@@ -433,7 +433,7 @@ const DashboardContent = () => {
           isNarrow ? (
             <div style={{
               position: 'fixed',
-              top: 0, right: 0, bottom: isPWA ? `calc(${RAIL_SIZE}px + 2.5rem)` : `${RAIL_SIZE}px`, left: 0,
+              top: 0, right: 0, bottom: isPWA ? `calc(${RAIL_SIZE}px + 2rem)` : `${RAIL_SIZE}px`, left: 0,
               zIndex: 200,
               backgroundColor: 'var(--bg-primary)',
               display: 'flex', flexDirection: 'column', overflow: 'hidden',
