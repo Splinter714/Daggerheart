@@ -35,9 +35,7 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
         borderTop: '1px solid var(--border)',
         paddingLeft: 'env(safe-area-inset-left, 0)',
         paddingRight: 'env(safe-area-inset-right, 0)',
-        paddingBottom: isPWA
-          ? 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)'
-          : 'env(safe-area-inset-bottom, 0)',
+        paddingBottom: isPWA ? '2.5rem' : '0',
       }
 
   const renderButton = ({ id, Icon, label, active, onClick, btnRef }) => (
