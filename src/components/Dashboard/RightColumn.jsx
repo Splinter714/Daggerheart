@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Browser from '../Browser/Browser'
 import EncounterReceipt from './EncounterReceipt'
 import { DASHBOARD_GAP, PANEL_BORDER, PANEL_BORDER_RADIUS, PANEL_BOX_SHADOW } from './constants'
@@ -7,6 +7,27 @@ import logoImage from '../../assets/daggerheart-logo.svg'
 const ColumnHeader = ({ title }) => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
     <span style={{ fontWeight: 600, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '0.01em' }}>{title}</span>
+  </div>
+)
+
+const BrowserTabBar = ({ active, onSelect }) => (
+  <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+    {['adversary', 'environment'].map(tab => (
+      <button
+        key={tab}
+        onClick={() => onSelect(tab)}
+        style={{
+          flex: 1, padding: '0.5rem', border: 'none', cursor: 'pointer',
+          fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
+          background: active === tab ? 'var(--bg-secondary)' : 'transparent',
+          color: active === tab ? 'var(--text-primary)' : 'var(--text-secondary)',
+          borderBottom: active === tab ? '2px solid var(--purple)' : '2px solid transparent',
+          transition: 'color 0.15s, border-color 0.15s',
+        }}
+      >
+        {tab === 'adversary' ? 'Adversaries' : 'Environments'}
+      </button>
+    ))}
   </div>
 )
 
@@ -47,15 +68,22 @@ const RightColumn = ({
   browserActiveTab, onTabChange,
   selectedCustomAdversaryId, onSelectCustomAdversary,
   onAddAdversaryFromBrowser,
+  onAddEnvironmentFromBrowser,
   pcCount, updatePartySize,
   adversaryGroups, createAdversary, createAdversariesBulk, deleteAdversary,
   bpAdjustments, onChangeBpAdjustments,
   availableBattlePoints, spentBattlePoints,
 }) => {
+  const [browserContentType, setBrowserContentType] = useState('adversary')
+
+  // Reset to adversaries tab when panel closes
+  useEffect(() => {
+    if (!open) setBrowserContentType('adversary')
+  }, [open])
+
   const encounterItems = groupsToEncounterItems(adversaryGroups, pcCount)
 
   const handleAdd = (item) => {
-    const group = adversaryGroups.find(g => g.template?.id === item.id || g.baseName === item.baseName)
     const isMinion = item.type === 'Minion'
     if (isMinion) {
       createAdversariesBulk(Array(pcCount).fill(null).map(() => ({ ...item })))
@@ -87,20 +115,34 @@ const RightColumn = ({
     }}>
       {mode === 'browser' && (
         <>
-          <ColumnHeader title="Adversaries" />
-          <Browser
-            type="adversary"
-            onAddItem={onAddAdversaryFromBrowser}
-            showContainer={false}
-            activeTab={browserActiveTab}
-            onTabChange={onTabChange}
-            selectedCustomAdversaryId={selectedCustomAdversaryId}
-            onSelectCustomAdversary={onSelectCustomAdversary}
-            autoFocus={open}
-            hideImportExport={true}
-            onClose={null}
-            searchPlaceholder="Search adversaries"
-          />
+          <ColumnHeader title="Add to Session" />
+          <BrowserTabBar active={browserContentType} onSelect={setBrowserContentType} />
+          {browserContentType === 'adversary' ? (
+            <Browser
+              type="adversary"
+              onAddItem={onAddAdversaryFromBrowser}
+              showContainer={false}
+              activeTab={browserActiveTab}
+              onTabChange={onTabChange}
+              selectedCustomAdversaryId={selectedCustomAdversaryId}
+              onSelectCustomAdversary={onSelectCustomAdversary}
+              autoFocus={open}
+              hideImportExport={true}
+              onClose={null}
+              searchPlaceholder="Search adversaries"
+            />
+          ) : (
+            <Browser
+              type="environment"
+              onAddItem={onAddEnvironmentFromBrowser}
+              showContainer={false}
+              activeTab="adversaries"
+              autoFocus={open && browserContentType === 'environment'}
+              hideImportExport={true}
+              onClose={null}
+              searchPlaceholder="Search environments"
+            />
+          )}
         </>
       )}
 
