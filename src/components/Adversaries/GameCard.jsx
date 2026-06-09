@@ -488,7 +488,7 @@ const GameCard = ({
                   }}>
                     {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
                     {(onAddInstance || onRemoveInstance) && (
-                      <span style={{ fontSize: '0.85rem', fontWeight: 400, color: 'var(--text-secondary)', marginLeft: '4px' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 400, color: 'var(--text-secondary)', marginLeft: '4px', verticalAlign: 'middle' }}>
                         ({instances.length})
                       </span>
                     )}
