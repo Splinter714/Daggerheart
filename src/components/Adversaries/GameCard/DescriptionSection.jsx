@@ -16,34 +16,13 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
         textAlign: 'center',
       }}
     >
-      <div
+      <hr
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: CARD_SPACE_H,
+          border: 'none',
+          borderTop: '1px solid white',
+          margin: 0,
         }}
-      >
-        <hr
-          style={{
-            flex: 1,
-            border: 'none',
-            borderTop: '1px solid white',
-            margin: 0,
-          }}
-        />
-        <h4
-          style={{
-            margin: 0,
-            fontSize: '0.75rem',
-            fontWeight: '500',
-            color: 'white',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-          }}
-        >
-          Description
-        </h4>
-      </div>
+      />
       {isEditMode ? (
         <textarea
           style={{

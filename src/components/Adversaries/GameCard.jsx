@@ -797,24 +797,6 @@ const GameCard = ({
 
         <DescriptionSection item={item} isEditMode={isEditMode} mode={mode} onUpdate={onUpdate} />
 
-        {/* Motives — not editable in session edit mode */}
-        {item.motives && (
-          <div style={{
-            padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
-            textAlign: 'center'
-          }}>
-            <div style={{
-              fontSize: '0.875rem',
-              fontStyle: 'italic',
-              color: 'var(--text-secondary)',
-              lineHeight: 1.4,
-              textAlign: 'center'
-            }}>
-              {highlightCardText(item.motives + (!item.motives.endsWith('.') ? '.' : ''))}
-            </div>
-          </div>
-        )}
-
             </div>
 
       </div>

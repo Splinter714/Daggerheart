@@ -246,12 +246,34 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
     return (
       <div style={isFirstCategory ? {} : { marginTop: CARD_SPACE_V }}>
         <FeatureDivider title={title} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: showAttackRow ? CARD_SPACE_V : undefined }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
+          {type === 'Action' && item.motives && !isEditMode && (
+            <div style={{
+              fontSize: '0.875rem',
+              fontStyle: 'italic',
+              color: 'var(--text-secondary)',
+              lineHeight: 1.4,
+              textAlign: 'center',
+            }}>
+              {highlightCardText(item.motives + (!item.motives.endsWith('.') ? '.' : ''))}
+            </div>
+          )}
           {showAttackRow && (
-            <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'baseline', fontSize: '0.9rem' }}>
-              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.weapon}</span>
-              {item.range && <span style={{ color: 'var(--text-secondary)' }}>· {highlightCardText(item.range)}</span>}
-              {item.damage && <span style={{ color: 'var(--text-secondary)' }}>· {highlightCardText(item.damage)}</span>}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div style={{
+                display: 'inline-flex',
+                gap: '0.35rem',
+                alignItems: 'baseline',
+                fontSize: '0.9rem',
+                backgroundColor: 'black',
+                border: '1px solid var(--text-secondary)',
+                borderRadius: '999px',
+                padding: '3px 14px',
+              }}>
+                <span style={{ fontWeight: 600, color: 'white' }}>{item.weapon}</span>
+                {item.range && <span style={{ color: 'var(--text-secondary)' }}>· {highlightCardText(item.range)}</span>}
+                {item.damage && <span style={{ color: 'white' }}>· {highlightCardText(item.damage)}</span>}
+              </div>
             </div>
           )}
           {isEditMode
