@@ -236,8 +236,9 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
   const renderFeatureCategory = (type, title) => {
     const features = (item.features || []).filter((f) => f.type === type)
     const hasCategoryFeatures = features.length > 0
+    const showAttackRow = type === 'Action' && hasStandardAttack && !isEditMode
 
-    if (!hasCategoryFeatures && !isEditMode) return null
+    if (!hasCategoryFeatures && !isEditMode && !showAttackRow) return null
 
     const featuresToShow = isEditMode && features.length === 0 ? [{ type, name: '', description: '' }] : features
     const isFirstCategory = type === 'Action' && (!hasStandardAttack || !isEditMode)
@@ -246,13 +247,22 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
       <div style={isFirstCategory ? {} : { marginTop: CARD_SPACE_V }}>
         <FeatureDivider title={title} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
-          {type === 'Action' && item.motives && !isEditMode && (
-            <div style={{
-              fontSize: '0.875rem',
-              color: 'var(--text-secondary)',
-              lineHeight: 1.4,
-            }}>
-              {highlightCardText(item.motives + (!item.motives.endsWith('.') ? '.' : ''))}
+          {showAttackRow && (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div style={{
+                display: 'inline-flex',
+                gap: '0.35rem',
+                alignItems: 'baseline',
+                fontSize: '0.9rem',
+                backgroundColor: 'black',
+                border: '1px solid var(--text-secondary)',
+                borderRadius: '6px',
+                padding: '3px 14px',
+              }}>
+                <span style={{ color: 'white' }}>{item.weapon}</span>
+                {item.range && <span style={{ color: 'white' }}>· {highlightCardText(item.range)}</span>}
+                {item.damage && <span style={{ color: 'white' }}>· {highlightCardText(item.damage)}</span>}
+              </div>
             </div>
           )}
           {isEditMode

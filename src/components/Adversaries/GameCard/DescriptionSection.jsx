@@ -2,7 +2,8 @@ import React from 'react'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
 const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
-  const shouldShow = isEditMode || (mode === 'expanded' && item.description && item.description.trim())
+  const hasMotives = item.motives && item.motives.trim()
+  const shouldShow = isEditMode || (mode === 'expanded' && hasMotives)
   if (!shouldShow) return null
 
   return (
@@ -14,7 +15,6 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
         paddingTop: '0.75rem',
         paddingLeft: CARD_SPACE_H,
         paddingRight: CARD_SPACE_H,
-        textAlign: 'center',
       }}
     >
       <hr
@@ -49,18 +49,17 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
           placeholder="Description..."
         />
       ) : (
-        <div
-          style={{
-            fontSize: '0.875rem',
-            fontStyle: 'italic',
-            color: 'var(--text-secondary)',
-            lineHeight: 1.4,
-            whiteSpace: 'pre-wrap',
-            padding: `${CARD_SPACE_V} 0`,
-          }}
-        >
-          {item.description}
-        </div>
+        hasMotives && (
+          <div
+            style={{
+              fontSize: '0.875rem',
+              color: 'var(--text-secondary)',
+              lineHeight: 1.4,
+            }}
+          >
+            {item.motives + (!item.motives.endsWith('.') ? '.' : '')}
+          </div>
+        )
       )}
     </div>
   )
