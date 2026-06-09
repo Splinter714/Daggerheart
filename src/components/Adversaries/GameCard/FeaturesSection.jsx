@@ -240,10 +240,9 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
     if (!hasCategoryFeatures && !isEditMode) return null
 
     const featuresToShow = isEditMode && features.length === 0 ? [{ type, name: '', description: '' }] : features
-    const isFirstCategory = type === 'Action'
 
     return (
-      <div style={isFirstCategory ? {} : { marginTop: CARD_SPACE_V }}>
+      <div style={{ marginTop: CARD_SPACE_V }}>
         <FeatureDivider title={title} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
           {isEditMode
