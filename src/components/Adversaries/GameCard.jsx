@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Hexagon, Locate, Check, Plus, Minus } from 'lucide-react'
+import { X, Hexagon, Locate, Check } from 'lucide-react'
 import ContainerWithTab from '../Dashboard/ContainerWithTab'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
 import FeaturesSection from './GameCard/FeaturesSection'
@@ -123,6 +123,7 @@ const GameCard = ({
     const prev = prevInstancesLengthRef.current
     prevInstancesLengthRef.current = instances.length
     if (instances.length === prev || !scrollableRef.current) return
+    return // scroll disabled
 
     const aliveInstances = instances.filter(i => (i.hp || 0) < (i.hpMax || 1))
     if (!aliveInstances.length) return
@@ -486,41 +487,14 @@ const GameCard = ({
                     textTransform: 'uppercase',
                   }}>
                     {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
+                    {(onAddInstance || onRemoveInstance) && (
+                      <span style={{ fontSize: '0.85rem', fontWeight: 400, color: 'var(--text-secondary)', marginLeft: '4px' }}>
+                        ({instances.length})
+                      </span>
+                    )}
                   </h4>
                 )}
               </div>
-
-              {/* Instance controls — right side of header */}
-              {!isEditMode && (onAddInstance || onRemoveInstance) && (
-                <div style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '2px',
-                }}>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onRemoveInstance && onRemoveInstance(item.id) }}
-                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
-                    title="Remove one"
-                  >
-                    <Minus size={14} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
-                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
-                    title="Add another"
-                  >
-                    <Plus size={14} />
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>

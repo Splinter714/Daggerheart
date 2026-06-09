@@ -1,4 +1,5 @@
 import React from 'react'
+import { Plus, Minus } from 'lucide-react'
 import Pips from '../../Shared/Pips'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
@@ -54,6 +55,8 @@ const StatusSection = ({
   onApplyDamage,
   onApplyHealing,
   onApplyStressChange,
+  onAddInstance,
+  onRemoveInstance,
 }) => {
   const shouldShowStatus =
     (instances && instances.length > 0) || (item.type !== 'Minion' && (item.thresholds || isEditMode))
@@ -232,7 +235,38 @@ const StatusSection = ({
         paddingRight: CARD_SPACE_H,
       }}
     >
-      {renderThresholds()}
+      {(() => {
+        const thresholdsEl = renderThresholds()
+        const showControls = !isEditMode && (onAddInstance || onRemoveInstance)
+        if (!thresholdsEl && !showControls) return null
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: CARD_SPACE_H }}>
+            {showControls && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onRemoveInstance && onRemoveInstance(item.id) }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
+                title="Remove one"
+              >
+                <Minus size={14} />
+              </button>
+            )}
+            {thresholdsEl}
+            {showControls && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
+                title="Add another"
+              >
+                <Plus size={14} />
+              </button>
+            )}
+          </div>
+        )
+      })()}
       {isEditMode ? (
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (
