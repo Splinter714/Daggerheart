@@ -36,7 +36,7 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
         paddingLeft: 'env(safe-area-inset-left, 0)',
         paddingRight: 'env(safe-area-inset-right, 0)',
         paddingBottom: isPWA
-          ? 'calc(env(safe-area-inset-bottom, 0px) + 1rem)'
+          ? 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)'
           : 'env(safe-area-inset-bottom, 0)',
       }
 
