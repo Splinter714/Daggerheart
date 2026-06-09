@@ -432,8 +432,8 @@ const DashboardContent = () => {
         {adversaryCreatorOpen && (
           isNarrow ? (
             <div style={{
-              position: 'fixed',
-              top: 0, right: 0, bottom: isPWA ? `calc(${RAIL_SIZE}px + 2rem)` : `${RAIL_SIZE}px`, left: 0,
+              position: 'absolute',
+              inset: 0,
               zIndex: 200,
               backgroundColor: 'var(--bg-primary)',
               display: 'flex', flexDirection: 'column', overflow: 'hidden',

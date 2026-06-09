@@ -71,6 +71,19 @@ const sectionStyle = {
 }
 
 const TYPES = ['Standard', 'Bruiser', 'Horde', 'Leader', 'Minion', 'Ranged', 'Skulk', 'Solo', 'Support', 'Social']
+const DAMAGE_TYPES = ['Physical', 'Magical', 'Physical/Magical']
+const TYPE_SHORT = { Physical: 'phy', Magical: 'mag', 'Physical/Magical': 'phy/mag' }
+const TYPE_FROM_SHORT = { phy: 'Physical', mag: 'Magical', 'phy/mag': 'Physical/Magical', 'mag/phy': 'Physical/Magical' }
+const parseDamage = (str) => {
+  if (!str) return { dice: '', type: '' }
+  const m = str.trim().match(/^(.*?)\s+(phy(?:\/mag)?|mag(?:\/phy)?)$/i)
+  if (m) return { dice: m[1].trim(), type: TYPE_FROM_SHORT[m[2].toLowerCase()] || '' }
+  return { dice: str.trim(), type: '' }
+}
+const buildDamage = (dice, type) => {
+  const short = TYPE_SHORT[type]
+  return short ? `${dice} ${short}`.trim() : (dice || '')
+}
 
 // ─── Module-level helpers (MUST stay outside the component to avoid remounting on every render) ───
 
@@ -524,7 +537,7 @@ const CustomAdversaryCreator = forwardRef(({
       hpMax: defaults.hpMax,
       stressMax: defaults.stressMax,
       atk: defaults.atk,
-      weapon: '', range: defaults.range, damage: defaults.damage,
+      weapon: '', range: defaults.range, damage: defaults.damage, damageType: 'Physical',
       experience: [], features: [],
     }
   })
@@ -584,6 +597,7 @@ const CustomAdversaryCreator = forwardRef(({
   useEffect(() => {
     if (editingAdversary) {
       const baseName = editingAdversary.baseName || editingAdversary.name?.replace(/\s+\(\d+\)$/, '') || editingAdversary.name || ''
+      const parsed = parseDamage(editingAdversary.damage || '')
       setFormData({
         name: baseName,
         tier: editingAdversary.tier || 1,
@@ -597,7 +611,8 @@ const CustomAdversaryCreator = forwardRef(({
         atk: editingAdversary.atk || 1,
         weapon: editingAdversary.weapon || '',
         range: editingAdversary.range || 'Melee',
-        damage: editingAdversary.damage || '',
+        damage: parsed.dice || editingAdversary.damage || '',
+        damageType: parsed.type || 'Physical',
         experience: editingAdversary.experience || [],
         features: editingAdversary.features || [],
       })
@@ -610,7 +625,7 @@ const CustomAdversaryCreator = forwardRef(({
         difficulty: defaults.difficulty,
         thresholds: defaults.thresholds,
         hpMax: defaults.hpMax, stressMax: defaults.stressMax,
-        atk: defaults.atk, weapon: '', range: defaults.range, damage: defaults.damage,
+        atk: defaults.atk, weapon: '', range: defaults.range, damage: defaults.damage, damageType: 'Physical',
         experience: [], features: [],
       })
       setStatsPulledFromExisting(false)
@@ -622,7 +637,8 @@ const CustomAdversaryCreator = forwardRef(({
     setFormData(prev => {
       if (!editingAdversary && !statsPulledFromExisting) {
         const d = getDefaultAdversaryValues(t, prev.type)
-        return { ...prev, tier: t, difficulty: d.difficulty, thresholds: d.thresholds, hpMax: d.hpMax, stressMax: d.stressMax, atk: d.atk, range: d.range, damage: d.damage }
+        const parsed = parseDamage(d.damage || '')
+        return { ...prev, tier: t, difficulty: d.difficulty, thresholds: d.thresholds, hpMax: d.hpMax, stressMax: d.stressMax, atk: d.atk, range: d.range, damage: parsed.dice || d.damage, damageType: parsed.type || prev.damageType }
       }
       return { ...prev, tier: t }
     })
@@ -632,7 +648,8 @@ const CustomAdversaryCreator = forwardRef(({
     setFormData(prev => {
       if (!editingAdversary && !statsPulledFromExisting) {
         const d = getDefaultAdversaryValues(prev.tier, t)
-        return { ...prev, type: t, difficulty: d.difficulty, thresholds: d.thresholds, hpMax: d.hpMax, stressMax: d.stressMax, atk: d.atk, range: d.range, damage: d.damage }
+        const parsed = parseDamage(d.damage || '')
+        return { ...prev, type: t, difficulty: d.difficulty, thresholds: d.thresholds, hpMax: d.hpMax, stressMax: d.stressMax, atk: d.atk, range: d.range, damage: parsed.dice || d.damage, damageType: parsed.type || prev.damageType }
       }
       return { ...prev, type: t }
     })
@@ -660,6 +677,7 @@ const CustomAdversaryCreator = forwardRef(({
   // Task #5 fix: pull ALL fields from template adversary
   const handleSelectAdversary = (adv) => {
     const baseName = adv.baseName || adv.name?.replace(/\s+\(\d+\)$/, '') || adv.name || ''
+    const parsed = parseDamage(adv.damage || '')
     setFormData(prev => ({
       ...prev,
       name: baseName,
@@ -674,7 +692,8 @@ const CustomAdversaryCreator = forwardRef(({
       atk: adv.atk !== undefined ? adv.atk : prev.atk,
       weapon: adv.weapon || prev.weapon,
       range: adv.range || prev.range,
-      damage: adv.damage || prev.damage,
+      damage: parsed.dice || adv.damage || prev.damage,
+      damageType: parsed.type || 'Physical',
       experience: adv.experience ? [...adv.experience] : prev.experience,
       features: adv.features ? [...adv.features] : prev.features,
     }))
@@ -717,10 +736,12 @@ const CustomAdversaryCreator = forwardRef(({
         (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier !== undefined && e.modifier !== 0))
 
       const baseName = formData.name.trim()
+      const { damageType, ...formRest } = formData
       const data = {
-        ...formData,
+        ...formRest,
         baseName,
         name: baseName,
+        damage: buildDamage(formData.damage, damageType),
         experience: filterBlank(formData.experience),
         hp: editingAdversary ? editingAdversary.hp : 0,
         stress: editingAdversary ? editingAdversary.stress : 0,
@@ -744,7 +765,7 @@ const CustomAdversaryCreator = forwardRef(({
           description: '', motives: '',
           difficulty: defaults.difficulty, thresholds: defaults.thresholds,
           hpMax: defaults.hpMax, stressMax: defaults.stressMax,
-          atk: defaults.atk, weapon: '', range: defaults.range, damage: defaults.damage,
+          atk: defaults.atk, weapon: '', range: defaults.range, damage: defaults.damage, damageType: 'Physical',
           experience: [], features: [],
         })
         setStatsPulledFromExisting(false)
@@ -763,8 +784,10 @@ const CustomAdversaryCreator = forwardRef(({
       const filterBlank = (exps) =>
         (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier !== undefined && e.modifier !== 0))
       const baseName = formData.name.trim()
+      const { damageType, ...formRest } = formData
       const data = {
-        ...formData, baseName, name: baseName,
+        ...formRest, baseName, name: baseName,
+        damage: buildDamage(formData.damage, damageType),
         experience: filterBlank(formData.experience),
         hp: 0, stress: 0, source: 'Homebrew',
       }
@@ -785,8 +808,10 @@ const CustomAdversaryCreator = forwardRef(({
       const filterBlank = (exps) =>
         (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier !== undefined && e.modifier !== 0))
       const baseName = formData.name.trim()
+      const { damageType, ...formRest } = formData
       const data = {
-        ...formData, baseName, name: baseName,
+        ...formRest, baseName, name: baseName,
+        damage: buildDamage(formData.damage, damageType),
         experience: filterBlank(formData.experience),
         hp: 0, stress: 0, source: 'Homebrew',
       }
@@ -805,8 +830,10 @@ const CustomAdversaryCreator = forwardRef(({
       const filterBlank = (exps) =>
         (exps || []).filter(e => (e.name && e.name.trim() !== '') || (e.modifier !== undefined && e.modifier !== 0))
       const baseName = formData.name.trim()
+      const { damageType, ...formRest } = formData
       const data = {
-        ...formData, baseName, name: baseName,
+        ...formRest, baseName, name: baseName,
+        damage: buildDamage(formData.damage, damageType),
         experience: filterBlank(formData.experience),
         hp: 0, stress: 0, source: 'Homebrew',
       }
@@ -835,7 +862,7 @@ const CustomAdversaryCreator = forwardRef(({
     const isMinion = formData.type === 'Minion'
     const guide = typeGuide[formData.type]
 
-    const formItem = { ...formData, id: 'creator-form', hp: 0, stress: 0, source: 'Homebrew', name: formData.name || 'Name', weapon: formData.weapon || 'Attack' }
+    const formItem = { ...formData, id: 'creator-form', hp: 0, stress: 0, source: 'Homebrew', name: formData.name || 'Name', weapon: formData.weapon || 'Attack', damage: buildDamage(formData.damage, formData.damageType) }
     const previewInstances = [{ ...formItem }]
 
     const canAct = !isSaving && !!formData.name.trim()
@@ -1076,8 +1103,8 @@ const CustomAdversaryCreator = forwardRef(({
                 <StatField label="Severe Threshold" field="thresholds" subfield="severe" rangeKey="severe" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
               </div>
 
-              {/* Standard Attack fields */}
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '0.5rem' }}>
+              {/* Standard Attack fields — 2×2 grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <div style={sectionStyle}>
                   <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
                     <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Standard Attack</span>
@@ -1108,6 +1135,18 @@ const CustomAdversaryCreator = forwardRef(({
                     tier={formData.tier}
                     onChange={v => setFormData(prev => ({ ...prev, damage: v }))}
                   />
+                </div>
+                <div style={sectionStyle}>
+                  <div style={{ display: 'flex', alignItems: 'center', minHeight: '20px', marginBottom: '0.3rem' }}>
+                    <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Damage Type</span>
+                  </div>
+                  <select
+                    value={formData.damageType || 'Physical'}
+                    onChange={e => setFormData(prev => ({ ...prev, damageType: e.target.value }))}
+                    style={{ ...inputStyle, minHeight: '44px', appearance: 'none', WebkitAppearance: 'none', backgroundImage: selectArrowBg, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.65rem center', paddingRight: '2rem' }}
+                  >
+                    {DAMAGE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
                 </div>
               </div>
 
