@@ -31,7 +31,7 @@
       "name": "Ikeri, Injuries Untold",
       "tier": 1,
       "type": "Colossus",
-      "description": "This apelike creature has the face of a bird, its enormous beak lined with jagged ridges. Scars cross its grey-green hide from ancient battles long forgotten.",
+      "description": "This apelike creature has the face of a bird. They are made of stone and carry an enormous mesa upon their back.",
       "motivesAndTactics": "Entangle, intimidate, peck, stomp",
       "size": "95 ft. tall, 60 ft. wide",
       "segmentsSummary": "2 Legs, 2 Arms, 1 Torso, and 1 Head",
@@ -51,7 +51,7 @@
         {
           "name": "Swatting Pests",
           "type": "Reaction",
-          "description": "When a PC moves within Very Close range of Ikeri, it can immediately make an attack against them."
+          "description": "When Ikeri is attacked by a flying target within Far range, you can make a Peck (Head) or Punch (Arm) standard attack against the attacker. On a success, add a d20 to the damage roll and the target is knocked to the ground at the feet of the colossus."
         }
       ],
       "segments": [
@@ -90,23 +90,23 @@
           "name": "Torso",
           "role": "torso",
           "count": 1,
-          "adjacentSegments": ["Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg"],
-          "difficulty": 15,
-          "hp": 7,
-          "atk": 1,
-          "weapon": "Grab",
-          "range": "Close",
-          "damage": "1d6+1 phy",
+          "adjacentSegments": ["Head", "Arms", "Legs"],
+          "difficulty": 14,
+          "hp": 8,
+          "atk": null,
+          "weapon": null,
+          "range": null,
+          "damage": null,
           "features": [
             {
-              "name": "Colossal Grip",
-              "type": "Action",
-              "description": "Mark a Stress. A target within Close range must make an Agility Reaction Roll against Ikeri's difficulty or become Restrained until the end of the next round."
+              "name": "Fatal",
+              "type": "Passive",
+              "description": "When the Torso is Destroyed, Ikeri is defeated."
             },
             {
-              "name": "Rampage",
-              "type": "Reaction",
-              "description": "When the Torso is Broken, Ikeri immediately makes a free attack against all targets within Close range."
+              "name": "Shake Off",
+              "type": "Action",
+              "description": "Spend a Fear to throw off foes. All creatures on Ikeri must make a Strength Reaction Roll. Targets who fail fall to the ground and must mark a HP. Targets who succeed must mark a Stress."
             }
           ]
         },
@@ -116,22 +116,22 @@
           "role": "arm",
           "count": 2,
           "adjacentSegments": ["Torso"],
-          "difficulty": 14,
-          "hp": 5,
-          "atk": 1,
-          "weapon": "Swat",
+          "difficulty": 13,
+          "hp": 3,
+          "atk": 2,
+          "weapon": "Punch",
           "range": "Very Close",
-          "damage": "1d8+1 phy",
+          "damage": "1d8+6 phy",
           "features": [
             {
-              "name": "Off-Hand",
+              "name": "Chain (A)",
               "type": "Passive",
-              "description": "Each Arm acts independently. When one Arm is Destroyed, the other can still act normally."
+              "description": "When all segments in Chain A are Destroyed, Ikeri is defeated."
             },
             {
-              "name": "Haul",
+              "name": "Crush",
               "type": "Action",
-              "description": "A target Restrained by the Torso's Colossal Grip can be hurled up to Far range, taking 1d8+1 physical damage on landing and becoming Prone."
+              "description": "Spend a Fear to make an attack against a target on another segment of Ikeri. On a success, Ikeri grabs and crushes the target, dealing 1d20+4 physical damage and Restraining them until this Arm takes Major or greater damage. When this Arm takes the spotlight while the target is still in Ikeri's hand, the target takes 1d20 physical damage."
             }
           ]
         },
@@ -140,18 +140,23 @@
           "name": "Leg",
           "role": "leg",
           "count": 2,
-          "adjacentSegments": ["Torso"],
-          "difficulty": 14,
-          "hp": 5,
-          "atk": 1,
+          "adjacentSegments": ["Torso", "Leg"],
+          "difficulty": 13,
+          "hp": 3,
+          "atk": 2,
           "weapon": "Stomp",
           "range": "Very Close",
           "damage": "1d6+3 phy",
           "features": [
             {
-              "name": "Groundbreaking",
+              "name": "Chain (A)",
+              "type": "Passive",
+              "description": "When all segments in Chain A are Destroyed, Ikeri is defeated."
+            },
+            {
+              "name": "Massive Stomp",
               "type": "Action",
-              "description": "All creatures within Very Close range must succeed on an Agility Reaction Roll or be knocked Prone and become Vulnerable until they next act."
+              "description": "Spend a Fear to make a standard attack with advantage against a group."
             }
           ]
         }
