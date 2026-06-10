@@ -1,0 +1,711 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "source": "Daggerheart Campaign Frame: Colossus",
+    "lastUpdated": "2026-06-09",
+    "totalColossi": 4,
+    "notes": "Colossus adversaries have a framework stat block (colossus-wide thresholds, stress, experiences, framework features) plus individual segment stat blocks. Each segment has its own HP, difficulty, attack, and features. Segments track Broken (half HP marked) and Destroyed (all HP marked) states."
+  },
+  "segmentRoleOrder": {
+    "description": "Sort order for segment display within a colossus. Lower = first.",
+    "roles": {
+      "head": 1,
+      "neck": 2,
+      "torso": 3,
+      "body": 3,
+      "shell": 3,
+      "cavity": 3,
+      "arm": 4,
+      "claw": 4,
+      "wing": 4,
+      "foreleg": 5,
+      "hindleg": 6,
+      "leg": 6,
+      "talon": 6,
+      "tail": 7
+    }
+  },
+  "colossi": [
+    {
+      "id": "ikeri",
+      "name": "Ikeri, Injuries Untold",
+      "tier": 1,
+      "type": "Colossus",
+      "description": "This apelike creature has the face of a bird. They are made of stone and carry an enormous mesa upon their back.",
+      "motivesAndTactics": "Entangle, intimidate, peck, stomp",
+      "size": "95 ft. tall, 60 ft. wide",
+      "segmentsSummary": "2 Legs, 2 Arms, 1 Torso, and 1 Head",
+      "thresholds": { "major": 11, "severe": 22 },
+      "stress": 6,
+      "experience": [
+        { "name": "Eagle Eyes", "modifier": 3 },
+        { "name": "Huge", "modifier": 2 }
+      ],
+      "source": "Daggerheart Campaign Frame: Colossus",
+      "features": [
+        {
+          "name": "Colossal Power",
+          "type": "Reaction",
+          "description": "When Ikeri fails an attack, you gain a Fear."
+        },
+        {
+          "name": "Swatting Pests",
+          "type": "Reaction",
+          "description": "When Ikeri is attacked by a flying target within Far range, you can make a Peck (Head) or Punch (Arm) standard attack against the attacker. On a success, add a d20 to the damage roll and the target is knocked to the ground at the feet of the colossus."
+        }
+      ],
+      "segments": [
+        {
+          "id": "ikeri-head",
+          "name": "Head",
+          "role": "head",
+          "count": 1,
+          "adjacentSegments": ["Torso"],
+          "difficulty": 16,
+          "hp": 5,
+          "atk": 2,
+          "weapon": "Peck",
+          "range": "Melee",
+          "damage": "1d10+1 phy",
+          "features": [
+            {
+              "name": "Fatal",
+              "type": "Passive",
+              "description": "When the Head is Destroyed, Ikeri is defeated."
+            },
+            {
+              "name": "Strike (Melee)",
+              "type": "Passive",
+              "description": "The Head is immune to damage from attacks not made within Melee range."
+            },
+            {
+              "name": "Follow-Up",
+              "type": "Reaction",
+              "description": "When the Head succeeds on an attack against a target, it can immediately make an attack against another target it hasn't attacked during this GM turn."
+            }
+          ]
+        },
+        {
+          "id": "ikeri-torso",
+          "name": "Torso",
+          "role": "torso",
+          "count": 1,
+          "adjacentSegments": ["Head", "Arms", "Legs"],
+          "difficulty": 14,
+          "hp": 8,
+          "atk": null,
+          "weapon": null,
+          "range": null,
+          "damage": null,
+          "features": [
+            {
+              "name": "Fatal",
+              "type": "Passive",
+              "description": "When the Torso is Destroyed, Ikeri is defeated."
+            },
+            {
+              "name": "Shake Off",
+              "type": "Action",
+              "description": "Spend a Fear to throw off foes. All creatures on Ikeri must make a Strength Reaction Roll. Targets who fail fall to the ground and must mark a HP. Targets who succeed must mark a Stress."
+            }
+          ]
+        },
+        {
+          "id": "ikeri-arm",
+          "name": "Arm",
+          "role": "arm",
+          "count": 2,
+          "adjacentSegments": ["Torso"],
+          "difficulty": 13,
+          "hp": 3,
+          "atk": 2,
+          "weapon": "Punch",
+          "range": "Very Close",
+          "damage": "1d8+6 phy",
+          "features": [
+            {
+              "name": "Chain (A)",
+              "type": "Passive",
+              "description": "When all segments in Chain A are Destroyed, Ikeri is defeated."
+            },
+            {
+              "name": "Crush",
+              "type": "Action",
+              "description": "Spend a Fear to make an attack against a target on another segment of Ikeri. On a success, Ikeri grabs and crushes the target, dealing 1d20+4 physical damage and Restraining them until this Arm takes Major or greater damage. When this Arm takes the spotlight while the target is still in Ikeri's hand, the target takes 1d20 physical damage."
+            }
+          ]
+        },
+        {
+          "id": "ikeri-leg",
+          "name": "Leg",
+          "role": "leg",
+          "count": 2,
+          "adjacentSegments": ["Torso", "Leg"],
+          "difficulty": 13,
+          "hp": 3,
+          "atk": 2,
+          "weapon": "Stomp",
+          "range": "Very Close",
+          "damage": "1d6+3 phy",
+          "features": [
+            {
+              "name": "Chain (A)",
+              "type": "Passive",
+              "description": "When all segments in Chain A are Destroyed, Ikeri is defeated."
+            },
+            {
+              "name": "Massive Stomp",
+              "type": "Action",
+              "description": "Spend a Fear to make a standard attack with advantage against a group."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "daktadae",
+      "name": "Daktadae, the Cleaver",
+      "tier": 2,
+      "type": "Colossus",
+      "description": "A massive steel rhinoceros formed from a steam train, a cleaver emerging from his head instead of a horn.",
+      "motivesAndTactics": "Clear forests, cleave, hew, stomp",
+      "size": "130 ft. tall, 220 ft. long",
+      "segmentsSummary": "2 Forelegs, 2 Hindlegs, 1 Torso, and 1 Head",
+      "thresholds": { "major": 16, "severe": 25 },
+      "stress": 6,
+      "experience": [
+        { "name": "Huge", "modifier": 2 },
+        { "name": "Trampling", "modifier": 2 }
+      ],
+      "source": "Daggerheart Campaign Frame: Colossus",
+      "features": [
+        {
+          "name": "Steam-Powered",
+          "type": "Action",
+          "description": "Scalding fountains of steam erupt from Daktadae's form. Spotlight any segment to make an attack with a +1 attack modifier against a target on that segment. On a success, deal 2d6+3 physical damage."
+        },
+        {
+          "name": "Roll",
+          "type": "Action",
+          "description": "Spend a Fear to have Daktadae drop to the ground and roll. All PCs on Daktadae or within Close range must succeed on an Instinct Reaction Roll (14) or take 2d20+5 physical damage; succeed or fail, the PCs are thrown off Daktadae onto the ground within Melee range of the colossus."
+        },
+        {
+          "name": "Slow Recovery",
+          "type": "Action",
+          "description": "Clear a token from one Broken or Collapsed segment."
+        },
+        {
+          "name": "Colossal Power",
+          "type": "Reaction",
+          "description": "When Daktadae fails an attack, you gain a Fear."
+        }
+      ],
+      "segments": [
+        {
+          "id": "daktadae-head",
+          "name": "Head",
+          "role": "head",
+          "count": 1,
+          "adjacentSegments": ["Torso"],
+          "difficulty": 15,
+          "hp": 5,
+          "atk": 2,
+          "weapon": "Cleaver",
+          "range": "Melee",
+          "damage": "2d20+8 phy",
+          "features": [
+            {
+              "name": "Invulnerable",
+              "type": "Passive",
+              "description": "The Head can only take damage while it's Broken."
+            },
+            {
+              "name": "Godcleaver",
+              "type": "Action",
+              "description": "Make a standard attack against a target. On a success, mark a Stress to deal 3d20+12 physical damage instead."
+            },
+            {
+              "name": "Head Toss",
+              "type": "Action",
+              "description": "Mark a Stress and make a standard attack against all targets within range who are not on this segment or the Torso. On a success, place 2 tokens on this segment. It is Broken until all tokens are cleared."
+            },
+            {
+              "name": "Cleaver Recovery",
+              "type": "Reaction",
+              "description": "After making a standard attack, place a token on this segment. It is Broken until all tokens are cleared."
+            }
+          ]
+        },
+        {
+          "id": "daktadae-torso",
+          "name": "Torso",
+          "role": "torso",
+          "count": 1,
+          "adjacentSegments": ["Head", "Forelegs", "Hindlegs"],
+          "difficulty": 14,
+          "hp": 6,
+          "atk": null,
+          "weapon": null,
+          "range": null,
+          "damage": null,
+          "features": [
+            {
+              "name": "Fatal",
+              "type": "Passive",
+              "description": "When this segment is Destroyed, Daktadae is defeated."
+            },
+            {
+              "name": "Climbing (+3)",
+              "type": "Passive",
+              "description": "The Torso's Difficulty gains a +3 bonus against action rolls made to climb it unless the Head is Broken."
+            },
+            {
+              "name": "Protected",
+              "type": "Passive",
+              "description": "The Torso is covered with external rib plates of unbreakable minerals. This segment can't be damaged unless the Head is currently Broken or Destroyed."
+            },
+            {
+              "name": "Weak Point",
+              "type": "Passive",
+              "description": "The underbelly of the Torso has a weak point. When this segment marks HP from an attack within Melee range while the Head is Broken or Destroyed, it must mark an additional HP."
+            }
+          ]
+        },
+        {
+          "id": "daktadae-foreleg",
+          "name": "Foreleg",
+          "role": "foreleg",
+          "count": 2,
+          "adjacentSegments": ["Torso", "Forelegs"],
+          "difficulty": 14,
+          "hp": 3,
+          "atk": 1,
+          "weapon": "Stomp",
+          "range": "Very Close",
+          "damage": "2d10+8 phy",
+          "features": [
+            {
+              "name": "Massive Hoof",
+              "type": "Passive",
+              "description": "This segment's standard attack is made with advantage and can target a group."
+            },
+            {
+              "name": "Shake The Earth",
+              "type": "Action",
+              "description": "Daktadae rears up on their hind legs and slams down, creating a shockwave that knocks back all PCs within Very Close range that aren't on Daktadae back to Close range and Rattles them until their next roll with Hope. While Rattled, the PC has disadvantage on reaction rolls."
+            },
+            {
+              "name": "Collapse",
+              "type": "Reaction",
+              "description": "If one Foreleg is Destroyed, place a token on this segment. Until it is cleared, Daktadae is Collapsed, allowing PCs to climb directly onto the Torso and Head. If both Forelegs are Destroyed, Daktadae is Collapsed permanently."
+            }
+          ]
+        },
+        {
+          "id": "daktadae-hindleg",
+          "name": "Hindleg",
+          "role": "hindleg",
+          "count": 2,
+          "adjacentSegments": ["Torso", "Hindlegs"],
+          "difficulty": 14,
+          "hp": 3,
+          "atk": 1,
+          "weapon": "Stomp",
+          "range": "Very Close",
+          "damage": "2d10+8 phy",
+          "features": [
+            {
+              "name": "Massive Hoof",
+              "type": "Passive",
+              "description": "This segment's standard attack is made with advantage and can target a group."
+            },
+            {
+              "name": "Backward Kick",
+              "type": "Action",
+              "description": "All targets within Very Close range behind Daktadae must succeed on an Agility Reaction Roll or take 2d8+10 physical damage."
+            },
+            {
+              "name": "Collapse",
+              "type": "Reaction",
+              "description": "If one Hindleg is Destroyed, place a token on this segment. Until it is cleared, Daktadae is Collapsed, allowing PCs to climb directly onto the Torso and Head. If both Hindlegs are Destroyed, Daktadae is Collapsed permanently."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poy",
+      "name": "Poy, Sky Skimmer of the Dust Sea",
+      "tier": 3,
+      "type": "Colossus",
+      "description": "This massive shoebill stork is formed from the dust of the Drylands and traps enemies in their cavernous beak.",
+      "motivesAndTactics": "Corral, intimidate, maintain distance",
+      "size": "220 ft. long, 160 ft. wingspan",
+      "segmentsSummary": "1 Head, 1 Neck, 2 Wings, 1 Body, 2 Talons, 1 Tail",
+      "thresholds": { "major": 25, "severe": 48 },
+      "stress": 6,
+      "experience": [
+        { "name": "Attack From Above", "modifier": 3 },
+        { "name": "Huge", "modifier": 3 },
+        { "name": "Maneuver", "modifier": 2 }
+      ],
+      "source": "Daggerheart Campaign Frame: Colossus",
+      "features": [
+        {
+          "name": "Flying",
+          "type": "Passive",
+          "description": "Poy can fly unless one of their Wings is Destroyed. While Poy is flying, each segment's Difficulty gains a +2 bonus against action rolls made by PCs who aren't on Poy."
+        },
+        {
+          "name": "Strong Winds",
+          "type": "Passive",
+          "description": "While Poy is flying, no other flying creature can come within Close range of Poy without being blown backward by their powerful wings."
+        },
+        {
+          "name": "Fall Off",
+          "type": "Reaction",
+          "description": "When a PC falls off Poy while the colossus is flying, they take 3d20+6 physical damage if they hit the ground."
+        },
+        {
+          "name": "Colossal Power",
+          "type": "Reaction",
+          "description": "When Poy fails an attack, you gain a Fear."
+        }
+      ],
+      "segments": [
+        {
+          "id": "poy-head",
+          "name": "Head",
+          "role": "head",
+          "count": 1,
+          "adjacentSegments": ["Neck"],
+          "difficulty": 16,
+          "hp": 5,
+          "atk": 3,
+          "weapon": "Screech",
+          "range": "Very Far",
+          "damage": "3d8+2 mag",
+          "features": [
+            {
+              "name": "Bill Trap",
+              "type": "Action",
+              "description": "Spend a Fear to make an attack against a target on Poy. On a success, the target takes 3d6+6 physical damage and is Trapped inside Poy's bill until the Head takes Major or greater damage. Poy's damage thresholds are doubled against damage dealt by Trapped targets."
+            },
+            {
+              "name": "Cascade",
+              "type": "Reaction",
+              "description": "When this segment is Destroyed, the Neck must mark 3 HP."
+            }
+          ]
+        },
+        {
+          "id": "poy-neck",
+          "name": "Neck",
+          "role": "neck",
+          "count": 1,
+          "adjacentSegments": ["Head", "Body"],
+          "difficulty": 13,
+          "hp": 6,
+          "atk": null,
+          "weapon": null,
+          "range": null,
+          "damage": null,
+          "features": [
+            {
+              "name": "Fatal",
+              "type": "Passive",
+              "description": "When this segment is Destroyed, Poy is defeated."
+            },
+            {
+              "name": "Protected",
+              "type": "Passive",
+              "description": "Poy's Neck is protected by swirling magic. The Neck only marks HP from the \"Cascade\" feature."
+            }
+          ]
+        },
+        {
+          "id": "poy-body",
+          "name": "Body",
+          "role": "body",
+          "count": 1,
+          "adjacentSegments": ["Wings", "Neck", "Tail", "Talons"],
+          "difficulty": 15,
+          "hp": null,
+          "atk": null,
+          "weapon": null,
+          "range": null,
+          "damage": null,
+          "features": [
+            {
+              "name": "Invulnerable",
+              "type": "Passive",
+              "description": "This segment is immune to all damage."
+            },
+            {
+              "name": "Dive-Bomb",
+              "type": "Reaction",
+              "description": "When this segment is successfully attacked, Poy dive-bombs the attacker and all targets within Very Close range of them. The targets must make an Instinct Reaction Roll. Targets who fail take 2d6+9 physical damage. Targets who succeed can mark a Stress to climb onto one of Poy's Talons."
+            }
+          ]
+        },
+        {
+          "id": "poy-wing",
+          "name": "Wing",
+          "role": "wing",
+          "count": 2,
+          "adjacentSegments": ["Body"],
+          "difficulty": 16,
+          "hp": 5,
+          "atk": 2,
+          "weapon": "Swipe",
+          "range": "Melee",
+          "damage": "3d12+9 phy",
+          "features": [
+            {
+              "name": "Dust Storm",
+              "type": "Action",
+              "description": "Poy bats their wings, filling the air and making it much harder to see. Any attacks made by PCs beyond Melee range have disadvantage until the next GM turn."
+            },
+            {
+              "name": "Flap",
+              "type": "Action",
+              "description": "Poy violently flaps a Wing. Mark a Stress to make an attack against all targets on the Wing. Targets Poy succeeds against take 3d8+4 physical damage and are knocked back onto the Tail. If the Tail is Destroyed, they instead fall off Poy."
+            }
+          ]
+        },
+        {
+          "id": "poy-talon",
+          "name": "Talon",
+          "role": "talon",
+          "count": 2,
+          "adjacentSegments": ["Body", "Tail"],
+          "difficulty": 14,
+          "hp": 5,
+          "atk": 2,
+          "weapon": "Talon Strike",
+          "range": "Melee",
+          "damage": "3d10+5 phy",
+          "features": [
+            {
+              "name": "Pick Up",
+              "type": "Action",
+              "description": "Spend a Fear to make an attack against a target within Melee range. If there's an additional target within Very Close range of them, you can spotlight both Talons at once and make an attack against both targets instead. On a success, Poy picks up their targets, flies straight upwards, and drops them. If a target hits the ground, they take 5d20+4 physical damage."
+            },
+            {
+              "name": "Cascade",
+              "type": "Reaction",
+              "description": "When this segment is Destroyed, the Neck must mark 1 HP."
+            }
+          ]
+        },
+        {
+          "id": "poy-tail",
+          "name": "Tail",
+          "role": "tail",
+          "count": 1,
+          "adjacentSegments": ["Body", "Talons"],
+          "difficulty": 15,
+          "hp": 3,
+          "atk": 1,
+          "weapon": "Whip",
+          "range": "Very Close",
+          "damage": "3d12+12 phy",
+          "features": [
+            {
+              "name": "Sweep",
+              "type": "Action",
+              "description": "Poy's tail curls up and sweeps across another segment. Spend a Fear to choose another segment and make an attack against all targets on that segment. Targets Poy succeeds against take 3d8+5 physical damage and are knocked back to an adjacent segment of your choice."
+            },
+            {
+              "name": "Cascade",
+              "type": "Reaction",
+              "description": "When this segment is Destroyed, the Neck must mark 2 HP."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kelir",
+      "name": "Kelir, the Virulent Hate & Her Hundred, Hundred Children",
+      "tier": 4,
+      "type": "Colossus",
+      "description": "A crablike, mountainous beast whose children scurry in and around her, bringing food as tribute.",
+      "motivesAndTactics": "Consume, ravage, swarm",
+      "size": "275 ft. tall, 150 ft. wide",
+      "segmentsSummary": "1 Head, 1 Shell, 1 Body Cavity, 2 Claws, and 4 Legs",
+      "thresholds": { "major": 30, "severe": 65 },
+      "stress": 6,
+      "experience": [
+        { "name": "Contempt", "modifier": 2 },
+        { "name": "Huge", "modifier": 4 },
+        { "name": "Sense Movement", "modifier": 4 }
+      ],
+      "source": "Daggerheart Campaign Frame: Colossus",
+      "features": [
+        {
+          "name": "Brood Attack",
+          "type": "Action",
+          "description": "Spotlight any segment to make an attack with a +6 attack modifier against a PC on that segment as Kelir's hundred, hundred children swarm the target with their pincers. On a success, deal 4d8 physical damage."
+        },
+        {
+          "name": "Swatting Pests",
+          "type": "Reaction",
+          "description": "When Kelir is attacked by a flying target within Far range, you can make a Pincer (Claws) standard attack against the attacker. On a success, add a d20 to the damage roll and the target is knocked to the ground within Far range."
+        },
+        {
+          "name": "Colossal Power",
+          "type": "Reaction",
+          "description": "When Kelir fails an attack, you gain a Fear."
+        }
+      ],
+      "segments": [
+        {
+          "id": "kelir-head",
+          "name": "Head",
+          "role": "head",
+          "count": 1,
+          "adjacentSegments": ["Shell"],
+          "difficulty": 18,
+          "hp": 4,
+          "atk": 4,
+          "weapon": "Eye Beams",
+          "range": "Close",
+          "damage": "4d6+6 mag",
+          "features": [
+            {
+              "name": "Strike (Very Close)",
+              "type": "Passive",
+              "description": "The Head is immune to damage from attacks not made within Very Close range."
+            },
+            {
+              "name": "Hateful Gaze",
+              "type": "Action",
+              "description": "All targets within Far range that Kelir can see must succeed on a Presence Reaction Roll or mark 1d6 Stress as Kelir's hate tries to consume their mind."
+            }
+          ]
+        },
+        {
+          "id": "kelir-shell",
+          "name": "Shell",
+          "role": "shell",
+          "count": 1,
+          "adjacentSegments": ["Head", "Legs", "Claws", "Body Cavity"],
+          "difficulty": 16,
+          "hp": 6,
+          "atk": null,
+          "weapon": null,
+          "range": null,
+          "damage": null,
+          "features": [
+            {
+              "name": "Armored",
+              "type": "Passive",
+              "description": "When the Shell marks HP from an attack, it marks 1 fewer HP."
+            },
+            {
+              "name": "Contagious Fury",
+              "type": "Action",
+              "description": "All PCs in front of the Head within Far range replace their Hope Die with a d8 the next time they make an action roll as they struggle to keep Kelir's hatred from consuming them."
+            }
+          ]
+        },
+        {
+          "id": "kelir-body-cavity",
+          "name": "Body Cavity",
+          "role": "cavity",
+          "count": 1,
+          "adjacentSegments": ["Shell"],
+          "difficulty": 17,
+          "hp": 6,
+          "atk": null,
+          "weapon": null,
+          "range": null,
+          "damage": null,
+          "features": [
+            {
+              "name": "Fatal",
+              "type": "Passive",
+              "description": "If this segment is Destroyed, Kelir is defeated."
+            },
+            {
+              "name": "Hateful Heart",
+              "type": "Passive",
+              "description": "Kelir's heart is suspended within the body cavity, connected by thick veins and arteries. The Body Cavity is immune to damage unless her heart is the target of a successful attack. The heart can only be attacked from Far or greater range, or a PC must succeed on an Agility Roll while inside the Body Cavity to reach the heart to make an attack against it within Melee range."
+            },
+            {
+              "name": "Grab and Rend",
+              "type": "Action",
+              "description": "Make an attack using Kelir's \"Brood Attack\" action against a target in the Body Cavity. On a success, spend a Fear to deal double damage and Restrain the target until they're freed with a successful Strength Roll."
+            },
+            {
+              "name": "Protective Swarm",
+              "type": "Reaction",
+              "description": "Kelir's Body Cavity is filled with her children, who protect her heart. A PC who makes an action roll in the Body Cavity must mark a Stress as they fight off Kelir's children and their shearing pincers."
+            }
+          ]
+        },
+        {
+          "id": "kelir-claw",
+          "name": "Claw",
+          "role": "claw",
+          "count": 2,
+          "adjacentSegments": ["Shell"],
+          "difficulty": 15,
+          "hp": 5,
+          "atk": 5,
+          "weapon": "Pincer",
+          "range": "Very Close",
+          "damage": "3d20+8 phy",
+          "features": [
+            {
+              "name": "Strike (Very Close)",
+              "type": "Passive",
+              "description": "The Claws are immune to damage from attacks not made within Very Close range."
+            },
+            {
+              "name": "Sever Hope",
+              "type": "Action",
+              "description": "Make a standard attack against a PC. On a success, mark a Stress to cause the target to lose 1d4 Hope. Gain as many Fear as the Hope lost."
+            },
+            {
+              "name": "Grab & Hurl",
+              "type": "Action",
+              "description": "Make a standard attack against a target. On a success, instead of dealing damage, hurl the target within Far range in any direction. They must succeed on an Agility Reaction Roll or suffer 3d20 physical damage from the fall."
+            }
+          ]
+        },
+        {
+          "id": "kelir-leg",
+          "name": "Leg",
+          "role": "leg",
+          "count": 4,
+          "adjacentSegments": ["Shell"],
+          "difficulty": 15,
+          "hp": 3,
+          "atk": 4,
+          "weapon": "Stomp",
+          "range": "Very Close",
+          "damage": "4d10+6 phy",
+          "features": [
+            {
+              "name": "Climbing (−2)",
+              "type": "Passive",
+              "description": "An action roll made to climb on the leg gains a -2 penalty to its Difficulty."
+            },
+            {
+              "name": "Destructive Scuttle",
+              "type": "Action",
+              "description": "Mark a Stress to move up to Far range in any direction. All creatures in that path must make an Agility Reaction Roll. Targets who fail take 4d10+6 physical damage and must mark a Stress. Targets who succeed mark a Stress. Kelir can't use this action if she is Collapsed."
+            },
+            {
+              "name": "Full Collapse",
+              "type": "Reaction",
+              "description": "Once three Legs are Destroyed, Kelir Collapses and PCs can climb on the Shell and Head from the ground."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

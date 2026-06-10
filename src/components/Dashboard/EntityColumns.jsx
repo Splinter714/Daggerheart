@@ -178,9 +178,13 @@ const EntityColumns = ({
           onUpdate={
             group.type === 'adversary' ? updateAdversary
               : updateEnvironment}
-          onDelete={group.type === 'environment' && deleteEnvironment
-            ? () => deleteEnvironment(group.instances[0].id)
-            : undefined}
+          onDelete={
+            group.type === 'environment' && deleteEnvironment
+              ? () => deleteEnvironment(group.instances[0].id)
+              : group.type === 'adversary' && group.template?.isColossus && deleteAdversary
+                ? () => deleteAdversary(group.instances[0].id)
+                : undefined
+          }
           adversaries={adversaries}
           showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary'}
           onEdit={group.type === 'adversary' ? itemId => handleEditAdversary(itemId) : undefined}

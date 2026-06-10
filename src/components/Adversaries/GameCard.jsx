@@ -969,6 +969,277 @@ const GameCard = ({
     )
   }
 
+  const renderExpandedColossus = () => {
+    const colossus = item
+    // Pull segmentHp from the single instance (colossi don't stack)
+    const inst = instances[0]
+    const segmentHp = inst?.segmentHp || {}
+
+    const SEGMENT_ROLE_ORDER = {
+      head: 1, neck: 2, torso: 3, body: 3, shell: 3, cavity: 3,
+      arm: 4, claw: 4, wing: 4, foreleg: 5, hindleg: 6, leg: 6, talon: 6, tail: 7,
+    }
+
+    const sortedSegments = [...(colossus.segments || [])].sort((a, b) => {
+      const ra = SEGMENT_ROLE_ORDER[a.role] ?? 99
+      const rb = SEGMENT_ROLE_ORDER[b.role] ?? 99
+      return ra !== rb ? ra - rb : (a.name || '').localeCompare(b.name || '')
+    })
+
+    const Divider = ({ title }) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginTop: CARD_SPACE_V }}>
+        <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)', margin: 0 }} />
+        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          {title}
+        </span>
+      </div>
+    )
+
+    const FeatureList = ({ features }) => {
+      if (!features?.length) return null
+      const byType = ['Passive', 'Action', 'Reaction']
+      return byType.map(ftype => {
+        const fts = features.filter(f => f.type === ftype)
+        if (!fts.length) return null
+        return (
+          <div key={ftype}>
+            <Divider title={ftype + 's'} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V, marginTop: CARD_SPACE_V }}>
+              {fts.map((f, i) => (
+                <div key={i}>
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{f.name}</span>
+                  {f.description && (
+                    <div style={{ fontSize: '0.8rem', lineHeight: 1.4, color: 'var(--text-secondary)', marginLeft: CARD_SPACE_H, marginTop: '2px' }}>
+                      {highlightCardText(f.description)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })
+    }
+
+    const HpPips = ({ max, marked, onToggle }) => {
+      if (!max) return null
+      return (
+        <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap', alignItems: 'center' }}>
+          {Array.from({ length: max }, (_, i) => (
+            <div
+              key={i}
+              onClick={e => { e.stopPropagation(); onToggle(i) }}
+              style={{
+                width: '12px', height: '12px', borderRadius: '50%', cursor: 'pointer',
+                border: '1.5px solid var(--text-secondary)',
+                backgroundColor: i < marked ? 'var(--text-primary)' : 'transparent',
+                transition: 'background-color 0.1s',
+                flexShrink: 0,
+              }}
+            />
+          ))}
+        </div>
+      )
+    }
+
+    const SegmentBlock = ({ seg, instanceKey, markedHp }) => {
+      const handlePipToggle = (pipIndex) => {
+        if (!inst || !onUpdate) return
+        const newMarked = pipIndex < markedHp ? pipIndex : pipIndex + 1
+        onUpdate(inst.id, { segmentHp: { ...segmentHp, [instanceKey]: newMarked } })
+      }
+      const isDestroyed = markedHp >= (seg.hp || 0) && seg.hp
+      const isBroken = !isDestroyed && seg.hp && markedHp >= Math.ceil((seg.hp || 0) / 2)
+
+      return (
+        <div style={{
+          borderRadius: '6px',
+          border: `1px solid ${isDestroyed ? 'var(--danger)' : 'var(--border)'}`,
+          padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
+          opacity: isDestroyed ? 0.6 : 1,
+          backgroundColor: isDestroyed ? 'color-mix(in srgb, var(--danger) 8%, transparent)' : 'transparent',
+        }}>
+          {/* Segment header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '4px', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>
+              {seg.name}
+              {isDestroyed && <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
+              {!isDestroyed && isBroken && <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
+            </span>
+            <div style={{ display: 'flex', gap: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0, alignItems: 'center' }}>
+              <span>Diff {seg.difficulty}</span>
+              {seg.atk != null && <span>ATK +{seg.atk}</span>}
+            </div>
+          </div>
+          {/* HP pips */}
+          {seg.hp ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '4px' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', flexShrink: 0 }}>HP</span>
+              <HpPips max={seg.hp} marked={markedHp} onToggle={handlePipToggle} />
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '4px' }}>Invulnerable</div>
+          )}
+          {/* Attack */}
+          {seg.weapon && (
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+              {seg.weapon} · {seg.range} · {seg.damage}
+            </div>
+          )}
+          {/* Features */}
+          <FeatureList features={seg.features} />
+        </div>
+      )
+    }
+
+    const tabContent = onDelete ? (
+      <button
+        onClick={e => { e.stopPropagation(); onDelete() }}
+        style={{
+          background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+          color: 'var(--text-secondary)', borderRadius: '4px',
+          padding: '0.375rem 0.75rem', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: '0.375rem',
+          fontSize: '0.875rem', fontWeight: 500, transition: 'all 0.2s ease',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.color = 'var(--danger)' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
+      >
+        <X size={14} />
+        <span>Remove</span>
+      </button>
+    ) : null
+
+    return (
+      <ContainerWithTab
+        tabContent={tabContent}
+        showTab={!!onDelete}
+        tabBorderColor='var(--border)'
+        containerBackgroundColor={getCardStyle(true).backgroundColor}
+        containerBorderColor='var(--border)'
+        containerBorderRadius="8px"
+        containerOverflow="hidden"
+        containerStyle={{
+          padding: 0, height: 'auto',
+          maxHeight: onDelete ? `calc(100vh - ${2 * DASHBOARD_GAP + TAB_HEIGHT}px)` : `calc(100vh - ${2 * DASHBOARD_GAP}px)`,
+          minHeight: 0,
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+          {/* Header */}
+          <div className="border-b" style={{
+            paddingTop: CARD_SPACE_V, paddingBottom: CARD_SPACE_V,
+            paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H,
+            flexShrink: 0, backgroundColor: 'var(--bg-card)',
+            borderRadius: '8px 8px 0 0',
+          }}>
+            <h4 style={{
+              ...styles.rowTitle, margin: 0, fontSize: '1rem',
+              textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {colossus.name}
+            </h4>
+          </div>
+
+          {/* Scrollable body */}
+          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }} className="invisible-scrollbar">
+            {/* Framework stats pill */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
+              <div style={{
+                display: 'inline-flex', gap: '0.35rem', alignItems: 'center',
+                fontSize: '0.8rem', backgroundColor: 'black',
+                border: '1px solid var(--text-secondary)', borderRadius: '4px',
+                height: '24px', padding: '0 10px', flexWrap: 'wrap',
+              }}>
+                <span style={{ color: 'white' }}>T{colossus.tier} Colossus</span>
+                <span style={{ color: 'var(--text-secondary)' }}>·</span>
+                <span style={{ color: 'white' }}>Major {colossus.thresholds?.major}</span>
+                <span style={{ color: 'var(--text-secondary)' }}>/</span>
+                <span style={{ color: 'white' }}>Severe {colossus.thresholds?.severe}</span>
+              </div>
+            </div>
+
+            {/* Size + segments summary */}
+            {(colossus.size || colossus.segmentsSummary) && (
+              <div style={{ padding: `4px ${CARD_SPACE_H} 0`, textAlign: 'center' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  {[colossus.size, colossus.segmentsSummary].filter(Boolean).join(' · ')}
+                </span>
+              </div>
+            )}
+
+            {/* Stress pips */}
+            {colossus.stress > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: CARD_SPACE_H, padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Stress</span>
+                <div style={{ display: 'flex', gap: '3px' }}>
+                  {Array.from({ length: colossus.stress }, (_, i) => (
+                    <div key={i} style={{
+                      width: '12px', height: '12px', borderRadius: '50%',
+                      border: '1.5px solid var(--text-secondary)',
+                      backgroundColor: i < (inst?.stress || 0) ? 'var(--text-primary)' : 'transparent',
+                      cursor: onUpdate && inst ? 'pointer' : 'default',
+                    }}
+                    onClick={e => {
+                      e.stopPropagation()
+                      if (!inst || !onUpdate) return
+                      const newStress = i < (inst.stress || 0) ? i : i + 1
+                      onUpdate(inst.id, { stress: newStress })
+                    }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Experiences */}
+            {colossus.experience?.length > 0 && (
+              <div style={{ padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0`, display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'center' }}>
+                {colossus.experience.map((e, i) => (
+                  <span key={i} style={{
+                    fontSize: '0.75rem', color: 'var(--text-secondary)',
+                    border: '1px solid var(--border)', borderRadius: '3px', padding: '1px 6px',
+                  }}>
+                    {e.name} +{e.modifier}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Framework features */}
+            <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H }}>
+              <FeatureList features={colossus.features} />
+            </div>
+
+            {/* Segments */}
+            <div style={{ padding: `${CARD_SPACE_V} ${CARD_SPACE_H}` }}>
+              <Divider title="Segments" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V, marginTop: CARD_SPACE_V }}>
+                {sortedSegments.map(seg => {
+                  const count = seg.count || 1
+                  return Array.from({ length: count }, (_, idx) => {
+                    const key = count > 1 ? `${seg.id}-${idx + 1}` : seg.id
+                    const markedHp = segmentHp[key] || 0
+                    return (
+                      <SegmentBlock
+                        key={key}
+                        seg={seg}
+                        instanceKey={key}
+                        markedHp={markedHp}
+                      />
+                    )
+                  })
+                })}
+              </div>
+            </div>
+
+            <div style={{ height: CARD_SPACE_V }} />
+          </div>
+        </div>
+      </ContainerWithTab>
+    )
+  }
+
   // ============================================================================
   // MAIN RENDER
   // ============================================================================
@@ -1079,6 +1350,11 @@ const GameCard = ({
   // Render environment card
   if (type === 'environment') {
     return renderExpandedEnvironment()
+  }
+
+  // Render colossus card
+  if (item.isColossus) {
+    return renderExpandedColossus()
   }
 
   // When showCustomCreator is true, use edit mode instead

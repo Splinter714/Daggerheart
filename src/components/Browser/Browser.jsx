@@ -954,14 +954,14 @@ const BrowserRow = ({ item, onAdd, type, onRowClick, encounterItems = [], pcCoun
           // Second row: description spanning name, tier, type
           [
             <td key="desc" colSpan={3} style={{...styles.rowCell, textAlign: 'left', ...deEmphasizedStyle, padding: '0 0.25rem 0.25rem 0.5rem', borderTop: 'none', borderBottom: 'none', outline: 'none'}}>
-              <div style={{ 
-                fontSize: '0.85rem', 
-                color: 'var(--text-secondary)', 
-                overflow: 'hidden', 
-                textOverflow: 'ellipsis', 
+              <div style={{
+                fontSize: '0.85rem',
+                color: 'var(--text-secondary)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap'
               }}>
-                {item.description || item.motives || ''}
+                {item.isColossus ? (item.segmentsSummary || '') : (item.description || item.motives || '')}
               </div>
             </td>
           ]

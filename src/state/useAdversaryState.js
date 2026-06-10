@@ -79,6 +79,17 @@ export function useAdversaryState(initialAdversaries = []) {
   // Flat adversaries — backward compat for all consumers
   const adversaries = useMemo(() => flattenGroups(groups), [groups])
 
+  const initSegmentHp = (segments) => {
+    const hp = {}
+    for (const seg of segments || []) {
+      for (let i = 1; i <= (seg.count || 1); i++) {
+        const key = (seg.count || 1) > 1 ? `${seg.id}-${i}` : seg.id
+        hp[key] = 0
+      }
+    }
+    return hp
+  }
+
   const createAdversary = (adversaryData) => {
     const baseName =
       adversaryData.baseName ||
@@ -94,15 +105,12 @@ export function useAdversaryState(initialAdversaries = []) {
         let next = 1
         while (usedNumbers.includes(next)) next++
 
+        const newInstance = { id: generateId('adv'), duplicateNumber: next, hp: 0, stress: 0, isVisible: true }
+        if (adversaryData.isColossus) newInstance.segmentHp = initSegmentHp(adversaryData.segments)
+
         return prev.map((g) =>
           g.baseName === baseName
-            ? {
-                ...g,
-                instances: [
-                  ...g.instances,
-                  { id: generateId('adv'), duplicateNumber: next, hp: 0, stress: 0, isVisible: true },
-                ],
-              }
+            ? { ...g, instances: [...g.instances, newInstance] }
             : g
         )
       } else {
@@ -114,7 +122,8 @@ export function useAdversaryState(initialAdversaries = []) {
             id: generateId('grp'),
             baseName,
             instances: [
-              { id: generateId('adv'), duplicateNumber: 1, hp: 0, stress: 0, isVisible: true },
+              { id: generateId('adv'), duplicateNumber: 1, hp: 0, stress: 0, isVisible: true,
+                ...(adversaryData.isColossus ? { segmentHp: initSegmentHp(adversaryData.segments) } : {}) },
             ],
           },
         ]
