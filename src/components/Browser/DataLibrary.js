@@ -30,49 +30,61 @@ export async function loadData() {
   if (_dataLoaded) {
     return { adversariesData, environmentsData }
   }
-  
+
   let officialAdversaries = { adversaries: [] }
   let officialEnvironments = { environments: [] }
   let playtestAdv = { adversaries: [] }
   let playtestEnv = { environments: [] }
-  
+  let colossaData = { colossi: [] }
+
   try {
     const mod = await import(/* @vite-ignore */ '../Adversaries/adversaries.json')
     officialAdversaries = mod?.default || mod
   } catch (e) {
     console.warn('Failed to load adversaries.json:', e)
   }
-  
+
   try {
     const mod = await import(/* @vite-ignore */ '../Environments/environments.json')
     officialEnvironments = mod?.default || mod
   } catch (e) {
     console.warn('Failed to load environments.json:', e)
   }
-  
+
   try {
     const mod = await import(/* @vite-ignore */ '../Adversaries/playtest-adversaries.json')
     playtestAdv = mod?.default || mod
   } catch (e) {
     console.warn('Failed to load playtest-adversaries.json:', e)
   }
-  
+
   try {
     const mod = await import(/* @vite-ignore */ '../Environments/playtest-environments.json')
     playtestEnv = mod?.default || mod
   } catch (e) {
     console.warn('Failed to load playtest-environments.json:', e)
   }
-  
+
+  try {
+    const mod = await import(/* @vite-ignore */ '../Adversaries/colossi.json')
+    colossaData = mod?.default || mod
+  } catch (e) {
+    console.warn('Failed to load colossi.json:', e)
+  }
+
+  // Colossi merge into adversaries so they appear in the same browser
+  const colossusAdversaries = (colossaData.colossi || []).map(c => ({ ...c, isColossus: true }))
+
   // Load custom content and merge everything
   const { customAdversaries, customEnvironments } = loadCustomContent()
-  
+
   // Create merged data objects without mutating originals
   adversariesData = {
     ...officialAdversaries,
     adversaries: [
       ...(officialAdversaries.adversaries || []),
       ...(playtestAdv.adversaries || []),
+      ...colossusAdversaries,
       ...customAdversaries
     ]
   }
