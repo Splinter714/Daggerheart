@@ -1,12 +1,34 @@
 import React from 'react'
-import { Plus, Wand2, Info, Scale, ArrowUpDown } from 'lucide-react'
+import { Skull, TreePine, Plus, WandSparkles, Info, Scale, ArrowUpDown } from 'lucide-react'
 
 const RAIL_SIZE = 52
 
+const BadgeIcon = ({ Base, size = 22, strokeWidth = 1.6 }) => (
+  <span style={{ position: 'relative', display: 'inline-flex', width: size, height: size }}>
+    <Base size={size} strokeWidth={strokeWidth} />
+    <Plus
+      size={10}
+      strokeWidth={2.8}
+      style={{
+        position: 'absolute',
+        bottom: -2,
+        right: -3,
+        background: 'var(--bg-primary)',
+        borderRadius: '50%',
+        padding: 1,
+      }}
+    />
+  </span>
+)
+
+const SkullPlus    = (props) => <BadgeIcon Base={Skull}    {...props} />
+const TreePinePlus = (props) => <BadgeIcon Base={TreePine} {...props} />
+
 const NAV_ITEMS = [
-  { id: 'browse',   Icon: Plus,          label: 'Add adversaries'   },
-  { id: 'receipt',  Icon: Scale,         label: 'Encounter info'    },
-  { id: 'create',   Icon: Wand2,         label: 'Create custom'     },
+  { id: 'browse',     Icon: SkullPlus,     label: 'Add adversaries'  },
+  { id: 'browse-env', Icon: TreePinePlus,  label: 'Add environments' },
+  { id: 'receipt',    Icon: Scale,         label: 'Encounter info'   },
+  { id: 'create',     Icon: WandSparkles,  label: 'Create custom'    },
 ]
 
 const isPWA = window.matchMedia('(display-mode: standalone)').matches ||

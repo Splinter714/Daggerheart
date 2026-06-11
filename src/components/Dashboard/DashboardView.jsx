@@ -53,6 +53,7 @@ const DashboardContent = () => {
   const [bpAdjustments, setBpAdjustments] = useState({ lessDifficult: false, increasedDamage: false, moreDangerous: false })
   const [editingAdversaryId, setEditingAdversaryId] = useState(null)
   const [browserActiveTab, setBrowserActiveTab] = useState('adversaries')
+  const [browserContentType, setBrowserContentType] = useState('adversary') // 'adversary' | 'environment'
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null)
   const [rightColumnMode, setRightColumnMode] = useState('browser') // 'browser' | 'info' | 'receipt'
   const [sortGroupOpen, setSortGroupOpen] = useState(false)
@@ -81,7 +82,7 @@ const DashboardContent = () => {
   const { browserOpenAtPosition, handleOpenBrowser, handleCloseBrowser } = useBrowserOverlay({
     scrollContainerRef,
     columnWidth,
-    onCloseReset: () => { setBrowserActiveTab('adversaries'); setRightColumnMode('browser') }
+    onCloseReset: () => { setBrowserActiveTab('adversaries'); setBrowserContentType('adversary'); setRightColumnMode('browser') }
   })
 
   const smoothScrollTo = useSmoothScroll(scrollContainerRef)
@@ -326,15 +327,20 @@ const DashboardContent = () => {
   const navActiveId = adversaryCreatorOpen
     ? 'create'
     : rightColumnOpen
-    ? rightColumnMode === 'receipt' ? 'receipt' : rightColumnMode === 'info' ? 'info' : 'browse'
+    ? rightColumnMode === 'receipt' ? 'receipt'
+      : rightColumnMode === 'info' ? 'info'
+      : browserContentType === 'environment' ? 'browse-env' : 'browse'
     : null
 
   const handleNavAction = useCallback((id) => {
-    if (id === 'browse') {
-      if (rightColumnOpen && rightColumnMode === 'browser') {
+    if (id === 'browse' || id === 'browse-env') {
+      const contentType = id === 'browse-env' ? 'environment' : 'adversary'
+      const alreadyOpen = rightColumnOpen && rightColumnMode === 'browser' && browserContentType === contentType
+      if (alreadyOpen) {
         handleCloseBrowser()
       } else {
         setAdversaryCreatorOpen(false)
+        setBrowserContentType(contentType)
         setRightColumnMode('browser')
         if (!rightColumnOpen) handleOpenBrowser(entityGroups.length)
       }
@@ -356,7 +362,7 @@ const DashboardContent = () => {
         openRightColumn('info')
       }
     }
-  }, [rightColumnOpen, rightColumnMode, handleCloseBrowser, handleOpenBrowser, openRightColumn, entityGroups])
+  }, [rightColumnOpen, rightColumnMode, browserContentType, handleCloseBrowser, handleOpenBrowser, openRightColumn, entityGroups])
 
   // On mobile the creator uses the right-column slot; on desktop it's a centered modal.
   // NavRail stays visible in both cases on desktop; on mobile it shows above the creator column.
@@ -383,6 +389,7 @@ const DashboardContent = () => {
             mode={rightColumnMode}
             columnWidth={columnWidth}
             onClose={handleCloseBrowser}
+            browserContentType={browserContentType}
             browserActiveTab={browserActiveTab}
             onTabChange={setBrowserActiveTab}
             selectedCustomAdversaryId={selectedCustomAdversaryId}
