@@ -1,11 +1,11 @@
 import React from 'react'
-import { Plus, Wand2, Info, ClipboardList, ArrowUpDown } from 'lucide-react'
+import { Plus, Wand2, Info, Scale, ArrowUpDown } from 'lucide-react'
 
 const RAIL_SIZE = 52
 
 const NAV_ITEMS = [
   { id: 'browse',   Icon: Plus,          label: 'Add adversaries'   },
-  { id: 'receipt',  Icon: ClipboardList, label: 'Encounter info'    },
+  { id: 'receipt',  Icon: Scale,         label: 'Encounter info'    },
   { id: 'create',   Icon: Wand2,         label: 'Create custom'     },
 ]
 
