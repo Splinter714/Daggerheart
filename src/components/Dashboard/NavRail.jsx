@@ -1,21 +1,23 @@
 import React from 'react'
-import { Skull, TreePine, Plus, WandSparkles, Info, ClipboardList, ArrowUpDown } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSkull, faTree } from '@fortawesome/free-solid-svg-icons'
+import { Plus, WandSparkles, Info, ClipboardList, ArrowUpDown } from 'lucide-react'
 
 const RAIL_SIZE = 52
 
+const FaIcon = ({ icon, size = 22 }) => (
+  <FontAwesomeIcon icon={icon} style={{ fontSize: size, width: size, height: size }} />
+)
+
 const BadgeIcon = ({ Base, size = 22, strokeWidth = 1.6 }) => (
   <span style={{ display: 'inline-flex', width: size + 8, height: size, alignItems: 'center' }}>
-    <Plus
-      size={14}
-      strokeWidth={2.5}
-      style={{ flexShrink: 0 }}
-    />
+    <Plus size={14} strokeWidth={2.5} style={{ flexShrink: 0 }} />
     <Base size={size + 6} strokeWidth={strokeWidth} />
   </span>
 )
 
-const SkullPlus    = (props) => <BadgeIcon Base={Skull}    {...props} />
-const TreePinePlus = (props) => <BadgeIcon Base={TreePine} {...props} />
+const SkullPlus    = (props) => <BadgeIcon Base={(p) => <FaIcon icon={faSkull} size={p.size} />}    {...props} />
+const TreePinePlus = (props) => <BadgeIcon Base={(p) => <FaIcon icon={faTree}  size={p.size} />}    {...props} />
 
 const NAV_ITEMS = [
   { id: 'browse',     Icon: SkullPlus,     label: 'Add adversaries'  },
