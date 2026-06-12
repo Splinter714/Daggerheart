@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
-import { Plus, Minus, X, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Info } from 'lucide-react'
+import React from 'react'
+import { Plus, Minus, X, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Check } from 'lucide-react'
 import { BATTLE_POINT_ADJUSTMENTS, BATTLE_POINT_COSTS } from './BattlePointsCalculator'
+import { useState } from 'react'
 
 const actionBtn = (danger) => ({
   background: danger ? 'var(--danger)' : 'var(--bg-secondary)',
@@ -32,24 +33,21 @@ const MANUAL_ADJUSTMENTS = [
     key: 'lessDifficult',
     label: 'Less Difficult',
     value: BATTLE_POINT_ADJUSTMENTS.lessDifficult,
-    tooltip: 'Reduce available Battle Points by 1. Use when you want a lighter encounter or the party needs a breather.',
   },
   {
     key: 'increasedDamage',
     label: 'Increased Damage',
     value: BATTLE_POINT_ADJUSTMENTS.increasedDamage,
-    tooltip: 'Reduce available Battle Points by 2. Adversaries deal increased damage (one damage die higher than normal).',
   },
   {
     key: 'moreDangerous',
     label: 'More Dangerous',
     value: BATTLE_POINT_ADJUSTMENTS.moreDangerous,
-    tooltip: 'Increase available Battle Points by 2. Use for climactic battles or when the encounter should feel truly perilous.',
   },
 ]
 
-// Explicit type group order: descending by threat level / BP cost
-const TYPE_ORDER = ['Colossus', 'Solo', 'Bruiser', 'Leader', 'Standard', 'Ranged', 'Skulk', 'Horde', 'Support', 'Minion', 'Social']
+// Horde moved to top of 2-BP section per user spec
+const TYPE_ORDER = ['Colossus', 'Solo', 'Bruiser', 'Leader', 'Horde', 'Standard', 'Ranged', 'Skulk', 'Support', 'Minion', 'Social']
 
 const SORT_OPTIONS = [
   { value: 'name',       label: 'Name'      },
@@ -59,8 +57,6 @@ const SORT_OPTIONS = [
   { value: 'atk',        label: 'Attack'    },
   { value: 'threshold',  label: 'Threshold' },
 ]
-
-const unitBpCost = (item) => BATTLE_POINT_COSTS[item.type] || 2
 
 const rowBpCost = (item, quantity, pcCount) => {
   const cost = BATTLE_POINT_COSTS[item.type] || 2
@@ -87,7 +83,6 @@ const sortItems = (items, sortBy, sortDir) => {
   })
 }
 
-// Always groups by type using the explicit TYPE_ORDER; sortBy/sortDir apply within each group
 const groupByType = (items, sortBy, sortDir) => {
   const map = {}
   items.forEach(item => {
@@ -126,6 +121,37 @@ const dot = (selected) => ({
   transition: 'background 0.1s, border-color 0.1s',
 })
 
+// Custom styled checkbox matching app aesthetic
+const AppCheckbox = ({ checked, onChange }) => (
+  <div
+    onClick={onChange}
+    style={{
+      width: 16, height: 16, borderRadius: 4, flexShrink: 0, cursor: 'pointer',
+      border: `2px solid ${checked ? 'var(--purple)' : 'var(--border)'}`,
+      backgroundColor: checked ? 'var(--purple)' : 'transparent',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      transition: 'background 0.1s, border-color 0.1s',
+    }}
+  >
+    {checked && <Check size={10} strokeWidth={3} color="white" />}
+  </div>
+)
+
+// Read-only auto adjustment indicator (circle = auto, square = manual)
+const AutoIndicator = ({ active }) => (
+  <div style={{
+    width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
+    border: `2px solid ${active ? 'var(--purple)' : 'var(--border)'}`,
+    backgroundColor: active ? 'var(--purple)' : 'transparent',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    transition: 'background 0.1s, border-color 0.1s',
+  }}>
+    {active && <Check size={9} strokeWidth={3} color="white" />}
+  </div>
+)
+
+const formatModifier = (value) => value > 0 ? `+${value} BP` : `${value} BP`
+
 const EncounterReceipt = ({
   encounterItems,
   pcCount,
@@ -145,12 +171,24 @@ const EncounterReceipt = ({
   const adversaryItems = encounterItems.filter(i => i.type === 'adversary')
   const groups = groupByType(adversaryItems, sortBy, sortDir)
 
+  // Compute auto adjustments
+  const soloCount = adversaryItems
+    .filter(i => i.item.type === 'Solo' && i.quantity > 0)
+    .reduce((sum, i) => sum + i.quantity, 0)
+  const twoOrMoreSolos = soloCount >= 2
+
+  const hasMajorThreats = adversaryItems.some(i =>
+    ['Bruiser', 'Horde', 'Leader', 'Solo'].includes(i.item.type) && i.quantity > 0
+  )
+  const noMajorThreats = adversaryItems.length > 0 && !hasMajorThreats
+
   const currentSortLabel = SORT_OPTIONS.find(o => o.value === sortBy)?.label || 'Name'
+  const baseBP = (3 * pcCount) + 2
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
 
-      {/* Sort — pinned at top, never scrolls */}
+      {/* Sort — pinned at top */}
       <div style={{ flexShrink: 0, borderBottom: '1px solid var(--border)', padding: '0 1rem' }}>
         <button
           type="button"
@@ -190,88 +228,96 @@ const EncounterReceipt = ({
         )}
       </div>
 
-      {/* Scrollable content: adversary rows + adjustments + party size */}
+      {/* Scrollable: adversary rows + adjustments + party size */}
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '0 1rem' }}>
 
-        {/* Adversary rows, grouped by type in BP-cost order */}
-        {groups.map(({ key, items }) => (
-          <React.Fragment key={key}>
-            <div style={{ padding: '0.3rem 0 0.1rem', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-              {key}
-            </div>
-            {items.map((encounterItem) => {
-              const isZero = encounterItem.quantity === 0
-              const qty = encounterItem.quantity
-              const unit = unitBpCost(encounterItem.item)
-              const total = rowBpCost(encounterItem.item, qty, pcCount)
-              return (
-                <div key={`${encounterItem.item.id}-${encounterItem.type}`} className="receipt-item" style={itemRowStyle}>
-                  <button onClick={() => onRemove(encounterItem.item.id, encounterItem.type)} style={actionBtn(isZero)}>
-                    {isZero ? <X size={13} /> : <Minus size={13} />}
-                  </button>
-                  <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {encounterItem.item.name || encounterItem.item.baseName}
-                  </span>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, lineHeight: 1.35 }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem' }}>
-                      {qty} × {unit} BP
-                    </span>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 600 }}>
-                      = {total} BP
-                    </span>
-                  </div>
-                  <button onClick={() => onAdd(encounterItem.item, encounterItem.type)} style={actionBtn(false)}>
-                    <Plus size={13} />
-                  </button>
-                </div>
-              )
-            })}
-          </React.Fragment>
-        ))}
-
-        {/* Adjustments */}
-        {onChangeBpAdjustments && (
-          <div style={{ marginTop: '0.75rem', borderTop: '1px solid var(--border)', paddingTop: '0.5rem' }}>
-            <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
-              Adjustments
-            </div>
-            {MANUAL_ADJUSTMENTS.map(({ key, label, value, tooltip }) => (
-              <label key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.18rem 0', cursor: 'pointer', gap: '0.5rem' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: bpAdjustments[key] ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
-                  {label}
-                  <span title={tooltip} style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-secondary)', cursor: 'help', lineHeight: 1 }}>
-                    <Info size={11} strokeWidth={2} />
-                  </span>
+        {/* Adversary rows grouped by type */}
+        {groups.map(({ key, items }) => {
+          const cost = BATTLE_POINT_COSTS[key]
+          return (
+            <React.Fragment key={key}>
+              <div style={{ padding: '0.3rem 0 0.1rem', display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                  {key}
                 </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
-                  <span style={{ fontSize: '0.75rem', color: value > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>
-                    {value > 0 ? `+${value}` : value} BP
+                {cost != null && (
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 400 }}>
+                    ({cost} BP each)
                   </span>
-                  <input
-                    type="checkbox"
-                    checked={!!bpAdjustments[key]}
-                    onChange={(e) => onChangeBpAdjustments(prev => ({ ...prev, [key]: e.target.checked }))}
-                    style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--purple)' }}
-                  />
-                </div>
-              </label>
-            ))}
-          </div>
-        )}
+                )}
+              </div>
+              {items.map((encounterItem) => {
+                const isZero = encounterItem.quantity === 0
+                return (
+                  <div key={`${encounterItem.item.id}-${encounterItem.type}`} className="receipt-item" style={itemRowStyle}>
+                    <button onClick={() => onRemove(encounterItem.item.id, encounterItem.type)} style={actionBtn(isZero)}>
+                      {isZero ? <X size={13} /> : <Minus size={13} />}
+                    </button>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', minWidth: '1rem', textAlign: 'center', flexShrink: 0 }}>
+                      {encounterItem.quantity}
+                    </span>
+                    <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {encounterItem.item.name || encounterItem.item.baseName}
+                    </span>
+                    <button onClick={() => onAdd(encounterItem.item, encounterItem.type)} style={actionBtn(false)}>
+                      <Plus size={13} />
+                    </button>
+                  </div>
+                )
+              })}
+            </React.Fragment>
+          )
+        })}
 
-        {/* Party Size */}
-        <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '0.4rem', paddingBottom: '0.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Party Size
-              <span
-                title={`Number of player characters. Base BP budget = (3 × party size) + 2 = ${(3 * pcCount) + 2} BP.`}
-                style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-secondary)', cursor: 'help', lineHeight: 1 }}
+        {/* Adjustments + Party Size */}
+        <div style={{ marginTop: '0.75rem', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>
+          <div style={sectionLabel}>Adjustments</div>
+
+          {/* Manual adjustment rows */}
+          {onChangeBpAdjustments && MANUAL_ADJUSTMENTS.map(({ key, label, value }) => {
+            const checked = !!bpAdjustments[key]
+            return (
+              <div
+                key={key}
+                onClick={() => onChangeBpAdjustments(prev => ({ ...prev, [key]: !prev[key] }))}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0', cursor: 'pointer', userSelect: 'none' }}
               >
-                <Info size={11} strokeWidth={2} />
-              </span>
+                <AppCheckbox checked={checked} onChange={() => {}} />
+                <span style={{ flex: 1, fontSize: '0.85rem', color: checked ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                  {label}
+                </span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: checked ? (value > 0 ? 'var(--success)' : 'var(--danger)') : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
+                  {checked ? formatModifier(value) : '—'}
+                </span>
+              </div>
+            )
+          })}
+
+          {/* Auto adjustment: 2+ Solos */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0', userSelect: 'none' }}>
+            <AutoIndicator active={twoOrMoreSolos} />
+            <span style={{ flex: 1, fontSize: '0.85rem', color: twoOrMoreSolos ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: 'italic' }}>
+              2+ Solos
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: twoOrMoreSolos ? 'var(--danger)' : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
+              {twoOrMoreSolos ? formatModifier(BATTLE_POINT_ADJUSTMENTS.twoOrMoreSolos) : '—'}
+            </span>
+          </div>
+
+          {/* Auto adjustment: no major threats */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0', userSelect: 'none' }}>
+            <AutoIndicator active={noMajorThreats} />
+            <span style={{ flex: 1, fontSize: '0.85rem', color: noMajorThreats ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: 'italic' }}>
+              No Major Threats
+            </span>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: noMajorThreats ? 'var(--success)' : 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
+              {noMajorThreats ? formatModifier(BATTLE_POINT_ADJUSTMENTS.noBruisersHordesLeadersSolos) : '—'}
+            </span>
+          </div>
+
+          {/* Party Size */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0', marginTop: '0.1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
               <button onClick={() => onChangePcCount(Math.max(1, pcCount - 1))} style={actionBtn(false)}>
                 <Minus size={13} />
               </button>
@@ -280,12 +326,16 @@ const EncounterReceipt = ({
                 <Plus size={13} />
               </button>
             </div>
+            <span style={{ flex: 1, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Party Size</span>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, color: 'var(--text-secondary)', minWidth: '3.5rem', textAlign: 'right' }}>
+              {baseBP} BP
+            </span>
           </div>
-        </div>
 
+        </div>
       </div>
 
-      {/* Sticky footer — budget/remaining only */}
+      {/* Sticky footer — budget/remaining */}
       <div style={{ flexShrink: 0, borderTop: '1px solid var(--border)', padding: '0.5rem 1rem 0.65rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.1rem 0' }}>
           <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Budget</span>
