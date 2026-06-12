@@ -1,6 +1,7 @@
 import React from 'react'
 import { Plus, Minus, X, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Check } from 'lucide-react'
 import { BATTLE_POINT_ADJUSTMENTS, BATTLE_POINT_COSTS } from './BattlePointsCalculator'
+import { TYPE_ORDER } from './constants'
 import { useState } from 'react'
 
 const actionBtn = (danger) => ({
@@ -46,8 +47,6 @@ const MANUAL_ADJUSTMENTS = [
   },
 ]
 
-// Horde moved to top of 2-BP section per user spec
-const TYPE_ORDER = ['Colossus', 'Solo', 'Bruiser', 'Leader', 'Horde', 'Standard', 'Ranged', 'Skulk', 'Support', 'Minion', 'Social']
 
 const SORT_OPTIONS = [
   { value: 'name',       label: 'Name'      },

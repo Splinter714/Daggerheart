@@ -1,5 +1,6 @@
 import { readFromStorage, writeToStorage } from '../../../state/StorageHelpers'
 import { useState, useEffect } from 'react'
+import { TYPE_ORDER } from '../constants'
 
 const STORAGE_KEY = 'daggerheart-dashboard-sort-group'
 
@@ -51,7 +52,7 @@ function getSortValue(group, sortBy) {
   switch (sortBy) {
     case 'name': return (group.baseName || '').toLowerCase()
     case 'tier': return group.tier ?? 0
-    case 'type': return (group.type || '').toLowerCase()
+    case 'type': { const idx = TYPE_ORDER.indexOf(group.type); return idx === -1 ? 999 : idx }
     case 'hp': return group.hpMax ?? 0
     case 'difficulty': return group.difficulty ?? 0
     case 'atk': return group.atk ?? 0
