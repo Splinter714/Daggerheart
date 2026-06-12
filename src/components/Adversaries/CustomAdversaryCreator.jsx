@@ -279,8 +279,10 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
                         return (
                           <td key={c.key} style={{
                             padding: '0.18rem 0.35rem 0.18rem 0',
-                            color: highlight ? '#fff' : curRow ? 'var(--text-primary)' : 'var(--text-secondary)',
-                            fontWeight: highlight ? 700 : curRow ? 600 : 400,
+                            color: highlight ? '#fff' : 'var(--text-secondary)',
+                            fontWeight: highlight ? 700 : 400,
+                            backgroundColor: highlight ? 'var(--purple)' : 'transparent',
+                            borderRadius: highlight ? '3px' : 0,
                           }}>{c.fmt(r)}</td>
                         )
                       })}
