@@ -583,7 +583,8 @@ const CustomAdversaryCreator = forwardRef(({
   // activeTab / isNarrow — only meaningful when !embedded, but hooks must be unconditional
   const [activeTab, setActiveTab] = useState('build')
   const containerRef = useRef(null)
-  const [isNarrow, setIsNarrow] = useState(false)
+  // Seed from window width so the first paint already has the correct layout (no flash)
+  const [isNarrow, setIsNarrow] = useState(() => !embedded && window.innerWidth < 700)
 
   useEffect(() => {
     if (embedded) return
