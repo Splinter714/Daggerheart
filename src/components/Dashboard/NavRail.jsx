@@ -1,25 +1,48 @@
 import React from 'react'
-import { Plus, Wand2, Info, Scale, ArrowUpDown } from 'lucide-react'
+import { Skull, TreePine, Plus, WandSparkles, Info, ClipboardList, Dices } from 'lucide-react'
 
 const RAIL_SIZE = 52
 
+const BadgeIcon = ({ Base, size = 22, strokeWidth = 1.6, baseStyle }) => (
+  <span style={{ position: 'relative', display: 'inline-flex', width: size, height: size }}>
+    <span style={baseStyle}>
+      <Base size={size} strokeWidth={strokeWidth} />
+    </span>
+    <Plus
+      size={13}
+      strokeWidth={2.8}
+      style={{
+        position: 'absolute',
+        bottom: -2,
+        right: -4,
+        background: 'var(--bg-primary)',
+        borderRadius: '50%',
+        padding: 1,
+      }}
+    />
+  </span>
+)
+
+const SkullPlus    = (props) => <BadgeIcon Base={Skull}    {...props} />
+const TreePinePlus = (props) => <BadgeIcon Base={TreePine} {...props} baseStyle={{ transform: 'scaleX(0.9)', display: 'inline-flex' }} />
+
 const NAV_ITEMS = [
-  { id: 'browse',   Icon: Plus,          label: 'Add adversaries'   },
-  { id: 'receipt',  Icon: Scale,         label: 'Encounter info'    },
-  { id: 'create',   Icon: Wand2,         label: 'Create custom'     },
+  { id: 'browse',     Icon: SkullPlus,     label: 'Add adversaries'  },
+  { id: 'browse-env', Icon: TreePinePlus,  label: 'Add environments' },
+  { id: 'create',     Icon: WandSparkles,  label: 'Create custom'    },
+  { id: 'receipt',    Icon: ClipboardList, label: 'Encounter info'   },
 ]
 
 const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
               window.navigator.standalone === true ||
               document.referrer.includes('android-app://')
 
-const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButtonRef, onSortToggle }) => {
+const NavRail = ({ placement = 'right', activeId, onAction }) => {
   const isRight = placement === 'right'
 
-  const renderButton = ({ id, Icon, label, active, onClick, btnRef }) => (
+  const renderButton = ({ id, Icon, label, active, onClick }) => (
     <button
       key={id}
-      ref={btnRef}
       type="button"
       title={label}
       onClick={onClick}
@@ -50,14 +73,6 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
       {NAV_ITEMS.map(({ id, Icon, label }) => {
         const active = activeId === id
         return renderButton({ id, Icon, label, active, onClick: () => onAction(id) })
-      })}
-      {renderButton({
-        id: 'sort',
-        Icon: ArrowUpDown,
-        label: 'Sort & group',
-        active: sortActive,
-        onClick: onSortToggle,
-        btnRef: sortButtonRef,
       })}
       {renderButton({
         id: 'info',
@@ -91,8 +106,7 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
     )
   }
 
-  // Bottom placement: outer wrapper auto-sizes to children so border-box
-  // doesn't compress the button row; spacer div handles PWA home-indicator gap.
+  // Bottom placement: mobile nav — dashboard button is leftmost
   return (
     <div style={{
       position: 'fixed',
@@ -112,6 +126,14 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
         paddingLeft: 'env(safe-area-inset-left, 0)',
         paddingRight: 'env(safe-area-inset-right, 0)',
       }}>
+        {/* Dashboard button — mobile only, always leftmost */}
+        {renderButton({
+          id: 'dashboard',
+          Icon: Dices,
+          label: 'View dashboard',
+          active: activeId === null,
+          onClick: () => onAction('dashboard'),
+        })}
         {buttons}
       </div>
       {isPWA && <div aria-hidden="true" style={{ height: '2rem', flexShrink: 0 }} />}

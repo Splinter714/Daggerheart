@@ -55,8 +55,7 @@ const DashboardContent = () => {
   const [browserActiveTab, setBrowserActiveTab] = useState('adversaries')
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null)
   const [rightColumnMode, setRightColumnMode] = useState('browser') // 'browser' | 'info' | 'receipt'
-  const [sortGroupOpen, setSortGroupOpen] = useState(false)
-  const sortGroupButtonRef = useRef(null)
+  const [browserContentType, setBrowserContentType] = useState('adversary') // 'adversary' | 'environment'
   const { sortBy, sortDir, groupBy, setSortBy, setGroupBy } = useDashboardSortGroup()
 
   // Narrow screen detection for NavRail placement
@@ -326,15 +325,20 @@ const DashboardContent = () => {
   const navActiveId = adversaryCreatorOpen
     ? 'create'
     : rightColumnOpen
-    ? rightColumnMode === 'receipt' ? 'receipt' : rightColumnMode === 'info' ? 'info' : 'browse'
+    ? rightColumnMode === 'receipt' ? 'receipt'
+      : rightColumnMode === 'info' ? 'info'
+      : browserContentType === 'environment' ? 'browse-env'
+      : 'browse'
     : null
 
   const handleNavAction = useCallback((id) => {
-    if (id === 'browse') {
-      if (rightColumnOpen && rightColumnMode === 'browser') {
+    if (id === 'browse' || id === 'browse-env') {
+      const contentType = id === 'browse-env' ? 'environment' : 'adversary'
+      if (rightColumnOpen && rightColumnMode === 'browser' && browserContentType === contentType) {
         handleCloseBrowser()
       } else {
         setAdversaryCreatorOpen(false)
+        setBrowserContentType(contentType)
         setRightColumnMode('browser')
         if (!rightColumnOpen) handleOpenBrowser(entityGroups.length)
       }
@@ -355,8 +359,11 @@ const DashboardContent = () => {
         setAdversaryCreatorOpen(false)
         openRightColumn('info')
       }
+    } else if (id === 'dashboard') {
+      handleCloseBrowser()
+      setAdversaryCreatorOpen(false)
     }
-  }, [rightColumnOpen, rightColumnMode, handleCloseBrowser, handleOpenBrowser, openRightColumn, entityGroups])
+  }, [rightColumnOpen, rightColumnMode, browserContentType, handleCloseBrowser, handleOpenBrowser, openRightColumn, entityGroups])
 
   // On mobile the creator uses the right-column slot; on desktop it's a centered modal.
   // NavRail stays visible in both cases on desktop; on mobile it shows above the creator column.
@@ -383,6 +390,7 @@ const DashboardContent = () => {
             mode={rightColumnMode}
             columnWidth={columnWidth}
             onClose={handleCloseBrowser}
+            browserContentType={browserContentType}
             browserActiveTab={browserActiveTab}
             onTabChange={setBrowserActiveTab}
             selectedCustomAdversaryId={selectedCustomAdversaryId}
@@ -399,6 +407,11 @@ const DashboardContent = () => {
             onChangeBpAdjustments={setBpAdjustments}
             availableBattlePoints={availableBattlePoints}
             spentBattlePoints={spentBattlePoints}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            groupBy={groupBy}
+            onSortBy={setSortBy}
+            onGroupBy={setGroupBy}
           />
         <EntityColumns
           entityGroups={entityGroups}
@@ -496,21 +509,6 @@ const DashboardContent = () => {
           placement={navPlacement}
           activeId={navActiveId}
           onAction={handleNavAction}
-          sortActive={sortGroupOpen}
-          sortButtonRef={sortGroupButtonRef}
-          onSortToggle={() => setSortGroupOpen(v => !v)}
-        />
-      )}
-      {sortGroupOpen && (
-        <SortGroupPopover
-          anchorRef={sortGroupButtonRef}
-          placement={navPlacement}
-          sortBy={sortBy}
-          sortDir={sortDir}
-          groupBy={groupBy}
-          onSortBy={setSortBy}
-          onGroupBy={setGroupBy}
-          onClose={() => setSortGroupOpen(false)}
         />
       )}
     </div>

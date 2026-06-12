@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import Browser from '../Browser/Browser'
 import EncounterReceipt from './EncounterReceipt'
 import { DASHBOARD_GAP, PANEL_BORDER, PANEL_BORDER_RADIUS, PANEL_BOX_SHADOW } from './constants'
@@ -10,26 +10,6 @@ const ColumnHeader = ({ title }) => (
   </div>
 )
 
-const BrowserTabBar = ({ active, onSelect }) => (
-  <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-    {['adversary', 'environment'].map(tab => (
-      <button
-        key={tab}
-        onClick={() => onSelect(tab)}
-        style={{
-          flex: 1, padding: '0.5rem', border: 'none', cursor: 'pointer',
-          fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
-          background: active === tab ? 'var(--bg-secondary)' : 'transparent',
-          color: active === tab ? 'var(--text-primary)' : 'var(--text-secondary)',
-          borderBottom: active === tab ? '2px solid var(--purple)' : '2px solid transparent',
-          transition: 'color 0.15s, border-color 0.15s',
-        }}
-      >
-        {tab === 'adversary' ? 'Adversaries' : 'Environments'}
-      </button>
-    ))}
-  </div>
-)
 
 const InfoContent = () => (
   <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem' }}>
@@ -57,14 +37,16 @@ const InfoContent = () => (
 // Convert live adversaryGroups into the encounterItems format EncounterReceipt expects
 const groupsToEncounterItems = (adversaryGroups, pcCount) =>
   adversaryGroups.map((group) => {
-    const isMinion = group.template?.type === 'Minion'
+    const isMinion = group.type === 'Minion'
     const qty = isMinion ? Math.round(group.instances.length / pcCount) : group.instances.length
-    return { type: 'adversary', item: { ...group.template, id: group.template?.id || group.baseName, name: group.baseName }, quantity: qty }
+    const { instances, ...itemData } = group
+    return { type: 'adversary', item: { ...itemData, id: itemData.id || group.baseName, name: group.baseName }, quantity: qty }
   })
 
 // mode: 'browser' | 'info' | 'receipt'
 const RightColumn = ({
   open, mode, columnWidth, onClose,
+  browserContentType,
   browserActiveTab, onTabChange,
   selectedCustomAdversaryId, onSelectCustomAdversary,
   onAddAdversaryFromBrowser,
@@ -73,13 +55,8 @@ const RightColumn = ({
   adversaryGroups, createAdversary, createAdversariesBulk, deleteAdversary,
   bpAdjustments, onChangeBpAdjustments,
   availableBattlePoints, spentBattlePoints,
+  sortBy, sortDir, groupBy, onSortBy, onGroupBy,
 }) => {
-  const [browserContentType, setBrowserContentType] = useState('adversary')
-
-  // Reset to adversaries tab when panel closes
-  useEffect(() => {
-    if (!open) setBrowserContentType('adversary')
-  }, [open])
 
   const encounterItems = groupsToEncounterItems(adversaryGroups, pcCount)
 
@@ -93,9 +70,9 @@ const RightColumn = ({
   }
 
   const handleRemove = (itemId) => {
-    const group = adversaryGroups.find(g => g.template?.id === itemId || g.baseName === itemId)
+    const group = adversaryGroups.find(g => g.id === itemId || g.baseName === itemId)
     if (!group) return
-    const isMinion = group.template?.type === 'Minion'
+    const isMinion = group.type === 'Minion'
     const removeCount = isMinion ? pcCount : 1
     const sorted = [...group.instances].sort((a, b) => (b.duplicateNumber || 1) - (a.duplicateNumber || 1))
     sorted.slice(0, removeCount).forEach(inst => deleteAdversary(inst.id))
@@ -115,8 +92,7 @@ const RightColumn = ({
     }}>
       {mode === 'browser' && (
         <>
-          <ColumnHeader title="Add to Session" />
-          <BrowserTabBar active={browserContentType} onSelect={setBrowserContentType} />
+          <ColumnHeader title={browserContentType === 'environment' ? 'Add Environments' : 'Add Adversaries'} />
           {browserContentType === 'adversary' ? (
             <Browser
               type="adversary"
@@ -150,7 +126,7 @@ const RightColumn = ({
 
       {mode === 'receipt' && (
         <>
-          <ColumnHeader title="Encounter" />
+          <ColumnHeader title="Encounter List" />
           <EncounterReceipt
             encounterItems={encounterItems}
             pcCount={pcCount}
@@ -161,6 +137,11 @@ const RightColumn = ({
             onChangeBpAdjustments={onChangeBpAdjustments}
             availableBattlePoints={availableBattlePoints}
             spentBattlePoints={spentBattlePoints}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            groupBy={groupBy}
+            onSortBy={onSortBy}
+            onGroupBy={onGroupBy}
           />
         </>
       )}
