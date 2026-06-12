@@ -331,38 +331,48 @@ const DashboardContent = () => {
     : null
 
   const handleNavAction = useCallback((id) => {
-    if (id === 'browse' || id === 'browse-env') {
-      const contentType = id === 'browse-env' ? 'environment' : 'adversary'
-      if (rightColumnOpen && rightColumnMode === 'browser' && browserContentType === contentType) {
-        handleCloseBrowser()
-      } else {
-        setAdversaryCreatorOpen(false)
-        setBrowserContentType(contentType)
-        setRightColumnMode('browser')
-        if (!rightColumnOpen) handleOpenBrowser(entityGroups.length)
-      }
-    } else if (id === 'create') {
-      handleCloseBrowser()
-      setAdversaryCreatorOpen(v => !v)
-    } else if (id === 'receipt') {
-      if (rightColumnOpen && rightColumnMode === 'receipt') {
-        handleCloseBrowser()
-      } else {
-        setAdversaryCreatorOpen(false)
-        openRightColumn('receipt')
-      }
-    } else if (id === 'info') {
-      if (rightColumnOpen && rightColumnMode === 'info') {
-        handleCloseBrowser()
-      } else {
-        setAdversaryCreatorOpen(false)
-        openRightColumn('info')
-      }
-    } else if (id === 'dashboard') {
+    if (id === 'dashboard') {
       handleCloseBrowser()
       setAdversaryCreatorOpen(false)
+      return
     }
-  }, [rightColumnOpen, rightColumnMode, browserContentType, handleCloseBrowser, handleOpenBrowser, openRightColumn, entityGroups])
+
+    // Determine if this action is already the active view
+    const alreadyActive =
+      (id === 'browse'     && rightColumnOpen && rightColumnMode === 'browser' && browserContentType === 'adversary') ||
+      (id === 'browse-env' && rightColumnOpen && rightColumnMode === 'browser' && browserContentType === 'environment') ||
+      (id === 'create'     && adversaryCreatorOpen) ||
+      (id === 'receipt'    && rightColumnOpen && rightColumnMode === 'receipt') ||
+      (id === 'info'       && rightColumnOpen && rightColumnMode === 'info')
+
+    // Mobile: tapping the current item does nothing (only the dashboard button goes back)
+    if (isNarrow && alreadyActive) return
+
+    // Desktop: tapping the current item closes it (toggle)
+    if (!isNarrow && alreadyActive) {
+      if (id === 'create') setAdversaryCreatorOpen(false)
+      else handleCloseBrowser()
+      return
+    }
+
+    // Activate
+    if (id === 'browse' || id === 'browse-env') {
+      const contentType = id === 'browse-env' ? 'environment' : 'adversary'
+      setAdversaryCreatorOpen(false)
+      setBrowserContentType(contentType)
+      setRightColumnMode('browser')
+      if (!rightColumnOpen) handleOpenBrowser(entityGroups.length)
+    } else if (id === 'create') {
+      handleCloseBrowser()
+      setAdversaryCreatorOpen(true)
+    } else if (id === 'receipt') {
+      setAdversaryCreatorOpen(false)
+      openRightColumn('receipt')
+    } else if (id === 'info') {
+      setAdversaryCreatorOpen(false)
+      openRightColumn('info')
+    }
+  }, [isNarrow, adversaryCreatorOpen, rightColumnOpen, rightColumnMode, browserContentType, handleCloseBrowser, handleOpenBrowser, openRightColumn, entityGroups])
 
   // On mobile the creator uses the right-column slot; on desktop it's a centered modal.
   // NavRail stays visible in both cases on desktop; on mobile it shows above the creator column.
