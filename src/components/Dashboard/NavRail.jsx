@@ -1,34 +1,31 @@
 import React from 'react'
-import { Skull, TreePine, Plus, WandSparkles, Info, Scale, ArrowUpDown } from 'lucide-react'
+import { Skull, TreePine, Plus, WandSparkles, Info, ClipboardList, ArrowUpDown } from 'lucide-react'
 
 const RAIL_SIZE = 52
 
 const BadgeIcon = ({ Base, size = 22, strokeWidth = 1.6 }) => (
-  <span style={{ position: 'relative', display: 'inline-flex', width: size, height: size }}>
-    <Base size={size} strokeWidth={strokeWidth} />
+  <span style={{ position: 'relative', display: 'inline-flex', width: size + 8, height: size, alignItems: 'center' }}>
     <Plus
-      size={10}
-      strokeWidth={2.8}
-      style={{
-        position: 'absolute',
-        bottom: -2,
-        right: -3,
-        background: 'var(--bg-primary)',
-        borderRadius: '50%',
-        padding: 1,
-      }}
+      size={14}
+      strokeWidth={2.5}
+      style={{ flexShrink: 0 }}
     />
+    <Base size={size} strokeWidth={strokeWidth} />
   </span>
 )
 
 const SkullPlus    = (props) => <BadgeIcon Base={Skull}    {...props} />
 const TreePinePlus = (props) => <BadgeIcon Base={TreePine} {...props} />
 
+const ArrowUpDownRotated = (props) => (
+  <ArrowUpDown {...props} style={{ transform: 'rotate(90deg)' }} />
+)
+
 const NAV_ITEMS = [
   { id: 'browse',     Icon: SkullPlus,     label: 'Add adversaries'  },
   { id: 'browse-env', Icon: TreePinePlus,  label: 'Add environments' },
-  { id: 'receipt',    Icon: Scale,         label: 'Encounter info'   },
   { id: 'create',     Icon: WandSparkles,  label: 'Create custom'    },
+  { id: 'receipt',    Icon: ClipboardList, label: 'Encounter info'   },
 ]
 
 const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
@@ -75,7 +72,7 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
       })}
       {renderButton({
         id: 'sort',
-        Icon: ArrowUpDown,
+        Icon: ArrowUpDownRotated,
         label: 'Sort & group',
         active: sortActive,
         onClick: onSortToggle,
