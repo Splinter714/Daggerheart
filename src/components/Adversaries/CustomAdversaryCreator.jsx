@@ -152,10 +152,27 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
     if (!open || !popoverRef.current) { setAdjust({ dx: 0, flipUp: false }); return }
     const rect = popoverRef.current.getBoundingClientRect()
     const MARGIN = 8
+    // Use the nearest scrollable ancestor's visible area as the clip boundary,
+    // falling back to the viewport if none is found.
+    let clipBottom = window.innerHeight
+    let clipRight  = window.innerWidth
+    let clipLeft   = 0
+    let el = containerRef.current?.parentElement
+    while (el && el !== document.body) {
+      const s = getComputedStyle(el)
+      if ((s.overflowY === 'auto' || s.overflowY === 'scroll') && el.scrollHeight > el.clientHeight) {
+        const cr = el.getBoundingClientRect()
+        clipBottom = cr.bottom
+        clipRight  = cr.right
+        clipLeft   = cr.left
+        break
+      }
+      el = el.parentElement
+    }
     let dx = 0
-    if (rect.right > window.innerWidth - MARGIN) dx = window.innerWidth - MARGIN - rect.right
-    if (rect.left + dx < MARGIN) dx = MARGIN - rect.left
-    const flipUp = rect.bottom > window.innerHeight - MARGIN
+    if (rect.right > clipRight - MARGIN)  dx = clipRight  - MARGIN - rect.right
+    if (rect.left + dx < clipLeft + MARGIN) dx = clipLeft + MARGIN - rect.left
+    const flipUp = rect.bottom > clipBottom - MARGIN
     setAdjust({ dx, flipUp })
   }, [open])
 
@@ -213,7 +230,7 @@ const STAT_COLS = [
   { key: 'major',      label: 'Maj',   fmt: r => r.major  ? formatRange(r.major)  : '—' },
   { key: 'severe',     label: 'Sev',   fmt: r => r.severe ? formatRange(r.severe) : '—' },
   { key: 'hp',         label: 'HP',    fmt: r => formatRange(r.hp) },
-  { key: 'stress',     label: 'Str',   fmt: r => formatRange(r.stress) },
+  { key: 'stress',     label: 'Stress', fmt: r => formatRange(r.stress) },
   { key: 'atk',        label: 'ATK',   fmt: r => formatAtkRange(r.atk) },
 ]
 
@@ -254,10 +271,10 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', whiteSpace: 'nowrap' }}>
               <thead>
                 <tr>
-                  <th style={{ textAlign: 'left', paddingBottom: '0.2rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', borderBottom: '1px solid var(--border)', paddingRight: '0.4rem' }}>T</th>
+                  <th style={{ textAlign: 'center', paddingBottom: '0.2rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', borderBottom: '1px solid var(--border)', paddingRight: '0.4rem' }}>T</th>
                   {STAT_COLS.map(c => (
                     <th key={c.key} style={{
-                      textAlign: 'left', paddingBottom: '0.2rem',
+                      textAlign: 'center', paddingBottom: '0.2rem',
                       color: 'var(--text-secondary)',
                       fontWeight: 600,
                       fontSize: '0.65rem', borderBottom: '1px solid var(--border)',
@@ -273,16 +290,15 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
                   const curRow = t === currentTier
                   return (
                     <tr key={t}>
-                      <td style={{ padding: '0.18rem 0.4rem 0.18rem 0', color: curRow ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: curRow ? 600 : 400 }}>{t}</td>
-                      {STAT_COLS.map((c, ci) => {
+                      <td style={{ padding: '0.18rem 0.4rem 0.18rem 0', textAlign: 'center', color: 'var(--text-secondary)' }}>{t}</td>
+                      {STAT_COLS.map((c) => {
                         const highlight = curRow && c.key === rangeKey
                         return (
                           <td key={c.key} style={{
                             padding: '0.18rem 0.35rem 0.18rem 0',
-                            color: highlight ? '#fff' : 'var(--text-secondary)',
+                            textAlign: 'center',
+                            color: highlight ? 'var(--text-primary)' : 'var(--text-secondary)',
                             fontWeight: highlight ? 700 : 400,
-                            backgroundColor: highlight ? 'var(--purple)' : 'transparent',
-                            borderRadius: highlight ? '3px' : 0,
                           }}>{c.fmt(r)}</td>
                         )
                       })}
