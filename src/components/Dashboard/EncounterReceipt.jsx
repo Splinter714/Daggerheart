@@ -2,30 +2,31 @@ import React, { useState } from 'react'
 import { Plus, Minus, X, ChevronDown, ChevronUp, ArrowUp, ArrowDown } from 'lucide-react'
 import { BATTLE_POINT_ADJUSTMENTS, BATTLE_POINT_COSTS } from './BattlePointsCalculator'
 
-const btnStyle = (danger) => ({
+const actionBtn = (danger) => ({
   background: danger ? 'var(--danger)' : 'var(--bg-secondary)',
   border: danger ? 'none' : '1px solid var(--border)',
   color: danger ? 'white' : 'var(--text-primary)',
-  borderRadius: '3px',
-  padding: '0',
+  borderRadius: '6px',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  minWidth: '18px',
-  height: '18px',
-  fontSize: '0.7rem',
-  position: 'absolute',
-  top: '50%',
-  transform: 'translateY(-50%)',
+  // Visual size
+  width: '28px',
+  height: '28px',
+  // Tap target padding
+  padding: '8px',
+  boxSizing: 'content-box',
+  flexShrink: 0,
 })
 
 const itemRowStyle = {
   display: 'flex',
   alignItems: 'center',
-  padding: '0.25rem 0',
+  padding: '0.15rem 0',
   borderBottom: '1px solid var(--border)',
   flexShrink: 0,
+  gap: '0.4rem',
 }
 
 const MANUAL_ADJUSTMENTS = [
@@ -138,18 +139,16 @@ const EncounterReceipt = ({
 
         {/* Party Size Row */}
         <div className="receipt-item" style={itemRowStyle}>
-          <div className="receipt-controls" style={{ width: '60px', textAlign: 'center', position: 'relative' }}>
-            <button onClick={() => onChangePcCount(Math.max(1, pcCount - 1))} style={{ ...btnStyle(false), left: '0' }}>
-              <Minus size={10} />
-            </button>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{pcCount}</span>
-            <button onClick={() => onChangePcCount(pcCount + 1)} style={{ ...btnStyle(false), right: '0' }}>
-              <Plus size={10} />
-            </button>
-          </div>
-          <div style={{ flex: 1, marginLeft: '1rem' }}>
+          <button onClick={() => onChangePcCount(Math.max(1, pcCount - 1))} style={actionBtn(false)}>
+            <Minus size={13} />
+          </button>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', minWidth: '1.2rem', textAlign: 'center' }}>{pcCount}</span>
             <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Party Size</span>
           </div>
+          <button onClick={() => onChangePcCount(pcCount + 1)} style={actionBtn(false)}>
+            <Plus size={13} />
+          </button>
         </div>
 
         {/* Sort & Group Controls */}
@@ -219,26 +218,21 @@ const EncounterReceipt = ({
               const isZero = encounterItem.quantity === 0
               return (
                 <div key={`${encounterItem.item.id}-${encounterItem.type}`} className="receipt-item" style={itemRowStyle}>
-                  <div className="receipt-controls" style={{ width: '60px', textAlign: 'center', position: 'relative' }}>
-                    <button onClick={() => onRemove(encounterItem.item.id, encounterItem.type)} style={{ ...btnStyle(isZero), left: '0' }}>
-                      {isZero ? <X size={10} /> : <Minus size={10} />}
-                    </button>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{encounterItem.quantity}</span>
-                    <button onClick={() => onAdd(encounterItem.item, encounterItem.type)} style={{ ...btnStyle(false), right: '0' }}>
-                      <Plus size={10} />
-                    </button>
-                  </div>
-                  <div style={{ flex: 1, marginLeft: '1rem' }}>
-                    <div style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                  <button onClick={() => onRemove(encounterItem.item.id, encounterItem.type)} style={actionBtn(isZero)}>
+                    {isZero ? <X size={13} /> : <Minus size={13} />}
+                  </button>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', minWidth: '1rem', textAlign: 'center', flexShrink: 0 }}>{encounterItem.quantity}</span>
+                    <span style={{ color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {encounterItem.item.name || encounterItem.item.baseName}
-                    </div>
-                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{encounterItem.item.type}</div>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                    </span>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', marginLeft: 'auto', flexShrink: 0 }}>
                       {rowBpCost(encounterItem.item, encounterItem.quantity, pcCount)} BP
                     </span>
                   </div>
+                  <button onClick={() => onAdd(encounterItem.item, encounterItem.type)} style={actionBtn(false)}>
+                    <Plus size={13} />
+                  </button>
                 </div>
               )
             })}
