@@ -54,6 +54,7 @@ const RightColumn = ({
   adversaryGroups, createAdversary, createAdversariesBulk, deleteAdversary,
   bpAdjustments, onChangeBpAdjustments,
   availableBattlePoints, spentBattlePoints,
+  sortBy, sortDir, groupBy, onSortBy, onGroupBy,
 }) => {
 
   const encounterItems = groupsToEncounterItems(adversaryGroups, pcCount)
@@ -135,6 +136,11 @@ const RightColumn = ({
             onChangeBpAdjustments={onChangeBpAdjustments}
             availableBattlePoints={availableBattlePoints}
             spentBattlePoints={spentBattlePoints}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            groupBy={groupBy}
+            onSortBy={onSortBy}
+            onGroupBy={onGroupBy}
           />
         </>
       )}

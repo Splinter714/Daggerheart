@@ -21,7 +21,6 @@ import { useEntityGroups } from './hooks/useEntityGroups'
 import { useAdversaryAddition } from './hooks/useAdversaryAddition'
 import { useDashboardSortGroup } from './hooks/useDashboardSortGroup'
 import NavRail, { RAIL_SIZE, isPWA } from './NavRail'
-import SortGroupPopover from './SortGroupPopover'
 import './DashboardView.css'
 
 // Main Dashboard View Component
@@ -56,8 +55,6 @@ const DashboardContent = () => {
   const [browserContentType, setBrowserContentType] = useState('adversary') // 'adversary' | 'environment'
   const [selectedCustomAdversaryId, setSelectedCustomAdversaryId] = useState(null)
   const [rightColumnMode, setRightColumnMode] = useState('browser') // 'browser' | 'info' | 'receipt'
-  const [sortGroupOpen, setSortGroupOpen] = useState(false)
-  const sortGroupButtonRef = useRef(null)
   const { sortBy, sortDir, groupBy, setSortBy, setGroupBy } = useDashboardSortGroup()
 
   // Narrow screen detection for NavRail placement
@@ -406,6 +403,11 @@ const DashboardContent = () => {
             onChangeBpAdjustments={setBpAdjustments}
             availableBattlePoints={availableBattlePoints}
             spentBattlePoints={spentBattlePoints}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            groupBy={groupBy}
+            onSortBy={setSortBy}
+            onGroupBy={setGroupBy}
           />
         <EntityColumns
           entityGroups={entityGroups}
@@ -503,21 +505,6 @@ const DashboardContent = () => {
           placement={navPlacement}
           activeId={navActiveId}
           onAction={handleNavAction}
-          sortActive={sortGroupOpen}
-          sortButtonRef={sortGroupButtonRef}
-          onSortToggle={() => setSortGroupOpen(v => !v)}
-        />
-      )}
-      {sortGroupOpen && (
-        <SortGroupPopover
-          anchorRef={sortGroupButtonRef}
-          placement={navPlacement}
-          sortBy={sortBy}
-          sortDir={sortDir}
-          groupBy={groupBy}
-          onSortBy={setSortBy}
-          onGroupBy={setGroupBy}
-          onClose={() => setSortGroupOpen(false)}
         />
       )}
     </div>

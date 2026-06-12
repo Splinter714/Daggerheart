@@ -1,5 +1,5 @@
 import React from 'react'
-import { Skull, TreePine, Plus, WandSparkles, Info, ClipboardList, ArrowUpDown } from 'lucide-react'
+import { Skull, TreePine, Plus, WandSparkles, Info, ClipboardList } from 'lucide-react'
 
 const RAIL_SIZE = 52
 
@@ -37,7 +37,7 @@ const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
               window.navigator.standalone === true ||
               document.referrer.includes('android-app://')
 
-const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButtonRef, onSortToggle }) => {
+const NavRail = ({ placement = 'right', activeId, onAction }) => {
   const isRight = placement === 'right'
 
   const renderButton = ({ id, Icon, label, active, onClick, btnRef }) => (
@@ -74,14 +74,6 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
       {NAV_ITEMS.map(({ id, Icon, label }) => {
         const active = activeId === id
         return renderButton({ id, Icon, label, active, onClick: () => onAction(id) })
-      })}
-      {renderButton({
-        id: 'sort',
-        Icon: ArrowUpDown,
-        label: 'Sort & group',
-        active: sortActive,
-        onClick: onSortToggle,
-        btnRef: sortButtonRef,
       })}
       {renderButton({
         id: 'info',
