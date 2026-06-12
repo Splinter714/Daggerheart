@@ -85,7 +85,8 @@
 html, body {
   height: 100%;
   height: 100dvh; /* Use dynamic viewport height for better mobile support */
-  overflow: auto; /* Allow scrolling when content exceeds viewport */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 /* Safari mobile viewport fixes */
