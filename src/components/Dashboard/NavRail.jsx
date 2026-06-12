@@ -4,22 +4,18 @@ import { Skull, TreePine, Plus, WandSparkles, Info, ClipboardList, ArrowUpDown }
 const RAIL_SIZE = 52
 
 const BadgeIcon = ({ Base, size = 22, strokeWidth = 1.6 }) => (
-  <span style={{ position: 'relative', display: 'inline-flex', width: size + 8, height: size, alignItems: 'center' }}>
+  <span style={{ display: 'inline-flex', width: size + 8, height: size, alignItems: 'center' }}>
     <Plus
       size={14}
       strokeWidth={2.5}
       style={{ flexShrink: 0 }}
     />
-    <Base size={size} strokeWidth={strokeWidth} />
+    <Base size={size + 6} strokeWidth={strokeWidth} />
   </span>
 )
 
 const SkullPlus    = (props) => <BadgeIcon Base={Skull}    {...props} />
 const TreePinePlus = (props) => <BadgeIcon Base={TreePine} {...props} />
-
-const ArrowUpDownRotated = (props) => (
-  <ArrowUpDown {...props} style={{ transform: 'rotate(90deg)' }} />
-)
 
 const NAV_ITEMS = [
   { id: 'browse',     Icon: SkullPlus,     label: 'Add adversaries'  },
@@ -72,7 +68,7 @@ const NavRail = ({ placement = 'right', activeId, onAction, sortActive, sortButt
       })}
       {renderButton({
         id: 'sort',
-        Icon: ArrowUpDownRotated,
+        Icon: ArrowUpDown,
         label: 'Sort & group',
         active: sortActive,
         onClick: onSortToggle,
