@@ -4,11 +4,22 @@ import { Skull, TreePine, Plus, WandSparkles, Info, ClipboardList, ArrowUpDown }
 const RAIL_SIZE = 52
 
 const BadgeIcon = ({ Base, size = 22, strokeWidth = 1.6, baseStyle }) => (
-  <span style={{ display: 'inline-flex', width: size + 8, height: size, alignItems: 'center', gap: -4 }}>
-    <Plus size={14} strokeWidth={2.5} style={{ flexShrink: 0 }} />
-    <span style={{ marginLeft: -4, ...baseStyle }}>
-      <Base size={size + 6} strokeWidth={strokeWidth} />
+  <span style={{ position: 'relative', display: 'inline-flex', width: size, height: size }}>
+    <span style={baseStyle}>
+      <Base size={size} strokeWidth={strokeWidth} />
     </span>
+    <Plus
+      size={13}
+      strokeWidth={2.8}
+      style={{
+        position: 'absolute',
+        bottom: -2,
+        right: -4,
+        background: 'var(--bg-primary)',
+        borderRadius: '50%',
+        padding: 1,
+      }}
+    />
   </span>
 )
 
