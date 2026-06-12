@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Plus, Minus, X, ChevronDown, ChevronUp, ArrowUp, ArrowDown } from 'lucide-react'
+import { Plus, Minus, X, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Info } from 'lucide-react'
 import { BATTLE_POINT_ADJUSTMENTS, BATTLE_POINT_COSTS } from './BattlePointsCalculator'
 
 const actionBtn = (danger) => ({
@@ -11,10 +11,8 @@ const actionBtn = (danger) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  // Visual size
   width: '28px',
   height: '28px',
-  // Tap target padding
   padding: '8px',
   boxSizing: 'content-box',
   flexShrink: 0,
@@ -30,9 +28,24 @@ const itemRowStyle = {
 }
 
 const MANUAL_ADJUSTMENTS = [
-  { key: 'lessDifficult',   label: 'Less Difficult',   value: BATTLE_POINT_ADJUSTMENTS.lessDifficult   },
-  { key: 'increasedDamage', label: 'Increased Damage',  value: BATTLE_POINT_ADJUSTMENTS.increasedDamage },
-  { key: 'moreDangerous',   label: 'More Dangerous',    value: BATTLE_POINT_ADJUSTMENTS.moreDangerous   },
+  {
+    key: 'lessDifficult',
+    label: 'Less Difficult',
+    value: BATTLE_POINT_ADJUSTMENTS.lessDifficult,
+    tooltip: 'Reduce available Battle Points by 1. Use when you want a lighter encounter or the party needs a breather.',
+  },
+  {
+    key: 'increasedDamage',
+    label: 'Increased Damage',
+    value: BATTLE_POINT_ADJUSTMENTS.increasedDamage,
+    tooltip: 'Reduce available Battle Points by 2. Adversaries deal increased damage (one damage die higher than normal).',
+  },
+  {
+    key: 'moreDangerous',
+    label: 'More Dangerous',
+    value: BATTLE_POINT_ADJUSTMENTS.moreDangerous,
+    tooltip: 'Increase available Battle Points by 2. Use for climactic battles or when the encounter should feel truly perilous.',
+  },
 ]
 
 const SORT_OPTIONS = [
@@ -63,13 +76,13 @@ const sortItems = (items, sortBy, sortDir) => {
     const ai = a.item, bi = b.item
     let va, vb
     switch (sortBy) {
-      case 'name':      va = ai.name || ''; vb = bi.name || ''; break
-      case 'tier':      va = ai.tier || 0;  vb = bi.tier || 0;  break
-      case 'type':      va = ai.type || ''; vb = bi.type || ''; break
-      case 'hp':        va = ai.hpMax || 0; vb = bi.hpMax || 0; break
-      case 'difficulty':va = ai.difficulty || 0; vb = bi.difficulty || 0; break
-      case 'atk':       va = ai.atk || 0;   vb = bi.atk || 0;   break
-      case 'threshold': va = ai.thresholds?.major || 0; vb = bi.thresholds?.major || 0; break
+      case 'name':       va = ai.name || ''; vb = bi.name || ''; break
+      case 'tier':       va = ai.tier || 0;  vb = bi.tier || 0;  break
+      case 'type':       va = ai.type || ''; vb = bi.type || ''; break
+      case 'hp':         va = ai.hpMax || 0; vb = bi.hpMax || 0; break
+      case 'difficulty': va = ai.difficulty || 0; vb = bi.difficulty || 0; break
+      case 'atk':        va = ai.atk || 0;   vb = bi.atk || 0;   break
+      case 'threshold':  va = ai.thresholds?.major || 0; vb = bi.thresholds?.major || 0; break
       default: return 0
     }
     if (typeof va === 'string') return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
@@ -134,79 +147,63 @@ const EncounterReceipt = ({
   const currentSortLabel = SORT_OPTIONS.find(o => o.value === sortBy)?.label || 'Name'
 
   return (
-    <div className="receipt-content" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', overflowY: 'auto', marginBottom: '0.75rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
 
-        {/* Party Size Row */}
-        <div className="receipt-item" style={itemRowStyle}>
-          <button onClick={() => onChangePcCount(Math.max(1, pcCount - 1))} style={actionBtn(false)}>
-            <Minus size={13} />
-          </button>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', minWidth: '1.2rem', textAlign: 'center' }}>{pcCount}</span>
-            <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Party Size</span>
-          </div>
-          <button onClick={() => onChangePcCount(pcCount + 1)} style={actionBtn(false)}>
-            <Plus size={13} />
-          </button>
-        </div>
-
-        {/* Sort & Group Controls */}
-        <div style={{ borderBottom: '1px solid var(--border)', marginBottom: '0.1rem' }}>
-          <button
-            type="button"
-            onClick={() => setSortOpen(v => !v)}
-            style={{
-              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: 'transparent', border: 'none', cursor: 'pointer',
-              padding: '0.35rem 0', color: 'var(--text-secondary)',
-            }}
-          >
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              Sort & Group
-              <span style={{ color: 'var(--text-secondary)', fontWeight: 400, fontSize: '0.72rem' }}>
-                {currentSortLabel} {sortDir === 'asc' ? '↑' : '↓'}
-                {groupBy !== 'none' && ` · ${GROUP_OPTIONS.find(o => o.value === groupBy)?.label}`}
-              </span>
+      {/* Sort & Group — pinned at top, never scrolls */}
+      <div style={{ flexShrink: 0, borderBottom: '1px solid var(--border)', padding: '0 1rem' }}>
+        <button
+          type="button"
+          onClick={() => setSortOpen(v => !v)}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            padding: '0.4rem 0', color: 'var(--text-secondary)',
+          }}
+        >
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            Sort & Group
+            <span style={{ color: 'var(--text-secondary)', fontWeight: 400, fontSize: '0.72rem' }}>
+              {currentSortLabel} {sortDir === 'asc' ? '↑' : '↓'}
+              {groupBy !== 'none' && ` · ${GROUP_OPTIONS.find(o => o.value === groupBy)?.label}`}
             </span>
-            {sortOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-          </button>
+          </span>
+          {sortOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+        </button>
 
-          {sortOpen && (
-            <div style={{ paddingBottom: '0.6rem', display: 'flex', gap: '1rem' }}>
-              {/* Sort */}
-              <div style={{ flex: 1 }}>
-                <div style={sectionLabel}>Sort by</div>
-                {SORT_OPTIONS.map(({ value, label }) => {
-                  const sel = sortBy === value
-                  return (
-                    <div key={value} style={optRow(sel)} onClick={() => onSortBy(value)}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                        <div style={dot(sel)} />{label}
-                      </div>
-                      {sel && (sortDir === 'asc'
-                        ? <ArrowUp size={11} strokeWidth={2.5} />
-                        : <ArrowDown size={11} strokeWidth={2.5} />)}
-                    </div>
-                  )
-                })}
-              </div>
-              {/* Group */}
-              <div style={{ minWidth: '68px' }}>
-                <div style={sectionLabel}>Group</div>
-                {GROUP_OPTIONS.map(({ value, label }) => (
-                  <div key={value} style={optRow(groupBy === value)} onClick={() => onGroupBy(value)}>
+        {sortOpen && (
+          <div style={{ paddingBottom: '0.6rem', display: 'flex', gap: '1rem' }}>
+            <div style={{ flex: 1 }}>
+              <div style={sectionLabel}>Sort by</div>
+              {SORT_OPTIONS.map(({ value, label }) => {
+                const sel = sortBy === value
+                return (
+                  <div key={value} style={optRow(sel)} onClick={() => onSortBy(value)}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <div style={dot(groupBy === value)} />{label}
+                      <div style={dot(sel)} />{label}
                     </div>
+                    {sel && (sortDir === 'asc'
+                      ? <ArrowUp size={11} strokeWidth={2.5} />
+                      : <ArrowDown size={11} strokeWidth={2.5} />)}
                   </div>
-                ))}
-              </div>
+                )
+              })}
             </div>
-          )}
-        </div>
+            <div style={{ minWidth: '68px' }}>
+              <div style={sectionLabel}>Group</div>
+              {GROUP_OPTIONS.map(({ value, label }) => (
+                <div key={value} style={optRow(groupBy === value)} onClick={() => onGroupBy(value)}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <div style={dot(groupBy === value)} />{label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
-        {/* Adversary Rows (sorted + grouped) */}
+      {/* Adversary rows — scrollable */}
+      <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '0 1rem' }}>
         {groups.map(({ key, items }) => (
           <React.Fragment key={key ?? '__all'}>
             {key !== null && (
@@ -238,60 +235,78 @@ const EncounterReceipt = ({
             })}
           </React.Fragment>
         ))}
+      </div>
+
+      {/* Sticky footer — always visible */}
+      <div style={{ flexShrink: 0, borderTop: '1px solid var(--border)', padding: '0.6rem 1rem 0.75rem' }}>
 
         {/* Budget / Remaining */}
-        <div className="receipt-item" style={itemRowStyle}>
-          <div style={{ flex: 1 }}>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Budget</span>
-          </div>
-          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{availableBattlePoints} BP</span>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.1rem 0' }}>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Budget</span>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{availableBattlePoints} BP</span>
         </div>
-        <div className="receipt-item" style={{ ...itemRowStyle, borderBottom: 'none' }}>
-          <div style={{ flex: 1 }}>
-            <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600 }}>
-              {spentBattlePoints > availableBattlePoints ? 'Over Budget' : 'Remaining'}
-            </span>
-          </div>
-          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <span style={{
-              color: spentBattlePoints > availableBattlePoints ? 'var(--danger)'
-                   : spentBattlePoints === availableBattlePoints ? 'var(--purple)'
-                   : 'var(--success)',
-              fontWeight: 600, fontSize: '0.9rem',
-            }}>
-              {spentBattlePoints > availableBattlePoints
-                ? `${spentBattlePoints - availableBattlePoints} BP`
-                : `${availableBattlePoints - spentBattlePoints} BP`}
-            </span>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.1rem 0', marginBottom: '0.5rem' }}>
+          <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600 }}>
+            {spentBattlePoints > availableBattlePoints ? 'Over Budget' : 'Remaining'}
+          </span>
+          <span style={{
+            color: spentBattlePoints > availableBattlePoints ? 'var(--danger)'
+                 : spentBattlePoints === availableBattlePoints ? 'var(--purple)'
+                 : 'var(--success)',
+            fontWeight: 600, fontSize: '0.9rem',
+          }}>
+            {spentBattlePoints > availableBattlePoints
+              ? `${spentBattlePoints - availableBattlePoints} BP`
+              : `${availableBattlePoints - spentBattlePoints} BP`}
+          </span>
         </div>
 
-        {/* Manual BP Adjustments */}
-        {onChangeBpAdjustments && (
-          <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Adjustments
+        <div style={{ borderTop: '1px solid var(--border)', marginBottom: '0.45rem' }} />
+
+        {/* Manual Adjustments */}
+        {onChangeBpAdjustments && MANUAL_ADJUSTMENTS.map(({ key, label, value, tooltip }) => (
+          <label key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.18rem 0', cursor: 'pointer', gap: '0.5rem' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: bpAdjustments[key] ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+              {label}
+              <span title={tooltip} style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-secondary)', cursor: 'help', lineHeight: 1 }}>
+                <Info size={11} strokeWidth={2} />
+              </span>
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
+              <span style={{ fontSize: '0.75rem', color: value > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>
+                {value > 0 ? `+${value}` : value} BP
+              </span>
+              <input
+                type="checkbox"
+                checked={!!bpAdjustments[key]}
+                onChange={(e) => onChangeBpAdjustments(prev => ({ ...prev, [key]: e.target.checked }))}
+                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--purple)' }}
+              />
             </div>
-            {MANUAL_ADJUSTMENTS.map(({ key, label, value }) => (
-              <label key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.2rem 0', cursor: 'pointer', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.85rem', color: bpAdjustments[key] ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{label}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
-                  <span style={{ fontSize: '0.75rem', color: value > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>
-                    {value > 0 ? `+${value}` : value} BP
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={!!bpAdjustments[key]}
-                    onChange={(e) => onChangeBpAdjustments(prev => ({ ...prev, [key]: e.target.checked }))}
-                    style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--purple)' }}
-                  />
-                </div>
-              </label>
-            ))}
+          </label>
+        ))}
+
+        {/* Party Size */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.18rem 0', marginTop: '0.1rem' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            Party Size
+            <span
+              title={`Number of player characters. Base BP budget = (3 × party size) + 2 = ${(3 * pcCount) + 2} BP.`}
+              style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-secondary)', cursor: 'help', lineHeight: 1 }}
+            >
+              <Info size={11} strokeWidth={2} />
+            </span>
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+            <button onClick={() => onChangePcCount(Math.max(1, pcCount - 1))} style={actionBtn(false)}>
+              <Minus size={13} />
+            </button>
+            <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600, minWidth: '1.2rem', textAlign: 'center' }}>{pcCount}</span>
+            <button onClick={() => onChangePcCount(pcCount + 1)} style={actionBtn(false)}>
+              <Plus size={13} />
+            </button>
           </div>
-        )}
+        </div>
 
       </div>
     </div>

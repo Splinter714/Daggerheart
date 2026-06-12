@@ -1,5 +1,5 @@
 import React from 'react'
-import { Skull, TreePine, Plus, WandSparkles, Info, ClipboardList } from 'lucide-react'
+import { Skull, TreePine, Plus, WandSparkles, Info, ClipboardList, Dices } from 'lucide-react'
 
 const RAIL_SIZE = 52
 
@@ -40,10 +40,9 @@ const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
 const NavRail = ({ placement = 'right', activeId, onAction }) => {
   const isRight = placement === 'right'
 
-  const renderButton = ({ id, Icon, label, active, onClick, btnRef }) => (
+  const renderButton = ({ id, Icon, label, active, onClick }) => (
     <button
       key={id}
-      ref={btnRef}
       type="button"
       title={label}
       onClick={onClick}
@@ -107,8 +106,7 @@ const NavRail = ({ placement = 'right', activeId, onAction }) => {
     )
   }
 
-  // Bottom placement: outer wrapper auto-sizes to children so border-box
-  // doesn't compress the button row; spacer div handles PWA home-indicator gap.
+  // Bottom placement: mobile nav — dashboard button is leftmost
   return (
     <div style={{
       position: 'fixed',
@@ -128,6 +126,14 @@ const NavRail = ({ placement = 'right', activeId, onAction }) => {
         paddingLeft: 'env(safe-area-inset-left, 0)',
         paddingRight: 'env(safe-area-inset-right, 0)',
       }}>
+        {/* Dashboard button — mobile only, always leftmost */}
+        {renderButton({
+          id: 'dashboard',
+          Icon: Dices,
+          label: 'View dashboard',
+          active: activeId === null,
+          onClick: () => onAction('dashboard'),
+        })}
         {buttons}
       </div>
       {isPWA && <div aria-hidden="true" style={{ height: '2rem', flexShrink: 0 }} />}

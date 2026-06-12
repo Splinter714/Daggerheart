@@ -326,14 +326,14 @@ const DashboardContent = () => {
     : rightColumnOpen
     ? rightColumnMode === 'receipt' ? 'receipt'
       : rightColumnMode === 'info' ? 'info'
-      : browserContentType === 'environment' ? 'browse-env' : 'browse'
+      : browserContentType === 'environment' ? 'browse-env'
+      : 'browse'
     : null
 
   const handleNavAction = useCallback((id) => {
     if (id === 'browse' || id === 'browse-env') {
       const contentType = id === 'browse-env' ? 'environment' : 'adversary'
-      const alreadyOpen = rightColumnOpen && rightColumnMode === 'browser' && browserContentType === contentType
-      if (alreadyOpen) {
+      if (rightColumnOpen && rightColumnMode === 'browser' && browserContentType === contentType) {
         handleCloseBrowser()
       } else {
         setAdversaryCreatorOpen(false)
@@ -358,6 +358,9 @@ const DashboardContent = () => {
         setAdversaryCreatorOpen(false)
         openRightColumn('info')
       }
+    } else if (id === 'dashboard') {
+      handleCloseBrowser()
+      setAdversaryCreatorOpen(false)
     }
   }, [rightColumnOpen, rightColumnMode, browserContentType, handleCloseBrowser, handleOpenBrowser, openRightColumn, entityGroups])
 

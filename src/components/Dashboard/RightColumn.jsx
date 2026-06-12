@@ -70,9 +70,9 @@ const RightColumn = ({
   }
 
   const handleRemove = (itemId) => {
-    const group = adversaryGroups.find(g => g.template?.id === itemId || g.baseName === itemId)
+    const group = adversaryGroups.find(g => g.id === itemId || g.baseName === itemId)
     if (!group) return
-    const isMinion = group.template?.type === 'Minion'
+    const isMinion = group.type === 'Minion'
     const removeCount = isMinion ? pcCount : 1
     const sorted = [...group.instances].sort((a, b) => (b.duplicateNumber || 1) - (a.duplicateNumber || 1))
     sorted.slice(0, removeCount).forEach(inst => deleteAdversary(inst.id))
@@ -126,7 +126,7 @@ const RightColumn = ({
 
       {mode === 'receipt' && (
         <>
-          <ColumnHeader title="Encounter" />
+          <ColumnHeader title="Encounter List" />
           <EncounterReceipt
             encounterItems={encounterItems}
             pcCount={pcCount}
