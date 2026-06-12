@@ -37,9 +37,10 @@ const InfoContent = () => (
 // Convert live adversaryGroups into the encounterItems format EncounterReceipt expects
 const groupsToEncounterItems = (adversaryGroups, pcCount) =>
   adversaryGroups.map((group) => {
-    const isMinion = group.template?.type === 'Minion'
+    const isMinion = group.type === 'Minion'
     const qty = isMinion ? Math.round(group.instances.length / pcCount) : group.instances.length
-    return { type: 'adversary', item: { ...group.template, id: group.template?.id || group.baseName, name: group.baseName }, quantity: qty }
+    const { instances, ...itemData } = group
+    return { type: 'adversary', item: { ...itemData, id: itemData.id || group.baseName, name: group.baseName }, quantity: qty }
   })
 
 // mode: 'browser' | 'info' | 'receipt'
