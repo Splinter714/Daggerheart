@@ -27,8 +27,8 @@ const SkullPlus    = (props) => <BadgeIcon Base={Skull}    {...props} />
 const TreePinePlus = (props) => <BadgeIcon Base={TreePine} {...props} baseStyle={{ transform: 'scaleX(0.9)', display: 'inline-flex' }} />
 
 const NAV_ITEMS = [
-  { id: 'browse',     Icon: SkullPlus,     label: 'Add adversaries'  },
   { id: 'browse-env', Icon: TreePinePlus,  label: 'Add environments' },
+  { id: 'browse',     Icon: SkullPlus,     label: 'Add adversaries'  },
   { id: 'create',     Icon: WandSparkles,  label: 'Create custom'    },
   { id: 'receipt',    Icon: ClipboardList, label: 'Encounter info'   },
 ]
