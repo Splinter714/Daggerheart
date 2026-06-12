@@ -136,7 +136,7 @@ const GuidanceHeading = ({ children }) => (
 //        'right' anchors to the right edge — use for fields near the right of the form
 const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
   const [open, setOpen] = useState(false)
-  const [shift, setShift] = useState(0)
+  const [adjust, setAdjust] = useState({ dx: 0, flipUp: false })
   const containerRef = useRef(null)
   const popoverRef = useRef(null)
 
@@ -149,18 +149,18 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
   }, [open])
 
   useLayoutEffect(() => {
-    if (!open || !popoverRef.current) { setShift(0); return }
+    if (!open || !popoverRef.current) { setAdjust({ dx: 0, flipUp: false }); return }
     const rect = popoverRef.current.getBoundingClientRect()
     const MARGIN = 8
     let dx = 0
     if (rect.right > window.innerWidth - MARGIN) dx = window.innerWidth - MARGIN - rect.right
     if (rect.left + dx < MARGIN) dx = MARGIN - rect.left
-    setShift(dx)
+    const flipUp = rect.bottom > window.innerHeight - MARGIN
+    setAdjust({ dx, flipUp })
   }, [open])
 
-  const popoverPos = align === 'right'
-    ? { top: '36px', right: 0, left: 'auto' }
-    : { top: '36px', left: 0, right: 'auto' }
+  const hAlign = align === 'right' ? { right: 0, left: 'auto' } : { left: 0, right: 'auto' }
+  const vAlign = adjust.flipUp ? { bottom: '36px', top: 'auto' } : { top: '36px', bottom: 'auto' }
 
   return (
     <div ref={containerRef} style={{ position: 'relative', display: 'inline-flex' }}>
@@ -189,7 +189,7 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
       </button>
       {open && (
         <div ref={popoverRef} style={{
-          position: 'absolute', ...popoverPos,
+          position: 'absolute', ...hAlign, ...vAlign,
           minWidth: `${minWidth}px`, maxWidth: `${Math.max(minWidth, 320)}px`,
           backgroundColor: 'var(--bg-primary)',
           border: '1px solid var(--border)',
@@ -198,7 +198,7 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
           zIndex: 200,
           boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
           fontSize: '0.78rem', lineHeight: 1.5, color: 'var(--text-secondary)',
-          transform: shift ? `translateX(${shift}px)` : 'none',
+          transform: adjust.dx ? `translateX(${adjust.dx}px)` : 'none',
         }}>
           {children}
         </div>
