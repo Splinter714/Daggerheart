@@ -21,7 +21,7 @@ const actionBtn = (danger) => ({
 const itemRowStyle = {
   display: 'flex',
   alignItems: 'center',
-  padding: '0.15rem 0',
+  padding: '0.25rem 0',
   borderBottom: '1px solid var(--border)',
   flexShrink: 0,
   gap: '0.4rem',
@@ -63,6 +63,8 @@ const GROUP_OPTIONS = [
   { value: 'type', label: 'Type' },
   { value: 'tier', label: 'Tier' },
 ]
+
+const unitBpCost = (item) => BATTLE_POINT_COSTS[item.type] || 2
 
 const rowBpCost = (item, quantity, pcCount) => {
   const cost = BATTLE_POINT_COSTS[item.type] || 2
@@ -139,7 +141,6 @@ const EncounterReceipt = ({
   onGroupBy,
 }) => {
   const [sortOpen, setSortOpen] = useState(false)
-  const [adjOpen, setAdjOpen] = useState(false)
 
   const adversaryItems = encounterItems.filter(i => i.type === 'adversary')
   const sorted = sortItems(adversaryItems, sortBy, sortDir)
@@ -203,8 +204,10 @@ const EncounterReceipt = ({
         )}
       </div>
 
-      {/* Adversary rows — scrollable */}
+      {/* Scrollable content: adversary rows + adjustments + party size */}
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '0 1rem' }}>
+
+        {/* Adversary rows */}
         {groups.map(({ key, items }) => (
           <React.Fragment key={key ?? '__all'}>
             {key !== null && (
@@ -214,18 +217,23 @@ const EncounterReceipt = ({
             )}
             {items.map((encounterItem) => {
               const isZero = encounterItem.quantity === 0
+              const qty = encounterItem.quantity
+              const unit = unitBpCost(encounterItem.item)
+              const total = rowBpCost(encounterItem.item, qty, pcCount)
               return (
                 <div key={`${encounterItem.item.id}-${encounterItem.type}`} className="receipt-item" style={itemRowStyle}>
                   <button onClick={() => onRemove(encounterItem.item.id, encounterItem.type)} style={actionBtn(isZero)}>
                     {isZero ? <X size={13} /> : <Minus size={13} />}
                   </button>
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', minWidth: '1rem', textAlign: 'center', flexShrink: 0 }}>{encounterItem.quantity}</span>
-                    <span style={{ color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {encounterItem.item.name || encounterItem.item.baseName}
+                  <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {encounterItem.item.name || encounterItem.item.baseName}
+                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, lineHeight: 1.35 }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem' }}>
+                      {qty} × {unit} BP
                     </span>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', marginLeft: 'auto', flexShrink: 0 }}>
-                      {rowBpCost(encounterItem.item, encounterItem.quantity, pcCount)} BP
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 600 }}>
+                      = {total} BP
                     </span>
                   </div>
                   <button onClick={() => onAdd(encounterItem.item, encounterItem.type)} style={actionBtn(false)}>
@@ -236,56 +244,14 @@ const EncounterReceipt = ({
             })}
           </React.Fragment>
         ))}
-      </div>
 
-      {/* Sticky footer — always visible */}
-      <div style={{ flexShrink: 0, borderTop: '1px solid var(--border)', padding: '0.6rem 1rem 0.75rem' }}>
-
-        {/* Budget / Remaining */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.1rem 0' }}>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Budget</span>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{availableBattlePoints} BP</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.1rem 0', marginBottom: '0.5rem' }}>
-          <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600 }}>
-            {spentBattlePoints > availableBattlePoints ? 'Over Budget' : 'Remaining'}
-          </span>
-          <span style={{
-            color: spentBattlePoints > availableBattlePoints ? 'var(--danger)'
-                 : spentBattlePoints === availableBattlePoints ? 'var(--purple)'
-                 : 'var(--success)',
-            fontWeight: 600, fontSize: '0.9rem',
-          }}>
-            {spentBattlePoints > availableBattlePoints
-              ? `${spentBattlePoints - availableBattlePoints} BP`
-              : `${availableBattlePoints - spentBattlePoints} BP`}
-          </span>
-        </div>
-
-        {/* Collapsible Adjustments */}
+        {/* Adjustments */}
         {onChangeBpAdjustments && (
-          <>
-            <button
-              type="button"
-              onClick={() => setAdjOpen(v => !v)}
-              style={{
-                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: 'transparent', border: 'none', borderTop: '1px solid var(--border)',
-                cursor: 'pointer', padding: '0.35rem 0', marginBottom: adjOpen ? '0.2rem' : 0,
-                color: 'var(--text-secondary)',
-              }}
-            >
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                Adjustments
-                {!adjOpen && Object.values(bpAdjustments).some(Boolean) && (
-                  <span style={{ color: 'var(--purple)', fontWeight: 400, fontSize: '0.72rem' }}>
-                    · {Object.values(bpAdjustments).filter(Boolean).length} active
-                  </span>
-                )}
-              </span>
-              {adjOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-            </button>
-            {adjOpen && MANUAL_ADJUSTMENTS.map(({ key, label, value, tooltip }) => (
+          <div style={{ marginTop: '0.75rem', borderTop: '1px solid var(--border)', paddingTop: '0.5rem' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+              Adjustments
+            </div>
+            {MANUAL_ADJUSTMENTS.map(({ key, label, value, tooltip }) => (
               <label key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.18rem 0', cursor: 'pointer', gap: '0.5rem' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: bpAdjustments[key] ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                   {label}
@@ -306,32 +272,58 @@ const EncounterReceipt = ({
                 </div>
               </label>
             ))}
-          </>
+          </div>
         )}
 
         {/* Party Size */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.18rem 0', marginTop: '0.1rem' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            Party Size
-            <span
-              title={`Number of player characters. Base BP budget = (3 × party size) + 2 = ${(3 * pcCount) + 2} BP.`}
-              style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-secondary)', cursor: 'help', lineHeight: 1 }}
-            >
-              <Info size={11} strokeWidth={2} />
+        <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '0.4rem', paddingBottom: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              Party Size
+              <span
+                title={`Number of player characters. Base BP budget = (3 × party size) + 2 = ${(3 * pcCount) + 2} BP.`}
+                style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-secondary)', cursor: 'help', lineHeight: 1 }}
+              >
+                <Info size={11} strokeWidth={2} />
+              </span>
             </span>
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-            <button onClick={() => onChangePcCount(Math.max(1, pcCount - 1))} style={actionBtn(false)}>
-              <Minus size={13} />
-            </button>
-            <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600, minWidth: '1.2rem', textAlign: 'center' }}>{pcCount}</span>
-            <button onClick={() => onChangePcCount(pcCount + 1)} style={actionBtn(false)}>
-              <Plus size={13} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+              <button onClick={() => onChangePcCount(Math.max(1, pcCount - 1))} style={actionBtn(false)}>
+                <Minus size={13} />
+              </button>
+              <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600, minWidth: '1.2rem', textAlign: 'center' }}>{pcCount}</span>
+              <button onClick={() => onChangePcCount(pcCount + 1)} style={actionBtn(false)}>
+                <Plus size={13} />
+              </button>
+            </div>
           </div>
         </div>
 
       </div>
+
+      {/* Sticky footer — budget/remaining only */}
+      <div style={{ flexShrink: 0, borderTop: '1px solid var(--border)', padding: '0.5rem 1rem 0.65rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.1rem 0' }}>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Budget</span>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{availableBattlePoints} BP</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.1rem 0' }}>
+          <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600 }}>
+            {spentBattlePoints > availableBattlePoints ? 'Over Budget' : 'Remaining'}
+          </span>
+          <span style={{
+            color: spentBattlePoints > availableBattlePoints ? 'var(--danger)'
+                 : spentBattlePoints === availableBattlePoints ? 'var(--purple)'
+                 : 'var(--success)',
+            fontWeight: 600, fontSize: '0.9rem',
+          }}>
+            {spentBattlePoints > availableBattlePoints
+              ? `${spentBattlePoints - availableBattlePoints} BP`
+              : `${availableBattlePoints - spentBattlePoints} BP`}
+          </span>
+        </div>
+      </div>
+
     </div>
   )
 }
