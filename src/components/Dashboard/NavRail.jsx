@@ -13,7 +13,7 @@ const BadgeIcon = ({ Base, size = 22, strokeWidth = 1.6, baseStyle }) => (
 )
 
 const SkullPlus    = (props) => <BadgeIcon Base={Skull}    {...props} />
-const TreePinePlus = (props) => <BadgeIcon Base={TreePine} {...props} baseStyle={{ transform: 'scaleX(0.75)', display: 'inline-flex' }} />
+const TreePinePlus = (props) => <BadgeIcon Base={TreePine} {...props} baseStyle={{ transform: 'scaleX(0.9)', display: 'inline-flex' }} />
 
 const NAV_ITEMS = [
   { id: 'browse',     Icon: SkullPlus,     label: 'Add adversaries'  },
