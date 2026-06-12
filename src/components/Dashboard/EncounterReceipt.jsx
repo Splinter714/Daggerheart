@@ -48,20 +48,16 @@ const MANUAL_ADJUSTMENTS = [
   },
 ]
 
+// Explicit type group order: descending by threat level / BP cost
+const TYPE_ORDER = ['Colossus', 'Solo', 'Bruiser', 'Leader', 'Standard', 'Ranged', 'Skulk', 'Horde', 'Support', 'Minion', 'Social']
+
 const SORT_OPTIONS = [
   { value: 'name',       label: 'Name'      },
   { value: 'tier',       label: 'Tier'      },
-  { value: 'type',       label: 'Type'      },
   { value: 'hp',         label: 'HP'        },
   { value: 'difficulty', label: 'Difficulty'},
   { value: 'atk',        label: 'Attack'    },
   { value: 'threshold',  label: 'Threshold' },
-]
-
-const GROUP_OPTIONS = [
-  { value: 'none', label: 'None' },
-  { value: 'type', label: 'Type' },
-  { value: 'tier', label: 'Tier' },
 ]
 
 const unitBpCost = (item) => BATTLE_POINT_COSTS[item.type] || 2
@@ -80,7 +76,6 @@ const sortItems = (items, sortBy, sortDir) => {
     switch (sortBy) {
       case 'name':       va = ai.name || ''; vb = bi.name || ''; break
       case 'tier':       va = ai.tier || 0;  vb = bi.tier || 0;  break
-      case 'type':       va = ai.type || ''; vb = bi.type || ''; break
       case 'hp':         va = ai.hpMax || 0; vb = bi.hpMax || 0; break
       case 'difficulty': va = ai.difficulty || 0; vb = bi.difficulty || 0; break
       case 'atk':        va = ai.atk || 0;   vb = bi.atk || 0;   break
@@ -92,16 +87,23 @@ const sortItems = (items, sortBy, sortDir) => {
   })
 }
 
-const groupItems = (items, groupBy) => {
-  if (!groupBy || groupBy === 'none') return [{ key: null, items }]
+// Always groups by type using the explicit TYPE_ORDER; sortBy/sortDir apply within each group
+const groupByType = (items, sortBy, sortDir) => {
   const map = {}
-  const order = []
   items.forEach(item => {
-    const key = String(groupBy === 'type' ? item.item.type : item.item.tier) || '—'
-    if (!map[key]) { map[key] = []; order.push(key) }
+    const key = item.item.type || 'Unknown'
+    if (!map[key]) map[key] = []
     map[key].push(item)
   })
-  return order.map(key => ({ key, items: map[key] }))
+  const keys = Object.keys(map).sort((a, b) => {
+    const ai = TYPE_ORDER.indexOf(a)
+    const bi = TYPE_ORDER.indexOf(b)
+    if (ai === -1 && bi === -1) return a.localeCompare(b)
+    if (ai === -1) return 1
+    if (bi === -1) return -1
+    return ai - bi
+  })
+  return keys.map(key => ({ key, items: sortItems(map[key], sortBy, sortDir) }))
 }
 
 const sectionLabel = {
@@ -136,22 +138,19 @@ const EncounterReceipt = ({
   spentBattlePoints,
   sortBy = 'name',
   sortDir = 'asc',
-  groupBy = 'none',
   onSortBy,
-  onGroupBy,
 }) => {
   const [sortOpen, setSortOpen] = useState(false)
 
   const adversaryItems = encounterItems.filter(i => i.type === 'adversary')
-  const sorted = sortItems(adversaryItems, sortBy, sortDir)
-  const groups = groupItems(sorted, groupBy)
+  const groups = groupByType(adversaryItems, sortBy, sortDir)
 
   const currentSortLabel = SORT_OPTIONS.find(o => o.value === sortBy)?.label || 'Name'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
 
-      {/* Sort & Group — pinned at top, never scrolls */}
+      {/* Sort — pinned at top, never scrolls */}
       <div style={{ flexShrink: 0, borderBottom: '1px solid var(--border)', padding: '0 1rem' }}>
         <button
           type="button"
@@ -163,43 +162,30 @@ const EncounterReceipt = ({
           }}
         >
           <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            Sort & Group
+            Sort within group
             <span style={{ color: 'var(--text-secondary)', fontWeight: 400, fontSize: '0.72rem' }}>
               {currentSortLabel} {sortDir === 'asc' ? '↑' : '↓'}
-              {groupBy !== 'none' && ` · ${GROUP_OPTIONS.find(o => o.value === groupBy)?.label}`}
             </span>
           </span>
           {sortOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
         </button>
 
         {sortOpen && (
-          <div style={{ paddingBottom: '0.6rem', display: 'flex', gap: '1rem' }}>
-            <div style={{ flex: 1 }}>
-              <div style={sectionLabel}>Sort by</div>
-              {SORT_OPTIONS.map(({ value, label }) => {
-                const sel = sortBy === value
-                return (
-                  <div key={value} style={optRow(sel)} onClick={() => onSortBy(value)}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <div style={dot(sel)} />{label}
-                    </div>
-                    {sel && (sortDir === 'asc'
-                      ? <ArrowUp size={11} strokeWidth={2.5} />
-                      : <ArrowDown size={11} strokeWidth={2.5} />)}
-                  </div>
-                )
-              })}
-            </div>
-            <div style={{ minWidth: '68px' }}>
-              <div style={sectionLabel}>Group</div>
-              {GROUP_OPTIONS.map(({ value, label }) => (
-                <div key={value} style={optRow(groupBy === value)} onClick={() => onGroupBy(value)}>
+          <div style={{ paddingBottom: '0.6rem' }}>
+            <div style={sectionLabel}>Sort by</div>
+            {SORT_OPTIONS.map(({ value, label }) => {
+              const sel = sortBy === value
+              return (
+                <div key={value} style={optRow(sel)} onClick={() => onSortBy(value)}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <div style={dot(groupBy === value)} />{label}
+                    <div style={dot(sel)} />{label}
                   </div>
+                  {sel && (sortDir === 'asc'
+                    ? <ArrowUp size={11} strokeWidth={2.5} />
+                    : <ArrowDown size={11} strokeWidth={2.5} />)}
                 </div>
-              ))}
-            </div>
+              )
+            })}
           </div>
         )}
       </div>
@@ -207,14 +193,12 @@ const EncounterReceipt = ({
       {/* Scrollable content: adversary rows + adjustments + party size */}
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '0 1rem' }}>
 
-        {/* Adversary rows */}
+        {/* Adversary rows, grouped by type in BP-cost order */}
         {groups.map(({ key, items }) => (
-          <React.Fragment key={key ?? '__all'}>
-            {key !== null && (
-              <div style={{ padding: '0.3rem 0 0.1rem', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                {groupBy === 'tier' ? `Tier ${key}` : key}
-              </div>
-            )}
+          <React.Fragment key={key}>
+            <div style={{ padding: '0.3rem 0 0.1rem', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+              {key}
+            </div>
             {items.map((encounterItem) => {
               const isZero = encounterItem.quantity === 0
               const qty = encounterItem.quantity
