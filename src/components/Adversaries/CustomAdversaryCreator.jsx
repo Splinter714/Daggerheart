@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef, useCallback, useLayoutEffect } from 'react'
 import GameCard from './GameCard'
 import FeaturesSection from './GameCard/FeaturesSection'
 import ExperienceSection from './GameCard/ExperienceSection'
@@ -136,22 +136,34 @@ const GuidanceHeading = ({ children }) => (
 //        'right' anchors to the right edge — use for fields near the right of the form
 const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
   const [open, setOpen] = useState(false)
-  const ref = useRef(null)
+  const [shift, setShift] = useState(0)
+  const containerRef = useRef(null)
+  const popoverRef = useRef(null)
 
   useEffect(() => {
     if (!open) return
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    const handler = (e) => { if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', handler)
     document.addEventListener('touchstart', handler)
     return () => { document.removeEventListener('mousedown', handler); document.removeEventListener('touchstart', handler) }
   }, [open])
 
+  useLayoutEffect(() => {
+    if (!open || !popoverRef.current) { setShift(0); return }
+    const rect = popoverRef.current.getBoundingClientRect()
+    const MARGIN = 8
+    let dx = 0
+    if (rect.right > window.innerWidth - MARGIN) dx = window.innerWidth - MARGIN - rect.right
+    if (rect.left + dx < MARGIN) dx = MARGIN - rect.left
+    setShift(dx)
+  }, [open])
+
   const popoverPos = align === 'right'
-    ? { top: '36px', right: 0, left: 'auto', transform: 'none' }
-    : { top: '36px', left: 0, right: 'auto', transform: 'none' }
+    ? { top: '36px', right: 0, left: 'auto' }
+    : { top: '36px', left: 0, right: 'auto' }
 
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
+    <div ref={containerRef} style={{ position: 'relative', display: 'inline-flex' }}>
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
@@ -176,7 +188,7 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
         }}>i</span>
       </button>
       {open && (
-        <div style={{
+        <div ref={popoverRef} style={{
           position: 'absolute', ...popoverPos,
           minWidth: `${minWidth}px`, maxWidth: `${Math.max(minWidth, 320)}px`,
           backgroundColor: 'var(--bg-primary)',
@@ -186,6 +198,7 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
           zIndex: 200,
           boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
           fontSize: '0.78rem', lineHeight: 1.5, color: 'var(--text-secondary)',
+          transform: shift ? `translateX(${shift}px)` : 'none',
         }}>
           {children}
         </div>
