@@ -139,6 +139,7 @@ const EncounterReceipt = ({
   onGroupBy,
 }) => {
   const [sortOpen, setSortOpen] = useState(false)
+  const [adjOpen, setAdjOpen] = useState(false)
 
   const adversaryItems = encounterItems.filter(i => i.type === 'adversary')
   const sorted = sortItems(adversaryItems, sortBy, sortDir)
@@ -261,30 +262,52 @@ const EncounterReceipt = ({
           </span>
         </div>
 
-        <div style={{ borderTop: '1px solid var(--border)', marginBottom: '0.45rem' }} />
-
-        {/* Manual Adjustments */}
-        {onChangeBpAdjustments && MANUAL_ADJUSTMENTS.map(({ key, label, value, tooltip }) => (
-          <label key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.18rem 0', cursor: 'pointer', gap: '0.5rem' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: bpAdjustments[key] ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
-              {label}
-              <span title={tooltip} style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-secondary)', cursor: 'help', lineHeight: 1 }}>
-                <Info size={11} strokeWidth={2} />
+        {/* Collapsible Adjustments */}
+        {onChangeBpAdjustments && (
+          <>
+            <button
+              type="button"
+              onClick={() => setAdjOpen(v => !v)}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: 'transparent', border: 'none', borderTop: '1px solid var(--border)',
+                cursor: 'pointer', padding: '0.35rem 0', marginBottom: adjOpen ? '0.2rem' : 0,
+                color: 'var(--text-secondary)',
+              }}
+            >
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                Adjustments
+                {!adjOpen && Object.values(bpAdjustments).some(Boolean) && (
+                  <span style={{ color: 'var(--purple)', fontWeight: 400, fontSize: '0.72rem' }}>
+                    · {Object.values(bpAdjustments).filter(Boolean).length} active
+                  </span>
+                )}
               </span>
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
-              <span style={{ fontSize: '0.75rem', color: value > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>
-                {value > 0 ? `+${value}` : value} BP
-              </span>
-              <input
-                type="checkbox"
-                checked={!!bpAdjustments[key]}
-                onChange={(e) => onChangeBpAdjustments(prev => ({ ...prev, [key]: e.target.checked }))}
-                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--purple)' }}
-              />
-            </div>
-          </label>
-        ))}
+              {adjOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            </button>
+            {adjOpen && MANUAL_ADJUSTMENTS.map(({ key, label, value, tooltip }) => (
+              <label key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.18rem 0', cursor: 'pointer', gap: '0.5rem' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: bpAdjustments[key] ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                  {label}
+                  <span title={tooltip} style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-secondary)', cursor: 'help', lineHeight: 1 }}>
+                    <Info size={11} strokeWidth={2} />
+                  </span>
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
+                  <span style={{ fontSize: '0.75rem', color: value > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>
+                    {value > 0 ? `+${value}` : value} BP
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={!!bpAdjustments[key]}
+                    onChange={(e) => onChangeBpAdjustments(prev => ({ ...prev, [key]: e.target.checked }))}
+                    style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--purple)' }}
+                  />
+                </div>
+              </label>
+            ))}
+          </>
+        )}
 
         {/* Party Size */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.18rem 0', marginTop: '0.1rem' }}>
