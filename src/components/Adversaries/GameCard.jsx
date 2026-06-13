@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Hexagon, Locate, Check } from 'lucide-react'
+import { X, Hexagon, Locate, Check, Minus, Plus, Pencil, Trash2 } from 'lucide-react'
 import ContainerWithTab from '../Dashboard/ContainerWithTab'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
 import FeaturesSection from './GameCard/FeaturesSection'
@@ -169,6 +169,22 @@ const GameCard = ({
       document.removeEventListener('keydown', handleKey)
     }
   }, [quickEdit])
+
+  // Two-stage card-level delete (top-left button)
+  const [deleteArmed, setDeleteArmed] = useState(false)
+  const deleteTimerRef = useRef(null)
+  useEffect(() => () => clearTimeout(deleteTimerRef.current), [])
+  const handleDeleteClick = (e) => {
+    e.stopPropagation()
+    if (deleteArmed) {
+      clearTimeout(deleteTimerRef.current)
+      setDeleteArmed(false)
+      onDelete?.()
+    } else {
+      setDeleteArmed(true)
+      deleteTimerRef.current = setTimeout(() => setDeleteArmed(false), 3000)
+    }
+  }
 
   // State for two-stage delete functionality
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
@@ -439,6 +455,40 @@ const GameCard = ({
           zIndex: isDead ? 1 : 'auto',
           borderBottomColor: isSelected ? 'var(--purple)' : 'var(--border)'
         }}>
+          {/* Delete button — top-left, two-stage */}
+          {onDelete && (
+            <button
+              onClick={handleDeleteClick}
+              style={{
+                position: 'absolute', left: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
+                width: '24px', height: '24px',
+                background: deleteArmed ? 'var(--danger)' : 'transparent',
+                border: 'none', borderRadius: '4px',
+                color: deleteArmed ? 'white' : 'var(--text-secondary)',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: 0, transition: 'all 0.15s ease',
+              }}
+              title={deleteArmed ? 'Click again to confirm' : 'Remove all'}
+            >
+              {deleteArmed ? <Trash2 size={12} /> : <X size={12} />}
+            </button>
+          )}
+          {/* Edit button — top-right */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setQuickEdit(v => !v) }}
+            style={{
+              position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
+              width: '24px', height: '24px',
+              background: isEditMode ? 'var(--purple)' : 'transparent',
+              border: 'none', borderRadius: '4px',
+              color: isEditMode ? 'white' : 'var(--text-secondary)',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 0, transition: 'all 0.15s ease',
+            }}
+            title={isEditMode ? 'Done editing' : 'Edit'}
+          >
+            {isEditMode ? <Check size={12} /> : <Pencil size={12} />}
+          </button>
           {/* Header with Name and Badges */}
           <div style={{
             display: 'flex',
@@ -519,6 +569,43 @@ const GameCard = ({
 
 
 
+
+        {/* Inc/dec instance count — quick edit only */}
+        {isEditMode && (onAddInstance || onRemoveInstance) && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: CARD_SPACE_H, padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
+            <button
+              onClick={(e) => { e.stopPropagation(); onRemoveInstance?.(item.id) }}
+              style={{
+                width: '28px', height: '28px', background: 'transparent',
+                border: '1px solid var(--text-secondary)', borderRadius: '4px',
+                color: 'var(--text-secondary)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.color = 'var(--danger)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--text-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
+              title="Remove one"
+            >
+              <Minus size={14} />
+            </button>
+            <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-secondary)', minWidth: '24px', textAlign: 'center' }}>
+              {instances.length}
+            </span>
+            <button
+              onClick={(e) => { e.stopPropagation(); onAddInstance?.(item) }}
+              style={{
+                width: '28px', height: '28px', background: 'transparent',
+                border: '1px solid var(--text-secondary)', borderRadius: '4px',
+                color: 'var(--text-secondary)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--purple)'; e.currentTarget.style.color = 'var(--purple)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--text-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
+              title="Add one"
+            >
+              <Plus size={14} />
+            </button>
+          </div>
+        )}
 
         {/* Standard Attack Pill */}
         {!isEditMode && item.weapon && (
@@ -894,20 +981,19 @@ const GameCard = ({
           }}>
             {onDelete && (
               <button
-                onClick={(e) => { e.stopPropagation(); onDelete() }}
+                onClick={handleDeleteClick}
                 style={{
-                  position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)',
-                  width: '24px', height: '24px', flexShrink: 0,
-                  background: 'transparent', border: '1px solid var(--text-secondary)',
-                  borderRadius: '4px', color: 'var(--text-secondary)',
+                  position: 'absolute', left: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
+                  width: '24px', height: '24px',
+                  background: deleteArmed ? 'var(--danger)' : 'transparent',
+                  border: 'none', borderRadius: '4px',
+                  color: deleteArmed ? 'white' : 'var(--text-secondary)',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  padding: 0,
+                  padding: 0, transition: 'all 0.15s ease',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.color = 'var(--danger)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--text-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
-                title="Remove"
+                title={deleteArmed ? 'Click again to confirm' : 'Remove'}
               >
-                <X size={12} />
+                {deleteArmed ? <Trash2 size={12} /> : <X size={12} />}
               </button>
             )}
             <h4 style={{
@@ -1115,20 +1201,19 @@ const GameCard = ({
           }}>
             {onDelete && (
               <button
-                onClick={(e) => { e.stopPropagation(); onDelete() }}
+                onClick={handleDeleteClick}
                 style={{
-                  position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)',
-                  width: '24px', height: '24px', flexShrink: 0,
-                  background: 'transparent', border: '1px solid var(--text-secondary)',
-                  borderRadius: '4px', color: 'var(--text-secondary)',
+                  position: 'absolute', left: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
+                  width: '24px', height: '24px',
+                  background: deleteArmed ? 'var(--danger)' : 'transparent',
+                  border: 'none', borderRadius: '4px',
+                  color: deleteArmed ? 'white' : 'var(--text-secondary)',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  padding: 0,
+                  padding: 0, transition: 'all 0.15s ease',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.color = 'var(--danger)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--text-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
-                title="Remove"
+                title={deleteArmed ? 'Click again to confirm' : 'Remove'}
               >
-                <X size={12} />
+                {deleteArmed ? <Trash2 size={12} /> : <X size={12} />}
               </button>
             )}
             <h4 style={{

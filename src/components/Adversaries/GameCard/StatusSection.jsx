@@ -1,5 +1,4 @@
 import React from 'react'
-import { Plus, Minus } from 'lucide-react'
 import Pips from '../../Shared/Pips'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
@@ -237,41 +236,10 @@ const StatusSection = ({
     >
       {(() => {
         const thresholdsEl = renderThresholds()
-        const showControls = !isEditMode && (onAddInstance || onRemoveInstance)
-        if (!thresholdsEl && !showControls) return null
+        if (!thresholdsEl) return null
         return (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: CARD_SPACE_H }}>
-            {showControls && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onRemoveInstance && onRemoveInstance(item.id) }}
-                style={{
-                  width: '24px', height: '24px', flexShrink: 0,
-                  background: 'transparent', border: '1px solid var(--text-secondary)',
-                  borderRadius: '4px', color: 'white',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  padding: 0,
-                }}
-                title="Remove one"
-              >
-                <Minus size={12} />
-              </button>
-            )}
             {thresholdsEl}
-            {showControls && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onAddInstance && onAddInstance(item) }}
-                style={{
-                  width: '24px', height: '24px', flexShrink: 0,
-                  background: 'transparent', border: '1px solid var(--text-secondary)',
-                  borderRadius: '4px', color: 'white',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  padding: 0,
-                }}
-                title="Add another"
-              >
-                <Plus size={12} />
-              </button>
-            )}
           </div>
         )
       })()}

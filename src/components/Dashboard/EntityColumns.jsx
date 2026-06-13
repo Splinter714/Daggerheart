@@ -183,7 +183,52 @@ const EntityColumns = ({
               ? () => deleteEnvironment(group.instances[0].id)
               : group.type === 'adversary' && group.template?.isColossus && deleteAdversary
                 ? () => deleteAdversary(group.instances[0].id)
-                : undefined
+                : group.type === 'adversary' && deleteAdversary
+                  ? () => {
+                      const instances = group.instances
+                      if (!instances.length) return
+                      const groupIndex = entityGroups.findIndex(
+                        g => g.baseName === group.baseName && g.type === 'adversary')
+                      const isLeftmostColumn = groupIndex === 0
+                      let wasAtMaxScroll = false
+                      if (scrollContainerRef.current) {
+                        const c = scrollContainerRef.current
+                        wasAtMaxScroll = Math.abs(c.scrollLeft - (c.scrollWidth - c.clientWidth)) < 1
+                      }
+                      setRemovingCardSpacer({ baseName: group.baseName, groupIndex })
+                      setSpacerShrinking(false)
+                      if (isLeftmostColumn && scrollContainerRef.current) {
+                        scrollContainerRef.current.style.scrollSnapType = 'none'
+                      }
+                      requestAnimationFrame(() => requestAnimationFrame(() => {
+                        if (scrollContainerRef.current) scrollContainerRef.current.offsetHeight
+                        instances.forEach(inst => deleteAdversary(inst.id))
+                        requestAnimationFrame(() => requestAnimationFrame(() => {
+                          if (scrollContainerRef.current) scrollContainerRef.current.offsetHeight
+                          setTimeout(() => {
+                            setSpacerShrinking(true)
+                            if (wasAtMaxScroll && scrollContainerRef.current) {
+                              const startTime = performance.now()
+                              const tick = () => {
+                                if (!scrollContainerRef.current) return
+                                scrollContainerRef.current.scrollLeft =
+                                  scrollContainerRef.current.scrollWidth - scrollContainerRef.current.clientWidth
+                                if (performance.now() - startTime < 300) requestAnimationFrame(tick)
+                              }
+                              requestAnimationFrame(tick)
+                            }
+                            setTimeout(() => {
+                              setRemovingCardSpacer(null)
+                              setSpacerShrinking(false)
+                              if (isLeftmostColumn && scrollContainerRef.current) {
+                                scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+                              }
+                            }, 300)
+                          }, 50)
+                        }))
+                      }))
+                    }
+                  : undefined
           }
           adversaries={adversaries}
           showAddRemoveButtons={browserOpenAtPosition !== null && group.type === 'adversary'}
