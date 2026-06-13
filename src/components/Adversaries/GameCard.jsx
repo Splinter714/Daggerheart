@@ -950,13 +950,73 @@ const GameCard = ({
             borderRadius: '8px 8px 0 0',
             position: 'relative',
           }}>
-            <h4 style={{
-              ...styles.rowTitle, margin: 0, fontSize: '1.1rem',
-              textAlign: 'center',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              {env.name}
-            </h4>
+            {quickEdit ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {onDelete && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onDelete() }}
+                    style={{
+                      flexShrink: 0, width: '24px', height: '24px',
+                      background: 'transparent', border: 'none', borderRadius: '4px',
+                      color: 'var(--danger)', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                    }}
+                    title="Remove"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+                <input
+                  type="text"
+                  value={env.name || ''}
+                  onChange={(e) => onUpdate && onUpdate(item.id, { name: e.target.value })}
+                  style={{
+                    flex: 1, minWidth: 0,
+                    backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
+                    borderRadius: '4px', color: 'var(--text-primary)',
+                    fontSize: '0.95rem', fontWeight: '600',
+                    padding: '2px 6px',
+                  }}
+                  placeholder="Name"
+                />
+                <button
+                  onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
+                  style={{
+                    flexShrink: 0, width: '24px', height: '24px',
+                    background: 'var(--purple)', border: 'none', borderRadius: '4px',
+                    color: 'white', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                  }}
+                  title="Done editing"
+                >
+                  <Check size={12} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
+                  style={{
+                    position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
+                    width: '24px', height: '24px',
+                    background: 'transparent', border: 'none', borderRadius: '4px',
+                    color: 'var(--text-secondary)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: 0, transition: 'all 0.15s ease',
+                  }}
+                  title="Edit"
+                >
+                  <Pencil size={12} />
+                </button>
+                <h4 style={{
+                  ...styles.rowTitle, margin: 0, fontSize: '1.1rem',
+                  textAlign: 'center',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {env.name}
+                </h4>
+              </>
+            )}
           </div>
 
           {/* Scrollable content */}
@@ -1153,12 +1213,72 @@ const GameCard = ({
             borderRadius: '8px 8px 0 0',
             position: 'relative',
           }}>
-            <h4 style={{
-              ...styles.rowTitle, margin: 0, fontSize: '1rem',
-              textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              {colossus.name}
-            </h4>
+            {quickEdit ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {onDelete && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onDelete() }}
+                    style={{
+                      flexShrink: 0, width: '24px', height: '24px',
+                      background: 'transparent', border: 'none', borderRadius: '4px',
+                      color: 'var(--danger)', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                    }}
+                    title="Remove"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+                <input
+                  type="text"
+                  value={colossus.name || ''}
+                  onChange={(e) => onUpdate && onUpdate(item.id, { name: e.target.value })}
+                  style={{
+                    flex: 1, minWidth: 0,
+                    backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
+                    borderRadius: '4px', color: 'var(--text-primary)',
+                    fontSize: '0.95rem', fontWeight: '600',
+                    padding: '2px 6px',
+                  }}
+                  placeholder="Name"
+                />
+                <button
+                  onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
+                  style={{
+                    flexShrink: 0, width: '24px', height: '24px',
+                    background: 'var(--purple)', border: 'none', borderRadius: '4px',
+                    color: 'white', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                  }}
+                  title="Done editing"
+                >
+                  <Check size={12} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
+                  style={{
+                    position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
+                    width: '24px', height: '24px',
+                    background: 'transparent', border: 'none', borderRadius: '4px',
+                    color: 'var(--text-secondary)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: 0, transition: 'all 0.15s ease',
+                  }}
+                  title="Edit"
+                >
+                  <Pencil size={12} />
+                </button>
+                <h4 style={{
+                  ...styles.rowTitle, margin: 0, fontSize: '1rem',
+                  textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {colossus.name}
+                </h4>
+              </>
+            )}
           </div>
 
           {/* Scrollable body */}
