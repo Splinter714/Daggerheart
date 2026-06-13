@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Hexagon, Locate, Check, Minus, Plus, Pencil, Trash2 } from 'lucide-react'
+import { X, Hexagon, Locate, Check, Minus, Plus, Pencil } from 'lucide-react'
 import ContainerWithTab from '../Dashboard/ContainerWithTab'
 import CustomAdversaryCreator from './CustomAdversaryCreator'
 import FeaturesSection from './GameCard/FeaturesSection'
@@ -170,22 +170,6 @@ const GameCard = ({
     }
   }, [quickEdit])
 
-  // Two-stage card-level delete (top-left button)
-  const [deleteArmed, setDeleteArmed] = useState(false)
-  const deleteTimerRef = useRef(null)
-  useEffect(() => () => clearTimeout(deleteTimerRef.current), [])
-  const handleDeleteClick = (e) => {
-    e.stopPropagation()
-    if (deleteArmed) {
-      clearTimeout(deleteTimerRef.current)
-      setDeleteArmed(false)
-      onDelete?.()
-    } else {
-      setDeleteArmed(true)
-      deleteTimerRef.current = setTimeout(() => setDeleteArmed(false), 3000)
-    }
-  }
-
   // State for two-stage delete functionality
   const [deleteConfirmations, setDeleteConfirmations] = useState({})
   
@@ -345,7 +329,7 @@ const GameCard = ({
 
   const renderExpandedAdversary = () => {
     const isDead = (item.hp || 0) >= (item.hpMax || 1)
-    const isEditMode = effectiveMode === 'edit' || showCustomCreator || quickEdit
+    const isEditMode = effectiveMode === 'edit' || showCustomCreator
     
     // Tab only shown in custom creator mode (Save/Cancel buttons)
     const shouldShowTab = (type === 'adversary') && showCustomCreator
@@ -455,101 +439,126 @@ const GameCard = ({
           zIndex: isDead ? 1 : 'auto',
           borderBottomColor: isSelected ? 'var(--purple)' : 'var(--border)'
         }}>
-          {/* Delete button — top-left, two-stage */}
-          {onDelete && (
-            <button
-              onClick={handleDeleteClick}
-              style={{
-                position: 'absolute', left: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-                width: '24px', height: '24px',
-                background: deleteArmed ? 'var(--danger)' : 'transparent',
-                border: 'none', borderRadius: '4px',
-                color: deleteArmed ? 'white' : 'var(--text-secondary)',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: 0, transition: 'all 0.15s ease',
-              }}
-              title={deleteArmed ? 'Click again to confirm' : 'Remove all'}
-            >
-              {deleteArmed ? <Trash2 size={12} /> : <X size={12} />}
-            </button>
-          )}
-          {/* Edit button — top-right */}
-          <button
-            onClick={(e) => { e.stopPropagation(); setQuickEdit(v => !v) }}
-            style={{
-              position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-              width: '24px', height: '24px',
-              background: isEditMode ? 'var(--purple)' : 'transparent',
-              border: 'none', borderRadius: '4px',
-              color: isEditMode ? 'white' : 'var(--text-secondary)',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: 0, transition: 'all 0.15s ease',
-            }}
-            title={isEditMode ? 'Done editing' : 'Edit'}
-          >
-            {isEditMode ? <Check size={12} /> : <Pencil size={12} />}
-          </button>
-          {/* Header with Name and Badges */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            position: 'relative',
-            zIndex: isDead ? 1 : 'auto',
-            padding: 0,
-            gap: 0
-          }}>
-            {/* Name row */}
-            <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-              {/* Name */}
-              <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
-                {isEditMode ? (
-                  <input
-                    ref={nameInputRef}
-                    type="text"
-                    value={item.baseName || item.name?.replace(/\s+\(\d+\)$/, '') || ''}
-                    onChange={(e) => {
-                      if (onUpdate && item.id) {
-                        onUpdate(item.id, { name: e.target.value, baseName: e.target.value })
-                      }
-                    }}
+          {quickEdit ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {onDelete && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDelete() }}
+                  style={{
+                    flexShrink: 0, width: '24px', height: '24px',
+                    background: 'transparent', border: 'none', borderRadius: '4px',
+                    color: 'var(--danger)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                  }}
+                  title="Remove all"
+                >
+                  <X size={12} />
+                </button>
+              )}
+              <input
+                ref={nameInputRef}
+                type="text"
+                value={item.baseName || item.name?.replace(/\s+\(\d+\)$/, '') || ''}
+                onChange={(e) => {
+                  if (onUpdate && item.id) onUpdate(item.id, { name: e.target.value, baseName: e.target.value })
+                }}
+                style={{
+                  flex: 1, minWidth: 0,
+                  backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
+                  borderRadius: '4px', color: 'var(--text-primary)',
+                  fontSize: '0.95rem', fontWeight: '600',
+                  padding: '2px 6px',
+                }}
+                placeholder="Name"
+              />
+              {(onRemoveInstance || onAddInstance) && (
+                <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onRemoveInstance?.(item.id) }}
                     style={{
-                      backgroundColor: 'var(--bg-primary)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '4px',
-                      color: 'var(--text-primary)',
-                      fontSize: '1.1rem',
-                      fontWeight: '600',
-                      padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
-                      width: '100%',
-                      textAlign: 'center',
+                      flexShrink: 0, width: '24px', height: '24px',
+                      background: 'transparent', border: 'none', borderRadius: '4px',
+                      color: 'var(--text-secondary)', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                     }}
-                    placeholder="Name"
-                  />
-                ) : (
-                  <h4 style={{
-                    ...styles.rowTitle,
-                    color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
-                    margin: 0,
-                    fontSize: '1.1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '4px',
-                    minWidth: 0,
-                  }}>
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
-                    </span>
-                    {(onAddInstance || onRemoveInstance) && (
-                      <span style={{ fontSize: '0.85rem', fontWeight: 400, color: 'var(--text-secondary)', flexShrink: 0 }}>
-                        ({instances.length})
-                      </span>
-                    )}
-                  </h4>
-                )}
-              </div>
+                    title="Remove one"
+                  >
+                    <Minus size={12} />
+                  </button>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)', flexShrink: 0 }}>
+                    {instances.length}
+                  </span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onAddInstance?.(item) }}
+                    style={{
+                      flexShrink: 0, width: '24px', height: '24px',
+                      background: 'transparent', border: 'none', borderRadius: '4px',
+                      color: 'var(--text-secondary)', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                    }}
+                    title="Add one"
+                  >
+                    <Plus size={12} />
+                  </button>
+                </>
+              )}
+              <button
+                onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
+                style={{
+                  flexShrink: 0, width: '24px', height: '24px',
+                  background: 'var(--purple)', border: 'none', borderRadius: '4px',
+                  color: 'white', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                }}
+                title="Done editing"
+              >
+                <Check size={12} />
+              </button>
             </div>
-          </div>
+          ) : (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
+                style={{
+                  position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
+                  width: '24px', height: '24px',
+                  background: 'transparent', border: 'none', borderRadius: '4px',
+                  color: 'var(--text-secondary)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: 0, transition: 'all 0.15s ease',
+                }}
+                title="Edit"
+              >
+                <Pencil size={12} />
+              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', zIndex: isDead ? 1 : 'auto', padding: 0, gap: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                  <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
+                    <h4 style={{
+                      ...styles.rowTitle,
+                      color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
+                      margin: 0,
+                      fontSize: '1.1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px',
+                      minWidth: 0,
+                    }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
+                      </span>
+                      {(onAddInstance || onRemoveInstance) && (
+                        <span style={{ fontSize: '0.85rem', fontWeight: 400, color: 'var(--text-secondary)', flexShrink: 0 }}>
+                          ({instances.length})
+                        </span>
+                      )}
+                    </h4>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Expandable Content Section - Scrollable */}
@@ -568,43 +577,6 @@ const GameCard = ({
 
 
 
-
-        {/* Inc/dec instance count — quick edit only */}
-        {isEditMode && (onAddInstance || onRemoveInstance) && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: CARD_SPACE_H, padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
-            <button
-              onClick={(e) => { e.stopPropagation(); onRemoveInstance?.(item.id) }}
-              style={{
-                width: '28px', height: '28px', background: 'transparent',
-                border: '1px solid var(--text-secondary)', borderRadius: '4px',
-                color: 'var(--text-secondary)', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.color = 'var(--danger)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--text-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
-              title="Remove one"
-            >
-              <Minus size={14} />
-            </button>
-            <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-secondary)', minWidth: '24px', textAlign: 'center' }}>
-              {instances.length}
-            </span>
-            <button
-              onClick={(e) => { e.stopPropagation(); onAddInstance?.(item) }}
-              style={{
-                width: '28px', height: '28px', background: 'transparent',
-                border: '1px solid var(--text-secondary)', borderRadius: '4px',
-                color: 'var(--text-secondary)', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--purple)'; e.currentTarget.style.color = 'var(--purple)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--text-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
-              title="Add one"
-            >
-              <Plus size={14} />
-            </button>
-          </div>
-        )}
 
         {/* Standard Attack Pill */}
         {!isEditMode && item.weapon && (
@@ -978,23 +950,6 @@ const GameCard = ({
             borderRadius: '8px 8px 0 0',
             position: 'relative',
           }}>
-            {onDelete && (
-              <button
-                onClick={handleDeleteClick}
-                style={{
-                  position: 'absolute', left: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-                  width: '24px', height: '24px',
-                  background: deleteArmed ? 'var(--danger)' : 'transparent',
-                  border: 'none', borderRadius: '4px',
-                  color: deleteArmed ? 'white' : 'var(--text-secondary)',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  padding: 0, transition: 'all 0.15s ease',
-                }}
-                title={deleteArmed ? 'Click again to confirm' : 'Remove'}
-              >
-                {deleteArmed ? <Trash2 size={12} /> : <X size={12} />}
-              </button>
-            )}
             <h4 style={{
               ...styles.rowTitle, margin: 0, fontSize: '1.1rem',
               textAlign: 'center',
@@ -1198,23 +1153,6 @@ const GameCard = ({
             borderRadius: '8px 8px 0 0',
             position: 'relative',
           }}>
-            {onDelete && (
-              <button
-                onClick={handleDeleteClick}
-                style={{
-                  position: 'absolute', left: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-                  width: '24px', height: '24px',
-                  background: deleteArmed ? 'var(--danger)' : 'transparent',
-                  border: 'none', borderRadius: '4px',
-                  color: deleteArmed ? 'white' : 'var(--text-secondary)',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  padding: 0, transition: 'all 0.15s ease',
-                }}
-                title={deleteArmed ? 'Click again to confirm' : 'Remove'}
-              >
-                {deleteArmed ? <Trash2 size={12} /> : <X size={12} />}
-              </button>
-            )}
             <h4 style={{
               ...styles.rowTitle, margin: 0, fontSize: '1rem',
               textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
