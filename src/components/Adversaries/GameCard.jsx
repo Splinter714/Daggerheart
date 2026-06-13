@@ -531,7 +531,6 @@ const GameCard = ({
                     color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
                     margin: 0,
                     fontSize: '1.1rem',
-                    textTransform: 'uppercase',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -998,7 +997,7 @@ const GameCard = ({
             )}
             <h4 style={{
               ...styles.rowTitle, margin: 0, fontSize: '1.1rem',
-              textTransform: 'uppercase', textAlign: 'center',
+              textAlign: 'center',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
               {env.name}
