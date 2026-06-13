@@ -870,36 +870,16 @@ const GameCard = ({
       )
     }
 
-    const tabContent = onDelete ? (
-      <button
-        onClick={(e) => { e.stopPropagation(); onDelete() }}
-        style={{
-          background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-          color: 'var(--text-secondary)', borderRadius: '4px',
-          padding: '0.375rem 0.75rem', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: '0.375rem',
-          fontSize: '0.875rem', fontWeight: 500, transition: 'all 0.2s ease',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.color = 'var(--danger)' }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
-      >
-        <X size={14} />
-        <span>Remove</span>
-      </button>
-    ) : null
-
     return (
       <ContainerWithTab
-        tabContent={tabContent}
-        showTab={!!onDelete}
-        tabBorderColor='var(--border)'
+        showTab={false}
         containerBackgroundColor={getCardStyle(true).backgroundColor}
         containerBorderColor='var(--border)'
         containerBorderRadius="8px"
         containerOverflow="hidden"
         containerStyle={{
           padding: 0, height: 'auto',
-          maxHeight: onDelete ? `calc(100vh - ${2 * DASHBOARD_GAP + TAB_HEIGHT}px)` : `calc(100vh - ${2 * DASHBOARD_GAP}px)`,
+          maxHeight: `calc(100vh - ${2 * DASHBOARD_GAP}px)`,
           minHeight: 0,
         }}
       >
@@ -910,7 +890,26 @@ const GameCard = ({
             paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H,
             flexShrink: 0, backgroundColor: 'var(--bg-card)',
             borderRadius: '8px 8px 0 0',
+            position: 'relative',
           }}>
+            {onDelete && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onDelete() }}
+                style={{
+                  position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)',
+                  width: '24px', height: '24px', flexShrink: 0,
+                  background: 'transparent', border: '1px solid var(--text-secondary)',
+                  borderRadius: '4px', color: 'var(--text-secondary)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: 0,
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.color = 'var(--danger)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--text-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
+                title="Remove"
+              >
+                <X size={12} />
+              </button>
+            )}
             <h4 style={{
               ...styles.rowTitle, margin: 0, fontSize: '1.1rem',
               textTransform: 'uppercase', textAlign: 'center',
@@ -1092,36 +1091,16 @@ const GameCard = ({
       )
     }
 
-    const tabContent = onDelete ? (
-      <button
-        onClick={e => { e.stopPropagation(); onDelete() }}
-        style={{
-          background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-          color: 'var(--text-secondary)', borderRadius: '4px',
-          padding: '0.375rem 0.75rem', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: '0.375rem',
-          fontSize: '0.875rem', fontWeight: 500, transition: 'all 0.2s ease',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.color = 'var(--danger)' }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
-      >
-        <X size={14} />
-        <span>Remove</span>
-      </button>
-    ) : null
-
     return (
       <ContainerWithTab
-        tabContent={tabContent}
-        showTab={!!onDelete}
-        tabBorderColor='var(--border)'
+        showTab={false}
         containerBackgroundColor={getCardStyle(true).backgroundColor}
         containerBorderColor='var(--border)'
         containerBorderRadius="8px"
         containerOverflow="hidden"
         containerStyle={{
           padding: 0, height: 'auto',
-          maxHeight: onDelete ? `calc(100vh - ${2 * DASHBOARD_GAP + TAB_HEIGHT}px)` : `calc(100vh - ${2 * DASHBOARD_GAP}px)`,
+          maxHeight: `calc(100vh - ${2 * DASHBOARD_GAP}px)`,
           minHeight: 0,
         }}
       >
@@ -1132,7 +1111,26 @@ const GameCard = ({
             paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H,
             flexShrink: 0, backgroundColor: 'var(--bg-card)',
             borderRadius: '8px 8px 0 0',
+            position: 'relative',
           }}>
+            {onDelete && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onDelete() }}
+                style={{
+                  position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)',
+                  width: '24px', height: '24px', flexShrink: 0,
+                  background: 'transparent', border: '1px solid var(--text-secondary)',
+                  borderRadius: '4px', color: 'var(--text-secondary)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: 0,
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--danger)'; e.currentTarget.style.color = 'var(--danger)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--text-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
+                title="Remove"
+              >
+                <X size={12} />
+              </button>
+            )}
             <h4 style={{
               ...styles.rowTitle, margin: 0, fontSize: '1rem',
               textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

@@ -7,7 +7,7 @@ const STORAGE_KEY = 'daggerheart-dashboard-sort-group'
 const DEFAULTS = {
   sortBy: 'name',
   sortDir: 'asc',
-  groupBy: 'none',
+  groupBy: 'type',
 }
 
 export function useDashboardSortGroup() {
@@ -17,7 +17,7 @@ export function useDashboardSortGroup() {
     // Migrate old format (sortBy: 'name-asc') to new format
     if (stored.sortBy && stored.sortBy.includes('-')) {
       const [field, dir] = stored.sortBy.split('-')
-      return { ...DEFAULTS, sortBy: field, sortDir: dir || 'asc', groupBy: stored.groupBy || 'none' }
+      return { ...DEFAULTS, sortBy: field, sortDir: dir || 'asc', groupBy: stored.groupBy || 'type' }
     }
     return { ...DEFAULTS, ...stored }
   })
