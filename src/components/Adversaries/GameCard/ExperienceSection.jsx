@@ -353,109 +353,27 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
     if (!item.experience || item.experience.length === 0) return null
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
         {item.experience.map((exp, index) => {
-      if (typeof exp === 'string') {
-        const match = exp.match(/^(.+?)\s*([+-]?\d+)$/)
-        if (match) {
-          const [, name, bonus] = match
+          let label
+          if (typeof exp === 'string') {
+            label = exp
+          } else {
+            const mod = typeof exp.modifier === 'number'
+              ? (exp.modifier >= 0 ? `+${exp.modifier}` : `${exp.modifier}`)
+              : exp.modifier
+            label = mod != null ? `${exp.name} ${mod}` : exp.name
+          }
           return (
-            <div key={index} style={{ position: 'relative' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  paddingTop: '1px',
-                  width: '24px',
-                  height: '24px'
-                }}
-              >
-                <div
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    border: '1px solid var(--text-secondary)',
-                    borderRadius: '4px',
-                    backgroundColor: 'black',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingTop: '1px'
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      color: 'white'
-                    }}
-                  >
-                    {bonus}
-                  </span>
-                </div>
-              </div>
-              <span style={{ marginLeft: '32px', color: 'var(--text-primary)' }}>{name}</span>
-            </div>
+            <span key={index} style={{
+              fontSize: '0.875rem', color: 'white',
+              backgroundColor: 'black',
+              border: '1px solid var(--text-secondary)', borderRadius: '4px', padding: '1px 6px',
+            }}>
+              {label}
+            </span>
           )
-        }
-
-        return (
-          <div key={index}>
-            {exp}
-          </div>
-        )
-      }
-
-      return (
-        <div key={index} style={{ position: 'relative' }}>
-          <div
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingTop: '1px',
-              width: '24px',
-              height: '24px'
-            }}
-          >
-            <div
-              style={{
-                width: '24px',
-                height: '24px',
-                border: '1px solid var(--text-secondary)',
-                borderRadius: '4px',
-                backgroundColor: 'transparent',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingTop: '1px'
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  color: 'white'
-                }}
-              >
-                {exp.modifier >= 0 ? '+' : ''}
-                {exp.modifier}
-              </span>
-            </div>
-          </div>
-          <span style={{ marginLeft: '32px', color: 'var(--text-primary)' }}>{exp.name}</span>
-        </div>
-      )
-    })}
+        })}
       </div>
     )
   }
