@@ -3,7 +3,7 @@ import { DASHBOARD_GAP } from '../constants'
 
 const getMinColumnWidth = (columnCount) => {
   if (columnCount === 1) return 200
-  return 350
+  return 280
 }
 
 // effectiveGap: the gap between every column (may be wider than DASHBOARD_GAP when grouping is on).
