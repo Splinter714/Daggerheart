@@ -14,30 +14,38 @@ import TabButtons from './GameCard/TabButtons'
 // Reusable Components
 // ============================================================================
 
-// Number-only stat badge — just the shape (hexagon / diamond) with its value,
-// no label pill. Used to flank the standard attack pill.
-const IconStatBadge = ({ value, shape }) => {
+// Merged stat badge — a label pill fused to the value glyph (hexagon / diamond)
+// as one continuous silhouette (single fill + border, no seam). Flanks the
+// standard attack pill. viewBox is 34 tall; rendered at 1.5em (24px) so the glyph
+// matches the standalone badge scale and the label/value text land near 12px.
+const MergedStatBadge = ({ label, value, shape }) => {
   const isHex = shape === 'hex'
-  // Both badges render in a 24px box (matching the weapon pill height) with tightly
-  // cropped viewBoxes so the diamond and hexagon read as the same visual size, and
-  // the inner number matches the pill text scale.
-  const viewBox = isHex ? '1.5 1.5 21 21' : '4 4 16 16'
+  // The DIFF (hex) pill is very slightly wider than the ATK (diamond) pill to fit
+  // the longer label; glyph center and total width shift with it. Only each glyph's
+  // translate differs beyond that (intrinsic to the hexagon vs diamond geometry).
+  const W = isHex ? 78 : 76       // total badge width
+  const cx = isHex ? 60 : 58      // glyph + value center
+  const pillW = isHex ? 60 : 58   // label pill width
   return (
-    <svg width="1.5em" height="1.5em" viewBox={viewBox} style={{ display: 'block', flexShrink: 0 }}>
+    <svg width={`${(W / 34 * 1.5).toFixed(3)}em`} height="1.5em" viewBox={`0 0 ${W} 34`} style={{ display: 'block', alignSelf: 'center', flexShrink: 0 }}>
+      <rect x="0.5" y="6.5" width={pillW} height="21" rx="4" fill="black" stroke="var(--text-secondary)" strokeWidth="1" />
       {isHex ? (
-        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" fill="black" stroke="var(--text-secondary)" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
+        <g transform="translate(42,-1) scale(1.5)" fill="black" stroke="var(--text-secondary)" strokeWidth="0.67" strokeLinejoin="round" strokeLinecap="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+        </g>
       ) : (
-        <>
-          <path d="M12.78 4.78 L19.22 11.22 Q20 12 19.22 12.78 L12.78 19.22 Q12 20 11.22 19.22 L4.78 12.78 Q4 12 4.78 11.22 L11.22 4.78 Q12 4 12.78 4.78 Z" fill="black" stroke="var(--text-secondary)" strokeWidth="0.72" strokeLinecap="round" strokeLinejoin="round" />
-          <g transform="rotate(45 12 12)" stroke="var(--text-secondary)" strokeWidth="0.72" strokeLinecap="round" strokeLinejoin="round">
+        <g transform="translate(33.4,-7.6) scale(2.05)" stroke="var(--text-secondary)" strokeWidth="0.47" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12.78 4.78 L19.22 11.22 Q20 12 19.22 12.78 L12.78 19.22 Q12 20 11.22 19.22 L4.78 12.78 Q4 12 4.78 11.22 L11.22 4.78 Q12 4 12.78 4.78 Z" fill="black" />
+          <g transform="rotate(45 12 12)">
             <line x1="12" y1="3.5" x2="12" y2="6.34" />
             <line x1="20.5" y1="12" x2="17.66" y2="12" />
             <line x1="12" y1="20.5" x2="12" y2="17.66" />
             <line x1="3.5" y1="12" x2="6.34" y2="12" />
           </g>
-        </>
+        </g>
       )}
-      <text x="12" y="12" fill="white" fontWeight="600" fontSize={isHex ? 10.5 : 8} fontFamily="inherit" dominantBaseline="central" textAnchor="middle">{value}</text>
+      <text x="7" y="17" dy="0.35em" fill="white" fontSize="15" fontWeight="500" fontFamily="inherit" textAnchor="start">{label}</text>
+      <text x={cx} y="17" dy="0.35em" fill="white" fontSize="17" fontWeight="500" fontFamily="inherit" textAnchor="middle">{value}</text>
     </svg>
   )
 }
@@ -527,41 +535,39 @@ const GameCard = ({
 
 
 
-        {/* Standard Attack Pill, flanked by Attack (left) and Difficulty (right) */}
+        {/* Attack + Difficulty badges on a row above the standard attack pill */}
         {!isEditMode && (item.weapon || item.atk !== undefined || item.difficulty) && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
-            <div style={{ flex: '0 0 auto' }}>
-              {item.atk !== undefined && (
-                <IconStatBadge shape="diamond" value={(() => {
-                  if (typeof item.atk === 'string' && item.atk.includes('d')) return item.atk
-                  const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : item.atk
-                  return atkValue >= 0 ? `+${atkValue}` : atkValue
-                })()} />
-              )}
-            </div>
-            <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center' }}>
-              {item.weapon && (
-                <div style={{
-                  display: 'inline-flex',
-                  gap: '0.35rem',
-                  alignItems: 'center',
-                  fontSize: '0.75rem',
-                  fontWeight: 400,
-                  backgroundColor: 'black',
-                  border: '1px solid var(--text-secondary)',
-                  borderRadius: '0.25rem',
-                  height: '1.375rem',
-                  padding: '0 0.4rem',
-                }}>
-                  <span style={{ color: 'white' }}>{item.weapon}</span>
-                  {item.range && <span style={{ color: 'white' }}>· {highlightCardText(item.range)}</span>}
-                  {item.damage && <span style={{ color: 'white' }}>· {highlightCardText(item.damage)}</span>}
-                </div>
-              )}
-            </div>
-            <div style={{ flex: '0 0 auto' }}>
-              {item.difficulty && <IconStatBadge shape="hex" value={item.difficulty} />}
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
+            {(item.atk !== undefined || item.difficulty) && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {item.atk !== undefined && (
+                  <MergedStatBadge shape="diamond" label="ATK" value={(() => {
+                    if (typeof item.atk === 'string' && item.atk.includes('d')) return item.atk
+                    const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : item.atk
+                    return atkValue >= 0 ? `+${atkValue}` : atkValue
+                  })()} />
+                )}
+                {item.difficulty && <MergedStatBadge shape="hex" label="DIFF" value={item.difficulty} />}
+              </div>
+            )}
+            {item.weapon && (
+              <div style={{
+                display: 'inline-flex',
+                gap: '0.35rem',
+                alignItems: 'center',
+                fontSize: '0.75rem',
+                fontWeight: 400,
+                backgroundColor: 'black',
+                border: '1px solid var(--text-secondary)',
+                borderRadius: '0.25rem',
+                height: '1.375rem',
+                padding: '0 0.4rem',
+              }}>
+                <span style={{ color: 'white' }}>{item.weapon}</span>
+                {item.range && <span style={{ color: 'white' }}>· {highlightCardText(item.range)}</span>}
+                {item.damage && <span style={{ color: 'white' }}>· {highlightCardText(item.damage)}</span>}
+              </div>
+            )}
           </div>
         )}
 

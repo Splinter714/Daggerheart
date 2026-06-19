@@ -367,9 +367,9 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
           return (
             <span key={index} style={{
               display: 'inline-flex', alignItems: 'center',
-              fontSize: '0.75rem', fontWeight: 400, color: 'white',
+              fontSize: '0.66rem', fontWeight: 500, color: 'white',
               backgroundColor: 'black', border: '1px solid var(--text-secondary)',
-              borderRadius: '0.25rem', height: '1.375rem', padding: '0 0.4rem',
+              borderRadius: '0.1875rem', height: '0.95rem', padding: '0 0.3rem',
             }}>
               {label}
             </span>
