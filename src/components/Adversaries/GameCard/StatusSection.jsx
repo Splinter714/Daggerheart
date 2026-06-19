@@ -18,8 +18,8 @@ const ThresholdTag = ({ value }) => (
       width="40"
       height="32"
       viewBox="0 0 40 32"
-      fill="black"
-      stroke="var(--text-secondary)"
+      fill="var(--bg-card)"
+      stroke="var(--border)"
       strokeWidth="1"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -32,7 +32,7 @@ const ThresholdTag = ({ value }) => (
         position: 'absolute',
         fontSize: '0.8rem',
         fontWeight: 500,
-        color: 'white',
+        color: 'var(--text-secondary)',
         textAlign: 'center',
         zIndex: 2,
         left: '50%',
@@ -196,8 +196,8 @@ const StatusSection = ({
           alignItems: 'center',
           justifyContent: 'center',
           gap: '0.375rem',
-          backgroundColor: 'var(--bg-primary)',
-          border: '1px solid var(--text-secondary)',
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border)',
           borderRadius: '4px',
           padding: '0 6px',
           height: '24px',
@@ -359,10 +359,9 @@ const VitalRow = ({ label, pipType, value, onChange }) => (
 const ThresholdLabel = ({ text }) => (
   <span
     style={{
-      color: 'var(--text-primary)',
+      color: 'var(--text-secondary)',
       fontSize: '0.6875rem',
       fontWeight: '500',
-      textTransform: 'uppercase',
     }}
   >
     {text}

@@ -14,6 +14,63 @@ import TabButtons from './GameCard/TabButtons'
 // Reusable Components
 // ============================================================================
 
+// Stat badge where the label pill and the value shape (hexagon / circle) are a
+// single merged silhouette — one continuous fill + border, no overlap seams.
+const MergedStatBadge = ({ label, value, shape }) => {
+  const isHex = shape === 'hex'
+  const W = isHex ? 106 : 90
+  const cx = isHex ? 81 : 68
+  const pillW = isHex ? 78 : 68
+  return (
+    <svg width={W} height="34" viewBox={`0 0 ${W} 34`} style={{ display: 'block', alignSelf: 'flex-start', flexShrink: 0 }}>
+      <rect x="0.5" y="6.5" width={pillW} height="21" rx="4" fill="black" stroke="var(--text-secondary)" strokeWidth="1" />
+      {isHex ? (
+        <g transform="translate(63,-1) scale(1.5)" fill="black" stroke="var(--text-secondary)" strokeWidth="0.67" strokeLinejoin="round" strokeLinecap="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+        </g>
+      ) : (
+        <g transform="translate(44.4,-7.6) scale(2.05)" stroke="var(--text-secondary)" strokeWidth="0.47" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12.78 4.78 L19.22 11.22 Q20 12 19.22 12.78 L12.78 19.22 Q12 20 11.22 19.22 L4.78 12.78 Q4 12 4.78 11.22 L11.22 4.78 Q12 4 12.78 4.78 Z" fill="black" />
+          <g transform="rotate(45 12 12)">
+            <line x1="12" y1="3.5" x2="12" y2="6.34" />
+            <line x1="20.5" y1="12" x2="17.66" y2="12" />
+            <line x1="12" y1="20.5" x2="12" y2="17.66" />
+            <line x1="3.5" y1="12" x2="6.34" y2="12" />
+          </g>
+        </g>
+      )}
+      <text x="7" y="17" fill="white" fontSize="14" fontFamily="inherit" dominantBaseline="central" textAnchor="start">{label}</text>
+      <text x={cx} y="17" fill="white" fontSize="14" fontWeight="400" fontFamily="inherit" dominantBaseline="central" textAnchor="middle">{value}</text>
+    </svg>
+  )
+}
+
+// Number-only stat badge — just the shape (hexagon / diamond) with its value,
+// no label pill. Used to flank the standard attack pill.
+const IconStatBadge = ({ value, shape }) => {
+  const isHex = shape === 'hex'
+  const size = isHex ? 36 : 32
+  const viewBox = isHex ? '-2 -2 28 28' : '3 3 18 18'
+  return (
+    <svg width={size} height={size} viewBox={viewBox} style={{ display: 'block', flexShrink: 0 }}>
+      {isHex ? (
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" fill="black" stroke="var(--text-secondary)" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
+      ) : (
+        <>
+          <path d="M12.78 4.78 L19.22 11.22 Q20 12 19.22 12.78 L12.78 19.22 Q12 20 11.22 19.22 L4.78 12.78 Q4 12 4.78 11.22 L11.22 4.78 Q12 4 12.78 4.78 Z" fill="black" stroke="var(--text-secondary)" strokeWidth="0.72" strokeLinecap="round" strokeLinejoin="round" />
+          <g transform="rotate(45 12 12)" stroke="var(--text-secondary)" strokeWidth="0.72" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="3.5" x2="12" y2="6.34" />
+            <line x1="20.5" y1="12" x2="17.66" y2="12" />
+            <line x1="12" y1="20.5" x2="12" y2="17.66" />
+            <line x1="3.5" y1="12" x2="6.34" y2="12" />
+          </g>
+        </>
+      )}
+      <text x="12" y="12" fill="white" fontSize={isHex ? 10 : 7.2} fontFamily="inherit" dominantBaseline="central" textAnchor="middle">{value}</text>
+    </svg>
+  )
+}
+
 // ============================================================================
 // STYLES - All CSS consolidated into inline styles
 // ============================================================================
@@ -578,23 +635,39 @@ const GameCard = ({
 
 
 
-        {/* Standard Attack Pill */}
-        {!isEditMode && item.weapon && (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
-            <div style={{
-              display: 'inline-flex',
-              gap: '0.35rem',
-              alignItems: 'center',
-              fontSize: '0.9rem',
-              backgroundColor: 'black',
-              border: '1px solid var(--text-secondary)',
-              borderRadius: '4px',
-              height: '24px',
-              padding: '0 10px',
-            }}>
-              <span style={{ color: 'white' }}>{item.weapon}</span>
-              {item.range && <span style={{ color: 'white' }}>· {highlightCardText(item.range)}</span>}
-              {item.damage && <span style={{ color: 'white' }}>· {highlightCardText(item.damage)}</span>}
+        {/* Standard Attack Pill, flanked by Attack (left) and Difficulty (right) */}
+        {!isEditMode && (item.weapon || item.atk !== undefined || item.difficulty) && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
+            <div style={{ flex: '0 0 auto' }}>
+              {item.atk !== undefined && (
+                <IconStatBadge shape="diamond" value={(() => {
+                  if (typeof item.atk === 'string' && item.atk.includes('d')) return item.atk
+                  const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : item.atk
+                  return atkValue >= 0 ? `+${atkValue}` : atkValue
+                })()} />
+              )}
+            </div>
+            <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center' }}>
+              {item.weapon && (
+                <div style={{
+                  display: 'inline-flex',
+                  gap: '0.35rem',
+                  alignItems: 'center',
+                  fontSize: '0.9rem',
+                  backgroundColor: 'black',
+                  border: '1px solid var(--text-secondary)',
+                  borderRadius: '4px',
+                  height: '24px',
+                  padding: '0 10px',
+                }}>
+                  <span style={{ color: 'white' }}>{item.weapon}</span>
+                  {item.range && <span style={{ color: 'white' }}>· {highlightCardText(item.range)}</span>}
+                  {item.damage && <span style={{ color: 'white' }}>· {highlightCardText(item.damage)}</span>}
+                </div>
+              )}
+            </div>
+            <div style={{ flex: '0 0 auto' }}>
+              {item.difficulty && <IconStatBadge shape="hex" value={item.difficulty} />}
             </div>
           </div>
         )}
@@ -603,248 +676,95 @@ const GameCard = ({
         {((item.difficulty || item.atk !== undefined || (item.thresholds && item.type !== 'Minion') || (item.experience && item.experience.length > 0)) || isEditMode) && (
           <div style={{
             padding: '0.5rem 8px',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '1rem'
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            alignItems: 'center',
           }}>
-            {/* Left Column - Stats */}
+            {/* Stats Row - Attack + Difficulty */}
                 <div style={{
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'row-reverse',
+              gap: '8px',
+              alignItems: 'flex-start',
+              justifyContent: 'center',
+              flexWrap: 'wrap',
             }}>
-              {/* Difficulty */}
-              {(item.difficulty || isEditMode) && (
-                <div style={{
-                  position: 'relative',
-                  marginBottom: '0.75rem'
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-            paddingTop: '1px',
-                    width: '36px'
-                }}>
+              {/* Difficulty (edit mode only; display handled in attack row) */}
+              {isEditMode && (
+                  <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
                     <div style={{
-                      position: 'absolute',
-                      width: '22px',
-                      height: '22px',
-                      backgroundColor: 'black',
-                      clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-                      zIndex: 0,
-                    }} />
-                    <Hexagon
-                      size={32}
-                    strokeWidth={1}
-                    style={{
-                        color: 'var(--text-secondary)',
-                        transform: 'rotate(0deg)',
-                        position: 'relative',
-                        zIndex: 1,
-                    }}
-                  />
-                    {isEditMode ? (
+                      position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      paddingTop: '1px', width: '36px',
+                    }}>
+                      <div style={{
+                        position: 'absolute', width: '22px', height: '22px',
+                        backgroundColor: 'black',
+                        clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                        zIndex: 0,
+                      }} />
+                      <Hexagon size={32} strokeWidth={1} style={{ color: 'var(--text-secondary)', position: 'relative', zIndex: 1 }} />
                       <input
                         type="text"
                         value={item.difficulty || ''}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^0-9]/g, '')
-                          if (value.length <= 2) {
-                            onUpdate && onUpdate(item.id, { difficulty: parseInt(value) || 0 })
-                          }
+                          if (value.length <= 2) onUpdate && onUpdate(item.id, { difficulty: parseInt(value) || 0 })
                         }}
                         onKeyDown={(e) => {
-                          if (e.key === 'ArrowUp') {
-                            e.preventDefault()
-                            const current = parseInt(item.difficulty) || 0
-                            onUpdate && onUpdate(item.id, { difficulty: Math.min(current + 1, 99) })
-                          } else if (e.key === 'ArrowDown') {
-                            e.preventDefault()
-                            const current = parseInt(item.difficulty) || 0
-                            onUpdate && onUpdate(item.id, { difficulty: Math.max(current - 1, 0) })
-                          }
+                          if (e.key === 'ArrowUp') { e.preventDefault(); const current = parseInt(item.difficulty) || 0; onUpdate && onUpdate(item.id, { difficulty: Math.min(current + 1, 99) }) }
+                          else if (e.key === 'ArrowDown') { e.preventDefault(); const current = parseInt(item.difficulty) || 0; onUpdate && onUpdate(item.id, { difficulty: Math.max(current - 1, 0) }) }
                         }}
-                        style={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -45%)',
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          color: 'white',
-                          fontSize: '0.8rem',
-                          fontWeight: 600,
-                          width: '20px',
-                          height: '20px',
-                          textAlign: 'center',
-                          outline: 'none'
-                        }}
+                        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -45%)', backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.8rem', fontWeight: 600, width: '20px', height: '20px', textAlign: 'center', outline: 'none' }}
                         maxLength="2"
                       />
-                    ) : (
-                  <span style={{
-                    position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -45%)',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    color: 'white',
-                    pointerEvents: 'none',
-                    zIndex: 2,
-                  }}>
-                        {item.difficulty}
-                  </span>
-                    )}
+                    </div>
+                    <div style={{ fontSize: '0.875rem', lineHeight: 1.4, color: 'var(--text-primary)', marginLeft: '44px' }}>Difficulty</div>
                   </div>
-                  <div style={{
-                    fontSize: '0.875rem',
-                    lineHeight: 1.4,
-                    color: 'var(--text-primary)',
-                    marginLeft: '44px'
-                  }}>
-                    Difficulty
-                  </div>
-                </div>
               )}
 
-              {/* Attack Modifier */}
-              {(item.atk !== undefined || isEditMode) && (
-                  <div style={{
-                  position: 'relative',
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-            paddingTop: '1px',
-                    width: '36px'
-                  }}>
+              {/* Attack Modifier (edit mode only; display handled in attack row) */}
+              {isEditMode && (
+                  <div style={{ position: 'relative' }}>
                     <div style={{
-                      position: 'absolute',
-                      width: '22px',
-                      height: '22px',
-                      backgroundColor: 'black',
-                      transform: 'rotate(45deg)',
-                      zIndex: 0,
-                    }} />
-                    <Locate
-                      size={38}
-                      strokeWidth={1}
-                      style={{
-                        color: 'var(--text-secondary)',
-                        transform: 'rotate(45deg)',
-                        position: 'relative',
-                        zIndex: 1,
-                      }}
-                    />
-                    {isEditMode ? (
+                      position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      paddingTop: '1px', width: '36px',
+                    }}>
+                      <div style={{ position: 'absolute', width: '22px', height: '22px', backgroundColor: 'black', transform: 'rotate(45deg)', zIndex: 0 }} />
+                      <Locate size={38} strokeWidth={1} style={{ color: 'var(--text-secondary)', transform: 'rotate(45deg)', position: 'relative', zIndex: 1 }} />
                       <input
                         type="text"
                         value={(() => {
-                          // If it's a string with dice notation, display as-is
-                          if (typeof item.atk === 'string' && item.atk.includes('d')) {
-                            return item.atk
-                          }
-                          // Otherwise, treat as number
+                          if (typeof item.atk === 'string' && item.atk.includes('d')) return item.atk
                           const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0)
                           return atkValue >= 0 ? `+${atkValue}` : atkValue.toString()
                         })()}
                         onChange={(e) => {
                           const value = e.target.value
-                          // Allow dice notation (contains 'd') or numeric values
-                          if (value.includes('d')) {
-                            // Store dice notation as string
-                            onUpdate && onUpdate(item.id, { atk: value })
-                          } else {
-                            // Handle numeric values
+                          if (value.includes('d')) { onUpdate && onUpdate(item.id, { atk: value }) }
+                          else {
                             const cleanValue = value.replace(/[^0-9+-]/g, '')
-                            if (cleanValue.length <= 4) {
-                              const numericValue = parseInt(cleanValue.replace(/[^0-9-]/g, '')) || 0
-                              onUpdate && onUpdate(item.id, { atk: numericValue })
-                            }
+                            if (cleanValue.length <= 4) { const numericValue = parseInt(cleanValue.replace(/[^0-9-]/g, '')) || 0; onUpdate && onUpdate(item.id, { atk: numericValue }) }
                           }
                         }}
                         onKeyDown={(e) => {
-                          // Only allow arrow key increment/decrement for numeric values
-                          if (typeof item.atk === 'string' && item.atk.includes('d')) {
-                            return // Don't allow increment/decrement for dice notation
-                          }
-                          if (e.key === 'ArrowUp') {
-                            e.preventDefault()
-                            const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0)
-                            const newValue = current + 1
-                            onUpdate && onUpdate(item.id, { atk: newValue })
-                          } else if (e.key === 'ArrowDown') {
-                            e.preventDefault()
-                            const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0)
-                            const newValue = current - 1
-                            onUpdate && onUpdate(item.id, { atk: newValue })
-                          }
+                          if (typeof item.atk === 'string' && item.atk.includes('d')) return
+                          if (e.key === 'ArrowUp') { e.preventDefault(); const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0); onUpdate && onUpdate(item.id, { atk: current + 1 }) }
+                          else if (e.key === 'ArrowDown') { e.preventDefault(); const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0); onUpdate && onUpdate(item.id, { atk: current - 1 }) }
                         }}
-                        style={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -45%)',
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          color: 'white',
-                          fontSize: '0.8rem',
-                          fontWeight: 600,
-                          width: '20px',
-                          height: '20px',
-                          textAlign: 'center',
-                          outline: 'none'
-                        }}
+                        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -45%)', backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.8rem', fontWeight: 600, width: '20px', height: '20px', textAlign: 'center', outline: 'none' }}
                         maxLength="3"
                       />
-                    ) : (
-                      <span style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -45%)',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        color: 'white',
-                        pointerEvents: 'none',
-                        zIndex: 2,
-                      }}>
-                        {(() => {
-                          // If it's a string with dice notation (contains 'd'), display as-is
-                          if (typeof item.atk === 'string' && item.atk.includes('d')) {
-                            return item.atk
-                          }
-                          // Otherwise, treat as number
-                          const atkValue = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : item.atk
-                          return atkValue >= 0 ? `+${atkValue}` : atkValue
-                        })()}
-                      </span>
-                    )}
+                    </div>
+                    <div style={{ fontSize: '0.875rem', lineHeight: 1.4, color: 'var(--text-primary)', marginLeft: '44px' }}>Attack</div>
                   </div>
-                <div style={{
-                  fontSize: '0.875rem',
-                    lineHeight: 1.4,
-                    color: 'var(--text-primary)',
-                    marginLeft: '44px'
-                  }}>
-                    Attack
-                </div>
-              </div>
-            )}
+              )}
             
                 </div>
 
-            {/* Right Column - Experiences */}
+            {/* Experiences Row */}
             <ExperienceSection
                               item={item}
               isEditMode={isEditMode}
