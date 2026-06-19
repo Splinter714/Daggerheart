@@ -2,47 +2,16 @@ import React from 'react'
 import Pips from '../../Shared/Pips'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
+const ThresholdSep = () => (
+  <span style={{ display: 'inline-block', width: '1px', height: '1em', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
+)
+
 const ThresholdTag = ({ value }) => (
-  <div
-    style={{
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '2.75rem',
-      height: '2rem',
-      zIndex: 3,
-    }}
-  >
-    <svg
-      width="2.5em"
-      height="2em"
-      viewBox="0 0 40 32"
-      fill="var(--bg-card)"
-      stroke="var(--border)"
-      strokeWidth="1"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ position: 'absolute', zIndex: 1 }}
-    >
-      <path d="M2 2h28l6 14-6 14H2l6-14-6-14z" />
-    </svg>
-    <span
-      style={{
-        position: 'absolute',
-        fontSize: '0.75rem',
-        fontWeight: 400,
-        color: 'var(--text-secondary)',
-        textAlign: 'center',
-        zIndex: 2,
-        left: '50%',
-        top: '50%',
-        transform: 'translate(-50%, -50%)',
-      }}
-    >
-      {value}
-    </span>
-  </div>
+  <>
+    <ThresholdSep />
+    <span style={{ color: 'white' }}>{value}</span>
+    <ThresholdSep />
+  </>
 )
 
 const StatusSection = ({
@@ -189,37 +158,54 @@ const StatusSection = ({
 
   const renderThresholds = () => {
     if (item.type === 'Minion' || (!item.thresholds && !isEditMode)) return null
-    return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.375rem',
-          backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: '0.25rem',
-          padding: '0 0.375rem',
-          height: '1.5rem',
-          overflow: 'visible',
-          alignSelf: 'center',
-          width: 'fit-content',
-        }}
-      >
-        {isEditMode ? (
+    if (isEditMode) {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.375rem',
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: '0.25rem',
+            padding: '0 0.375rem',
+            height: '1.5rem',
+            overflow: 'visible',
+            alignSelf: 'center',
+            width: 'fit-content',
+          }}
+        >
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.75rem' }}>
             <ThresholdInput label="Minor" value={item.thresholds?.major} onChange={(val) => updateThreshold('major', val, onUpdate, item)} />
             <ThresholdInput label="Major" value={item.thresholds?.severe} onChange={(val) => updateThreshold('severe', val, onUpdate, item)} />
           </div>
-        ) : (
-          <>
-            <ThresholdLabel text="Minor" />
-            <ThresholdTag value={item.thresholds?.major || 7} />
-            <ThresholdLabel text="Major" />
-            <ThresholdTag value={item.thresholds?.severe || 14} />
-            <ThresholdLabel text="Severe" />
-          </>
-        )}
+        </div>
+      )
+    }
+    return (
+      <div
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.35rem',
+          fontSize: '0.75rem',
+          fontWeight: 400,
+          lineHeight: 1,
+          backgroundColor: 'black',
+          border: '1px solid var(--text-secondary)',
+          borderRadius: '0.25rem',
+          padding: '0 0.4rem',
+          height: '1.375rem',
+          alignSelf: 'center',
+          width: 'fit-content',
+        }}
+      >
+        <ThresholdLabel text="Minor" />
+        <ThresholdTag value={item.thresholds?.major || 7} />
+        <ThresholdLabel text="Major" />
+        <ThresholdTag value={item.thresholds?.severe || 14} />
+        <ThresholdLabel text="Severe" />
       </div>
     )
   }
@@ -328,7 +314,7 @@ const VitalRow = ({ label, pipType, value, onChange }) => (
 const ThresholdLabel = ({ text }) => (
   <span
     style={{
-      color: 'var(--text-secondary)',
+      color: 'white',
       fontSize: '0.75rem',
       fontWeight: 400,
     }}

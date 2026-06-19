@@ -557,6 +557,7 @@ const GameCard = ({
                 alignItems: 'center',
                 fontSize: '0.75rem',
                 fontWeight: 400,
+                lineHeight: 1,
                 backgroundColor: 'black',
                 border: '1px solid var(--text-secondary)',
                 borderRadius: '0.25rem',
@@ -564,8 +565,8 @@ const GameCard = ({
                 padding: '0 0.4rem',
               }}>
                 <span style={{ color: 'white' }}>{item.weapon}</span>
-                {item.range && <span style={{ color: 'white' }}>· {highlightCardText(item.range)}</span>}
-                {item.damage && <span style={{ color: 'white' }}>· {highlightCardText(item.damage)}</span>}
+                {item.range && <><span style={{ display: 'inline-block', width: '1px', height: '1em', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} /><span style={{ color: 'white' }}>{highlightCardText(item.range)}</span></>}
+                {item.damage && <><span style={{ display: 'inline-block', width: '1px', height: '1em', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} /><span style={{ color: 'white' }}>{highlightCardText(item.damage)}</span></>}
               </div>
             )}
           </div>
