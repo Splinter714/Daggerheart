@@ -35,7 +35,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
             borderRadius: '0.5rem',
             backgroundColor: 'var(--bg-primary)',
             color: 'white',
-            fontSize: '0.875rem',
+            fontSize: '0.85rem',
             lineHeight: 1.5,
             resize: 'none',
             overflow: 'hidden',
@@ -53,7 +53,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
         hasMotives && (
           <div
             style={{
-              fontSize: '0.875rem',
+              fontSize: '0.85rem',
               color: 'var(--text-secondary)',
               lineHeight: 1.4,
               textAlign: 'center',

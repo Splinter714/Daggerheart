@@ -523,7 +523,7 @@ const GameCard = ({
                   flex: 1, minWidth: 0,
                   backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
                   borderRadius: '4px', color: 'var(--text-primary)',
-                  fontSize: '0.95rem', fontWeight: '600',
+                  fontSize: '1rem', fontWeight: '600',
                   padding: '2px 6px',
                 }}
                 placeholder="Name"
@@ -653,7 +653,7 @@ const GameCard = ({
                   display: 'inline-flex',
                   gap: '0.35rem',
                   alignItems: 'center',
-                  fontSize: '0.9rem',
+                  fontSize: '0.85rem',
                   backgroundColor: 'black',
                   border: '1px solid var(--text-secondary)',
                   borderRadius: '4px',
@@ -716,11 +716,11 @@ const GameCard = ({
                           if (e.key === 'ArrowUp') { e.preventDefault(); const current = parseInt(item.difficulty) || 0; onUpdate && onUpdate(item.id, { difficulty: Math.min(current + 1, 99) }) }
                           else if (e.key === 'ArrowDown') { e.preventDefault(); const current = parseInt(item.difficulty) || 0; onUpdate && onUpdate(item.id, { difficulty: Math.max(current - 1, 0) }) }
                         }}
-                        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -45%)', backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.8rem', fontWeight: 600, width: '20px', height: '20px', textAlign: 'center', outline: 'none' }}
+                        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -45%)', backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', fontWeight: 600, width: '20px', height: '20px', textAlign: 'center', outline: 'none' }}
                         maxLength="2"
                       />
                     </div>
-                    <div style={{ fontSize: '0.875rem', lineHeight: 1.4, color: 'var(--text-primary)', marginLeft: '44px' }}>Difficulty</div>
+                    <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-primary)', marginLeft: '44px' }}>Difficulty</div>
                   </div>
               )}
 
@@ -754,11 +754,11 @@ const GameCard = ({
                           if (e.key === 'ArrowUp') { e.preventDefault(); const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0); onUpdate && onUpdate(item.id, { atk: current + 1 }) }
                           else if (e.key === 'ArrowDown') { e.preventDefault(); const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0); onUpdate && onUpdate(item.id, { atk: current - 1 }) }
                         }}
-                        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -45%)', backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.8rem', fontWeight: 600, width: '20px', height: '20px', textAlign: 'center', outline: 'none' }}
+                        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -45%)', backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', fontWeight: 600, width: '20px', height: '20px', textAlign: 'center', outline: 'none' }}
                         maxLength="3"
                       />
                     </div>
-                    <div style={{ fontSize: '0.875rem', lineHeight: 1.4, color: 'var(--text-primary)', marginLeft: '44px' }}>Attack</div>
+                    <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-primary)', marginLeft: '44px' }}>Attack</div>
                   </div>
               )}
             
@@ -894,7 +894,7 @@ const GameCard = ({
                     flex: 1, minWidth: 0,
                     backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
                     borderRadius: '4px', color: 'var(--text-primary)',
-                    fontSize: '0.95rem', fontWeight: '600',
+                    fontSize: '1rem', fontWeight: '600',
                     padding: '2px 6px',
                   }}
                   placeholder="Name"
@@ -945,7 +945,7 @@ const GameCard = ({
             <div style={{ display: 'flex', justifyContent: 'center', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
               <div style={{
                 display: 'inline-flex', gap: '0.35rem', alignItems: 'center',
-                fontSize: '0.9rem', backgroundColor: 'black',
+                fontSize: '0.85rem', backgroundColor: 'black',
                 border: '1px solid var(--text-secondary)', borderRadius: '4px',
                 height: '24px', padding: '0 10px',
               }}>
@@ -1026,7 +1026,7 @@ const GameCard = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V, marginTop: CARD_SPACE_V }}>
               {fts.map((f, i) => (
                 <div key={i}>
-                  <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{f.name}</span>
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{f.name}</span>
                   {f.description && (
                     <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)', marginLeft: CARD_SPACE_H, marginTop: '2px' }}>
                       {highlightCardText(f.description)}
@@ -1080,7 +1080,7 @@ const GameCard = ({
         }}>
           {/* Segment header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '4px', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>
+            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>
               {seg.name}
               {isDestroyed && <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
               {!isDestroyed && isBroken && <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
@@ -1157,7 +1157,7 @@ const GameCard = ({
                     flex: 1, minWidth: 0,
                     backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
                     borderRadius: '4px', color: 'var(--text-primary)',
-                    fontSize: '0.95rem', fontWeight: '600',
+                    fontSize: '1rem', fontWeight: '600',
                     padding: '2px 6px',
                   }}
                   placeholder="Name"
@@ -1207,7 +1207,7 @@ const GameCard = ({
             <div style={{ display: 'flex', justifyContent: 'center', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
               <div style={{
                 display: 'inline-flex', gap: '0.35rem', alignItems: 'center',
-                fontSize: '0.9rem', backgroundColor: 'black',
+                fontSize: '0.85rem', backgroundColor: 'black',
                 border: '1px solid var(--text-secondary)', borderRadius: '4px',
                 height: '24px', padding: '0 10px', flexWrap: 'wrap',
               }}>
@@ -1329,7 +1329,7 @@ const GameCard = ({
             alignItems: 'center',
             justifyContent: 'center',
             gap: '0.375rem',
-            fontSize: '0.875rem',
+            fontSize: '0.85rem',
             fontWeight: '500',
             transition: 'all 0.2s ease'
           }}
@@ -1361,7 +1361,7 @@ const GameCard = ({
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.375rem',
-              fontSize: '0.875rem',
+              fontSize: '0.85rem',
               fontWeight: '500',
               transition: 'all 0.2s ease'
             }}

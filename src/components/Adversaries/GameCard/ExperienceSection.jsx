@@ -106,7 +106,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
                   alignItems: 'center',
                   justifyContent: 'center',
                   paddingTop: '1px',
-                  fontSize: '0.8rem',
+                  fontSize: '0.85rem',
                   fontWeight: 600,
                   color: 'var(--text-primary)',
                   textAlign: 'center',
@@ -140,7 +140,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-primary)',
                   color: 'var(--text-primary)',
-                  fontSize: '0.875rem',
+                  fontSize: '0.85rem',
                   transition: 'background-color 0.2s'
                 }}
               />
@@ -379,7 +379,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
 
   return (
     <div style={{ paddingTop: '0' }}>
-      {isEditMode ? renderEditExperiences() : <div style={{ fontSize: '0.875rem', lineHeight: 1.4, color: 'var(--text-secondary)' }}>{renderReadOnlyExperiences()}</div>}
+      {isEditMode ? renderEditExperiences() : <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)' }}>{renderReadOnlyExperiences()}</div>}
     </div>
   )
 }

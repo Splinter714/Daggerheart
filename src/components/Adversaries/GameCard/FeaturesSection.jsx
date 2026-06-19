@@ -16,11 +16,9 @@ const FeatureDivider = ({ title }) => (
     <h4
       style={{
         margin: 0,
-        fontSize: '0.8rem',
+        fontSize: '0.75rem',
         fontWeight: '600',
         color: 'white',
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
       }}
     >
       {title}
@@ -82,7 +80,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
             borderRadius: '4px',
             backgroundColor: 'var(--bg-primary)',
             color: 'var(--text-primary)',
-            fontSize: '0.875rem',
+            fontSize: '0.85rem',
             transition: 'background-color 0.2s',
           }}
         />
@@ -112,7 +110,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
             borderRadius: '4px',
             backgroundColor: 'var(--bg-primary)',
             color: 'var(--text-primary)',
-            fontSize: '0.875rem',
+            fontSize: '0.85rem',
             minHeight: '4.5rem',
             resize: 'vertical',
           }}
@@ -135,7 +133,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
       {features.map((feature, index) => (
         <div key={`${feature.type}-${index}`} style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{feature.name}</span>
+            <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem' }}>{feature.name}</span>
           </div>
           <div style={{ 
             fontSize: '0.85rem', 
@@ -181,7 +179,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-primary)',
                   color: 'var(--text-primary)',
-                  fontSize: '0.875rem',
+                  fontSize: '0.85rem',
                 }}
               />
               <select
@@ -194,7 +192,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-primary)',
                   color: 'var(--text-primary)',
-                  fontSize: '0.875rem',
+                  fontSize: '0.85rem',
                   appearance: 'none',
                   backgroundImage:
                     "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e\")",
@@ -223,7 +221,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
                   borderRadius: '4px',
                   backgroundColor: 'var(--bg-primary)',
                   color: 'var(--text-primary)',
-                  fontSize: '0.875rem',
+                  fontSize: '0.85rem',
                 }}
               />
             </div>

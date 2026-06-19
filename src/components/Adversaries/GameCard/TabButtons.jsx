@@ -13,7 +13,6 @@ const buttonBaseStyles = {
   justifyContent: 'center',
   width: '32px',
   height: '32px',
-  fontSize: '0.7rem',
   transition: 'all 0.2s ease'
 }
 
@@ -28,7 +27,7 @@ const actionButtonStyles = {
   alignItems: 'center',
   justifyContent: 'center',
   gap: '0.375rem',
-  fontSize: '0.875rem',
+  fontSize: '0.85rem',
   fontWeight: '500',
   transition: 'all 0.2s ease'
 }

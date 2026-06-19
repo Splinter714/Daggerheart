@@ -30,7 +30,7 @@ const ThresholdTag = ({ value }) => (
     <span
       style={{
         position: 'absolute',
-        fontSize: '0.8rem',
+        fontSize: '0.75rem',
         fontWeight: 500,
         color: 'var(--text-secondary)',
         textAlign: 'center',
@@ -174,7 +174,7 @@ const StatusSection = ({
           >
             <span
               style={{
-                fontSize: '0.8rem',
+                fontSize: '0.85rem',
                 fontWeight: 600,
                 color: isInstanceDead ? 'var(--gray-400)' : 'white',
               }}
@@ -207,7 +207,7 @@ const StatusSection = ({
         }}
       >
         {isEditMode ? (
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.75rem' }}>
             <ThresholdInput label="Minor" value={item.thresholds?.major} onChange={(val) => updateThreshold('major', val, onUpdate, item)} />
             <ThresholdInput label="Major" value={item.thresholds?.severe} onChange={(val) => updateThreshold('severe', val, onUpdate, item)} />
           </div>
@@ -338,7 +338,7 @@ const VitalRow = ({ label, pipType, value, onChange }) => (
         borderRadius: '4px',
         backgroundColor: 'var(--bg-primary)',
         color: 'var(--text-primary)',
-        fontSize: '0.875rem',
+        fontSize: '0.85rem',
         textAlign: 'center',
       }}
     />
@@ -360,7 +360,7 @@ const ThresholdLabel = ({ text }) => (
   <span
     style={{
       color: 'var(--text-secondary)',
-      fontSize: '0.6875rem',
+      fontSize: '0.75rem',
       fontWeight: '500',
     }}
   >
@@ -389,7 +389,7 @@ const ThresholdInput = ({ label, value, onChange }) => (
         borderRadius: '4px',
         backgroundColor: 'var(--bg-primary)',
         color: 'var(--text-primary)',
-        fontSize: '0.8rem',
+        fontSize: '0.75rem',
         textAlign: 'center',
       }}
     />
