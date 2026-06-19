@@ -21,7 +21,7 @@ const IconStatBadge = ({ value, shape }) => {
   // Both badges render in a 24px box (matching the weapon pill height) with tightly
   // cropped viewBoxes so the diamond and hexagon read as the same visual size, and
   // the inner number matches the pill text scale.
-  const viewBox = isHex ? '0 0 24 24' : '3 3 18 18'
+  const viewBox = isHex ? '1.5 1.5 21 21' : '4 4 16 16'
   return (
     <svg width="1.5em" height="1.5em" viewBox={viewBox} style={{ display: 'block', flexShrink: 0 }}>
       {isHex ? (
@@ -37,7 +37,7 @@ const IconStatBadge = ({ value, shape }) => {
           </g>
         </>
       )}
-      <text x="12" y="12" fill="white" fontWeight="600" fontSize={isHex ? 11 : 8.5} fontFamily="inherit" dominantBaseline="central" textAnchor="middle">{value}</text>
+      <text x="12" y="12" fill="white" fontWeight="600" fontSize={isHex ? 10.5 : 8} fontFamily="inherit" dominantBaseline="central" textAnchor="middle">{value}</text>
     </svg>
   )
 }

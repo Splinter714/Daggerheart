@@ -18,7 +18,7 @@ const FeatureDivider = ({ title }) => (
         margin: 0,
         fontSize: '0.75rem',
         fontWeight: 400,
-        color: 'var(--text-secondary)',
+        color: 'var(--text-primary)',
         textTransform: 'uppercase',
         letterSpacing: '0.5px',
       }}
@@ -135,7 +135,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
       {features.map((feature, index) => (
         <div key={`${feature.type}-${index}`} style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 400, color: 'var(--text-primary)', fontSize: '0.85rem' }}>{feature.name}</span>
+            <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem' }}>{feature.name}</span>
           </div>
           <div style={{ 
             fontSize: '0.85rem', 

@@ -21,7 +21,7 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
       <hr
         style={{
           border: 'none',
-          borderTop: '1px solid var(--text-secondary)',
+          borderTop: '1px solid var(--border)',
           margin: 0,
         }}
       />
