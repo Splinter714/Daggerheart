@@ -1,4 +1,5 @@
 import React from 'react'
+import { Heart, Activity } from 'lucide-react'
 import Pips from '../../Shared/Pips'
 import MergedStatBadge from './MergedStatBadge'
 import ExperienceSection from './ExperienceSection'
@@ -29,7 +30,7 @@ const StatusSection = ({
   onRemoveInstance,
 }) => {
   const shouldShowStatus =
-    (instances && instances.length > 0) || (item.type !== 'Minion' && (item.thresholds || isEditMode))
+    (instances && instances.length > 0) || (item.type === 'Minion' ? item.difficulty : (item.thresholds || isEditMode))
   if (!shouldShowStatus) return null
 
   const renderInstanceRow = (instance) => {
@@ -43,7 +44,7 @@ const StatusSection = ({
             paddingTop: 0,
             paddingBottom: 0,
             paddingLeft: CARD_SPACE_H,
-            paddingRight: CARD_SPACE_H,
+            paddingRight: 0,
             border: '1px solid',
             borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
             display: 'flex',
@@ -76,51 +77,27 @@ const StatusSection = ({
               }}
             />
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.125rem', flex: 1 }}>
-            <div style={{ opacity: isInstanceDead ? 0.3 : 1 }}>
-              <Pips
-                type="adversaryHP"
-                value={instance.hp || 0}
-                maxValue={instance.hpMax || 1}
-                onPipClick={(index, isFilled) => {
-                  if (onApplyDamage && type === 'adversary') {
-                    const currentHp = instance.hp || 0
-                    const maxHp = instance.hpMax || 1
-                    if (isFilled) {
-                      onApplyHealing?.(instance.id, 1, currentHp)
-                    } else if (currentHp < maxHp) {
-                      onApplyDamage(instance.id, 1, currentHp, maxHp)
-                    }
-                  }
-                }}
-                containerStyle={{ height: 'auto', padding: '0' }}
-                pipStyle={{ fontSize: '1rem', width: '1.25rem', height: '1.25rem' }}
-                emptyColor="var(--gray-200)"
-                filledColor="var(--gray-600)"
-                size="lg"
-                showTooltip={false}
-              />
-            </div>
-
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: 0, opacity: isInstanceDead ? 0.3 : 1 }}>
+            <StatCounter
+              value={instance.hp || 0}
+              max={instance.hpMax || 1}
+              Icon={Heart}
+              iconColor="var(--text-secondary)"
+              onDec={() => { const hp = instance.hp || 0; if (hp > 0) onApplyHealing?.(instance.id, 1, hp) }}
+              onInc={() => { const hp = instance.hp || 0; const max = instance.hpMax || 1; if (hp < max) onApplyDamage?.(instance.id, 1, hp, max) }}
+            />
             {instance.stressMax > 0 && (
-              <div style={{ opacity: isInstanceDead ? 0.3 : 1 }}>
-                <Pips
-                  type="adversaryStress"
-                  value={instance.stress || 0}
-                  maxValue={instance.stressMax}
-                  onPipClick={(index, isFilled) => {
-                    if (onApplyStressChange && type === 'adversary') {
-                      onApplyStressChange(instance.id, isFilled ? -1 : 1)
-                    }
-                  }}
-                  containerStyle={{ height: 'auto', padding: '0' }}
-                  pipStyle={{ fontSize: '1rem', width: '1.25rem', height: '1.25rem' }}
-                  emptyColor="var(--gray-600)"
-                  filledColor="var(--gray-200)"
-                  size="lg"
-                  showTooltip={false}
-                />
-              </div>
+              <>
+                <span style={{ display: 'inline-block', width: '1px', height: '1.5rem', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
+                <StatCounter
+                value={instance.stress || 0}
+                max={instance.stressMax}
+                Icon={Activity}
+                iconColor="var(--text-secondary)"
+                onDec={() => { if ((instance.stress || 0) > 0) onApplyStressChange?.(instance.id, -1) }}
+                onInc={() => { if ((instance.stress || 0) < instance.stressMax) onApplyStressChange?.(instance.id, 1) }}
+              />
+              </>
             )}
           </div>
 
@@ -140,7 +117,8 @@ const StatusSection = ({
               paddingRight: '0.1875rem',
               flexShrink: 0,
               opacity: isInstanceDead ? 0.5 : 1,
-              marginLeft: '0.375rem',
+              marginLeft: 'auto',
+              marginRight: CARD_SPACE_H,
             }}
           >
             <span
@@ -159,7 +137,29 @@ const StatusSection = ({
   }
 
   const renderThresholds = () => {
-    if (item.type === 'Minion' || (!item.thresholds && !isEditMode)) return null
+    if (item.type === 'Minion') {
+      if (!item.difficulty) return null
+      const minionFeature = item.features?.find(f => /^Minion \(\d+\)$/i.test(f.name))
+      const minionNum = minionFeature ? minionFeature.name.match(/\d+/)?.[0] : null
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H }}>
+          {item.difficulty && <MergedStatBadge shape="hex" label="DIFF" value={item.difficulty} />}
+          {minionNum && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              gap: '0.35rem', fontSize: '0.75rem', fontWeight: 400, lineHeight: 1,
+              backgroundColor: 'black', border: '1px solid var(--text-secondary)',
+              borderRadius: '0.25rem', padding: '0 0.4rem', height: '1.375rem', flex: 1,
+            }}>
+              <ThresholdLabel text="Minion" />
+              <ThresholdSep />
+              <span style={{ color: 'white' }}>{minionNum}</span>
+            </div>
+          )}
+        </div>
+      )
+    }
+    if (!item.thresholds && !isEditMode) return null
     if (isEditMode) {
       return (
         <div
@@ -332,6 +332,25 @@ const VitalRow = ({ label, pipType, value, onChange }) => (
     </span>
   </div>
 )
+
+const StatCounter = ({ value, max, Icon, iconColor, onDec, onInc }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+    <button onClick={onDec} style={counterBtnStyle}>−</button>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.75rem', fontWeight: 600, color: 'white', minWidth: '2.5rem', justifyContent: 'center', fontVariantNumeric: 'tabular-nums' }}>
+      <Icon size={14} strokeWidth={1.25} color={iconColor} />
+      <span style={{ display: 'inline-block', minWidth: '1ch', textAlign: 'right' }}>{value}</span>
+      <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>/ <span style={{ display: 'inline-block', minWidth: '1ch' }}>{max}</span></span>
+    </span>
+    <button onClick={onInc} style={counterBtnStyle}>+</button>
+  </div>
+)
+
+const counterBtnStyle = {
+  width: '32px', height: '44px', padding: 0, flexShrink: 0,
+  border: 'none', backgroundColor: 'transparent', color: 'var(--text-secondary)',
+  fontSize: '1.1rem', lineHeight: 1, cursor: 'pointer',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+}
 
 const ThresholdLabel = ({ text }) => (
   <span

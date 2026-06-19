@@ -246,14 +246,15 @@ const Pips = ({
   centerPips = true, // Whether to center pips within the click container
   emptyColor = null, // Override the empty pip color from config
   filledColor: filledColorProp = null, // Override the filled pip color from config
+  reverseDirection = false, // Fill from right instead of left
 }) => {
   const [showTooltipState, setShowTooltip] = useState(false)
-  
+
   // Get pip configuration
   const config = PIP_TYPES[type] || PIP_TYPES.fear
   const effectiveMaxValue = maxValue || config.maxValue
   const safeValue = Math.max(0, Math.min(effectiveMaxValue, value))
-  
+
   const filledColor = filledColorProp || config.filledColor
 
   // Handle click on individual pip
@@ -329,7 +330,9 @@ const Pips = ({
         <React.Fragment key={group.groupIndex}>
           {[...Array(group.end - group.start)].map((_, i) => {
             const pipIndex = group.start + i
-            const isFilled = pipIndex < safeValue
+            const isFilled = reverseDirection
+              ? pipIndex >= effectiveMaxValue - safeValue
+              : pipIndex < safeValue
             
             if (config.isDots) {
               // Dot-based pips
@@ -371,9 +374,7 @@ const Pips = ({
                       size={size}
                     />
                   ) : (
-                    <IconComponent 
-                      size={size === 'lg' ? 18 : 16}
-                    />
+                    <IconComponent size="100%" strokeWidth={1.25} />
                   )}
                 </span>
               )
