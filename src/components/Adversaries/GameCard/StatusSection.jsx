@@ -216,6 +216,7 @@ const StatusSection = ({
         display: 'flex',
         flexDirection: 'column',
         gap: CARD_SPACE_V,
+        paddingTop: CARD_SPACE_V,
         paddingLeft: CARD_SPACE_H,
         paddingRight: CARD_SPACE_H,
       }}

@@ -573,9 +573,12 @@ const GameCard = ({
         )}
 
         {/* Stats and Experiences - Two Column Layout */}
-        {((item.difficulty || item.atk !== undefined || (item.thresholds && item.type !== 'Minion') || (item.experience && item.experience.length > 0)) || isEditMode) && (
+        {(isEditMode || (item.experience && item.experience.length > 0)) && (
           <div style={{
-            padding: '0.5rem 8px',
+            paddingTop: CARD_SPACE_V,
+            paddingBottom: 0,
+            paddingLeft: CARD_SPACE_H,
+            paddingRight: CARD_SPACE_H,
             display: 'flex',
             flexDirection: 'column',
             gap: '0.5rem',
