@@ -9,7 +9,7 @@ const FeatureDivider = ({ title }) => (
       style={{
         flex: 1,
         border: 'none',
-        borderTop: '1px solid var(--text-secondary)',
+        borderTop: '1px solid var(--border)',
         margin: 0,
       }}
     />
@@ -17,8 +17,8 @@ const FeatureDivider = ({ title }) => (
       style={{
         margin: 0,
         fontSize: '0.75rem',
-        fontWeight: '600',
-        color: 'white',
+        fontWeight: 400,
+        color: 'var(--text-secondary)',
         textTransform: 'uppercase',
         letterSpacing: '0.5px',
       }}
@@ -42,7 +42,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
         gap: CARD_SPACE_H,
         padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
         border: '1px solid var(--border)',
-        borderRadius: '4px',
+        borderRadius: '0.25rem',
         backgroundColor: 'var(--bg-secondary)',
         alignItems: 'stretch',
       }}
@@ -79,7 +79,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
           style={{
             padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
             border: '1px solid var(--border)',
-            borderRadius: '4px',
+            borderRadius: '0.25rem',
             backgroundColor: 'var(--bg-primary)',
             color: 'var(--text-primary)',
             fontSize: '0.85rem',
@@ -109,7 +109,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
           style={{
             padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
             border: '1px solid var(--border)',
-            borderRadius: '4px',
+            borderRadius: '0.25rem',
             backgroundColor: 'var(--bg-primary)',
             color: 'var(--text-primary)',
             fontSize: '0.85rem',
@@ -135,7 +135,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
       {features.map((feature, index) => (
         <div key={`${feature.type}-${index}`} style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem' }}>{feature.name}</span>
+            <span style={{ fontWeight: 400, color: 'var(--text-primary)', fontSize: '0.85rem' }}>{feature.name}</span>
           </div>
           <div style={{ 
             fontSize: '0.85rem', 
@@ -164,7 +164,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
               gap: CARD_SPACE_V,
               padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
               border: '1px solid var(--border)',
-              borderRadius: '4px',
+              borderRadius: '0.25rem',
               backgroundColor: 'var(--bg-secondary)',
             }}
           >
@@ -178,7 +178,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
                   flex: 1,
                   padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
                   border: '1px solid var(--border)',
-                  borderRadius: '4px',
+                  borderRadius: '0.25rem',
                   backgroundColor: 'var(--bg-primary)',
                   color: 'var(--text-primary)',
                   fontSize: '0.85rem',
@@ -191,7 +191,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
                   flex: 1,
                   padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
                   border: '1px solid var(--border)',
-                  borderRadius: '4px',
+                  borderRadius: '0.25rem',
                   backgroundColor: 'var(--bg-primary)',
                   color: 'var(--text-primary)',
                   fontSize: '0.85rem',
@@ -220,7 +220,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
                   flex: 1,
                   padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
                   border: '1px solid var(--border)',
-                  borderRadius: '4px',
+                  borderRadius: '0.25rem',
                   backgroundColor: 'var(--bg-primary)',
                   color: 'var(--text-primary)',
                   fontSize: '0.85rem',

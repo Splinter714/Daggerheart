@@ -14,45 +14,16 @@ import TabButtons from './GameCard/TabButtons'
 // Reusable Components
 // ============================================================================
 
-// Stat badge where the label pill and the value shape (hexagon / circle) are a
-// single merged silhouette — one continuous fill + border, no overlap seams.
-const MergedStatBadge = ({ label, value, shape }) => {
-  const isHex = shape === 'hex'
-  const W = isHex ? 106 : 90
-  const cx = isHex ? 81 : 68
-  const pillW = isHex ? 78 : 68
-  return (
-    <svg width={isHex ? '6.625em' : '5.625em'} height="2.125em" viewBox={`0 0 ${W} 34`} style={{ display: 'block', alignSelf: 'flex-start', flexShrink: 0 }}>
-      <rect x="0.5" y="6.5" width={pillW} height="21" rx="4" fill="black" stroke="var(--text-secondary)" strokeWidth="1" />
-      {isHex ? (
-        <g transform="translate(63,-1) scale(1.5)" fill="black" stroke="var(--text-secondary)" strokeWidth="0.67" strokeLinejoin="round" strokeLinecap="round">
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-        </g>
-      ) : (
-        <g transform="translate(44.4,-7.6) scale(2.05)" stroke="var(--text-secondary)" strokeWidth="0.47" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12.78 4.78 L19.22 11.22 Q20 12 19.22 12.78 L12.78 19.22 Q12 20 11.22 19.22 L4.78 12.78 Q4 12 4.78 11.22 L11.22 4.78 Q12 4 12.78 4.78 Z" fill="black" />
-          <g transform="rotate(45 12 12)">
-            <line x1="12" y1="3.5" x2="12" y2="6.34" />
-            <line x1="20.5" y1="12" x2="17.66" y2="12" />
-            <line x1="12" y1="20.5" x2="12" y2="17.66" />
-            <line x1="3.5" y1="12" x2="6.34" y2="12" />
-          </g>
-        </g>
-      )}
-      <text x="7" y="17" fill="white" fontSize="14" fontFamily="inherit" dominantBaseline="central" textAnchor="start">{label}</text>
-      <text x={cx} y="17" fill="white" fontSize="14" fontWeight="400" fontFamily="inherit" dominantBaseline="central" textAnchor="middle">{value}</text>
-    </svg>
-  )
-}
-
 // Number-only stat badge — just the shape (hexagon / diamond) with its value,
 // no label pill. Used to flank the standard attack pill.
 const IconStatBadge = ({ value, shape }) => {
   const isHex = shape === 'hex'
-  const size = isHex ? 36 : 32
-  const viewBox = isHex ? '-2 -2 28 28' : '3 3 18 18'
+  // Both badges render in a 24px box (matching the weapon pill height) with tightly
+  // cropped viewBoxes so the diamond and hexagon read as the same visual size, and
+  // the inner number matches the pill text scale.
+  const viewBox = isHex ? '0 0 24 24' : '3 3 18 18'
   return (
-    <svg width={isHex ? '2.25em' : '2em'} height={isHex ? '2.25em' : '2em'} viewBox={viewBox} style={{ display: 'block', flexShrink: 0 }}>
+    <svg width="1.5em" height="1.5em" viewBox={viewBox} style={{ display: 'block', flexShrink: 0 }}>
       {isHex ? (
         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" fill="black" stroke="var(--text-secondary)" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
       ) : (
@@ -66,7 +37,7 @@ const IconStatBadge = ({ value, shape }) => {
           </g>
         </>
       )}
-      <text x="12" y="12" fill="white" fontSize={isHex ? 10 : 7.2} fontFamily="inherit" dominantBaseline="central" textAnchor="middle">{value}</text>
+      <text x="12" y="12" fill="white" fontWeight="600" fontSize={isHex ? 11 : 8.5} fontFamily="inherit" dominantBaseline="central" textAnchor="middle">{value}</text>
     </svg>
   )
 }
@@ -85,8 +56,8 @@ const styles = {
   // Container styles
   card: {
     backgroundColor: 'var(--bg-card)',
-    borderRadius: '8px',
-    padding: '8px',
+    borderRadius: '0.5rem',
+    padding: '0.5rem',
     cursor: 'pointer',
     transition: 'all 0.1s ease',
     position: 'relative',
@@ -100,48 +71,12 @@ const styles = {
     backgroundColor: 'var(--gray-800)',
     borderColor: 'var(--border)'
   },
-  cardAtMax: {
-    backgroundColor: 'var(--success)',
-    borderColor: 'var(--success)'
-  },
-
-  // Layout styles
-  rowMain: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '8px'
-  },
   rowTitle: {
-    fontSize: '16px',
+    fontSize: '1rem',
     fontWeight: '600',
     color: 'var(--text-primary)',
     margin: 0
   },
-  rowMeta: {
-    display: 'flex',
-    gap: '8px',
-    alignItems: 'center'
-  },
-
-  // Badge styles
-  badge: {
-    padding: '2px 6px',
-    borderRadius: '3px',
-    fontSize: '0.6875rem',
-    fontWeight: '500',
-    textTransform: 'uppercase'
-  },
-  typeBadge: {
-    backgroundColor: 'var(--purple)',
-    color: 'var(--text-primary)'
-  },
-  tierBadge: {
-    backgroundColor: 'var(--info)',
-    color: 'var(--text-primary)'
-  },
-
-  // Damage input styles
 }
 
 // ============================================================================
@@ -337,49 +272,6 @@ const GameCard = ({
   // RENDERING HELPERS
   // ============================================================================
 
-  const renderTitle = () => {
-    if (type === 'adversary' || type === 'adversaries') {
-      const baseName = item.baseName || item.name?.replace(/\s+\(\d+\)$/, '') || ''
-      const duplicateNumber = item.duplicateNumber || 1
-      
-      // Check if there are other adversaries with the same base name
-      // Include the current item in the check to ensure accurate duplicate detection
-      const allAdversaries = [...adversaries]
-      if (!adversaries.some(adv => adv.id === item.id)) {
-        allAdversaries.push(item)
-      }
-      const sameNameAdversaries = allAdversaries.filter(adv => adv.baseName === baseName)
-      const hasDuplicates = sameNameAdversaries.length > 1
-      
-      
-      
-      
-      // Show duplicate number if there are actually duplicates (including the first one)
-      if (hasDuplicates) {
-        return `${baseName} (${duplicateNumber})`
-      } else {
-        return baseName
-      }
-    }
-    return item.name
-  }
-
-  const renderMeta = () => {
-    const badges = []
-    
-    if (item.type) {
-      badges.push(
-        <span key="type" style={{ ...styles.badge, ...styles.typeBadge }}>
-          {item.type}
-        </span>
-      )
-    }
-    
-    
-    return badges
-  }
-
-
   // ============================================================================
   // EXPANDED VIEW RENDERERS
   // ============================================================================
@@ -412,7 +304,7 @@ const GameCard = ({
         tabBorderColor={isSelected ? 'var(--purple)' : 'var(--border)'}
         containerBackgroundColor={isDead ? 'var(--gray-900)' : getCardStyle(true).backgroundColor}
         containerBorderColor={isDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : (isSelected ? 'var(--purple)' : 'var(--border)')}
-        containerBorderRadius="8px"
+        containerBorderRadius="0.5rem"
         containerOverflow="hidden"
         containerStyle={{
           padding: 0,
@@ -491,19 +383,19 @@ const GameCard = ({
           paddingRight: CARD_SPACE_H,
           flexShrink: 0,
           backgroundColor: 'var(--bg-card)',
-          borderRadius: '8px 8px 0 0',
+          borderRadius: '0.5rem 0.5rem 0 0',
           position: 'relative',
           zIndex: isDead ? 1 : 'auto',
           borderBottomColor: isSelected ? 'var(--purple)' : 'var(--border)'
         }}>
           {quickEdit ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
               {onDelete && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onDelete() }}
                   style={{
-                    flexShrink: 0, width: '24px', height: '24px',
-                    background: 'transparent', border: 'none', borderRadius: '4px',
+                    flexShrink: 0, width: '1.5rem', height: '1.5rem',
+                    background: 'transparent', border: 'none', borderRadius: '0.25rem',
                     color: 'var(--danger)', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                   }}
@@ -522,7 +414,7 @@ const GameCard = ({
                 style={{
                   flex: 1, minWidth: 0,
                   backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
-                  borderRadius: '4px', color: 'var(--text-primary)',
+                  borderRadius: '0.25rem', color: 'var(--text-primary)',
                   fontSize: '1rem', fontWeight: '600',
                   padding: '2px 6px',
                 }}
@@ -533,8 +425,8 @@ const GameCard = ({
                   <button
                     onClick={(e) => { e.stopPropagation(); onRemoveInstance?.(item.id) }}
                     style={{
-                      flexShrink: 0, width: '24px', height: '24px',
-                      background: 'transparent', border: 'none', borderRadius: '4px',
+                      flexShrink: 0, width: '1.5rem', height: '1.5rem',
+                      background: 'transparent', border: 'none', borderRadius: '0.25rem',
                       color: 'var(--text-secondary)', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                     }}
@@ -548,8 +440,8 @@ const GameCard = ({
                   <button
                     onClick={(e) => { e.stopPropagation(); onAddInstance?.(item) }}
                     style={{
-                      flexShrink: 0, width: '24px', height: '24px',
-                      background: 'transparent', border: 'none', borderRadius: '4px',
+                      flexShrink: 0, width: '1.5rem', height: '1.5rem',
+                      background: 'transparent', border: 'none', borderRadius: '0.25rem',
                       color: 'var(--text-secondary)', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                     }}
@@ -562,8 +454,8 @@ const GameCard = ({
               <button
                 onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
                 style={{
-                  flexShrink: 0, width: '24px', height: '24px',
-                  background: 'var(--purple)', border: 'none', borderRadius: '4px',
+                  flexShrink: 0, width: '1.5rem', height: '1.5rem',
+                  background: 'var(--purple)', border: 'none', borderRadius: '0.25rem',
                   color: 'white', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                 }}
@@ -578,8 +470,8 @@ const GameCard = ({
                 onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
                 style={{
                   position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-                  width: '24px', height: '24px',
-                  background: 'transparent', border: 'none', borderRadius: '4px',
+                  width: '1.5rem', height: '1.5rem',
+                  background: 'transparent', border: 'none', borderRadius: '0.25rem',
                   color: 'var(--text-secondary)', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   padding: 0, transition: 'all 0.15s ease',
@@ -599,7 +491,7 @@ const GameCard = ({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '4px',
+                      gap: '0.25rem',
                       minWidth: 0,
                     }}>
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -622,7 +514,7 @@ const GameCard = ({
                   <div
           ref={scrollableRef}
           style={{
-          borderRadius: '0 0 8px 8px',
+          borderRadius: '0 0 0.5rem 0.5rem',
           flex: 1,
           overflowY: 'auto',
           overflowX: 'hidden',
@@ -637,7 +529,7 @@ const GameCard = ({
 
         {/* Standard Attack Pill, flanked by Attack (left) and Difficulty (right) */}
         {!isEditMode && (item.weapon || item.atk !== undefined || item.difficulty) && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
             <div style={{ flex: '0 0 auto' }}>
               {item.atk !== undefined && (
                 <IconStatBadge shape="diamond" value={(() => {
@@ -654,11 +546,12 @@ const GameCard = ({
                   gap: '0.35rem',
                   alignItems: 'center',
                   fontSize: '0.75rem',
+                  fontWeight: 400,
                   backgroundColor: 'black',
                   border: '1px solid var(--text-secondary)',
-                  borderRadius: '4px',
-                  height: '24px',
-                  padding: '0 10px',
+                  borderRadius: '0.25rem',
+                  height: '1.5rem',
+                  padding: '0 0.625rem',
                 }}>
                   <span style={{ color: 'white' }}>{item.weapon}</span>
                   {item.range && <span style={{ color: 'white' }}>· {highlightCardText(item.range)}</span>}
@@ -678,14 +571,14 @@ const GameCard = ({
             padding: '0.5rem 8px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
+            gap: '0.5rem',
             alignItems: 'center',
           }}>
             {/* Stats Row - Attack + Difficulty */}
                 <div style={{
               display: 'flex',
               flexDirection: 'row-reverse',
-              gap: '8px',
+              gap: '0.5rem',
               alignItems: 'flex-start',
               justifyContent: 'center',
               flexWrap: 'wrap',
@@ -696,10 +589,10 @@ const GameCard = ({
                     <div style={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      paddingTop: '1px', width: '36px',
+                      paddingTop: '1px', width: '2.25rem',
                     }}>
                       <div style={{
-                        position: 'absolute', width: '22px', height: '22px',
+                        position: 'absolute', width: '1.375rem', height: '1.375rem',
                         backgroundColor: 'black',
                         clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
                         zIndex: 0,
@@ -716,11 +609,11 @@ const GameCard = ({
                           if (e.key === 'ArrowUp') { e.preventDefault(); const current = parseInt(item.difficulty) || 0; onUpdate && onUpdate(item.id, { difficulty: Math.min(current + 1, 99) }) }
                           else if (e.key === 'ArrowDown') { e.preventDefault(); const current = parseInt(item.difficulty) || 0; onUpdate && onUpdate(item.id, { difficulty: Math.max(current - 1, 0) }) }
                         }}
-                        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -45%)', backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', fontWeight: 600, width: '20px', height: '20px', textAlign: 'center', outline: 'none' }}
+                        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -45%)', backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', fontWeight: 600, width: '1.25rem', height: '1.25rem', textAlign: 'center', outline: 'none' }}
                         maxLength="2"
                       />
                     </div>
-                    <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-primary)', marginLeft: '44px' }}>Difficulty</div>
+                    <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-primary)', marginLeft: '2.75rem' }}>Difficulty</div>
                   </div>
               )}
 
@@ -730,9 +623,9 @@ const GameCard = ({
                     <div style={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      paddingTop: '1px', width: '36px',
+                      paddingTop: '1px', width: '2.25rem',
                     }}>
-                      <div style={{ position: 'absolute', width: '22px', height: '22px', backgroundColor: 'black', transform: 'rotate(45deg)', zIndex: 0 }} />
+                      <div style={{ position: 'absolute', width: '1.375rem', height: '1.375rem', backgroundColor: 'black', transform: 'rotate(45deg)', zIndex: 0 }} />
                       <Locate size={38} strokeWidth={1} style={{ color: 'var(--text-secondary)', transform: 'rotate(45deg)', position: 'relative', zIndex: 1 }} />
                       <input
                         type="text"
@@ -754,11 +647,11 @@ const GameCard = ({
                           if (e.key === 'ArrowUp') { e.preventDefault(); const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0); onUpdate && onUpdate(item.id, { atk: current + 1 }) }
                           else if (e.key === 'ArrowDown') { e.preventDefault(); const current = typeof item.atk === 'string' ? parseInt(item.atk.replace(/[^0-9-]/g, '')) : (item.atk || 0); onUpdate && onUpdate(item.id, { atk: current - 1 }) }
                         }}
-                        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -45%)', backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', fontWeight: 600, width: '20px', height: '20px', textAlign: 'center', outline: 'none' }}
+                        style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -45%)', backgroundColor: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', fontWeight: 600, width: '1.25rem', height: '1.25rem', textAlign: 'center', outline: 'none' }}
                         maxLength="3"
                       />
                     </div>
-                    <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-primary)', marginLeft: '44px' }}>Attack</div>
+                    <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-primary)', marginLeft: '2.75rem' }}>Attack</div>
                   </div>
               )}
             
@@ -814,8 +707,8 @@ const GameCard = ({
 
     const FeatureDivider = ({ title }) => (
       <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginTop: CARD_SPACE_V }}>
-        <hr style={{ flex: 1, border: 'none', borderTop: '1px solid white', margin: 0 }} />
-        <h4 style={{ margin: 0, fontSize: '0.8rem', fontWeight: 600, color: 'white', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)', margin: 0 }} />
+        <h4 style={{ margin: 0, fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           {title}
         </h4>
       </div>
@@ -830,14 +723,14 @@ const GameCard = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V, marginTop: CARD_SPACE_V }}>
             {features.map((f, i) => (
               <div key={i}>
-                <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{f.name}</span>
+                <span style={{ fontWeight: 400, color: 'var(--text-primary)', fontSize: '0.85rem' }}>{f.name}</span>
                 {f.description && (
-                  <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)', marginLeft: CARD_SPACE_H, marginTop: '2px' }}>
+                  <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)', marginLeft: CARD_SPACE_H, marginTop: '0.125rem' }}>
                     {highlightCardText(f.description)}
                   </div>
                 )}
                 {f.details && f.details.length > 0 && (
-                  <ul style={{ margin: '4px 0 0', paddingLeft: '1.25rem', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                  <ul style={{ margin: '4px 0 0', paddingLeft: '1.25rem', fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                     {f.details.map((d, di) => <li key={di}>{d}</li>)}
                   </ul>
                 )}
@@ -853,7 +746,7 @@ const GameCard = ({
         showTab={false}
         containerBackgroundColor={getCardStyle(true).backgroundColor}
         containerBorderColor='var(--border)'
-        containerBorderRadius="8px"
+        containerBorderRadius="0.5rem"
         containerOverflow="hidden"
         containerStyle={{
           padding: 0, height: 'auto',
@@ -867,17 +760,17 @@ const GameCard = ({
             paddingTop: CARD_SPACE_V, paddingBottom: CARD_SPACE_V,
             paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H,
             flexShrink: 0, backgroundColor: 'var(--bg-card)',
-            borderRadius: '8px 8px 0 0',
+            borderRadius: '0.5rem 0.5rem 0 0',
             position: 'relative',
           }}>
             {quickEdit ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                 {onDelete && (
                   <button
                     onClick={(e) => { e.stopPropagation(); onDelete() }}
                     style={{
-                      flexShrink: 0, width: '24px', height: '24px',
-                      background: 'transparent', border: 'none', borderRadius: '4px',
+                      flexShrink: 0, width: '1.5rem', height: '1.5rem',
+                      background: 'transparent', border: 'none', borderRadius: '0.25rem',
                       color: 'var(--danger)', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                     }}
@@ -893,7 +786,7 @@ const GameCard = ({
                   style={{
                     flex: 1, minWidth: 0,
                     backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
-                    borderRadius: '4px', color: 'var(--text-primary)',
+                    borderRadius: '0.25rem', color: 'var(--text-primary)',
                     fontSize: '1rem', fontWeight: '600',
                     padding: '2px 6px',
                   }}
@@ -902,8 +795,8 @@ const GameCard = ({
                 <button
                   onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
                   style={{
-                    flexShrink: 0, width: '24px', height: '24px',
-                    background: 'var(--purple)', border: 'none', borderRadius: '4px',
+                    flexShrink: 0, width: '1.5rem', height: '1.5rem',
+                    background: 'var(--purple)', border: 'none', borderRadius: '0.25rem',
                     color: 'white', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                   }}
@@ -918,8 +811,8 @@ const GameCard = ({
                   onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
                   style={{
                     position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-                    width: '24px', height: '24px',
-                    background: 'transparent', border: 'none', borderRadius: '4px',
+                    width: '1.5rem', height: '1.5rem',
+                    background: 'transparent', border: 'none', borderRadius: '0.25rem',
                     color: 'var(--text-secondary)', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     padding: 0, transition: 'all 0.15s ease',
@@ -945,9 +838,9 @@ const GameCard = ({
             <div style={{ display: 'flex', justifyContent: 'center', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
               <div style={{
                 display: 'inline-flex', gap: '0.35rem', alignItems: 'center',
-                fontSize: '0.85rem', backgroundColor: 'black',
-                border: '1px solid var(--text-secondary)', borderRadius: '4px',
-                height: '24px', padding: '0 10px',
+                fontSize: '0.75rem', backgroundColor: 'black',
+                border: '1px solid var(--text-secondary)', borderRadius: '0.25rem',
+                height: '1.5rem', padding: '0 10px',
               }}>
                 <span style={{ color: 'white' }}>{env.type}</span>
                 <span style={{ color: 'white' }}>· T{env.tier}</span>
@@ -973,9 +866,9 @@ const GameCard = ({
             {env.potentialAdversaries && env.potentialAdversaries.length > 0 && (
               <div style={{ paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H, paddingBottom: CARD_SPACE_V }}>
                 <FeatureDivider title="Potential Adversaries" />
-                <div style={{ marginTop: CARD_SPACE_V, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <div style={{ marginTop: CARD_SPACE_V, display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
                   {env.potentialAdversaries.map((adv, i) => (
-                    <div key={i} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{adv}</div>
+                    <div key={i} style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{adv}</div>
                   ))}
                 </div>
               </div>
@@ -1007,8 +900,8 @@ const GameCard = ({
 
     const Divider = ({ title }) => (
       <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginTop: CARD_SPACE_V }}>
-        <hr style={{ flex: 1, border: 'none', borderTop: '1px solid white', margin: 0 }} />
-        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'white', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)', margin: 0 }} />
+        <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           {title}
         </span>
       </div>
@@ -1026,9 +919,9 @@ const GameCard = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V, marginTop: CARD_SPACE_V }}>
               {fts.map((f, i) => (
                 <div key={i}>
-                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{f.name}</span>
+                  <span style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{f.name}</span>
                   {f.description && (
-                    <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)', marginLeft: CARD_SPACE_H, marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)', marginLeft: CARD_SPACE_H, marginTop: '0.125rem' }}>
                       {highlightCardText(f.description)}
                     </div>
                   )}
@@ -1043,13 +936,13 @@ const GameCard = ({
     const HpPips = ({ max, marked, onToggle }) => {
       if (!max) return null
       return (
-        <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.1875rem', flexWrap: 'wrap', alignItems: 'center' }}>
           {Array.from({ length: max }, (_, i) => (
             <div
               key={i}
               onClick={e => { e.stopPropagation(); onToggle(i) }}
               style={{
-                width: '12px', height: '12px', borderRadius: '50%', cursor: 'pointer',
+                width: '0.75rem', height: '0.75rem', borderRadius: '50%', cursor: 'pointer',
                 border: '1.5px solid var(--text-secondary)',
                 backgroundColor: i < marked ? 'var(--text-primary)' : 'transparent',
                 transition: 'background-color 0.1s',
@@ -1072,36 +965,36 @@ const GameCard = ({
 
       return (
         <div style={{
-          borderRadius: '6px',
+          borderRadius: '0.375rem',
           border: `1px solid ${isDestroyed ? 'var(--danger)' : 'var(--border)'}`,
           padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
           opacity: isDestroyed ? 0.6 : 1,
           backgroundColor: isDestroyed ? 'color-mix(in srgb, var(--danger) 8%, transparent)' : 'transparent',
         }}>
           {/* Segment header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '4px', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>
               {seg.name}
-              {isDestroyed && <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
-              {!isDestroyed && isBroken && <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
+              {isDestroyed && <span style={{ marginLeft: '0.375rem', fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 600, textTransform: 'uppercase' }}>Destroyed</span>}
+              {!isDestroyed && isBroken && <span style={{ marginLeft: '0.375rem', fontSize: '0.75rem', color: 'var(--warning, #f59e0b)', fontWeight: 600, textTransform: 'uppercase' }}>Broken</span>}
             </span>
-            <div style={{ display: 'flex', gap: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0, alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.375rem', fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0, alignItems: 'center' }}>
               <span>Diff {seg.difficulty}</span>
               {seg.atk != null && <span>ATK +{seg.atk}</span>}
             </div>
           </div>
           {/* HP pips */}
           {seg.hp ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '0.25rem' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0 }}>HP</span>
               <HpPips max={seg.hp} marked={markedHp} onToggle={handlePipToggle} />
             </div>
           ) : (
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '4px' }}>Invulnerable</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '0.25rem' }}>Invulnerable</div>
           )}
           {/* Attack */}
           {seg.weapon && (
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
               {seg.weapon} · {seg.range} · {seg.damage}
             </div>
           )}
@@ -1116,7 +1009,7 @@ const GameCard = ({
         showTab={false}
         containerBackgroundColor={getCardStyle(true).backgroundColor}
         containerBorderColor='var(--border)'
-        containerBorderRadius="8px"
+        containerBorderRadius="0.5rem"
         containerOverflow="hidden"
         containerStyle={{
           padding: 0, height: 'auto',
@@ -1130,17 +1023,17 @@ const GameCard = ({
             paddingTop: CARD_SPACE_V, paddingBottom: CARD_SPACE_V,
             paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H,
             flexShrink: 0, backgroundColor: 'var(--bg-card)',
-            borderRadius: '8px 8px 0 0',
+            borderRadius: '0.5rem 0.5rem 0 0',
             position: 'relative',
           }}>
             {quickEdit ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                 {onDelete && (
                   <button
                     onClick={(e) => { e.stopPropagation(); onDelete() }}
                     style={{
-                      flexShrink: 0, width: '24px', height: '24px',
-                      background: 'transparent', border: 'none', borderRadius: '4px',
+                      flexShrink: 0, width: '1.5rem', height: '1.5rem',
+                      background: 'transparent', border: 'none', borderRadius: '0.25rem',
                       color: 'var(--danger)', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                     }}
@@ -1156,7 +1049,7 @@ const GameCard = ({
                   style={{
                     flex: 1, minWidth: 0,
                     backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
-                    borderRadius: '4px', color: 'var(--text-primary)',
+                    borderRadius: '0.25rem', color: 'var(--text-primary)',
                     fontSize: '1rem', fontWeight: '600',
                     padding: '2px 6px',
                   }}
@@ -1165,8 +1058,8 @@ const GameCard = ({
                 <button
                   onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
                   style={{
-                    flexShrink: 0, width: '24px', height: '24px',
-                    background: 'var(--purple)', border: 'none', borderRadius: '4px',
+                    flexShrink: 0, width: '1.5rem', height: '1.5rem',
+                    background: 'var(--purple)', border: 'none', borderRadius: '0.25rem',
                     color: 'white', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                   }}
@@ -1181,8 +1074,8 @@ const GameCard = ({
                   onClick={(e) => { e.stopPropagation(); setQuickEdit(true) }}
                   style={{
                     position: 'absolute', right: CARD_SPACE_H, top: '50%', transform: 'translateY(-50%)', zIndex: 1,
-                    width: '24px', height: '24px',
-                    background: 'transparent', border: 'none', borderRadius: '4px',
+                    width: '1.5rem', height: '1.5rem',
+                    background: 'transparent', border: 'none', borderRadius: '0.25rem',
                     color: 'var(--text-secondary)', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     padding: 0, transition: 'all 0.15s ease',
@@ -1207,9 +1100,9 @@ const GameCard = ({
             <div style={{ display: 'flex', justifyContent: 'center', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
               <div style={{
                 display: 'inline-flex', gap: '0.35rem', alignItems: 'center',
-                fontSize: '0.85rem', backgroundColor: 'black',
-                border: '1px solid var(--text-secondary)', borderRadius: '4px',
-                height: '24px', padding: '0 10px', flexWrap: 'wrap',
+                fontSize: '0.75rem', backgroundColor: 'black',
+                border: '1px solid var(--text-secondary)', borderRadius: '0.25rem',
+                height: '1.5rem', padding: '0 10px', flexWrap: 'wrap',
               }}>
                 <span style={{ color: 'white' }}>T{colossus.tier} Colossus</span>
                 <span style={{ color: 'var(--text-secondary)' }}>·</span>
@@ -1222,7 +1115,7 @@ const GameCard = ({
             {/* Size + segments summary */}
             {(colossus.size || colossus.segmentsSummary) && (
               <div style={{ padding: `4px ${CARD_SPACE_H} 0`, textAlign: 'center' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                   {[colossus.size, colossus.segmentsSummary].filter(Boolean).join(' · ')}
                 </span>
               </div>
@@ -1232,10 +1125,10 @@ const GameCard = ({
             {colossus.stress > 0 && (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: CARD_SPACE_H, padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Stress</span>
-                <div style={{ display: 'flex', gap: '3px' }}>
+                <div style={{ display: 'flex', gap: '0.1875rem' }}>
                   {Array.from({ length: colossus.stress }, (_, i) => (
                     <div key={i} style={{
-                      width: '12px', height: '12px', borderRadius: '50%',
+                      width: '0.75rem', height: '0.75rem', borderRadius: '50%',
                       border: '1.5px solid var(--text-secondary)',
                       backgroundColor: i < (inst?.stress || 0) ? 'var(--text-primary)' : 'transparent',
                       cursor: onUpdate && inst ? 'pointer' : 'default',
@@ -1254,11 +1147,11 @@ const GameCard = ({
 
             {/* Experiences */}
             {colossus.experience?.length > 0 && (
-              <div style={{ padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0`, display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'center' }}>
+              <div style={{ padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0`, display: 'flex', flexWrap: 'wrap', gap: '0.25rem', justifyContent: 'center' }}>
                 {colossus.experience.map((e, i) => (
                   <span key={i} style={{
                     fontSize: '0.75rem', color: 'var(--text-secondary)',
-                    border: '1px solid var(--border)', borderRadius: '3px', padding: '1px 6px',
+                    border: '1px solid var(--border)', borderRadius: '0.1875rem', padding: '1px 6px',
                   }}>
                     {e.name} +{e.modifier}
                   </span>
@@ -1322,7 +1215,7 @@ const GameCard = ({
             background: 'var(--purple)',
             border: '1px solid var(--purple)',
             color: 'white',
-            borderRadius: '4px',
+            borderRadius: '0.25rem',
             padding: '0.375rem 0.75rem',
             cursor: 'pointer',
             display: 'flex',
@@ -1354,7 +1247,7 @@ const GameCard = ({
               background: 'var(--bg-secondary)',
               border: '1px solid var(--border)',
               color: 'var(--text-primary)',
-              borderRadius: '4px',
+              borderRadius: '0.25rem',
               padding: '0.375rem 0.75rem',
               cursor: 'pointer',
               display: 'flex',

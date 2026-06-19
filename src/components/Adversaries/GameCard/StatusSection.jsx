@@ -9,14 +9,14 @@ const ThresholdTag = ({ value }) => (
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      width: '44px',
-      height: '32px',
+      width: '2.75rem',
+      height: '2rem',
       zIndex: 3,
     }}
   >
     <svg
-      width="40"
-      height="32"
+      width="2.5em"
+      height="2em"
       viewBox="0 0 40 32"
       fill="var(--bg-card)"
       stroke="var(--border)"
@@ -31,7 +31,7 @@ const ThresholdTag = ({ value }) => (
       style={{
         position: 'absolute',
         fontSize: '0.75rem',
-        fontWeight: 500,
+        fontWeight: 400,
         color: 'var(--text-secondary)',
         textAlign: 'center',
         zIndex: 2,
@@ -68,7 +68,7 @@ const StatusSection = ({
         <div
           style={{
             backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'var(--bg-card)',
-            borderRadius: '6px',
+            borderRadius: '0.375rem',
             paddingTop: 0,
             paddingBottom: 0,
             paddingLeft: CARD_SPACE_H,
@@ -81,7 +81,7 @@ const StatusSection = ({
             opacity: isInstanceDead ? 0.7 : 1,
             position: 'relative',
             transition: 'all 0.2s ease',
-            minHeight: '40px',
+            minHeight: '2.5rem',
           }}
         >
           {isInstanceDead && (
@@ -101,7 +101,7 @@ const StatusSection = ({
                         )`,
                 pointerEvents: 'none',
                 zIndex: 1,
-                borderRadius: '4px',
+                borderRadius: '0.25rem',
               }}
             />
           )}
@@ -157,16 +157,16 @@ const StatusSection = ({
             style={{
               backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'black',
               border: '1px solid',
-              borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'white',
+              borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
               borderRadius: '50%',
-              minWidth: '24px',
-              height: '24px',
+              minWidth: '1.5rem',
+              height: '1.5rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              paddingTop: '1px',
-              paddingLeft: '3px',
-              paddingRight: '3px',
+              paddingTop: '0.0625rem',
+              paddingLeft: '0.1875rem',
+              paddingRight: '0.1875rem',
               flexShrink: 0,
               opacity: isInstanceDead ? 0.5 : 1,
               marginLeft: '0.375rem',
@@ -174,7 +174,7 @@ const StatusSection = ({
           >
             <span
               style={{
-                fontSize: '0.85rem',
+                fontSize: '0.75rem',
                 fontWeight: 600,
                 color: isInstanceDead ? 'var(--gray-400)' : 'white',
               }}
@@ -198,9 +198,9 @@ const StatusSection = ({
           gap: '0.375rem',
           backgroundColor: 'var(--bg-card)',
           border: '1px solid var(--border)',
-          borderRadius: '4px',
-          padding: '0 6px',
-          height: '24px',
+          borderRadius: '0.25rem',
+          padding: '0 0.375rem',
+          height: '1.5rem',
           overflow: 'visible',
           alignSelf: 'center',
           width: 'fit-content',
@@ -261,44 +261,13 @@ const StatusSection = ({
   )
 }
 
-const SectionHeader = ({ title }) => (
-  <div
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: CARD_SPACE_H,
-    }}
-  >
-    <hr
-      style={{
-        flex: 1,
-        border: 'none',
-        borderTop: '1px solid var(--border)',
-        margin: 0,
-      }}
-    />
-    <h4
-      style={{
-        margin: 0,
-        fontSize: '0.75rem',
-        fontWeight: '500',
-        color: 'var(--text-secondary)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-      }}
-    >
-      {title}
-    </h4>
-  </div>
-)
-
 const EditableVitals = ({ item, onUpdate }) => (
   <div>
     <div
       style={{
         padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
         backgroundColor: 'var(--bg-secondary)',
-        borderRadius: '8px',
+        borderRadius: '0.5rem',
         border: '1px solid var(--border)',
       }}
     >
@@ -332,10 +301,10 @@ const VitalRow = ({ label, pipType, value, onChange }) => (
       min="1"
       max="99"
       style={{
-        width: '40px',
+        width: '2.5rem',
         padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
         border: '1px solid var(--border)',
-        borderRadius: '4px',
+        borderRadius: '0.25rem',
         backgroundColor: 'var(--bg-primary)',
         color: 'var(--text-primary)',
         fontSize: '0.85rem',
@@ -348,7 +317,7 @@ const VitalRow = ({ label, pipType, value, onChange }) => (
         fontSize: '0.75rem',
         color: 'var(--text-secondary)',
         textTransform: 'uppercase',
-        minWidth: '40px',
+        minWidth: '2.5rem',
       }}
     >
       {label}
@@ -361,7 +330,7 @@ const ThresholdLabel = ({ text }) => (
     style={{
       color: 'var(--text-secondary)',
       fontSize: '0.75rem',
-      fontWeight: '500',
+      fontWeight: 400,
     }}
   >
     {text}
@@ -383,10 +352,10 @@ const ThresholdInput = ({ label, value, onChange }) => (
         }
       }}
       style={{
-        width: '30px',
+        width: '1.875rem',
         padding: `${CARD_SPACE_V} ${CARD_SPACE_H}`,
         border: '1px solid var(--border)',
-        borderRadius: '4px',
+        borderRadius: '0.25rem',
         backgroundColor: 'var(--bg-primary)',
         color: 'var(--text-primary)',
         fontSize: '0.75rem',
