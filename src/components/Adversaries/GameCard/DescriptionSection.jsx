@@ -3,7 +3,7 @@ import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
 const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
   const hasMotives = item.motives && item.motives.trim()
-  const shouldShow = isEditMode || (mode === 'expanded' && hasMotives)
+  const shouldShow = isEditMode
   if (!shouldShow) return null
 
   return (

@@ -1,5 +1,7 @@
 import React from 'react'
 import Pips from '../../Shared/Pips'
+import MergedStatBadge from './MergedStatBadge'
+import ExperienceSection from './ExperienceSection'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
 const ThresholdSep = () => (
@@ -184,28 +186,31 @@ const StatusSection = ({
       )
     }
     return (
-      <div
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.35rem',
-          fontSize: '0.75rem',
-          fontWeight: 400,
-          lineHeight: 1,
-          backgroundColor: 'black',
-          border: '1px solid var(--text-secondary)',
-          borderRadius: '0.25rem',
-          padding: '0 0.4rem',
-          height: '1.375rem',
-          alignSelf: 'center',
-          width: 'fit-content',
-        }}
-      >
-        <ThresholdLabel text="Minor" />
-        <ThresholdTag value={item.thresholds?.major || 7} />
-        <ThresholdLabel text="Major" />
-        <ThresholdTag value={item.thresholds?.severe || 14} />
-        <ThresholdLabel text="Severe" />
+      <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H }}>
+        {item.difficulty && <MergedStatBadge shape="hex" label="DIFF" value={item.difficulty} />}
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.35rem',
+            fontSize: '0.75rem',
+            fontWeight: 400,
+            lineHeight: 1,
+            backgroundColor: 'black',
+            border: '1px solid var(--text-secondary)',
+            borderRadius: '0.25rem',
+            padding: '0 0.4rem',
+            height: '1.375rem',
+            flex: 1,
+          }}
+        >
+          <ThresholdLabel text="Minor" />
+          <ThresholdTag value={item.thresholds?.major || 7} />
+          <ThresholdLabel text="Major" />
+          <ThresholdTag value={item.thresholds?.severe || 14} />
+          <ThresholdLabel text="Severe" />
+        </div>
       </div>
     )
   }
@@ -224,12 +229,28 @@ const StatusSection = ({
       {(() => {
         const thresholdsEl = renderThresholds()
         if (!thresholdsEl) return null
-        return (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: CARD_SPACE_H }}>
-            {thresholdsEl}
-          </div>
-        )
+        return thresholdsEl
       })()}
+      {!isEditMode && (item.experience?.length > 0 || item.motives?.trim()) && (
+        <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'center' }}>
+          {item.experience?.length > 0 && (
+            <div style={{ flexShrink: 0 }}>
+              <ExperienceSection item={item} isEditMode={false} onUpdate={onUpdate} deleteConfirmations={{}} setDeleteConfirmations={() => {}} />
+            </div>
+          )}
+          {item.motives?.trim() && (
+            <>
+              <span style={{ display: 'inline-block', width: '1px', alignSelf: 'stretch', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
+              <div style={{
+                flex: 1, fontSize: '0.66rem', fontWeight: 400, color: 'var(--text-primary)', lineHeight: 1.4,
+                textAlign: 'center', textWrap: 'balance',
+              }}>
+                {item.motives + (!item.motives.endsWith('.') ? '.' : '')}
+              </div>
+            </>
+          )}
+        </div>
+      )}
       {isEditMode ? (
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (

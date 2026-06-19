@@ -353,7 +353,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
     if (!item.experience || item.experience.length === 0) return null
 
     return (
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
         {item.experience.map((exp, index) => {
           let label
           if (typeof exp === 'string') {
@@ -367,7 +367,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
           return (
             <span key={index} style={{
               display: 'inline-flex', alignItems: 'center',
-              fontSize: '0.66rem', fontWeight: 500, color: 'white',
+              fontSize: '0.66rem', fontWeight: 400, color: 'white', whiteSpace: 'nowrap',
               backgroundColor: 'black', border: '1px solid var(--text-secondary)',
               borderRadius: '0.1875rem', height: '0.95rem', padding: '0 0.3rem',
             }}>
