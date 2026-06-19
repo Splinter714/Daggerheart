@@ -379,7 +379,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
 
   return (
     <div style={{ paddingTop: '0' }}>
-      {isEditMode ? renderEditExperiences() : <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)' }}>{renderReadOnlyExperiences()}</div>}
+      {isEditMode ? renderEditExperiences() : <div style={{ fontSize: '0.75rem', lineHeight: 1.4, color: 'var(--text-secondary)' }}>{renderReadOnlyExperiences()}</div>}
     </div>
   )
 }

@@ -542,7 +542,7 @@ const GameCard = ({
                   >
                     <Minus size={12} />
                   </button>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)', flexShrink: 0 }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)', flexShrink: 0 }}>
                     {instances.length}
                   </span>
                   <button
@@ -606,7 +606,7 @@ const GameCard = ({
                         {item.name?.replace(/\s+\(\d+\)$/, '') || item.name}
                       </span>
                       {(onAddInstance || onRemoveInstance) && (
-                        <span style={{ fontSize: '0.85rem', fontWeight: 400, color: 'var(--text-secondary)', flexShrink: 0 }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-secondary)', flexShrink: 0 }}>
                           ({instances.length})
                         </span>
                       )}
@@ -653,7 +653,7 @@ const GameCard = ({
                   display: 'inline-flex',
                   gap: '0.35rem',
                   alignItems: 'center',
-                  fontSize: '0.85rem',
+                  fontSize: '0.75rem',
                   backgroundColor: 'black',
                   border: '1px solid var(--text-secondary)',
                   borderRadius: '4px',

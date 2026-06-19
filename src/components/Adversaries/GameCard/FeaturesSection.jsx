@@ -19,6 +19,8 @@ const FeatureDivider = ({ title }) => (
         fontSize: '0.75rem',
         fontWeight: '600',
         color: 'white',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
       }}
     >
       {title}
