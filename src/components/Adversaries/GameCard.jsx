@@ -22,7 +22,7 @@ const MergedStatBadge = ({ label, value, shape }) => {
   const cx = isHex ? 81 : 68
   const pillW = isHex ? 78 : 68
   return (
-    <svg width={W} height="34" viewBox={`0 0 ${W} 34`} style={{ display: 'block', alignSelf: 'flex-start', flexShrink: 0 }}>
+    <svg width={isHex ? '6.625em' : '5.625em'} height="2.125em" viewBox={`0 0 ${W} 34`} style={{ display: 'block', alignSelf: 'flex-start', flexShrink: 0 }}>
       <rect x="0.5" y="6.5" width={pillW} height="21" rx="4" fill="black" stroke="var(--text-secondary)" strokeWidth="1" />
       {isHex ? (
         <g transform="translate(63,-1) scale(1.5)" fill="black" stroke="var(--text-secondary)" strokeWidth="0.67" strokeLinejoin="round" strokeLinecap="round">
@@ -52,7 +52,7 @@ const IconStatBadge = ({ value, shape }) => {
   const size = isHex ? 36 : 32
   const viewBox = isHex ? '-2 -2 28 28' : '3 3 18 18'
   return (
-    <svg width={size} height={size} viewBox={viewBox} style={{ display: 'block', flexShrink: 0 }}>
+    <svg width={isHex ? '2.25em' : '2em'} height={isHex ? '2.25em' : '2em'} viewBox={viewBox} style={{ display: 'block', flexShrink: 0 }}>
       {isHex ? (
         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" fill="black" stroke="var(--text-secondary)" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
       ) : (
@@ -595,7 +595,7 @@ const GameCard = ({
                       ...styles.rowTitle,
                       color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
                       margin: 0,
-                      fontSize: '1.1rem',
+                      fontSize: '1rem',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -929,7 +929,7 @@ const GameCard = ({
                   <Pencil size={12} />
                 </button>
                 <h4 style={{
-                  ...styles.rowTitle, margin: 0, fontSize: '1.1rem',
+                  ...styles.rowTitle, margin: 0, fontSize: '1rem',
                   textAlign: 'center',
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>
@@ -1007,8 +1007,8 @@ const GameCard = ({
 
     const Divider = ({ title }) => (
       <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginTop: CARD_SPACE_V }}>
-        <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)', margin: 0 }} />
-        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <hr style={{ flex: 1, border: 'none', borderTop: '1px solid white', margin: 0 }} />
+        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'white', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           {title}
         </span>
       </div>
@@ -1026,9 +1026,9 @@ const GameCard = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V, marginTop: CARD_SPACE_V }}>
               {fts.map((f, i) => (
                 <div key={i}>
-                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{f.name}</span>
+                  <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{f.name}</span>
                   {f.description && (
-                    <div style={{ fontSize: '0.8rem', lineHeight: 1.4, color: 'var(--text-secondary)', marginLeft: CARD_SPACE_H, marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.85rem', lineHeight: 1.4, color: 'var(--text-secondary)', marginLeft: CARD_SPACE_H, marginTop: '2px' }}>
                       {highlightCardText(f.description)}
                     </div>
                   )}
@@ -1093,7 +1093,7 @@ const GameCard = ({
           {/* HP pips */}
           {seg.hp ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, marginBottom: '4px' }}>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', flexShrink: 0 }}>HP</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', flexShrink: 0 }}>HP</span>
               <HpPips max={seg.hp} marked={markedHp} onToggle={handlePipToggle} />
             </div>
           ) : (
@@ -1101,7 +1101,7 @@ const GameCard = ({
           )}
           {/* Attack */}
           {seg.weapon && (
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
               {seg.weapon} · {seg.range} · {seg.damage}
             </div>
           )}
@@ -1207,7 +1207,7 @@ const GameCard = ({
             <div style={{ display: 'flex', justifyContent: 'center', padding: `${CARD_SPACE_V} ${CARD_SPACE_H} 0` }}>
               <div style={{
                 display: 'inline-flex', gap: '0.35rem', alignItems: 'center',
-                fontSize: '0.8rem', backgroundColor: 'black',
+                fontSize: '0.9rem', backgroundColor: 'black',
                 border: '1px solid var(--text-secondary)', borderRadius: '4px',
                 height: '24px', padding: '0 10px', flexWrap: 'wrap',
               }}>
