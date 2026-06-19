@@ -550,8 +550,8 @@ const GameCard = ({
                   backgroundColor: 'black',
                   border: '1px solid var(--text-secondary)',
                   borderRadius: '0.25rem',
-                  height: '1.5rem',
-                  padding: '0 0.625rem',
+                  height: '1.375rem',
+                  padding: '0 0.4rem',
                 }}>
                   <span style={{ color: 'white' }}>{item.weapon}</span>
                   {item.range && <span style={{ color: 'white' }}>· {highlightCardText(item.range)}</span>}
