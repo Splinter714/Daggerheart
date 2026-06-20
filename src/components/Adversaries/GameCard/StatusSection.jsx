@@ -229,27 +229,27 @@ const StatusSection = ({
       })()}
       {!isEditMode && (item.experience?.length > 0 || item.motives?.trim()) && (
         <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'stretch' }}>
-          {item.motives?.trim() && (
-            <div style={{
-              flex: 1,
-              fontSize: '0.66rem', fontWeight: 400, color: 'var(--text-primary)', lineHeight: 1.4,
-              textAlign: 'left', textWrap: 'balance',
-              borderLeft: '1px solid var(--border)',
-              paddingLeft: CARD_SPACE_H,
-              display: 'flex', alignItems: 'center',
-            }}>
-              {item.motives + (!item.motives.endsWith('.') ? '.' : '')}
-            </div>
-          )}
-          {item.experience?.length > 0 && (
-            <div style={{
-              flexShrink: 0, display: 'flex', alignItems: 'center',
-              borderRight: '1px solid var(--border)',
-              paddingRight: CARD_SPACE_H,
-            }}>
+          {/* Motive slot — keeps its left line even when empty (as long as the row shows) */}
+          <div style={{
+            flex: 1,
+            fontSize: '0.66rem', fontWeight: 400, color: 'var(--text-primary)', lineHeight: 1.4,
+            textAlign: 'left', textWrap: 'balance',
+            borderLeft: '1px solid var(--border)',
+            paddingLeft: CARD_SPACE_H,
+            display: 'flex', alignItems: 'center',
+          }}>
+            {item.motives?.trim() ? item.motives + (!item.motives.endsWith('.') ? '.' : '') : ''}
+          </div>
+          {/* Experience slot — keeps its right line even when empty */}
+          <div style={{
+            flexShrink: 0, display: 'flex', alignItems: 'center',
+            borderRight: '1px solid var(--border)',
+            paddingRight: CARD_SPACE_H,
+          }}>
+            {item.experience?.length > 0 && (
               <ExperienceSection item={item} isEditMode={false} onUpdate={onUpdate} deleteConfirmations={{}} setDeleteConfirmations={() => {}} />
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
       {isEditMode ? (
