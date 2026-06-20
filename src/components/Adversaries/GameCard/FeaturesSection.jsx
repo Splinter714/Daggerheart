@@ -135,7 +135,7 @@ const FeaturesSection = ({ item, isEditMode, onUpdate, handleFeatureDeleteClick,
       {features.map((feature, index) => (
         <div key={`${feature.type}-${index}`} style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem' }}>{feature.name}</span>
+            <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem', textDecoration: 'underline' }}>{feature.name}</span>
           </div>
           <div style={{ 
             fontSize: '0.85rem', 
