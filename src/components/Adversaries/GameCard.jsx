@@ -117,6 +117,8 @@ const GameCard = ({
 
   // Quick edit mode — local toggle, saves immediately via onUpdate, no Save/Cancel needed
   const [quickEdit, setQuickEdit] = useState(false)
+  const [showColorPicker, setShowColorPicker] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
 
   // Exit edit mode when clicking/tapping outside the card, or pressing Enter/Escape
   useEffect(() => {
@@ -368,21 +370,56 @@ const GameCard = ({
           borderBottomColor: isSelected ? 'var(--purple)' : 'var(--border)'
         }}>
           {quickEdit ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-              {onDelete && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', height: '1.5rem', overflow: 'visible' }}>
+              <div style={{ position: 'relative', flexShrink: 0, height: '1.5rem', display: 'flex', alignItems: 'center' }}>
                 <button
-                  onClick={(e) => { e.stopPropagation(); onDelete() }}
+                  onClick={(e) => { e.stopPropagation(); setShowColorPicker(v => !v) }}
+                  title="Instance color"
                   style={{
-                    flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                    background: 'transparent', border: 'none', borderRadius: '0.25rem',
-                    color: 'var(--danger)', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                    width: '1.5rem', height: '1.5rem', borderRadius: '50%', flexShrink: 0,
+                    background: item.color || 'black', border: '1px solid white',
+                    cursor: 'pointer', padding: 0,
                   }}
-                  title="Remove all"
-                >
-                  <X size={12} />
-                </button>
-              )}
+                />
+                {showColorPicker && (
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      position: 'absolute', top: 'calc(100% + 6px)', left: '50%', transform: 'translateX(-50%)',
+                      backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
+                      borderRadius: '0.5rem', padding: '0.5rem', zIndex: 200,
+                      display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '120px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', justifyContent: 'center' }}>
+                      {INSTANCE_COLORS.map(({ value, label }) => {
+                        const isSelected = item.color === value
+                        return (
+                          <button
+                            key={value}
+                            onClick={() => { onUpdate && onUpdate(item.id, { color: value }) }}
+                            title={label}
+                            style={{
+                              width: '1.75rem', height: '1.75rem', borderRadius: '50%',
+                              background: value, border: '1px solid white',
+                              cursor: 'pointer', padding: 0, position: 'relative',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}
+                          >
+                            {isSelected && <Check size={12} strokeWidth={3} color="white" />}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <input
+                      type="color"
+                      value={item.color && !INSTANCE_COLORS.find(c => c.value === item.color) ? item.color : '#4a9edd'}
+                      onChange={(e) => { onUpdate && onUpdate(item.id, { color: e.target.value }) }}
+                      style={{ width: '100%', height: '2rem', border: '1px solid var(--border)', borderRadius: '0.25rem', cursor: 'pointer', padding: '2px' }}
+                    />
+                  </div>
+                )}
+              </div>
               <input
                 ref={nameInputRef}
                 type="text"
@@ -395,7 +432,7 @@ const GameCard = ({
                   backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
                   borderRadius: '0.25rem', color: 'var(--text-primary)',
                   fontSize: '1rem', fontWeight: '600',
-                  padding: '2px 6px',
+                  height: '1.5rem', padding: '0 6px', boxSizing: 'border-box',
                 }}
                 placeholder="Name"
               />
@@ -405,23 +442,23 @@ const GameCard = ({
                     onClick={(e) => { e.stopPropagation(); onRemoveInstance?.(item.id) }}
                     style={{
                       flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                      background: 'transparent', border: 'none', borderRadius: '0.25rem',
-                      color: 'var(--text-secondary)', cursor: 'pointer',
+                      background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
+                      color: 'white', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                     }}
                     title="Remove one"
                   >
                     <Minus size={12} />
                   </button>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)', flexShrink: 0 }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'white', flexShrink: 0, display: 'inline-block', minWidth: '1.25rem', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
                     {instances.length}
                   </span>
                   <button
                     onClick={(e) => { e.stopPropagation(); onAddInstance?.(item) }}
                     style={{
                       flexShrink: 0, width: '1.5rem', height: '1.5rem',
-                      background: 'transparent', border: 'none', borderRadius: '0.25rem',
-                      color: 'var(--text-secondary)', cursor: 'pointer',
+                      background: 'var(--gray-700)', border: '1px solid var(--gray-600)', borderRadius: '0.25rem',
+                      color: 'white', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                     }}
                     title="Add one"
@@ -430,29 +467,34 @@ const GameCard = ({
                   </button>
                 </>
               )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
-                {INSTANCE_COLORS.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    onClick={(e) => { e.stopPropagation(); onUpdate && onUpdate(item.id, { color: value }) }}
-                    title={label}
-                    style={{
-                      width: '14px', height: '14px', borderRadius: '50%', flexShrink: 0,
-                      background: value, border: item.color === value ? '2px solid white' : '2px solid transparent',
-                      cursor: 'pointer', padding: 0,
-                    }}
-                  />
-                ))}
-                <input
-                  type="color"
-                  value={item.color && !INSTANCE_COLORS.find(c => c.value === item.color) ? item.color : '#ffffff'}
-                  onChange={(e) => { e.stopPropagation(); onUpdate && onUpdate(item.id, { color: e.target.value }) }}
-                  title="Custom color"
-                  style={{ width: '14px', height: '14px', borderRadius: '50%', border: 'none', padding: 0, cursor: 'pointer', background: 'none' }}
-                />
-              </div>
+              {onDelete && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (deleteConfirm) {
+                      onDelete()
+                    } else {
+                      setDeleteConfirm(true)
+                      setTimeout(() => setDeleteConfirm(false), 3000)
+                    }
+                  }}
+                  style={{
+                    flexShrink: 0, width: '1.5rem', height: '1.5rem',
+                    background: deleteConfirm ? 'var(--danger)' : 'black',
+                    border: deleteConfirm ? 'none' : '1px solid var(--gray-600)',
+                    borderRadius: '0.25rem',
+                    color: deleteConfirm ? 'white' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                    transition: 'background 0.15s, color 0.15s',
+                  }}
+                  title={deleteConfirm ? 'Click again to confirm' : 'Remove all'}
+                >
+                  <X size={12} />
+                </button>
+              )}
               <button
-                onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
+                onClick={(e) => { e.stopPropagation(); setQuickEdit(false); setShowColorPicker(false); setDeleteConfirm(false) }}
                 style={{
                   flexShrink: 0, width: '1.5rem', height: '1.5rem',
                   background: 'var(--purple)', border: 'none', borderRadius: '0.25rem',
@@ -488,6 +530,7 @@ const GameCard = ({
                       color: isDead ? 'color-mix(in srgb, var(--gray-400) 80%, transparent)' : styles.rowTitle.color,
                       margin: 0,
                       fontSize: '1rem',
+                      height: '1.5rem',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',

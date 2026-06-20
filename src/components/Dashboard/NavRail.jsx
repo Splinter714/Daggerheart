@@ -1,9 +1,10 @@
 import React from 'react'
 import { Skull, TreePine, Plus, WandSparkles, Info, ClipboardList, Dices } from 'lucide-react'
+import { DASHBOARD_GAP } from './constants'
 
-const RAIL_SIZE = 52
+const RAIL_SIZE = 60
 
-const BadgeIcon = ({ Base, size = 22, strokeWidth = 1.6, baseStyle }) => (
+const BadgeIcon = ({ Base, size = 26, strokeWidth = 1.6, baseStyle }) => (
   <span style={{ position: 'relative', display: 'inline-flex', width: size, height: size }}>
     <span style={baseStyle}>
       <Base size={size} strokeWidth={strokeWidth} />
@@ -64,7 +65,7 @@ const NavRail = ({ placement = 'right', activeId, onAction }) => {
       onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'var(--text-primary)' }}
       onMouseLeave={e => { if (!active) e.currentTarget.style.color = active ? 'var(--purple)' : 'var(--text-secondary)' }}
     >
-      <Icon size={22} strokeWidth={1.6} />
+      <Icon size={26} strokeWidth={1.6} />
     </button>
   )
 
@@ -94,9 +95,9 @@ const NavRail = ({ placement = 'right', activeId, onAction }) => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        gap: '0.25rem',
+        gap: '0.5rem',
         borderLeft: '1px solid var(--border)',
-        paddingTop: '0.5rem',
+        paddingTop: '3.5rem',
         paddingBottom: 'env(safe-area-inset-bottom, 0.5rem)',
         backgroundColor: 'var(--bg-primary)',
         zIndex: 100,

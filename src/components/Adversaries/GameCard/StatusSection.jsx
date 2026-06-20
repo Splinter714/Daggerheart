@@ -44,8 +44,8 @@ const StatusSection = ({
             borderRadius: '0.375rem',
             paddingTop: 0,
             paddingBottom: 0,
-            paddingLeft: CARD_SPACE_H,
-            paddingRight: 0,
+            paddingLeft: 0,
+            paddingRight: CARD_SPACE_H,
             border: '1px solid',
             borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
             display: 'flex',
@@ -78,30 +78,7 @@ const StatusSection = ({
               }}
             />
           )}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 9px 1fr auto', alignItems: 'center', flex: 1, minWidth: 0, opacity: isInstanceDead ? 0.3 : 1 }}>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <StatCounter
-                value={instance.hp || 0}
-                max={instance.hpMax || 1}
-                Icon={Heart}
-                iconColor="var(--text-secondary)"
-                onDec={() => { const hp = instance.hp || 0; if (hp > 0) onApplyHealing?.(instance.id, 1, hp) }}
-                onInc={() => { const hp = instance.hp || 0; const max = instance.hpMax || 1; if (hp < max) onApplyDamage?.(instance.id, 1, hp, max) }}
-              />
-            </div>
-            <div style={{ width: '1px', height: '1.25rem', backgroundColor: 'var(--text-secondary)', justifySelf: 'center' }} />
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              {instance.stressMax > 0 && (
-                <StatCounter
-                  value={instance.stress || 0}
-                  max={instance.stressMax}
-                  Icon={Activity}
-                  iconColor="var(--text-secondary)"
-                  onDec={() => { if ((instance.stress || 0) > 0) onApplyStressChange?.(instance.id, -1) }}
-                  onInc={() => { if ((instance.stress || 0) < instance.stressMax) onApplyStressChange?.(instance.id, 1) }}
-                />
-              )}
-            </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr 9px 1fr', alignItems: 'center', flex: 1, minWidth: 0, opacity: isInstanceDead ? 0.3 : 1 }}>
             <div
               style={{
                 backgroundColor: isInstanceDead ? 'var(--gray-900)' : (instanceColor || 'black'),
@@ -125,6 +102,29 @@ const StatusSection = ({
               <span style={{ fontSize: '0.75rem', fontWeight: 600, color: isInstanceDead ? 'var(--gray-400)' : 'white' }}>
                 {instance.duplicateNumber || 1}
               </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <StatCounter
+                value={instance.hp || 0}
+                max={instance.hpMax || 1}
+                Icon={Heart}
+                iconColor="var(--text-secondary)"
+                onDec={() => { const hp = instance.hp || 0; if (hp > 0) onApplyHealing?.(instance.id, 1, hp) }}
+                onInc={() => { const hp = instance.hp || 0; const max = instance.hpMax || 1; if (hp < max) onApplyDamage?.(instance.id, 1, hp, max) }}
+              />
+            </div>
+            <div style={{ width: '1px', height: '1.25rem', backgroundColor: 'var(--text-secondary)', justifySelf: 'center' }} />
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              {instance.stressMax > 0 && (
+                <StatCounter
+                  value={instance.stress || 0}
+                  max={instance.stressMax}
+                  Icon={Activity}
+                  iconColor="var(--text-secondary)"
+                  onDec={() => { if ((instance.stress || 0) > 0) onApplyStressChange?.(instance.id, -1) }}
+                  onInc={() => { if ((instance.stress || 0) < instance.stressMax) onApplyStressChange?.(instance.id, 1) }}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -252,12 +252,7 @@ const StatusSection = ({
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
           {[...instances]
-            .sort((a, b) => {
-              const aDead = (a.hp || 0) >= (a.hpMax || 1)
-              const bDead = (b.hp || 0) >= (b.hpMax || 1)
-              if (aDead !== bDead) return aDead ? 1 : -1
-              return (a.duplicateNumber || 1) - (b.duplicateNumber || 1)
-            })
+            .sort((a, b) => (a.duplicateNumber || 1) - (b.duplicateNumber || 1))
             .map((instance) => renderInstanceRow(instance))}
         </div>
       )}
