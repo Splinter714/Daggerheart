@@ -239,7 +239,7 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
   const guideRange = getGuideRange(adversaryType, currentTier)
   const range = guideRange?.[rangeKey]
   const outOfRange = !disabled && !isInRange(raw, range)
-  const color = disabled ? 'var(--text-secondary)' : outOfRange ? 'var(--orange, #e67e22)' : 'var(--border)'
+  const color = disabled ? 'var(--text-secondary)' : outOfRange ? 'var(--danger)' : 'var(--border)'
 
   const set = (val) => {
     if (subfield) {
