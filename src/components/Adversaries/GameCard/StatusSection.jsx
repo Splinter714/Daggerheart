@@ -229,14 +229,16 @@ const StatusSection = ({
       })()}
       {!isEditMode && (item.experience?.length > 0 || item.motives?.trim()) && (
         <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'stretch' }}>
-          {/* Motive slot — keeps its left line even when empty (as long as the row shows) */}
+          {/* Motive slot — keeps its left line even when empty (as long as the row shows);
+              centered when there are no experiences, left-aligned (quote block) when there are */}
           <div style={{
             flex: 1,
             fontSize: '0.66rem', fontWeight: 400, color: 'var(--text-primary)', lineHeight: 1.4,
-            textAlign: 'left', textWrap: 'balance',
+            textAlign: item.experience?.length > 0 ? 'left' : 'center', textWrap: 'balance',
             borderLeft: '1px solid var(--border)',
             paddingLeft: CARD_SPACE_H,
             display: 'flex', alignItems: 'center',
+            justifyContent: item.experience?.length > 0 ? 'flex-start' : 'center',
           }}>
             {item.motives?.trim() ? item.motives + (!item.motives.endsWith('.') ? '.' : '') : ''}
           </div>
