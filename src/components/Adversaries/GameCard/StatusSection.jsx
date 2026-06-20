@@ -2,7 +2,6 @@ import React from 'react'
 import { Heart, Activity } from 'lucide-react'
 import Pips from '../../Shared/Pips'
 import MergedStatBadge from './MergedStatBadge'
-import ExperienceSection from './ExperienceSection'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
 const ThresholdSep = () => (
@@ -104,17 +103,6 @@ const StatusSection = ({
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <StatCounter
-                value={instance.hp || 0}
-                max={instance.hpMax || 1}
-                Icon={Heart}
-                iconColor="var(--text-secondary)"
-                onDec={() => { const hp = instance.hp || 0; if (hp > 0) onApplyHealing?.(instance.id, 1, hp) }}
-                onInc={() => { const hp = instance.hp || 0; const max = instance.hpMax || 1; if (hp < max) onApplyDamage?.(instance.id, 1, hp, max) }}
-              />
-            </div>
-            <div style={{ width: '1px', height: '1.25rem', backgroundColor: 'var(--text-secondary)', justifySelf: 'center' }} />
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
               {instance.stressMax > 0 && (
                 <StatCounter
                   value={instance.stress || 0}
@@ -125,6 +113,17 @@ const StatusSection = ({
                   onInc={() => { if ((instance.stress || 0) < instance.stressMax) onApplyStressChange?.(instance.id, 1) }}
                 />
               )}
+            </div>
+            <div style={{ width: '1px', height: '1.25rem', backgroundColor: 'var(--text-secondary)', justifySelf: 'center' }} />
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <StatCounter
+                value={instance.hp || 0}
+                max={instance.hpMax || 1}
+                Icon={Heart}
+                iconColor="var(--text-secondary)"
+                onDec={() => { const hp = instance.hp || 0; if (hp > 0) onApplyHealing?.(instance.id, 1, hp) }}
+                onInc={() => { const hp = instance.hp || 0; const max = instance.hpMax || 1; if (hp < max) onApplyDamage?.(instance.id, 1, hp, max) }}
+              />
             </div>
           </div>
         </div>
@@ -227,26 +226,6 @@ const StatusSection = ({
         if (!thresholdsEl) return null
         return thresholdsEl
       })()}
-      {!isEditMode && (item.experience?.length > 0 || item.motives?.trim()) && (
-        <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'center' }}>
-          {item.experience?.length > 0 && (
-            <div style={{ flexShrink: 0 }}>
-              <ExperienceSection item={item} isEditMode={false} onUpdate={onUpdate} deleteConfirmations={{}} setDeleteConfirmations={() => {}} />
-            </div>
-          )}
-          {item.motives?.trim() && (
-            <>
-              <span style={{ display: 'inline-block', width: '1px', alignSelf: 'stretch', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
-              <div style={{
-                flex: 1, fontSize: '0.66rem', fontWeight: 400, color: 'var(--text-primary)', lineHeight: 1.4,
-                textAlign: 'center', textWrap: 'balance',
-              }}>
-                {item.motives + (!item.motives.endsWith('.') ? '.' : '')}
-              </div>
-            </>
-          )}
-        </div>
-      )}
       {isEditMode ? (
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (

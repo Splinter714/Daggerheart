@@ -570,6 +570,23 @@ const GameCard = ({
 
 
 
+        {/* Motive — centered under the name header, above the ATK/weapon row */}
+        {!isEditMode && item.motives?.trim() && (
+          <div style={{
+            paddingTop: CARD_SPACE_V,
+            paddingLeft: CARD_SPACE_H,
+            paddingRight: CARD_SPACE_H,
+            fontSize: '0.66rem',
+            fontWeight: 400,
+            color: 'white',
+            lineHeight: 1.4,
+            textAlign: 'center',
+            textWrap: 'balance',
+          }}>
+            {item.motives + (!item.motives.endsWith('.') ? '.' : '')}
+          </div>
+        )}
+
         {/* ATK badge + weapon pill row */}
         {!isEditMode && (item.weapon || item.atk !== undefined) && (
           <div style={{ display: 'flex', alignItems: 'center', gap: CARD_SPACE_H, paddingTop: CARD_SPACE_V, paddingLeft: CARD_SPACE_H, paddingRight: CARD_SPACE_H }}>
@@ -734,6 +751,25 @@ const GameCard = ({
           onAddInstance={onAddInstance}
           onRemoveInstance={onRemoveInstance}
         />
+
+        {/* Experiences — centered, below instances and above features */}
+        {!isEditMode && item.experience?.length > 0 && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            paddingTop: CARD_SPACE_V,
+            paddingLeft: CARD_SPACE_H,
+            paddingRight: CARD_SPACE_H,
+          }}>
+            <ExperienceSection
+              item={item}
+              isEditMode={false}
+              onUpdate={onUpdate}
+              deleteConfirmations={deleteConfirmations}
+              setDeleteConfirmations={setDeleteConfirmations}
+            />
+          </div>
+        )}
 
         <FeaturesSection
                               item={item}
