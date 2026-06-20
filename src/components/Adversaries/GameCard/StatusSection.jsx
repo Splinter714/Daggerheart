@@ -104,6 +104,17 @@ const StatusSection = ({
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <StatCounter
+                value={instance.hp || 0}
+                max={instance.hpMax || 1}
+                Icon={Heart}
+                iconColor="var(--text-secondary)"
+                onDec={() => { const hp = instance.hp || 0; if (hp > 0) onApplyHealing?.(instance.id, 1, hp) }}
+                onInc={() => { const hp = instance.hp || 0; const max = instance.hpMax || 1; if (hp < max) onApplyDamage?.(instance.id, 1, hp, max) }}
+              />
+            </div>
+            <div style={{ width: '1px', height: '1.25rem', backgroundColor: 'var(--text-secondary)', justifySelf: 'center' }} />
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
               {instance.stressMax > 0 && (
                 <StatCounter
                   value={instance.stress || 0}
@@ -114,17 +125,6 @@ const StatusSection = ({
                   onInc={() => { if ((instance.stress || 0) < instance.stressMax) onApplyStressChange?.(instance.id, 1) }}
                 />
               )}
-            </div>
-            <div style={{ width: '1px', height: '1.25rem', backgroundColor: 'var(--text-secondary)', justifySelf: 'center' }} />
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <StatCounter
-                value={instance.hp || 0}
-                max={instance.hpMax || 1}
-                Icon={Heart}
-                iconColor="var(--text-secondary)"
-                onDec={() => { const hp = instance.hp || 0; if (hp > 0) onApplyHealing?.(instance.id, 1, hp) }}
-                onInc={() => { const hp = instance.hp || 0; const max = instance.hpMax || 1; if (hp < max) onApplyDamage?.(instance.id, 1, hp, max) }}
-              />
             </div>
           </div>
         </div>
