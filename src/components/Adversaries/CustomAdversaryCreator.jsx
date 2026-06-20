@@ -600,6 +600,11 @@ const CustomAdversaryCreator = forwardRef(({
   }, [embedded])
 
   // ── Data loading ────────────────────────────────────────────────────────────
+  // Depend on value-stable keys, not array identities: callers may pass a fresh
+  // array (or rely on the default []) every render, and since this effect calls
+  // setAdversaryData with a new array, depending on identity would loop forever.
+  const allAdvKey = (allAdversaries || []).map(a => a.id || a.name).join('|')
+  const customAdvKey = (customAdversaries || []).map(a => a.id || a.name).join('|')
   useEffect(() => {
     const init = async () => {
       await loadData()
@@ -613,7 +618,8 @@ const CustomAdversaryCreator = forwardRef(({
       setAdversaryData([...customs, ...builtInFiltered])
     }
     init()
-  }, [allAdversaries, customAdversaries])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allAdvKey, customAdvKey])
 
   // ── Auto-focus ──────────────────────────────────────────────────────────────
   useEffect(() => {
