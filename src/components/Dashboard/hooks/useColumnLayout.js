@@ -34,13 +34,17 @@ const calculateColumnLayout = (width, effectiveGap = DASHBOARD_GAP, edgePadding 
   return layout
 }
 
-const getWindowWidth = () => (typeof window === 'undefined' ? 0 : window.innerWidth)
+// visualViewport.width settles more reliably than innerWidth on iOS standalone PWAs,
+// and its resize event fires when iOS finishes adjusting the viewport on launch/rotate.
+const getWindowWidth = () => {
+  if (typeof window === 'undefined') return 0
+  return window.visualViewport?.width || window.innerWidth
+}
 
 // sideRailWidth: the width of the side rail when it's on the right (0 when on bottom).
 // Passing it here lets column COUNT always be computed as-if the rail is on the right,
 // so the column switch and the rail placement switch happen at the same window width.
 export const useColumnLayout = (scrollContainerRef, effectiveGap = DASHBOARD_GAP, edgePadding = DASHBOARD_GAP, sideRailWidth = 0) => {
-  const [containerWidth, setContainerWidth] = useState(getWindowWidth)
   const [windowWidth, setWindowWidth] = useState(getWindowWidth)
 
   // visibleColumns: always derived from window width minus the side rail, regardless of
@@ -51,8 +55,15 @@ export const useColumnLayout = (scrollContainerRef, effectiveGap = DASHBOARD_GAP
     [windowWidth, sideRailWidth, effectiveGap, edgePadding]
   )
 
-  // columnWidth: derived from the actual container width so columns fill the available space
-  // correctly regardless of which side the rail is on.
+  // containerWidth: derived from windowWidth matching the CSS layout logic.
+  // When visibleColumns >= 2, the rail is on the right and adds paddingRight = sideRailWidth.
+  // When visibleColumns < 2 (mobile), the rail is at the bottom and doesn't affect width.
+  // This avoids a post-mount DOM measurement that would cause a visible flash.
+  const containerWidth = visibleColumns >= 2
+    ? windowWidth - sideRailWidth
+    : windowWidth
+
+  // columnWidth: derived from the container width so columns fill available space.
   const columnWidth = useMemo(() => {
     const availableWidth = containerWidth - edgePadding * 2
     const totalGapWidth = (visibleColumns - 1) * effectiveGap
@@ -61,30 +72,21 @@ export const useColumnLayout = (scrollContainerRef, effectiveGap = DASHBOARD_GAP
   }, [containerWidth, visibleColumns, effectiveGap, edgePadding])
 
   useLayoutEffect(() => {
-    const measureContainer = () => {
-      if (scrollContainerRef.current) {
-        setContainerWidth(scrollContainerRef.current.clientWidth)
-      }
-    }
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth)
-      measureContainer()
-    }
+    const handleResize = () => setWindowWidth(getWindowWidth())
 
-    measureContainer()
+    // Re-read after layout to catch any initial mismatch before the browser paints.
+    handleResize()
+
     window.addEventListener('resize', handleResize)
-
-    let resizeObserver
-    if (typeof ResizeObserver !== 'undefined' && scrollContainerRef.current) {
-      resizeObserver = new ResizeObserver(measureContainer)
-      resizeObserver.observe(scrollContainerRef.current)
-    }
+    document.addEventListener('visibilitychange', handleResize)
+    window.visualViewport?.addEventListener('resize', handleResize)
 
     return () => {
       window.removeEventListener('resize', handleResize)
-      if (resizeObserver) resizeObserver.disconnect()
+      document.removeEventListener('visibilitychange', handleResize)
+      window.visualViewport?.removeEventListener('resize', handleResize)
     }
-  }, [scrollContainerRef])
+  }, [])
 
   return {
     gap: DASHBOARD_GAP,

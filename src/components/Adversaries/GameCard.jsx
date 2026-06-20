@@ -385,7 +385,7 @@ const GameCard = ({
                   <div
                     onClick={(e) => e.stopPropagation()}
                     style={{
-                      position: 'absolute', top: 'calc(100% + 6px)', left: '50%', transform: 'translateX(-50%)',
+                      position: 'absolute', top: 'calc(100% + 6px)', left: 0,
                       backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
                       borderRadius: '0.5rem', padding: '0.5rem', zIndex: 200,
                       display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '120px',
@@ -450,7 +450,7 @@ const GameCard = ({
                   >
                     <Minus size={12} />
                   </button>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'white', flexShrink: 0, display: 'inline-block', minWidth: '1.25rem', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'white', flexShrink: 0, display: 'inline-block', minWidth: '0.9rem', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
                     {instances.length}
                   </span>
                   <button

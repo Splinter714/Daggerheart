@@ -296,23 +296,56 @@ const DashboardContent = () => {
   const availableBattlePoints = calculateAvailableBattlePoints(pcCount, bpAdjustments) + automaticAdjustments
   const spentBattlePoints = calculateSpentBattlePoints(encounterItems, pcCount)
 
-  // Scroll handling - just track position, let CSS handle snapping
+  // Scroll handling - persist position so it survives PWA kills and app-switches
   const scrollTimeoutRef = useRef(null)
-  
+  const SCROLL_KEY = 'dashboard-scroll-left'
+  const scrollRestoredRef = useRef(false)
+
+  const restoreScroll = useCallback(() => {
+    const saved = localStorage.getItem(SCROLL_KEY)
+    if (saved === null || !scrollContainerRef.current) return
+    const container = scrollContainerRef.current
+    // Disable snap so the browser doesn't fight the programmatic scrollLeft set
+    container.style.scrollSnapType = 'none'
+    container.scrollLeft = parseFloat(saved)
+    requestAnimationFrame(() => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.style.scrollSnapType = ''
+      }
+    })
+  }, [scrollContainerRef])
+
   const handleScroll = useCallback((e) => {
-    // Clear existing timeout
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current)
     }
-    
-    // After scrolling stops, ensure scroll-snap is enabled
+    const container = e.target
+    localStorage.setItem(SCROLL_KEY, container.scrollLeft)
     scrollTimeoutRef.current = setTimeout(() => {
-      const container = e.target
       if (container && container.style.scrollSnapType === 'none') {
         container.style.scrollSnapType = 'x mandatory'
       }
-    }, 150) // Wait 150ms after last scroll event
+    }, 150)
   }, [])
+
+  // Restore on initial mount (handles PWA full-reload after being killed)
+  useEffect(() => {
+    if (!scrollRestoredRef.current && scrollContainerRef.current) {
+      scrollRestoredRef.current = true
+      restoreScroll()
+    }
+  }, [columnWidth, restoreScroll])
+
+  // Restore on app resume (handles warm app-switch where DOM persists but scroll resets)
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        requestAnimationFrame(restoreScroll)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [restoreScroll])
 
   const navPlacement = isNarrow ? 'bottom' : 'right'
   const railPadding = isNarrow
