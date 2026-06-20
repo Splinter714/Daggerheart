@@ -37,6 +37,22 @@
 
     <title>Daggerheart GM Dashboard</title>
     
+    <!-- In-app launch overlay: paints immediately and stays up until the iOS
+         launch viewport-zoom has settled and React has rendered, masking the
+         "zoom-then-snap". Oversized so it covers under any initial launch scale. -->
+    <style>
+      #app-splash {
+        position: fixed;
+        top: -50vh; left: -50vw;
+        width: 200vw; height: 200vh;
+        background: #000;
+        z-index: 2147483647;
+        opacity: 1;
+        transition: opacity 0.35s ease;
+      }
+      #app-splash.hide { opacity: 0; }
+    </style>
+
     <!-- Main CSS -->
     <link rel="stylesheet" href="./index.css" />
     
@@ -56,7 +72,62 @@
     </script>
   </head>
   <body>
+    <div id="app-splash"></div>
     <div id="root"></div>
+    <script>
+      (function () {
+        var splash = document.getElementById('app-splash');
+        if (!splash) return;
+        var done = false;
+        var settleTimer = null;
+        var start = Date.now();
+        var MIN_MS = 600;     // always show at least this long
+        var QUIET_MS = 400;   // hide only after viewport has been quiet this long
+        var HARD_CAP_MS = 6000; // never stick longer than this
+
+        function rendered() {
+          var root = document.getElementById('root');
+          return root && root.childElementCount > 0;
+        }
+
+        function remove() {
+          if (done) return;
+          done = true;
+          splash.classList.add('hide');
+          setTimeout(function () {
+            if (splash.parentNode) splash.parentNode.removeChild(splash);
+          }, 400);
+        }
+
+        function tryHide(force) {
+          if (done) return;
+          var waited = Date.now() - start;
+          if (!force && (waited < MIN_MS || !rendered())) {
+            // not ready yet — re-check shortly
+            clearTimeout(settleTimer);
+            settleTimer = setTimeout(function () { tryHide(false); }, 100);
+            return;
+          }
+          remove();
+        }
+
+        // Any viewport change (the iOS launch zoom animating) pushes the hide out,
+        // so the overlay outlives the zoom-then-snap.
+        function bump() {
+          clearTimeout(settleTimer);
+          settleTimer = setTimeout(function () { tryHide(false); }, QUIET_MS);
+        }
+
+        window.addEventListener('resize', bump);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener('resize', bump);
+          window.visualViewport.addEventListener('scroll', bump);
+        }
+        window.addEventListener('load', bump);
+        bump();
+        setTimeout(function () { tryHide(true); }, HARD_CAP_MS);
+      })();
+    </script>
     <script type="module" src="index.jsx"></script>
     
   </body>

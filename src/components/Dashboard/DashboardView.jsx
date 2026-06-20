@@ -300,22 +300,45 @@ const DashboardContent = () => {
   const scrollTimeoutRef = useRef(null)
   const SCROLL_KEY = 'dashboard-scroll-left'
   const scrollRestoredRef = useRef(false)
+  const isRestoringRef = useRef(false)
 
   const restoreScroll = useCallback(() => {
     const saved = localStorage.getItem(SCROLL_KEY)
-    if (saved === null || !scrollContainerRef.current) return
-    const container = scrollContainerRef.current
-    // Disable snap so the browser doesn't fight the programmatic scrollLeft set
-    container.style.scrollSnapType = 'none'
-    container.scrollLeft = parseFloat(saved)
-    requestAnimationFrame(() => {
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.style.scrollSnapType = ''
+    if (saved === null) return
+    const target = parseFloat(saved)
+    if (!target || Number.isNaN(target)) return
+
+    isRestoringRef.current = true
+    let attempts = 0
+    const MAX_ATTEMPTS = 90 // ~1.5s at 60fps, in case columns lay out slowly after a reload
+
+    const apply = () => {
+      const container = scrollContainerRef.current
+      if (!container) { isRestoringRef.current = false; return }
+      // Disable snap so the browser doesn't fight the programmatic scrollLeft set
+      container.style.scrollSnapType = 'none'
+      container.scrollLeft = target
+      const maxScroll = container.scrollWidth - container.clientWidth
+      const reached = Math.abs(container.scrollLeft - target) < 2
+      // On a fresh reload the columns may not be wide enough yet — retry until they are.
+      if (!reached && maxScroll < target && attempts < MAX_ATTEMPTS) {
+        attempts += 1
+        requestAnimationFrame(apply)
+        return
       }
-    })
+      requestAnimationFrame(() => {
+        const c = scrollContainerRef.current
+        if (c) c.style.scrollSnapType = ''
+        isRestoringRef.current = false
+      })
+    }
+    requestAnimationFrame(apply)
   }, [scrollContainerRef])
 
   const handleScroll = useCallback((e) => {
+    // Don't clobber the saved value while we're programmatically restoring
+    // (mid-restore the position is briefly clamped to 0 before content lays out).
+    if (isRestoringRef.current) return
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current)
     }
@@ -328,7 +351,7 @@ const DashboardContent = () => {
     }, 150)
   }, [])
 
-  // Restore on initial mount (handles PWA full-reload after being killed)
+  // Restore on initial mount (handles PWA full-reload after iOS killed the page)
   useEffect(() => {
     if (!scrollRestoredRef.current && scrollContainerRef.current) {
       scrollRestoredRef.current = true
@@ -336,15 +359,16 @@ const DashboardContent = () => {
     }
   }, [columnWidth, restoreScroll])
 
-  // Restore on app resume (handles warm app-switch where DOM persists but scroll resets)
+  // Restore on app resume: visibilitychange (warm switch) and pageshow (bfcache restore)
   useEffect(() => {
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        requestAnimationFrame(restoreScroll)
-      }
+    const onVisible = () => { if (document.visibilityState === 'visible') restoreScroll() }
+    const onPageShow = (e) => { if (e.persisted) restoreScroll() }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('pageshow', onPageShow)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('pageshow', onPageShow)
     }
-    document.addEventListener('visibilitychange', onVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
   }, [restoreScroll])
 
   const navPlacement = isNarrow ? 'bottom' : 'right'
