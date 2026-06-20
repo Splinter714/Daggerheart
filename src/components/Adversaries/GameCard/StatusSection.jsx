@@ -227,6 +227,27 @@ const StatusSection = ({
         if (!thresholdsEl) return null
         return thresholdsEl
       })()}
+      {!isEditMode && (item.experience?.length > 0 || item.motives?.trim()) && (
+        <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'stretch' }}>
+          {item.experience?.length > 0 && (
+            <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+              <ExperienceSection item={item} isEditMode={false} onUpdate={onUpdate} deleteConfirmations={{}} setDeleteConfirmations={() => {}} />
+            </div>
+          )}
+          {item.motives?.trim() && (
+            <div style={{
+              flex: 1,
+              fontSize: '0.66rem', fontWeight: 400, color: 'var(--text-primary)', lineHeight: 1.4,
+              textAlign: 'left', textWrap: 'balance',
+              borderLeft: '1px solid var(--text-secondary)',
+              paddingLeft: CARD_SPACE_H,
+              display: 'flex', alignItems: 'center',
+            }}>
+              {item.motives + (!item.motives.endsWith('.') ? '.' : '')}
+            </div>
+          )}
+        </div>
+      )}
       {isEditMode ? (
         <EditableVitals item={item} onUpdate={onUpdate} />
       ) : (
@@ -234,26 +255,6 @@ const StatusSection = ({
           {[...instances]
             .sort((a, b) => (a.duplicateNumber || 1) - (b.duplicateNumber || 1))
             .map((instance) => renderInstanceRow(instance))}
-        </div>
-      )}
-      {!isEditMode && (item.experience?.length > 0 || item.motives?.trim()) && (
-        <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'center' }}>
-          {item.experience?.length > 0 && (
-            <div style={{ flexShrink: 0 }}>
-              <ExperienceSection item={item} isEditMode={false} onUpdate={onUpdate} deleteConfirmations={{}} setDeleteConfirmations={() => {}} />
-            </div>
-          )}
-          {item.motives?.trim() && (
-            <>
-              <span style={{ display: 'inline-block', width: '1px', alignSelf: 'stretch', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
-              <div style={{
-                flex: 1, fontSize: '0.66rem', fontWeight: 400, color: 'var(--text-primary)', lineHeight: 1.4,
-                textAlign: 'center', textWrap: 'balance',
-              }}>
-                {item.motives + (!item.motives.endsWith('.') ? '.' : '')}
-              </div>
-            </>
-          )}
         </div>
       )}
     </div>
