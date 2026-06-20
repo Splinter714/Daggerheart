@@ -46,7 +46,7 @@ const inputStyle = {
   width: '100%',
   padding: '0.4rem 0.6rem',
   border: '1px solid var(--border)',
-  borderRadius: '5px',
+  borderRadius: '0.25rem',
   backgroundColor: 'var(--bg-secondary)',
   color: 'var(--text-primary)',
   fontSize: '1rem',
@@ -55,7 +55,7 @@ const inputStyle = {
 }
 
 const labelStyle = {
-  fontSize: '0.7rem',
+  fontSize: '0.75rem',
   fontWeight: '600',
   color: 'var(--text-secondary)',
   textTransform: 'uppercase',
@@ -104,8 +104,8 @@ const PanelHeader = ({ label, children }) => (
     flex: '0 0 auto', padding: '0.45rem 0.75rem',
     borderBottom: '1px solid var(--border)',
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-secondary)',
-    textTransform: 'uppercase', letterSpacing: '0.6px',
+    fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)',
+    textTransform: 'uppercase', letterSpacing: '0.5px',
   }}>
     <span>{label}</span>
     {children}
@@ -116,15 +116,15 @@ const AddBtn = ({ label, onClick }) => (
   <button type="button" onClick={onClick} style={{
     marginTop: '0.4rem', padding: '0.25rem 0.6rem',
     background: 'transparent', border: '1px dashed var(--border)',
-    borderRadius: '5px', color: 'var(--text-secondary)',
-    fontSize: '0.78rem', cursor: 'pointer', width: '100%', textAlign: 'left',
+    borderRadius: '0.25rem', color: 'var(--text-secondary)',
+    fontSize: '0.75rem', cursor: 'pointer', width: '100%', textAlign: 'left',
   }}>+ {label}</button>
 )
 
 const GuidanceHeading = ({ children }) => (
   <div style={{
-    fontSize: '0.68rem', fontWeight: '700', color: 'var(--text-secondary)',
-    textTransform: 'uppercase', letterSpacing: '0.6px',
+    fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)',
+    textTransform: 'uppercase', letterSpacing: '0.5px',
     paddingBottom: '0.3rem', borderBottom: '1px solid var(--border)',
     marginBottom: '0.5rem',
   }}>{children}</div>
@@ -199,7 +199,7 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
           border: `1px solid ${open ? 'var(--purple)' : 'var(--border)'}`,
           background: open ? 'var(--purple)' : 'var(--bg-secondary)',
           color: open ? 'white' : 'var(--text-secondary)',
-          fontSize: '0.65rem', fontWeight: 700,
+          fontSize: '0.66rem', fontWeight: 600,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           pointerEvents: 'none', flexShrink: 0,
         }}>i</span>
@@ -210,11 +210,11 @@ const InfoPopover = ({ children, align = 'left', minWidth = 220 }) => {
           minWidth: `${minWidth}px`, maxWidth: `${Math.max(minWidth, 320)}px`,
           backgroundColor: 'var(--bg-primary)',
           border: '1px solid var(--border)',
-          borderRadius: '8px',
+          borderRadius: '0.5rem',
           padding: '0.75rem',
           zIndex: 200,
           boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-          fontSize: '0.78rem', lineHeight: 1.5, color: 'var(--text-secondary)',
+          fontSize: '0.75rem', lineHeight: 1.5, color: 'var(--text-secondary)',
           transform: adjust.dx ? `translateX(${adjust.dx}px)` : 'none',
         }}>
           {children}
@@ -253,7 +253,7 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
     <button type="button" disabled={disabled} onClick={() => set((parseInt(raw) || 0) + delta)} style={{
       width: '44px', height: '44px', flexShrink: 0,
       border: `1px solid ${color}`,
-      borderRadius: delta < 0 ? '4px 0 0 4px' : '0 4px 4px 0',
+      borderRadius: delta < 0 ? '0.25rem 0 0 0.25rem' : '0 0.25rem 0.25rem 0',
       background: 'var(--bg-secondary)',
       color: disabled ? 'var(--text-secondary)' : 'var(--text-primary)',
       fontSize: '1rem', lineHeight: 1, cursor: disabled ? 'not-allowed' : 'pointer',
@@ -268,16 +268,16 @@ const StatField = ({ label, field, subfield, rangeKey, disabled, formData, setFo
         <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>{label}</span>
         <span style={{ visibility: disabled ? 'hidden' : 'visible', display: 'flex', alignItems: 'center' }}>
           <InfoPopover minWidth={320}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', whiteSpace: 'nowrap' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
               <thead>
                 <tr>
-                  <th style={{ textAlign: 'center', paddingBottom: '0.2rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', borderBottom: '1px solid var(--border)', paddingRight: '0.4rem' }}>T</th>
+                  <th style={{ textAlign: 'center', paddingBottom: '0.2rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.66rem', borderBottom: '1px solid var(--border)', paddingRight: '0.4rem' }}>T</th>
                   {STAT_COLS.map(c => (
                     <th key={c.key} style={{
                       textAlign: 'center', paddingBottom: '0.2rem',
                       color: 'var(--text-secondary)',
                       fontWeight: 600,
-                      fontSize: '0.65rem', borderBottom: '1px solid var(--border)',
+                      fontSize: '0.66rem', borderBottom: '1px solid var(--border)',
                       paddingRight: '0.35rem',
                     }}>{c.label}</th>
                   ))}
@@ -348,32 +348,32 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
         <InfoPopover>
           {guideFeatures?.length > 0 ? (
             <>
-              <div style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Common {label}</div>
+              <div style={{ fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Common {label}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {guideFeatures.map((f, i) => (
                   <div key={i}>
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.5rem' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.78rem' }}>{f.name}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.75rem' }}>{f.name}</span>
                       <button type="button" onClick={() => addGuideFeature(f)} style={{
                         padding: '0.2rem 0.5rem', minHeight: '36px', flexShrink: 0,
-                        background: 'var(--purple)', border: 'none', borderRadius: '3px',
-                        color: 'white', fontSize: '0.68rem', cursor: 'pointer',
+                        background: 'var(--purple)', border: 'none', borderRadius: '0.25rem',
+                        color: 'white', fontSize: '0.75rem', cursor: 'pointer',
                       }}>Add</button>
                     </div>
-                    {f.desc && <div style={{ fontSize: '0.73rem', marginTop: '0.1rem' }}>{f.desc}</div>}
+                    {f.desc && <div style={{ fontSize: '0.75rem', marginTop: '0.1rem' }}>{f.desc}</div>}
                   </div>
                 ))}
               </div>
             </>
           ) : (
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
               {featureType === 'Action' && 'Things the adversary does on its turn — attacks, abilities, special moves.'}
               {featureType === 'Passive' && 'Ongoing abilities that are always active and affect how the adversary works.'}
               {featureType === 'Reaction' && 'Abilities triggered by specific events, such as taking damage or an ally acting.'}
             </div>
           )}
         </InfoPopover>
-        <button type="button" onClick={addItem} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '44px', minHeight: '44px' }} title={`Add ${label.slice(0, -1)}`}>+</button>
+        <button type="button" onClick={addItem} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '44px', minHeight: '44px' }} title={`Add ${label.slice(0, -1)}`}>+</button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
         {items.map((feat, localIdx) => {
@@ -392,7 +392,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
                 setFormData(prev => ({ ...prev, features: rebuilt }))
                 dragFromRef.current = null
               }}
-              style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '5px', padding: '0.4rem 0.5rem' }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '0.25rem', padding: '0.4rem 0.5rem' }}
             >
               <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
                 <DragHandle />
@@ -405,7 +405,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
                     setFormData(prev => ({ ...prev, features: next }))
                   }}
                   placeholder={`${label.slice(0, -1)} name`}
-                  style={{ ...inputStyle, flex: 1, background: 'transparent', border: '1px solid transparent', borderRadius: '4px' }}
+                  style={{ ...inputStyle, flex: 1, background: 'transparent', border: '1px solid transparent', borderRadius: '0.25rem' }}
                   onFocus={e => e.target.style.borderColor = 'var(--border)'}
                   onBlur={e => e.target.style.borderColor = 'transparent'}
                 />
@@ -423,7 +423,7 @@ const FeatureList = ({ featureType, label, formData, setFormData, dragFromRef, g
                 }}
                 placeholder="Description..."
                 rows={2}
-                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', minHeight: '48px', background: 'transparent', border: '1px solid transparent', borderRadius: '4px' }}
+                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', minHeight: '48px', background: 'transparent', border: '1px solid transparent', borderRadius: '0.25rem' }}
                 onFocus={e => e.target.style.borderColor = 'var(--border)'}
                 onBlur={e => e.target.style.borderColor = 'transparent'}
               />
@@ -499,19 +499,19 @@ const TypeSelector = ({ selectedType, onTypeChange }) => {
         width: '100%', textAlign: 'left',
         background: 'var(--bg-secondary)',
         border: `1px solid ${typeOpen ? 'var(--purple)' : 'var(--border)'}`,
-        borderRadius: typeOpen ? '5px 5px 0 0' : '5px',
+        borderRadius: typeOpen ? '0.25rem 0.25rem 0 0' : '0.25rem',
         padding: '0.4rem 0.6rem',
         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem',
         minHeight: '44px',
       }}>
-        <span style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)' }}>{selectedType}</span>
-        <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', flexShrink: 0 }}>{typeOpen ? '▲' : '▼'}</span>
+        <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{selectedType}</span>
+        <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', flexShrink: 0 }}>{typeOpen ? '▲' : '▼'}</span>
       </button>
       {typeOpen && (
         <div style={{
           position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
           border: '1px solid var(--purple)', borderTop: 'none',
-          borderRadius: '0 0 5px 5px',
+          borderRadius: '0 0 0.25rem 0.25rem',
           backgroundColor: 'var(--bg-primary)',
           maxHeight: '260px', overflowY: 'auto',
           boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
@@ -526,8 +526,8 @@ const TypeSelector = ({ selectedType, onTypeChange }) => {
                 border: 'none', borderBottom: '1px solid var(--border)',
                 padding: '0.4rem 0.6rem', cursor: 'pointer', minHeight: '44px',
               }}>
-                <div style={{ fontWeight: 700, fontSize: '0.82rem', color: isSelected ? 'var(--purple)' : 'var(--text-primary)', marginBottom: tg?.summary ? '0.1rem' : 0 }}>{t}</div>
-                {tg?.summary && <div style={{ fontSize: '0.71rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tg.summary}</div>}
+                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: isSelected ? 'var(--purple)' : 'var(--text-primary)', marginBottom: tg?.summary ? '0.1rem' : 0 }}>{t}</div>
+                {tg?.summary && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>{tg.summary}</div>}
               </button>
             )
           })}
@@ -920,9 +920,9 @@ const CustomAdversaryCreator = forwardRef(({
               padding: '0.3rem 0.7rem', minHeight: '44px',
               background: activeTab === 'preview' ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent',
               border: `1px solid ${activeTab === 'preview' ? 'var(--purple)' : 'var(--border)'}`,
-              borderRadius: '5px',
+              borderRadius: '0.25rem',
               color: activeTab === 'preview' ? 'var(--purple)' : 'var(--text-secondary)',
-              fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap',
+              fontSize: '0.75rem', cursor: 'pointer', whiteSpace: 'nowrap',
             }}
           >{activeTab === 'preview' ? '← Build' : 'Preview'}</button>
         )}
@@ -933,8 +933,8 @@ const CustomAdversaryCreator = forwardRef(({
           <button onClick={onCancelEdit} style={{
             padding: '0.3rem 0.7rem', minHeight: '44px',
             background: 'transparent',
-            border: '1px solid var(--border)', borderRadius: '5px',
-            color: 'var(--text-primary)', fontSize: '0.875rem', cursor: 'pointer',
+            border: '1px solid var(--border)', borderRadius: '0.25rem',
+            color: 'var(--text-primary)', fontSize: '0.85rem', cursor: 'pointer',
           }}>Cancel</button>
         )}
 
@@ -946,8 +946,8 @@ const CustomAdversaryCreator = forwardRef(({
             style={{
               padding: '0.3rem 0.7rem', minHeight: '44px',
               background: 'transparent',
-              border: '1px solid var(--border)', borderRadius: '5px',
-              color: 'var(--text-primary)', fontSize: '0.875rem', cursor: canAct ? 'pointer' : 'not-allowed',
+              border: '1px solid var(--border)', borderRadius: '0.25rem',
+              color: 'var(--text-primary)', fontSize: '0.85rem', cursor: canAct ? 'pointer' : 'not-allowed',
               ...(canAct ? {} : disabledStyle),
             }}
           >Save As New</button>
@@ -961,8 +961,8 @@ const CustomAdversaryCreator = forwardRef(({
             style={{
               padding: '0.3rem 0.7rem', minHeight: '44px',
               background: 'transparent',
-              border: '1px solid var(--border)', borderRadius: '5px',
-              color: 'var(--text-primary)', fontSize: '0.875rem', cursor: canAct ? 'pointer' : 'not-allowed',
+              border: '1px solid var(--border)', borderRadius: '0.25rem',
+              color: 'var(--text-primary)', fontSize: '0.85rem', cursor: canAct ? 'pointer' : 'not-allowed',
               ...(canAct ? {} : disabledStyle),
             }}
           >Add to Encounter</button>
@@ -975,8 +975,8 @@ const CustomAdversaryCreator = forwardRef(({
           style={{
             padding: '0.3rem 0.9rem', minHeight: '44px',
             background: canAct ? 'var(--purple)' : 'var(--gray-600)',
-            border: 'none', borderRadius: '5px', color: 'white',
-            fontSize: '0.875rem', fontWeight: '600',
+            border: 'none', borderRadius: '0.25rem', color: 'white',
+            fontSize: '0.85rem', fontWeight: '600',
             cursor: canAct ? 'pointer' : 'not-allowed',
             ...(canAct ? {} : disabledStyle),
           }}
@@ -999,7 +999,7 @@ const CustomAdversaryCreator = forwardRef(({
 
     const btnBase = {
       padding: '0.3rem 0.7rem', minHeight: '44px',
-      borderRadius: '5px', fontSize: '0.8rem', cursor: 'pointer',
+      borderRadius: '0.25rem', fontSize: '0.75rem', cursor: 'pointer',
       flexShrink: 0, whiteSpace: 'nowrap',
     }
 
@@ -1059,7 +1059,7 @@ const CustomAdversaryCreator = forwardRef(({
                   <div style={{
                     position: 'absolute', top: '100%', left: 0, right: 0,
                     backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border)',
-                    borderTop: 'none', borderRadius: '0 0 6px 6px',
+                    borderTop: 'none', borderRadius: '0 0 0.375rem 0.375rem',
                     maxHeight: '180px', overflowY: 'auto', zIndex: 100,
                     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                   }}>
@@ -1071,13 +1071,13 @@ const CustomAdversaryCreator = forwardRef(({
                           onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
                           onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                         >
-                          <div style={{ fontWeight: 600, fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <div style={{ fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             {base}
                             {adv.__custom && (
-                              <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--purple)', border: '1px solid var(--purple)', borderRadius: '3px', padding: '0 0.25rem', lineHeight: 1.4 }}>Custom</span>
+                              <span style={{ fontSize: '0.66rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--purple)', border: '1px solid var(--purple)', borderRadius: '0.25rem', padding: '0 0.25rem', lineHeight: 1.4 }}>Custom</span>
                             )}
                           </div>
-                          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{adv.type} · Tier {adv.tier}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{adv.type} · Tier {adv.tier}</div>
                         </div>
                       )
                     })}
@@ -1091,9 +1091,9 @@ const CustomAdversaryCreator = forwardRef(({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.3rem', minHeight: '20px' }}>
                     <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Tier</span>
                     <InfoPopover>
-                      <div style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>PC Levels by Tier</div>
+                      <div style={{ fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>PC Levels by Tier</div>
                       {[['1','1'],['2','2–4'],['3','5–7'],['4','8–10']].map(([t, lvls]) => (
-                        <div key={t} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', padding: '0.15rem 0', color: parseInt(t) === formData.tier ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: parseInt(t) === formData.tier ? 600 : 400, backgroundColor: parseInt(t) === formData.tier ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent', borderRadius: '3px', paddingLeft: '0.2rem', paddingRight: '0.2rem' }}>
+                        <div key={t} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', padding: '0.15rem 0', color: parseInt(t) === formData.tier ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: parseInt(t) === formData.tier ? 600 : 400, backgroundColor: parseInt(t) === formData.tier ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent', borderRadius: '0.25rem', paddingLeft: '0.2rem', paddingRight: '0.2rem' }}>
                           <span>Lvl {lvls}</span><span>Tier {t}</span>
                         </div>
                       ))}
@@ -1105,11 +1105,11 @@ const CustomAdversaryCreator = forwardRef(({
                         flex: 1, minWidth: '44px', height: '44px',
                         border: '1px solid var(--border)',
                         borderLeft: i > 0 ? 'none' : '1px solid var(--border)',
-                        borderRadius: i === 0 ? '5px 0 0 5px' : i === 3 ? '0 5px 5px 0' : '0',
+                        borderRadius: i === 0 ? '0.25rem 0 0 0.25rem' : i === 3 ? '0 0.25rem 0.25rem 0' : '0',
                         background: formData.tier === t ? 'var(--purple)' : 'var(--bg-secondary)',
                         color: formData.tier === t ? 'white' : 'var(--text-primary)',
                         fontWeight: formData.tier === t ? '700' : '400',
-                        fontSize: '0.875rem', cursor: 'pointer',
+                        fontSize: '0.85rem', cursor: 'pointer',
                       }}>{t}</button>
                     ))}
                   </div>
@@ -1165,7 +1165,7 @@ const CustomAdversaryCreator = forwardRef(({
                     <span style={{ ...labelStyle, marginBottom: 0, lineHeight: 1, display: 'flex', alignItems: 'center' }}>Damage</span>
                     <span style={{ visibility: guide?.damageDie ? 'visible' : 'hidden', display: 'flex', alignItems: 'center' }}>
                       <InfoPopover align="right">
-                        <div style={{ fontWeight: 700, fontSize: '0.72rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Damage Die</div>
+                        <div style={{ fontWeight: 600, fontSize: '0.75rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Damage Die</div>
                         <div>{guide?.damageDie}</div>
                       </InfoPopover>
                     </span>
@@ -1198,7 +1198,7 @@ const CustomAdversaryCreator = forwardRef(({
                   <InfoPopover>
                     {guide?.experiences?.length > 0 ? (
                       <>
-                        <div style={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
                           Suggested — Tier {formData.tier} (+{Math.min(formData.tier + 1, 3)})
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
@@ -1211,7 +1211,7 @@ const CustomAdversaryCreator = forwardRef(({
                               style={{
                                 padding: '0.2rem 0.5rem',
                                 background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-                                borderRadius: '4px', fontSize: '0.75rem',
+                                borderRadius: '0.25rem', fontSize: '0.75rem',
                                 color: 'var(--text-primary)', cursor: 'pointer',
                               }}>{exp}</button>
                           ))}
@@ -1226,7 +1226,7 @@ const CustomAdversaryCreator = forwardRef(({
                   <button type="button" onClick={() => {
                     const bonus = Math.min(formData.tier + 1, 3)
                     setFormData(prev => ({ ...prev, experience: [...(prev.experience || []), { name: '', modifier: bonus }] }))
-                  }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '44px', minHeight: '44px' }} title="Add experience">+</button>
+                  }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0.3rem 0.4rem', minWidth: '44px', minHeight: '44px' }} title="Add experience">+</button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                   {(formData.experience || []).map((exp, i) => (
@@ -1261,8 +1261,8 @@ const CustomAdversaryCreator = forwardRef(({
                           const cur = typeof exp === 'object' ? (exp.modifier || 0) : 0
                           next[i] = { name: typeof exp === 'object' ? (exp.name || '') : exp, modifier: Math.max(0, cur - 1) }
                           setFormData(prev => ({ ...prev, experience: next }))
-                        }} style={{ width: '44px', height: '44px', border: '1px solid var(--border)', borderRadius: '4px 0 0 4px', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.875rem' }}>−</button>
-                        <div style={{ width: '44px', height: '44px', border: '1px solid var(--border)', borderLeft: 'none', borderRight: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-primary)', background: 'var(--bg-secondary)', fontFamily: 'monospace' }}>
+                        }} style={{ width: '44px', height: '44px', border: '1px solid var(--border)', borderRadius: '0.25rem 0 0 0.25rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>−</button>
+                        <div style={{ width: '44px', height: '44px', border: '1px solid var(--border)', borderLeft: 'none', borderRight: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: 'var(--text-primary)', background: 'var(--bg-secondary)', fontFamily: 'monospace' }}>
                           +{typeof exp === 'object' ? (exp.modifier || 0) : 0}
                         </div>
                         <button type="button" onClick={() => {
@@ -1270,7 +1270,7 @@ const CustomAdversaryCreator = forwardRef(({
                           const cur = typeof exp === 'object' ? (exp.modifier || 0) : 0
                           next[i] = { name: typeof exp === 'object' ? (exp.name || '') : exp, modifier: Math.min(6, cur + 1) }
                           setFormData(prev => ({ ...prev, experience: next }))
-                        }} style={{ width: '44px', height: '44px', border: '1px solid var(--border)', borderRadius: '0 4px 4px 0', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.875rem' }}>+</button>
+                        }} style={{ width: '44px', height: '44px', border: '1px solid var(--border)', borderRadius: '0 0.25rem 0.25rem 0', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>+</button>
                       </div>
                       <button type="button" onClick={() => {
                         const next = (formData.experience || []).filter((_, j) => j !== i)
@@ -1398,9 +1398,9 @@ const CustomAdversaryCreator = forwardRef(({
             style={{
               padding: '0.5rem 1rem',
               backgroundColor: isSaving || !formData.name.trim() ? 'var(--gray-600)' : 'var(--purple)',
-              border: 'none', color: 'white', borderRadius: '6px',
+              border: 'none', color: 'white', borderRadius: '0.375rem',
               cursor: isSaving || !formData.name.trim() ? 'not-allowed' : 'pointer',
-              fontSize: '0.875rem', fontWeight: '600',
+              fontSize: '0.85rem', fontWeight: '600',
               opacity: isSaving || !formData.name.trim() ? 0.6 : 1,
             }}
           >
@@ -1416,8 +1416,8 @@ const CustomAdversaryCreator = forwardRef(({
                 backgroundColor: 'transparent',
                 border: '1px solid var(--border)',
                 color: 'var(--text-primary)',
-                borderRadius: '6px', cursor: 'pointer',
-                fontSize: '0.875rem', fontWeight: '600',
+                borderRadius: '0.375rem', cursor: 'pointer',
+                fontSize: '0.85rem', fontWeight: '600',
               }}
             >
               Cancel
@@ -1437,7 +1437,7 @@ const CustomAdversaryCreator = forwardRef(({
             placeholder="Adversary name"
             style={{
               width: '100%', padding: '0.75rem',
-              border: '1px solid var(--border)', borderRadius: '8px',
+              border: '1px solid var(--border)', borderRadius: '0.5rem',
               backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)',
               fontSize: '1rem', outline: 'none',
             }}
@@ -1447,7 +1447,7 @@ const CustomAdversaryCreator = forwardRef(({
               position: 'absolute', top: '100%', left: 0, right: 0,
               backgroundColor: 'var(--bg-primary)',
               border: '1px solid var(--border)',
-              borderRadius: '0 0 8px 8px', borderTop: 'none',
+              borderRadius: '0 0 0.5rem 0.5rem', borderTop: 'none',
               maxHeight: '200px', overflowY: 'auto',
               zIndex: 1000, boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
             }}>
@@ -1466,7 +1466,7 @@ const CustomAdversaryCreator = forwardRef(({
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <div style={{ fontWeight: 600 }}>{base}</div>
-                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
                       {adv.type} · Tier {adv.tier}
                     </div>
                   </div>
