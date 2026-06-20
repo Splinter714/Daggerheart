@@ -522,7 +522,7 @@ const TypeSelector = ({ selectedType, onTypeChange }) => {
             return (
               <button key={t} type="button" onClick={() => { onTypeChange(t); setTypeOpen(false) }} style={{
                 width: '100%', textAlign: 'left',
-                background: isSelected ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent',
+                background: isSelected ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent',
                 border: 'none', borderBottom: '1px solid var(--border)',
                 padding: '0.4rem 0.6rem', cursor: 'pointer', minHeight: '44px',
               }}>
@@ -1093,7 +1093,7 @@ const CustomAdversaryCreator = forwardRef(({
                     <InfoPopover>
                       <div style={{ fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', color: 'var(--text-primary)' }}>PC Levels by Tier</div>
                       {[['1','1'],['2','2–4'],['3','5–7'],['4','8–10']].map(([t, lvls]) => (
-                        <div key={t} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', padding: '0.15rem 0', color: parseInt(t) === formData.tier ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: parseInt(t) === formData.tier ? 600 : 400, backgroundColor: parseInt(t) === formData.tier ? 'color-mix(in srgb, var(--purple) 10%, transparent)' : 'transparent', borderRadius: '0.25rem', paddingLeft: '0.2rem', paddingRight: '0.2rem' }}>
+                        <div key={t} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', padding: '0.15rem 0', color: parseInt(t) === formData.tier ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: parseInt(t) === formData.tier ? 600 : 400, backgroundColor: parseInt(t) === formData.tier ? 'color-mix(in srgb, var(--purple) 15%, transparent)' : 'transparent', borderRadius: '0.25rem', paddingLeft: '0.2rem', paddingRight: '0.2rem' }}>
                           <span>Lvl {lvls}</span><span>Tier {t}</span>
                         </div>
                       ))}
