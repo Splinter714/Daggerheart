@@ -77,59 +77,54 @@ const StatusSection = ({
               }}
             />
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: 0, opacity: isInstanceDead ? 0.3 : 1 }}>
-            <StatCounter
-              value={instance.hp || 0}
-              max={instance.hpMax || 1}
-              Icon={Heart}
-              iconColor="var(--text-secondary)"
-              onDec={() => { const hp = instance.hp || 0; if (hp > 0) onApplyHealing?.(instance.id, 1, hp) }}
-              onInc={() => { const hp = instance.hp || 0; const max = instance.hpMax || 1; if (hp < max) onApplyDamage?.(instance.id, 1, hp, max) }}
-            />
-            {instance.stressMax > 0 && (
-              <>
-                <span style={{ display: 'inline-block', width: '1px', height: '1.5rem', backgroundColor: 'var(--text-secondary)', flexShrink: 0 }} />
-                <StatCounter
-                value={instance.stress || 0}
-                max={instance.stressMax}
-                Icon={Activity}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 9px 1fr auto', alignItems: 'center', flex: 1, minWidth: 0, opacity: isInstanceDead ? 0.3 : 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <StatCounter
+                value={instance.hp || 0}
+                max={instance.hpMax || 1}
+                Icon={Heart}
                 iconColor="var(--text-secondary)"
-                onDec={() => { if ((instance.stress || 0) > 0) onApplyStressChange?.(instance.id, -1) }}
-                onInc={() => { if ((instance.stress || 0) < instance.stressMax) onApplyStressChange?.(instance.id, 1) }}
+                onDec={() => { const hp = instance.hp || 0; if (hp > 0) onApplyHealing?.(instance.id, 1, hp) }}
+                onInc={() => { const hp = instance.hp || 0; const max = instance.hpMax || 1; if (hp < max) onApplyDamage?.(instance.id, 1, hp, max) }}
               />
-              </>
-            )}
-          </div>
-
-          <div
-            style={{
-              backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'black',
-              border: '1px solid',
-              borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
-              borderRadius: '50%',
-              minWidth: '1.5rem',
-              height: '1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingTop: '0.0625rem',
-              paddingLeft: '0.1875rem',
-              paddingRight: '0.1875rem',
-              flexShrink: 0,
-              opacity: isInstanceDead ? 0.5 : 1,
-              marginLeft: 'auto',
-              marginRight: CARD_SPACE_H,
-            }}
-          >
-            <span
+            </div>
+            <div style={{ width: '1px', height: '1.25rem', backgroundColor: 'var(--text-secondary)', justifySelf: 'center' }} />
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              {instance.stressMax > 0 && (
+                <StatCounter
+                  value={instance.stress || 0}
+                  max={instance.stressMax}
+                  Icon={Activity}
+                  iconColor="var(--text-secondary)"
+                  onDec={() => { if ((instance.stress || 0) > 0) onApplyStressChange?.(instance.id, -1) }}
+                  onInc={() => { if ((instance.stress || 0) < instance.stressMax) onApplyStressChange?.(instance.id, 1) }}
+                />
+              )}
+            </div>
+            <div
               style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                color: isInstanceDead ? 'var(--gray-400)' : 'white',
+                backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'black',
+                border: '1px solid',
+                borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
+                borderRadius: '50%',
+                minWidth: '1.5rem',
+                height: '1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingTop: '0.0625rem',
+                paddingLeft: '0.1875rem',
+                paddingRight: '0.1875rem',
+                flexShrink: 0,
+                opacity: isInstanceDead ? 0.5 : 1,
+                marginLeft: CARD_SPACE_H,
+                marginRight: CARD_SPACE_H,
               }}
             >
-              {instance.duplicateNumber || 1}
-            </span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: isInstanceDead ? 'var(--gray-400)' : 'white' }}>
+                {instance.duplicateNumber || 1}
+              </span>
+            </div>
           </div>
         </div>
       </div>

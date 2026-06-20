@@ -2,8 +2,8 @@ import React from 'react'
 import { CARD_SPACE_H, CARD_SPACE_V } from './constants'
 
 const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
-  const hasMotives = item.motives && item.motives.trim()
-  const shouldShow = isEditMode
+  const hasDescription = item.description && item.description.trim()
+  const shouldShow = isEditMode || hasDescription
   if (!shouldShow) return null
 
   return (
@@ -50,16 +50,16 @@ const DescriptionSection = ({ item, isEditMode, mode, onUpdate }) => {
           placeholder="Description..."
         />
       ) : (
-        hasMotives && (
+        hasDescription && (
           <div
             style={{
-              fontSize: '0.85rem',
+              fontSize: '0.66rem',
               color: 'var(--text-secondary)',
               lineHeight: 1.4,
               textAlign: 'center',
             }}
           >
-            {item.motives + (!item.motives.endsWith('.') ? '.' : '')}
+            {item.description}
           </div>
         )
       )}
