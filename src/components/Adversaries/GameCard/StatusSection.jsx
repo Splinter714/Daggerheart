@@ -234,7 +234,7 @@ const StatusSection = ({
               flex: 1,
               fontSize: '0.66rem', fontWeight: 400, color: 'var(--text-primary)', lineHeight: 1.4,
               textAlign: 'left', textWrap: 'balance',
-              borderLeft: '1px solid var(--text-secondary)',
+              borderLeft: '1px solid var(--border)',
               paddingLeft: CARD_SPACE_H,
               display: 'flex', alignItems: 'center',
             }}>
@@ -244,7 +244,7 @@ const StatusSection = ({
           {item.experience?.length > 0 && (
             <div style={{
               flexShrink: 0, display: 'flex', alignItems: 'center',
-              borderRight: '1px solid var(--text-secondary)',
+              borderRight: '1px solid var(--border)',
               paddingRight: CARD_SPACE_H,
             }}>
               <ExperienceSection item={item} isEditMode={false} onUpdate={onUpdate} deleteConfirmations={{}} setDeleteConfirmations={() => {}} />
