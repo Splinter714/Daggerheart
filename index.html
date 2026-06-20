@@ -47,21 +47,10 @@
         width: 200vw; height: 200vh;
         background: #000;
         z-index: 2147483647;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         opacity: 1;
         transition: opacity 0.35s ease;
       }
       #app-splash.hide { opacity: 0; }
-      #app-splash .spinner {
-        width: 28px; height: 28px;
-        border: 3px solid rgba(255,255,255,0.18);
-        border-top-color: rgba(255,255,255,0.7);
-        border-radius: 50%;
-        animation: app-splash-spin 0.8s linear infinite;
-      }
-      @keyframes app-splash-spin { to { transform: rotate(360deg); } }
     </style>
 
     <!-- Main CSS -->
@@ -88,7 +77,7 @@
     <link rel="stylesheet" href="/Daggerheart/assets/index-b1d7a9ff.css">
   </head>
   <body>
-    <div id="app-splash"><div class="spinner"></div></div>
+    <div id="app-splash"></div>
     <div id="root"></div>
     <script>
       (function () {
