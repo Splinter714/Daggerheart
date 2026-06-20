@@ -1,5 +1,5 @@
 // Bump this on every meaningful change to force the SW to reinstall and purge old caches.
-const CACHE_NAME = 'daggerheart-gm-v1.1.3'
+const CACHE_NAME = 'daggerheart-gm-v1.1.4'
 
 // Minimal precache: just the shell entry. Hashed assets are cached opportunistically
 // on first fetch (their names change every build, so they can't be listed statically).
