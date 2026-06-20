@@ -227,6 +227,15 @@ const StatusSection = ({
         if (!thresholdsEl) return null
         return thresholdsEl
       })()}
+      {isEditMode ? (
+        <EditableVitals item={item} onUpdate={onUpdate} />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
+          {[...instances]
+            .sort((a, b) => (a.duplicateNumber || 1) - (b.duplicateNumber || 1))
+            .map((instance) => renderInstanceRow(instance))}
+        </div>
+      )}
       {!isEditMode && (item.experience?.length > 0 || item.motives?.trim()) && (
         <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'center' }}>
           {item.experience?.length > 0 && (
@@ -245,15 +254,6 @@ const StatusSection = ({
               </div>
             </>
           )}
-        </div>
-      )}
-      {isEditMode ? (
-        <EditableVitals item={item} onUpdate={onUpdate} />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: CARD_SPACE_V }}>
-          {[...instances]
-            .sort((a, b) => (a.duplicateNumber || 1) - (b.duplicateNumber || 1))
-            .map((instance) => renderInstanceRow(instance))}
         </div>
       )}
     </div>
