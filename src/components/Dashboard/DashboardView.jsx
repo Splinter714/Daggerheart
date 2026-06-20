@@ -296,53 +296,57 @@ const DashboardContent = () => {
   const availableBattlePoints = calculateAvailableBattlePoints(pcCount, bpAdjustments) + automaticAdjustments
   const spentBattlePoints = calculateSpentBattlePoints(encounterItems, pcCount)
 
-  // Scroll handling - persist position so it survives PWA kills and app-switches
+  // Scroll handling - persist position so it survives PWA kills, app-switches, and reloads
   const scrollTimeoutRef = useRef(null)
   const SCROLL_KEY = 'dashboard-scroll-left'
   const scrollRestoredRef = useRef(false)
   const isRestoringRef = useRef(false)
+  // Capture the saved position at first render, before any scroll event can overwrite it.
+  const savedScrollRef = useRef(
+    typeof localStorage !== 'undefined' ? parseFloat(localStorage.getItem(SCROLL_KEY)) : NaN
+  )
+
+  // Stop the browser's own scroll restoration from fighting ours.
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
+  }, [])
 
   const restoreScroll = useCallback(() => {
-    const saved = localStorage.getItem(SCROLL_KEY)
-    if (saved === null) return
-    const target = parseFloat(saved)
+    const target = savedScrollRef.current
     if (!target || Number.isNaN(target)) return
 
     isRestoringRef.current = true
-    let attempts = 0
-    const MAX_ATTEMPTS = 90 // ~1.5s at 60fps, in case columns lay out slowly after a reload
+    // Enforce the target every frame for a window of time, so late layout passes or
+    // a browser scroll-reset can't leave us at 0. This runs under the launch overlay.
+    const deadline = Date.now() + 1200
 
-    const apply = () => {
+    const tick = () => {
       const container = scrollContainerRef.current
       if (!container) { isRestoringRef.current = false; return }
-      // Disable snap so the browser doesn't fight the programmatic scrollLeft set
       container.style.scrollSnapType = 'none'
-      container.scrollLeft = target
       const maxScroll = container.scrollWidth - container.clientWidth
-      const reached = Math.abs(container.scrollLeft - target) < 2
-      // On a fresh reload the columns may not be wide enough yet — retry until they are.
-      if (!reached && maxScroll < target && attempts < MAX_ATTEMPTS) {
-        attempts += 1
-        requestAnimationFrame(apply)
-        return
+      const clamped = Math.min(target, Math.max(0, maxScroll))
+      if (Math.abs(container.scrollLeft - clamped) > 1) {
+        container.scrollLeft = clamped
       }
-      requestAnimationFrame(() => {
-        const c = scrollContainerRef.current
-        if (c) c.style.scrollSnapType = ''
+      if (Date.now() < deadline) {
+        requestAnimationFrame(tick)
+      } else {
+        container.style.scrollSnapType = ''
         isRestoringRef.current = false
-      })
+      }
     }
-    requestAnimationFrame(apply)
+    requestAnimationFrame(tick)
   }, [scrollContainerRef])
 
   const handleScroll = useCallback((e) => {
-    // Don't clobber the saved value while we're programmatically restoring
-    // (mid-restore the position is briefly clamped to 0 before content lays out).
+    // Don't clobber the saved value while we're programmatically restoring.
     if (isRestoringRef.current) return
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current)
     }
     const container = e.target
+    savedScrollRef.current = container.scrollLeft
     localStorage.setItem(SCROLL_KEY, container.scrollLeft)
     scrollTimeoutRef.current = setTimeout(() => {
       if (container && container.style.scrollSnapType === 'none') {
@@ -351,7 +355,8 @@ const DashboardContent = () => {
     }, 150)
   }, [])
 
-  // Restore on initial mount (handles PWA full-reload after iOS killed the page)
+  // Restore on initial mount (handles full reload / PWA kill). Re-attempt as columnWidth
+  // resolves so the container is present and laid out when we enforce the position.
   useEffect(() => {
     if (!scrollRestoredRef.current && scrollContainerRef.current) {
       scrollRestoredRef.current = true
