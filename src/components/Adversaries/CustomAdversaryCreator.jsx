@@ -550,6 +550,7 @@ const CustomAdversaryCreator = forwardRef(({
   isStockAdversary = false,
   autoFocus = false,
   allAdversaries = [],
+  customAdversaries = [],
   embedded = false,
   hideEmbeddedButtons = false,
   columnWidth = null,
@@ -602,14 +603,17 @@ const CustomAdversaryCreator = forwardRef(({
   useEffect(() => {
     const init = async () => {
       await loadData()
-      if (allAdversaries.length > 0) {
-        setAdversaryData(allAdversaries)
-      } else {
-        setAdversaryData(adversariesData.adversaries || [])
-      }
+      const builtIn = allAdversaries.length > 0 ? allAdversaries : (adversariesData.adversaries || [])
+      // Include the user's saved custom adversaries in autocomplete — listed first,
+      // de-duped against built-ins by base name so an override doesn't appear twice.
+      const baseName = (n) => (n || '').toLowerCase().replace(/\s+\(\d+\)$/, '')
+      const customs = (customAdversaries || []).map(a => ({ ...a, __custom: true }))
+      const customNames = new Set(customs.map(a => baseName(a.name)))
+      const builtInFiltered = builtIn.filter(a => !customNames.has(baseName(a.name)))
+      setAdversaryData([...customs, ...builtInFiltered])
     }
     init()
-  }, [allAdversaries])
+  }, [allAdversaries, customAdversaries])
 
   // ── Auto-focus ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -1067,7 +1071,12 @@ const CustomAdversaryCreator = forwardRef(({
                           onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
                           onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                         >
-                          <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{base}</div>
+                          <div style={{ fontWeight: 600, fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            {base}
+                            {adv.__custom && (
+                              <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--purple)', border: '1px solid var(--purple)', borderRadius: '3px', padding: '0 0.25rem', lineHeight: 1.4 }}>Custom</span>
+                            )}
+                          </div>
                           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{adv.type} · Tier {adv.tier}</div>
                         </div>
                       )

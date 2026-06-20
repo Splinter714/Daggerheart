@@ -547,6 +547,7 @@ const DashboardContent = () => {
                     setAdversaryCreatorOpen(false)
                   }}
                   onCancelEdit={() => setAdversaryCreatorOpen(false)}
+                  customAdversaries={customContent?.adversaries || []}
                   embedded={false}
                   autoFocus
                 />
@@ -564,6 +565,7 @@ const DashboardContent = () => {
                 setAdversaryCreatorOpen(false)
               }}
               onCancelEdit={() => setAdversaryCreatorOpen(false)}
+              customAdversaries={customContent?.adversaries || []}
               embedded={false}
               autoFocus
               columnWidth={columnWidth}
