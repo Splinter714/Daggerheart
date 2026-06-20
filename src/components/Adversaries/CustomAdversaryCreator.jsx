@@ -1128,26 +1128,10 @@ const CustomAdversaryCreator = forwardRef(({
                 </div>
               </div>
 
-              {/* Description + Motives */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div style={sectionStyle}>
-                  <label style={labelStyle}>Description</label>
-                  <textarea value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} placeholder="Appearance and background..." rows={2} style={{ ...inputStyle, resize: 'vertical', minHeight: '52px', fontFamily: 'inherit' }} />
-                </div>
-                <div style={sectionStyle}>
-                  <label style={labelStyle}>Motives & Tactics</label>
-                  <textarea value={formData.motives} onChange={e => setFormData(prev => ({ ...prev, motives: e.target.value }))} placeholder="What drives them, how they fight..." rows={2} style={{ ...inputStyle, resize: 'vertical', minHeight: '52px', fontFamily: 'inherit' }} />
-                </div>
-              </div>
-
-              {/* Stats */}
+              {/* Attack + Difficulty */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <StatField label="Difficulty" field="difficulty" rangeKey="difficulty" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
                 <StatField label="Attack Modifier" field="atk" rangeKey="atk" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
-                <StatField label="HP" field="hpMax" rangeKey="hp" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
-                <StatField label="Stress" field="stressMax" rangeKey="stress" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
-                <StatField label="Major Threshold" field="thresholds" subfield="major" rangeKey="major" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
-                <StatField label="Severe Threshold" field="thresholds" subfield="severe" rangeKey="severe" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+                <StatField label="Difficulty" field="difficulty" rangeKey="difficulty" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
               </div>
 
               {/* Standard Attack fields — 2×2 grid */}
@@ -1194,6 +1178,30 @@ const CustomAdversaryCreator = forwardRef(({
                   >
                     {DAMAGE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
+                </div>
+              </div>
+
+              {/* Thresholds */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <StatField label="Major Threshold" field="thresholds" subfield="major" rangeKey="major" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+                <StatField label="Severe Threshold" field="thresholds" subfield="severe" rangeKey="severe" disabled={isMinion} formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+              </div>
+
+              {/* Stress + HP */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <StatField label="Stress" field="stressMax" rangeKey="stress" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+                <StatField label="HP" field="hpMax" rangeKey="hp" formData={formData} setFormData={setFormData} adversaryType={formData.type} currentTier={formData.tier} />
+              </div>
+
+              {/* Description + Motives */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={sectionStyle}>
+                  <label style={labelStyle}>Description</label>
+                  <textarea value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} placeholder="Appearance and background..." rows={2} style={{ ...inputStyle, resize: 'vertical', minHeight: '52px', fontFamily: 'inherit' }} />
+                </div>
+                <div style={sectionStyle}>
+                  <label style={labelStyle}>Motives & Tactics</label>
+                  <textarea value={formData.motives} onChange={e => setFormData(prev => ({ ...prev, motives: e.target.value }))} placeholder="What drives them, how they fight..." rows={2} style={{ ...inputStyle, resize: 'vertical', minHeight: '52px', fontFamily: 'inherit' }} />
                 </div>
               </div>
 
@@ -1344,11 +1352,11 @@ const CustomAdversaryCreator = forwardRef(({
       return (
         <>
           <div style={{ ...panelStyle, right: `${DASHBOARD_GAP + columnWidth + DASHBOARD_GAP}px` }}>
-            {ActionBar()}
-            {formScrollContent}
+            {previewContent}
           </div>
           <div style={{ ...panelStyle, right: `${DASHBOARD_GAP}px` }}>
-            {previewContent}
+            {ActionBar()}
+            {formScrollContent}
           </div>
         </>
       )
@@ -1370,11 +1378,11 @@ const CustomAdversaryCreator = forwardRef(({
     return (
       <div ref={containerRef} style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%', overflow: 'hidden', gap: '12px' }}>
         <div style={cardStyle}>
-          {ActionBar()}
-          {formScrollContent}
+          {previewContent}
         </div>
         <div style={cardStyle}>
-          {previewContent}
+          {ActionBar()}
+          {formScrollContent}
         </div>
       </div>
     )
