@@ -1,7 +1,7 @@
 import React from 'react'
 
-// All highlights get underline only — no color change (text stays as-is)
-const HIGHLIGHT = { textDecoration: 'underline' }
+// All highlights get a lighter color only — no underline
+const HIGHLIGHT = { color: 'var(--text-primary)' }
 
 // Rules in order — longer/more specific patterns first
 const RULES = [
