@@ -23,8 +23,28 @@ function getGitCommitHash() {
   }
 }
 
+// Stamp a unique build id into the service worker's cache name so every deploy
+// auto-updates the SW and purges old caches (no manual version bumping).
+const BUILD_ID = `${getGitCommitHash()}-${Date.now()}`
+
+function serviceWorkerVersionPlugin() {
+  return {
+    name: 'service-worker-version',
+    closeBundle() {
+      const swPath = path.resolve(__dirname, './dist/pwa-service-worker.js')
+      try {
+        const content = fs.readFileSync(swPath, 'utf8').replace(/__BUILD_ID__/g, BUILD_ID)
+        fs.writeFileSync(swPath, content)
+        console.log(`Service worker cache id: daggerheart-gm-${BUILD_ID}`)
+      } catch (error) {
+        console.warn('service-worker-version: could not patch service worker', error.message)
+      }
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), serviceWorkerVersionPlugin()],
   root: path.resolve(__dirname, './src'),
   base: process.env.NODE_ENV === 'production' ? '/Daggerheart/' : '/', // GitHub Pages subdirectory only in production
   publicDir: path.resolve(__dirname, './public'), // Point to public directory relative to project root
