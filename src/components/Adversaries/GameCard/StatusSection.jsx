@@ -234,19 +234,13 @@ const StatusSection = ({
               flex: 1,
               fontSize: '0.66rem', fontWeight: 400, color: 'var(--text-primary)', lineHeight: 1.4,
               textAlign: 'left', textWrap: 'balance',
-              borderLeft: '1px solid var(--text-secondary)',
-              paddingLeft: CARD_SPACE_H,
               display: 'flex', alignItems: 'center',
             }}>
               {item.motives + (!item.motives.endsWith('.') ? '.' : '')}
             </div>
           )}
           {item.experience?.length > 0 && (
-            <div style={{
-              flexShrink: 0, display: 'flex', alignItems: 'center',
-              borderRight: '1px solid var(--text-secondary)',
-              paddingRight: CARD_SPACE_H,
-            }}>
+            <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
               <ExperienceSection item={item} isEditMode={false} onUpdate={onUpdate} deleteConfirmations={{}} setDeleteConfirmations={() => {}} />
             </div>
           )}
