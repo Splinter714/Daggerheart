@@ -1,26 +1,26 @@
 import React from 'react'
 
-const WHITE = { color: 'var(--text-primary)' }
-const WHITE_UNDERLINE = { color: 'var(--text-primary)', textDecoration: 'underline' }
+// All highlights get underline only — no color change (text stays as-is)
+const HIGHLIGHT = { textDecoration: 'underline' }
 
 // Rules in order — longer/more specific patterns first
 const RULES = [
-  // Trigger clauses — "When/If" — primary color, no underline
-  { regex: /(?:^|(?<=[.!?]\s))(?:When|If)\b/g, style: WHITE },
-  // Frequency limiter — "Once per scene/turn/round/encounter" — white only
-  { regex: /\bOnce per (?:scene|turn|round|encounter)\b/gi, style: WHITE },
+  // Trigger clauses — "When/If"
+  { regex: /(?:^|(?<=[.!?]\s))(?:When|If)\b/g, style: HIGHLIGHT },
+  // Frequency limiter — "Once per scene/turn/round/encounter"
+  { regex: /\bOnce per (?:scene|turn|round|encounter)\b/gi, style: HIGHLIGHT },
   // "You must spend/mark" — GM cost even though it uses "must"
-  { regex: /\byou must\s+(?:spend|mark)\s+(?:a\s+|an\s+|\d+\s+)?(?:fear|stress|hp)\b/gi, style: WHITE_UNDERLINE },
+  { regex: /\byou must\s+(?:spend|mark)\s+(?:a\s+|an\s+|\d+\s+)?(?:fear|stress|hp)\b/gi, style: HIGHLIGHT },
   // GM cost phrases — "Spend [X] Fear" always GM; "Mark/Spend [X] Stress/HP" only when NOT preceded
   // by "must " (which signals a cost forced onto players instead)
-  { regex: /(?<!must\s)\bspend\s+(?:a\s+|an\s+|\d+\s+)?(?:fear|stress|hp)\b/gi, style: WHITE_UNDERLINE },
-  { regex: /(?<!must\s)\bmark\s+(?:a\s+|an\s+|\d+\s+)?(?:stress|hp)\b/gi, style: WHITE_UNDERLINE },
-  // GM outcomes — white only (no underline)
-  { regex: /\byou gain\s+(?:a\s+|\d+d?\d*\s+)?fear\b/gi, style: WHITE },
-  { regex: /\blose\s+a\s+hope\b/gi, style: WHITE },
-  { regex: /\bclear\s+(?:a\s+|\d+\s+)?(?:hp|stress)\b/gi, style: WHITE },
-  // Dice notation — white only
-  { regex: /\d+d\d+(?:[+-]\d+)?/g, style: WHITE },
+  { regex: /(?<!must\s)\bspend\s+(?:a\s+|an\s+|\d+\s+)?(?:fear|stress|hp)\b/gi, style: HIGHLIGHT },
+  { regex: /(?<!must\s)\bmark\s+(?:a\s+|an\s+|\d+\s+)?(?:stress|hp)\b/gi, style: HIGHLIGHT },
+  // GM outcomes
+  { regex: /\byou gain\s+(?:a\s+|\d+d?\d*\s+)?fear\b/gi, style: HIGHLIGHT },
+  { regex: /\blose\s+a\s+hope\b/gi, style: HIGHLIGHT },
+  { regex: /\bclear\s+(?:a\s+|\d+\s+)?(?:hp|stress)\b/gi, style: HIGHLIGHT },
+  // Dice notation
+  { regex: /\d+d\d+(?:[+-]\d+)?/g, style: HIGHLIGHT },
 ]
 
 const COMBINED = new RegExp(
