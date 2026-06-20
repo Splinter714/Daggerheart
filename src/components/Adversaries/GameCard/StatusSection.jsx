@@ -242,7 +242,11 @@ const StatusSection = ({
             </div>
           )}
           {item.experience?.length > 0 && (
-            <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+            <div style={{
+              flexShrink: 0, display: 'flex', alignItems: 'center',
+              borderRight: '1px solid var(--text-secondary)',
+              paddingRight: CARD_SPACE_H,
+            }}>
               <ExperienceSection item={item} isEditMode={false} onUpdate={onUpdate} deleteConfirmations={{}} setDeleteConfirmations={() => {}} />
             </div>
           )}
