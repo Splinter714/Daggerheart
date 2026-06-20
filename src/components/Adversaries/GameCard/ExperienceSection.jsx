@@ -353,7 +353,7 @@ const ExperienceSection = ({ item, isEditMode, onUpdate, deleteConfirmations, se
     if (!item.experience || item.experience.length === 0) return null
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
         {item.experience.map((exp, index) => {
           let label
           if (typeof exp === 'string') {

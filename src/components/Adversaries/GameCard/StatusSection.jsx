@@ -229,11 +229,6 @@ const StatusSection = ({
       })()}
       {!isEditMode && (item.experience?.length > 0 || item.motives?.trim()) && (
         <div style={{ display: 'flex', gap: CARD_SPACE_H, alignItems: 'stretch' }}>
-          {item.experience?.length > 0 && (
-            <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
-              <ExperienceSection item={item} isEditMode={false} onUpdate={onUpdate} deleteConfirmations={{}} setDeleteConfirmations={() => {}} />
-            </div>
-          )}
           {item.motives?.trim() && (
             <div style={{
               flex: 1,
@@ -244,6 +239,11 @@ const StatusSection = ({
               display: 'flex', alignItems: 'center',
             }}>
               {item.motives + (!item.motives.endsWith('.') ? '.' : '')}
+            </div>
+          )}
+          {item.experience?.length > 0 && (
+            <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+              <ExperienceSection item={item} isEditMode={false} onUpdate={onUpdate} deleteConfirmations={{}} setDeleteConfirmations={() => {}} />
             </div>
           )}
         </div>
