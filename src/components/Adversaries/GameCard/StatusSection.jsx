@@ -22,6 +22,7 @@ const StatusSection = ({
   instances = [],
   isEditMode,
   type,
+  instanceColor,
   onUpdate,
   onApplyDamage,
   onApplyHealing,
@@ -103,9 +104,9 @@ const StatusSection = ({
             </div>
             <div
               style={{
-                backgroundColor: isInstanceDead ? 'var(--gray-900)' : 'black',
+                backgroundColor: isInstanceDead ? 'var(--gray-900)' : (instanceColor || 'black'),
                 border: '1px solid',
-                borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'var(--text-secondary)',
+                borderColor: isInstanceDead ? 'color-mix(in srgb, var(--gray-600) 40%, transparent)' : 'white',
                 borderRadius: '50%',
                 minWidth: '1.5rem',
                 height: '1.5rem',

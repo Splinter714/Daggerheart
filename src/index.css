@@ -6,9 +6,11 @@
   /* Core colors - just what you actually use */
   --white: #ffffff;
   --black: #000000;
-  --purple: #4f46e5;
-  --red: #ef4444;
-  --gold: #eab308;
+  --purple: #5b21b6;
+  --red: #b91c1c;
+  --gold: #ca8a04;
+  --green: #2e7d32;
+  --blue: #1565c0;
   
   /* Status colors */
   --success: #28a745;

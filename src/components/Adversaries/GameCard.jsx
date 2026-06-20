@@ -12,6 +12,15 @@ import { highlightCardText } from './GameCard/textHighlighter'
 import MergedStatBadge from './GameCard/MergedStatBadge'
 import TabButtons from './GameCard/TabButtons'
 
+const INSTANCE_COLORS = [
+  { value: 'var(--red)',    label: 'Red' },
+  { value: 'var(--gold)',   label: 'Gold' },
+  { value: 'var(--green)',  label: 'Green' },
+  { value: 'var(--blue)',   label: 'Blue' },
+  { value: 'var(--purple)', label: 'Purple' },
+  { value: 'var(--black)',  label: 'Black' },
+]
+
 // ============================================================================
 // STYLES - All CSS consolidated into inline styles
 // ============================================================================
@@ -421,6 +430,27 @@ const GameCard = ({
                   </button>
                 </>
               )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+                {INSTANCE_COLORS.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    onClick={(e) => { e.stopPropagation(); onUpdate && onUpdate(item.id, { color: value }) }}
+                    title={label}
+                    style={{
+                      width: '14px', height: '14px', borderRadius: '50%', flexShrink: 0,
+                      background: value, border: item.color === value ? '2px solid white' : '2px solid transparent',
+                      cursor: 'pointer', padding: 0,
+                    }}
+                  />
+                ))}
+                <input
+                  type="color"
+                  value={item.color && !INSTANCE_COLORS.find(c => c.value === item.color) ? item.color : '#ffffff'}
+                  onChange={(e) => { e.stopPropagation(); onUpdate && onUpdate(item.id, { color: e.target.value }) }}
+                  title="Custom color"
+                  style={{ width: '14px', height: '14px', borderRadius: '50%', border: 'none', padding: 0, cursor: 'pointer', background: 'none' }}
+                />
+              </div>
               <button
                 onClick={(e) => { e.stopPropagation(); setQuickEdit(false) }}
                 style={{
@@ -653,6 +683,7 @@ const GameCard = ({
           instances={instances}
           isEditMode={isEditMode}
           type={type}
+          instanceColor={item.color}
                               onUpdate={onUpdate}
           onApplyDamage={onApplyDamage}
           onApplyHealing={onApplyHealing}
