@@ -19,7 +19,13 @@
   "rules": {
     "react/prop-types": "off",
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.{js,jsx}", "src/test/**"],
+      "env": { "jest": true, "node": true }
+    }
+  ]
 }
 
 
