@@ -52,17 +52,27 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(`${getPackageVersion()} (${getGitCommitHash()})`)
   },
   server: {
-    host: '0.0.0.0', // Bind to all network interfaces
-    port: 5173, // Default Vite port
-    allowedHosts: [
-      'irrigation-nothing-comfortable-occasions.trycloudflare.com'
-    ],
-    hmr: {
-      port: 5179,
-      host: 'localhost'
-    },
-    force: true // Force reload on changes
+    host: true, // bind all interfaces (localhost + LAN)
+    // Honour the PORT the Claude Code preview assigns (its autoPort) so Vite binds to the
+    // SAME port the preview then navigates to. Vite ignores PORT by default and stays on
+    // 5173, so the preview would open a port nothing is serving → blank pane. With PORT set
+    // we bind exactly there (strictPort); without it, fall back to 5173 and let Vite
+    // increment, so multiple worktrees each running `npm run dev` don't collide.
+    port: Number(process.env.PORT) || 5173,
+    strictPort: !!process.env.PORT,
+    // The preview attaches to the server itself — don't spawn an extra browser tab.
+    open: false,
+    // No fixed hmr.port: let HMR follow the dev-server port so each worktree's live-reload
+    // socket is automatically isolated (the old hard-coded 5179 collided across worktrees).
+    // This repo lives in a OneDrive cloud-sync folder; sync touches lock/temp files and
+    // would trigger endless reloads — ignore those and debounce writes so saves settle first.
+    watch: {
+      ignored: ['**/.~lock*', '**/*.tmp', '**/~$*', '**/desktop.ini'],
+      awaitWriteFinish: { stabilityThreshold: 300, pollInterval: 100 }
+    }
   },
+  // Re-optimize deps on each dev start (moved from the now-deprecated server.force).
+  optimizeDeps: { force: true },
   build: {
     outDir: path.resolve(__dirname, './dist'),
     emptyOutDir: true,
