@@ -6,8 +6,12 @@ Always verify fixes on the branch/environment the user is actually testing (typi
 
 ## Scope / Working Style
 
-Keep changes minimal and scoped to exactly what was requested. Do not create extra files (e.g., launch.json), fix unrequested issues, or run long verification sessions without confirming the user wants them.
+Keep changes minimal and scoped to exactly what was requested. Do not create extra files, fix unrequested issues, or run long verification sessions without confirming the user wants them.
 
 ## UI / Styling Conventions
 
 For styling/highlighting work, start simple (single accent, minimal coloring) and add complexity only on request — avoid chaotic multi-color schemes and overly broad keyword matching.
+
+## Dev Server / Preview
+
+Don't start your own `npm run dev` — Claude Code's preview owns this worktree's dev server (`.claude/launch.json`, `autoPort: true`), and each worktree gets its own port. A second server in the same worktree bumps the preview onto a phantom port and the panes diverge (the "stale dev server" gotcha). For verification, rely on the preview's already-running server; only start one if none is detected for this worktree.
