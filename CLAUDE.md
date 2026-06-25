@@ -2,7 +2,11 @@
 
 ## Verification / Branching
 
-Always verify fixes on the branch/environment the user is actually testing (typically main with hot-reload), not just the worktree branch. Confirm a change is merged before reporting it as fixed.
+Always verify fixes on the branch/environment the user is actually testing (typically main with hot-reload), not just the worktree branch. Confirm a change is merged before reporting it as fixed. Verify, don't assume — run the app/tests and observe the actual result before reporting something as working.
+
+## Test Net
+
+The two-layer test net is mandatory: fast vitest unit tests (`src/state/`, `src/components/**/*.test.js`) plus the jsdom app-boot smoke (`DashboardView` inside `GameStateProvider`), with the fitness guards in `src/fitness/` (ratcheting file-size budget + import boundaries). Run `npm run build` and `npm test` green before landing any change, and extend the net with new behavior — add or update a test when you add logic. When a refactor shrinks a budgeted file, ratchet its cap in `src/fitness/file-size-budget.test.js` down, never up.
 
 ## Scope / Working Style
 
