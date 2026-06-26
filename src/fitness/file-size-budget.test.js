@@ -14,7 +14,7 @@ const SRC_ROOT = join(process.cwd(), 'src')
 // Files over the global cap, grandfathered at their size as of this commit.
 // Lower these as the files shrink; never raise them.
 const BUDGETS = {
-  'src/components/Browser/Browser.jsx': 2054,
+  'src/components/Browser/Browser.jsx': 1678,
   'src/components/Adversaries/CustomAdversaryCreator.jsx': 1507,
   'src/components/Adversaries/GameCard.jsx': 1380,
   'src/components/Dashboard/DashboardView.jsx': 610,
