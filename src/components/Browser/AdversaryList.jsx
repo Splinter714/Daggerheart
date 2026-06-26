@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import React, { useRef } from 'react'
 import { useOptimalGridColumns } from './hooks/useOptimalGridColumns'
 
 // AdversaryList component that uses the optimal grid columns hook
