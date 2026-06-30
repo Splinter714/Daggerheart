@@ -12,39 +12,7 @@ import { StatField } from './StatField'
 import { FeatureList } from './FeatureList'
 import { DamageSelector, selectArrowBg } from './DamageSelector'
 import { TypeSelector } from './TypeSelector'
-
-// Load adversary data for autocomplete
-let adversariesData = { adversaries: [] }
-let _dataLoaded = false
-
-const loadData = async () => {
-  if (_dataLoaded) return
-
-  let officialAdversaries = { adversaries: [] }
-  let playtestAdv = { adversaries: [] }
-
-  try {
-    const mod = await import(/* @vite-ignore */ './adversaries.json')
-    officialAdversaries = mod?.default || mod
-  } catch (e) {
-    console.warn('Failed to load adversaries.json:', e)
-  }
-
-  try {
-    const mod = await import(/* @vite-ignore */ './playtest-adversaries.json')
-    playtestAdv = mod?.default || mod
-  } catch (e) {
-    console.warn('Failed to load playtest-adversaries.json:', e)
-  }
-
-  adversariesData = {
-    adversaries: [
-      ...(officialAdversaries.adversaries || []),
-      ...(playtestAdv.adversaries || []),
-    ],
-  }
-  _dataLoaded = true
-}
+import { loadData, adversariesData } from './customAdversaryData'
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
